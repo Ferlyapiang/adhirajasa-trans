@@ -5,11 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="{{ asset('ats/ATSLogo.png') }}" />
-    <title>Login</title>
+    <title>Register</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
-        .custom-login-container {
+        .custom-register-container {
             display: flex;
             justify-content: center;
             align-items: center;
@@ -22,20 +22,6 @@
             width: 100%;
         }
 
-        .form-control-icon {
-            position: absolute;
-            left: 8px;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-
-        .form-control-eye {
-            position: absolute;
-            right: 8px;
-            top: 10%;
-            transform: translateY(50%);
-        }
-
         .form-group {
             position: relative;
         }
@@ -44,13 +30,15 @@
             padding-left: 30px;
         }
 
-        .btn {
-            width: 50%;
+        .form-control-icon {
+            position: absolute;
+            left: 8px;
+            top: 50%;
+            transform: translateY(-50%);
         }
 
-        .spinner-border {
-            width: 1.5rem;
-            height: 1.5rem;
+        .btn {
+            width: 50%;
         }
     </style>
 </head>
@@ -62,35 +50,39 @@
                 <img src="{{ asset('ats/ATSLogo.png') }}" style="height: 90px;" alt="ATS Logo">
             </div>
             <div class="col-sm">
-                <div class="custom-login-container">
+                <div class="custom-register-container">
                     <div class="custom-form-container">
                         <div class="text-center mb-4">
-                            <h2>Selamat Datang di <span style="color:#4169E1;">ATS Digital</span></h2>
-                            <p>Masukkan Email dan password Adhirajasa Trans Sejahtera Digital untuk masuk.</p>
+                            <h2>Register for <span style="color:#4169E1;">ATS Digital</span></h2>
+                            <p>Please fill in the details below to create an account.</p>
                         </div>
-                        <form action="{{ route('login') }}" method="POST">
+                        <form action="{{ route('register') }}" method="POST">
                             @csrf
                             <div class="form-group">
+                                <span class="fas fa-user form-control-icon"></span>
+                                <input type="text" class="form-control" name="name" placeholder="Full Name" required>
+                                @error('name')
+                                <div class="text-danger">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="form-group">
                                 <span class="fas fa-envelope form-control-icon"></span>
-                                <input type="email" class="form-control" id="email" name="email" placeholder="Email ATS" required>
+                                <input type="email" class="form-control" name="email" placeholder="Email" required>
                                 @error('email')
                                 <div class="text-danger">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="form-group">
                                 <span class="fas fa-lock form-control-icon"></span>
-                                <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
-                                <span class="fas fa-eye form-control-eye"></span>
+                                <input type="password" class="form-control" name="password" placeholder="Password" required>
                                 @error('password')
                                 <div class="text-danger">{{ $message }}</div>
                                 @enderror
                             </div>
-                            <button type="submit" class="btn btn-primary mt-4">Masuk</button>
-                            <div id="loader" class="text-center mt-3" style="display:none;">
-                                <div class="spinner-border" role="status">
-                                    <span class="sr-only">Loading...</span>
-                                </div>
+                            <div class="form-group">
+                                <input type="password" class="form-control" name="password_confirmation" placeholder="Confirm Password" required>
                             </div>
+                            <button type="submit" class="btn btn-primary mt-4">Register</button>
                         </form>
                     </div>
                 </div>
