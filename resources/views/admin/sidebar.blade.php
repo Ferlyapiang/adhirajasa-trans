@@ -58,13 +58,14 @@
     <!-- /.sidebar-menu -->
 
     <div class="sidebar-footer mb-6">
-      {{-- <a href="{{ route('logout') }}" class="btn btn-danger btn-block">
-        <i class="fas fa-sign-out-alt"></i> Logout
-      </a> --}}
-      <a href="#" class="btn btn-danger btn-block">
-        <i class="fas fa-sign-out-alt"></i> Logout
-      </a>
-    </div>
+      <form action="{{ route('logout') }}" method="POST">
+          @csrf
+          <button type="submit" class="btn btn-danger btn-block">
+              <i class="fas fa-sign-out-alt"></i> Logout
+          </button>
+      </form>
+  </div>
+  
   </div>
   <!-- /.sidebar -->
 </aside>

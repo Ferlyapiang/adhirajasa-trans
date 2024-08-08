@@ -16,10 +16,13 @@
               <i class="fas fa-user"></i> Rico
           </a>
           <div class="dropdown-menu dropdown-menu-right">
-              <a href="#" class="dropdown-item">
-                  <i class="fas fa-sign-out-alt mr-2"></i> Logout
-              </a>
-          </div>
+            <form action="{{ route('logout') }}" method="POST" class="dropdown-item">
+                @csrf
+                <button type="submit" class="btn btn-link">
+                    <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                </button>
+            </form>
+        </div>        
       </li>
   </ul>
 </nav>
