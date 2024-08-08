@@ -38,7 +38,11 @@
         }
 
         .btn {
-            width: 50%;
+            width: 100%;
+        }
+
+        .text-danger {
+            font-size: 0.875rem;
         }
     </style>
 </head>
@@ -46,7 +50,7 @@
 <body>
     <div class="container">
         <div class="row">
-            <div class="col-sm" style="background: #9AB76F; display: flex; align-items: center; justify-content: center;">
+            <div class="col-sm d-flex align-items-center justify-content-center" style="background: #9AB76F;">
                 <img src="{{ asset('ats/ATSLogo.png') }}" style="height: 90px;" alt="ATS Logo">
             </div>
             <div class="col-sm">
@@ -61,25 +65,34 @@
                             <div class="form-group">
                                 <span class="fas fa-user form-control-icon"></span>
                                 <input type="text" class="form-control" name="name" placeholder="Full Name" required>
-                                @error('name')
-                                <div class="text-danger">{{ $message }}</div>
-                                @enderror
                             </div>
+                            @error('name')
+                                <div class="text-danger">{{ $message }}</div>
+                            @enderror
                             <div class="form-group">
                                 <span class="fas fa-envelope form-control-icon"></span>
                                 <input type="email" class="form-control" name="email" placeholder="Email" required>
-                                @error('email')
+                            </div>
+                            @error('email')
                                 <div class="text-danger">{{ $message }}</div>
+                            @enderror
+                            <!-- <div class="form-group">
+                                <span class="fas fa-lock form-control-icon"></span>
+                                <input type="password" class="form-control" name="password" placeholder="Password" required>
+                            </div>
+                            @error('password')
+                                <div class="text-danger">{{ $message }}</div>
+                            @enderror -->
+                            <div class="form-group">
+                                <span class="fas fa-lock form-control-icon"></span>
+                                <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+                                <span class="fas fa-eye form-control-eye" id="toggle-password"></span>
+                                @error('password')
+                                    <div class="text-danger">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="form-group">
                                 <span class="fas fa-lock form-control-icon"></span>
-                                <input type="password" class="form-control" name="password" placeholder="Password" required>
-                                @error('password')
-                                <div class="text-danger">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="form-group">
                                 <input type="password" class="form-control" name="password_confirmation" placeholder="Confirm Password" required>
                             </div>
                             <button type="submit" class="btn btn-primary mt-4">Register</button>

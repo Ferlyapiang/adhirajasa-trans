@@ -32,8 +32,9 @@
         .form-control-eye {
             position: absolute;
             right: 8px;
-            top: 10%;
-            transform: translateY(50%);
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
         }
 
         .form-group {
@@ -45,12 +46,17 @@
         }
 
         .btn {
-            width: 50%;
+            width: 100%;
         }
 
         .spinner-border {
             width: 1.5rem;
             height: 1.5rem;
+        }
+
+        .text-center a {
+            display: block;
+            margin-top: 1rem;
         }
     </style>
 </head>
@@ -80,12 +86,15 @@
                             <div class="form-group">
                                 <span class="fas fa-lock form-control-icon"></span>
                                 <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
-                                <span class="fas fa-eye form-control-eye"></span>
-                                @error('password')
-                                <div class="text-danger">{{ $message }}</div>
-                                @enderror
+                                <span class="fas fa-eye form-control-eye" id="toggle-password"></span>
                             </div>
+                            @error('password')
+                                <div class="text-danger">{{ $message }}</div>
+                            @enderror
                             <button type="submit" class="btn btn-primary mt-4">Masuk</button>
+                            <div class="text-center mt-3">
+                                <a href="{{ route('register') }}" class="btn btn-secondary">Belum punya akun? Daftar</a>
+                            </div>
                             <div id="loader" class="text-center mt-3" style="display:none;">
                                 <div class="spinner-border" role="status">
                                     <span class="sr-only">Loading...</span>
@@ -100,6 +109,14 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        document.getElementById('toggle-password').addEventListener('click', function() {
+            const passwordField = document.getElementById('password');
+            const type = passwordField.type === 'password' ? 'text' : 'password';
+            passwordField.type = type;
+            this.classList.toggle('fa-eye-slash');
+        });
+    </script>
 </body>
 
 </html>
