@@ -154,7 +154,7 @@
                                     <div id="time" style="font-size:42px; font-weight: 600">00:00
                                         <span class="p-1" style="font-size:14px;">WIB</span>
                                     </div>
-                                    <span id="date" class="p-1" style="color: #8A94A5; font-size:24px">01 January 1970</span>
+                                    <span id="date" class="p-1" style="color: #8A94A5; font-size:auto">01 January 1970</span>
                                 </div>
                             </div>
                           </div>
