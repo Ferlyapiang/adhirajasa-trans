@@ -20,6 +20,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'status',
+        'group_id',
     ];
 
     /**
@@ -43,5 +45,14 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+    public function group()
+    {
+        return $this->belongsTo(Group::class);
+    }
+
+    public function softDelete()
+    {
+        $this->update(['status' => 'inactive']); // Or use 0 if that’s how you represent it
     }
 }

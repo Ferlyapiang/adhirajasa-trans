@@ -46,44 +46,51 @@
             <!-- /.content-header -->
 
             <!-- Main content -->
-            <div class="container">
-                <h1>Edit User</h1>
-            
-                <form action="{{ route('users.update', $user) }}" method="POST">
+            <<div class="container mt-3">
+                <h1>Add User</h1>
+                
+                <form action="{{ route('users.store') }}" method="POST">
                     @csrf
-                    @method('PUT')
-            
+                    
                     <div class="form-group">
                         <label for="name">Name</label>
-                        <input type="text" id="name" name="name" class="form-control" value="{{ old('name', $user->name) }}" required>
+                        <input type="text" id="name" name="name" class="form-control" required>
                     </div>
-            
+                    
                     <div class="form-group">
                         <label for="email">Email</label>
-                        <input type="email" id="email" name="email" class="form-control" value="{{ old('email', $user->email) }}" required>
+                        <input type="email" id="email" name="email" class="form-control" required>
                     </div>
-            
+                    
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password_confirmation">Confirm Password</label>
+                        <input type="password" id="password_confirmation" name="password_confirmation" class="form-control" required>
+                    </div>
+                    
                     <div class="form-group">
                         <label for="status">Status</label>
                         <select id="status" name="status" class="form-control" required>
-                            <option value="active" {{ $user->status === 'active' ? 'selected' : '' }}>Active</option>
-                            <option value="inactive" {{ $user->status === 'inactive' ? 'selected' : '' }}>Inactive</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
                         </select>
                     </div>
-            
+                    
                     <div class="form-group">
                         <label for="group_id">Group</label>
                         <select id="group_id" name="group_id" class="form-control">
-                            <option value="">None</option>
-                            @foreach($groups as $group)
-                                <option value="{{ $group->id }}" {{ $group->id == $user->group_id ? 'selected' : '' }}>
-                                    {{ $group->name }}
-                                </option>
+                            <!-- Assuming you have groups table -->
+                            @foreach(App\Models\Group::all() as $group)
+                                <option value="{{ $group->id }}">{{ $group->name }}</option>
                             @endforeach
                         </select>
                     </div>
-            
-                    <button type="submit" class="btn btn-primary">Update User</button>
+                    
+                    <button type="submit" class="btn btn-primary">Save User</button>
                 </form>
             </div>
             
