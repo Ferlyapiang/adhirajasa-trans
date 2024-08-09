@@ -37,6 +37,14 @@
             transform: translateY(-50%);
         }
 
+        .form-control-eye {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+        }
+
         .btn {
             width: 100%;
         }
@@ -76,13 +84,6 @@
                             @error('email')
                                 <div class="text-danger">{{ $message }}</div>
                             @enderror
-                            <!-- <div class="form-group">
-                                <span class="fas fa-lock form-control-icon"></span>
-                                <input type="password" class="form-control" name="password" placeholder="Password" required>
-                            </div>
-                            @error('password')
-                                <div class="text-danger">{{ $message }}</div>
-                            @enderror -->
                             <div class="form-group">
                                 <span class="fas fa-lock form-control-icon"></span>
                                 <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
@@ -96,6 +97,9 @@
                                 <input type="password" class="form-control" name="password_confirmation" placeholder="Confirm Password" required>
                             </div>
                             <button type="submit" class="btn btn-primary mt-4">Register</button>
+                            <div class="text-center mt-3">
+                                <a href="{{ route('login') }}" class="btn btn-secondary">Sudah memiliki Akun? Login</a>
+                            </div>
                         </form>
                     </div>
                 </div>

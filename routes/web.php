@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AdminController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\RegisterController;
 
@@ -16,4 +16,4 @@ Route::post('register', [RegisterController::class, 'register']);
 
 
 #Dashboard
-Route::get('/admin', [AdminController::class, 'index'])->middleware('auth');
+Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('auth');

@@ -12,9 +12,9 @@
   <ul class="navbar-nav ml-auto">
       <!-- Dropdown for User Profile (Optional) -->
       <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button">
-              <i class="fas fa-user"></i> Rico
-          </a>
+        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button">
+            <i class="fas fa-user"></i> {{ Auth::user()->name ?? 'User' }}
+        </a>
           <div class="dropdown-menu dropdown-menu-right">
             <form action="{{ route('logout') }}" method="POST" class="dropdown-item">
                 @csrf
