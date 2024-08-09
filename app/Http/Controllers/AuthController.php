@@ -16,6 +16,7 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
+
     public function login(Request $request)
     {
         $request->validate([
@@ -25,14 +26,18 @@ class AuthController extends Controller
 
         $credentials = $request->only('email', 'password');
 
-        if (Auth::attempt($credentials)) {
+        // Check if the user is active
+        $user = User::where('email', $request->email)->first();
+
+        if ($user && $user->status === 'active' && Auth::attempt($credentials)) {
             return redirect()->intended('dashboard');
         }
 
         return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
+            'email' => 'The provided credentials do not match our records or your account is inactive. Please contact your administrator.',
         ]);
     }
+
 
     public function logout()
     {
