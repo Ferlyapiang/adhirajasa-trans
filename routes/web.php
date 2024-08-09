@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\RegisterController;
+use App\Http\Controllers\UserController;
 
 #Login logout
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login.form');
@@ -17,3 +18,7 @@ Route::post('register', [RegisterController::class, 'register']);
 
 #Dashboard
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('auth');
+
+#Management User
+Route::resource('/users', UserController::class);
+

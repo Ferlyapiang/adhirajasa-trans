@@ -1,6 +1,6 @@
 <aside class="main-sidebar custom-sidebar elevation-4">
   <!-- Brand Logo -->
-  <a href="index3.html" class="brand-link mb-3">
+  <a href="{{ url('/dashboard') }}" class="brand-link mb-3">
     <img src="{{ asset('ats/ATSLogo.png') }}" alt="AdminLTE Logo" class="brand-image elevation-2" style="opacity: .8; width: 35px; height: 30px;">
     <span class="brand-text font-weight-light">ATS Digital</span>
   </a>
@@ -23,7 +23,7 @@
     <nav class="mt-2">
       <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
         <li class="nav-item">
-          <a href="/dashboard" class="nav-link">
+          <a href="/dashboard" class="nav-link {{ request()->is('dashboard') ? 'active' : '' }}">
             <i class="nav-icon fa fa-home"></i>
             <p>
               Home
@@ -31,7 +31,7 @@
           </a>
         </li>
         <li class="nav-item menu-open">
-          <a href="#" class="nav-link active">
+          <a class="nav-link {{ request()->is('management-user/*') ? 'active' : '' }}">
             <i class="nav-icon fa fa-list-alt"></i>
             <p>
               Management User
@@ -40,26 +40,18 @@
           </a>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a href="#" class="nav-link active">
+              <a href="/users" class="nav-link {{ request()->is('users') ? 'active' : '' }}">
                 <i class="far fa-circle nav-icon"></i>
-                <p>Active Page</p>
+                <p>User</p>
               </a>
             </li>
             <li class="nav-item">
-              <a href="#" class="nav-link">
+              <a href="#" class="nav-link {{ request()->is('management-user/inactive') ? 'active' : '' }}">
                 <i class="far fa-circle nav-icon"></i>
                 <p>Inactive Page</p>
               </a>
             </li>
           </ul>
-        </li>
-        <li class="nav-item">
-          <a href="#" class="nav-link">
-            <i class="nav-icon fas fa-th"></i>
-            <p>
-              Simple Link
-            </p>
-          </a>
         </li>
       </ul>
     </nav>
@@ -77,7 +69,6 @@
   </div>
   <!-- /.sidebar -->
 </aside>
-
 
 <style>
  .custom-sidebar {
