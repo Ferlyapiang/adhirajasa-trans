@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\RegisterController;
+use App\Http\Controllers\ReportLogController;
 use App\Http\Controllers\UserController;
 
 // Login and Logout
@@ -28,3 +29,8 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('aut
 
 // User Management
 Route::resource('users', UserController::class);
+
+// Report Log
+Route::get('/reports-log', [ReportLogController::class, 'index'])->name('reports.index');
+Route::get('logs', [ReportLogController::class, 'index'])->name('logs.index');
+

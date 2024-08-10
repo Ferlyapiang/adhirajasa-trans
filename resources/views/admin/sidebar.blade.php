@@ -47,6 +47,23 @@
             </li>
           </ul>
         </li>
+        <li class="nav-item">
+          <a class="nav-link {{ request()->is('log/*') ? 'active' : '' }}">
+            <i class="nav-icon fa fa-list-alt"></i>
+            <p>
+              Log
+              <i class="right fas fa-angle-left"></i>
+            </p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              <a href="/reports-log" class="nav-link {{ request()->is('reports-log') ? 'active' : '' }}">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Data Logs</p>
+              </a>
+            </li>
+          </ul>
+        </li>
       </ul>
     </nav>
     <!-- /.sidebar-menu -->
