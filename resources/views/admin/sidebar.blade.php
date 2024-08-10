@@ -30,7 +30,7 @@
             </p>
           </a>
         </li>
-        <li class="nav-item menu-open">
+        <li class="nav-item">
           <a class="nav-link {{ request()->is('management-user/*') ? 'active' : '' }}">
             <i class="nav-icon fa fa-list-alt"></i>
             <p>
@@ -43,12 +43,6 @@
               <a href="/users" class="nav-link {{ request()->is('users') ? 'active' : '' }}">
                 <i class="far fa-circle nav-icon"></i>
                 <p>User</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="#" class="nav-link {{ request()->is('management-user/inactive') ? 'active' : '' }}">
-                <i class="far fa-circle nav-icon"></i>
-                <p>Inactive Page</p>
               </a>
             </li>
           </ul>
