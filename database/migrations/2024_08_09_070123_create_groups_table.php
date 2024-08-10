@@ -14,9 +14,9 @@ class CreateGroupsTable extends Migration
     public function up()
     {
         Schema::create('groups', function (Blueprint $table) {
-            $table->id(); // This will create an auto-incrementing `id` column
-            $table->string('name'); // This will create a `name` column with a maximum length of 255 characters
-            $table->timestamps(); // This will create `created_at` and `updated_at` columns
+            $table->id(); // Creates an auto-incrementing `id` column
+            $table->string('name', 191)->index(); // Limits length to 191 characters to stay within key length limits
+            $table->timestamps(); // Creates `created_at` and `updated_at` columns
         });
     }
 
