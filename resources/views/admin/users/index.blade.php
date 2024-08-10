@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -12,9 +11,12 @@
 
     <!-- Theme style -->
     <link rel="stylesheet" href="{{ asset('lte/dist/css/adminlte.min.css') }}">
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.3/css/jquery.dataTables.min.css">
 
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.3/js/jquery.dataTables.min.js"></script>
     <script src="{{ asset('lte/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('lte/dist/js/adminlte.min.js') }}"></script>
 </head>
@@ -46,30 +48,12 @@
             <!-- /.content-header -->
 
             <!-- Main content -->
-            <div class="container mt-3">
+            <div class="container-fluid pl-4">
                 <h1>Users</h1>
                 <a href="{{ route('users.create') }}" class="btn btn-primary mb-3">Add User</a>
-                
-                <!-- Search and Filter -->
-                <div class="d-flex justify-content-between mb-3">
-                    <div class="form-group">
-                        <label for="itemsPerPage">Items:</label>
-                        <select id="itemsPerPage" class="form-control">
-                            <option value="10">10</option>
-                            <option value="25">25</option>
-                            <option value="50">50</option>
-                            <option value="100">100</option>
-                        </select>
-                    </div>
 
-                    <div class="form-group mr-3">
-                        <label for="searchInput">Search:</label>
-                        <input type="text" id="searchInput" class="form-control" placeholder="Search by name or email">
-                    </div>
-                </div>
-                
                 <div class="table-responsive">
-                    <table class="table">
+                    <table id="userTable" class="table table-striped table-bordered">
                         <thead>
                             <tr>
                                 <th>Name</th>
@@ -79,7 +63,7 @@
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="userTableBody">
+                        <tbody>
                             @foreach($users as $user)
                                 <tr>
                                     <td>{{ $user->name }}</td>
@@ -100,7 +84,6 @@
                     </table>
                 </div>
             </div>
-            
             <!-- /.main content -->
 
         </div>
@@ -116,60 +99,51 @@
     <!-- Confirm Delete Modal -->
     <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
         <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="confirmDeleteModalLabel">Confirm Deletion</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmDeleteModalLabel">Confirm Deletion</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete <span id="userName"></span>? This action cannot be undone.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="cancelButton">Cancel</button>
+                    <form id="deleteForm" method="POST" style="display:inline;">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>            
+                </div>
             </div>
-            <div class="modal-body">
-              Are you sure you want to delete <span id="userName"></span>? This action cannot be undone.
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" id="cancelButton">Cancel</button>
-              <!-- Update form action to point to the route with soft delete -->
-              <form id="deleteForm" method="POST" style="display:inline;">
-                @csrf
-                @method('DELETE')
-                <button type="submit" class="btn btn-danger">Delete</button>
-            </form>            
-            </div>
-          </div>
         </div>
     </div>
-
-    <!-- Script for handling modal -->
     <script>
     $(document).ready(function() {
-    $('#searchInput').on('keyup', function() {
-        var value = $(this).val().toLowerCase();
-        $('#userTableBody tr').filter(function() {
-            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+        var table = $('#userTable').DataTable();
+
+        $('#searchInput').on('keyup', function() {
+            table.search($(this).val()).draw();
+        });
+
+        $('#userTable').on('click', '.btn-danger', function(event) {
+            event.preventDefault();
+            var form = $(this).closest('form');
+            var userName = $(this).closest('tr').find('td').first().text();
+            var actionUrl = form.attr('action');
+
+            $('#userName').text(userName);
+            $('#deleteForm').attr('action', actionUrl);
+
+            var modalElement = document.getElementById('confirmDeleteModal');
+            var modal = new bootstrap.Modal(modalElement); // Initialize the modal
+            modal.show(); // Show the modal
+        });
+
+        $('#cancelButton').on('click', function() {
+            location.reload(); // Reload the page
         });
     });
-
-    $('#itemsPerPage').on('change', function() {
-        var itemsPerPage = $(this).val();
-        window.location.href = "{{ route('users.index') }}" + "?itemsPerPage=" + itemsPerPage;
-    });
-
-    $('#userTableBody').on('click', '.btn-danger', function(event) {
-        event.preventDefault();
-        var form = $(this).closest('form');
-        var userName = $(this).closest('tr').find('td').first().text();
-        var actionUrl = form.attr('action');
-
-        $('#userName').text(userName);
-        $('#deleteForm').attr('action', actionUrl);
-
-        var modalElement = document.getElementById('confirmDeleteModal');
-        var modal = new bootstrap.Modal(modalElement); // Initialize the modal
-        modal.show(); // Show the modal
-    });
-
-    $('#cancelButton').on('click', function() {
-        location.reload(); // Reload the page
-    });
-});
     </script>
 </body>
 

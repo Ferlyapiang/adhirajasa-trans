@@ -22,6 +22,7 @@
     <script src="{{ asset('lte/dist/js/adminlte.min.js') }}"></script>
 </head>
 
+
 <body class="hold-transition sidebar-mini">
     <div class="wrapper">
 
