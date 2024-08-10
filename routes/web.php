@@ -31,6 +31,6 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('aut
 Route::resource('users', UserController::class);
 
 // Report Log
-Route::get('/reports-log', [ReportLogController::class, 'index'])->name('reports.index');
+Route::get('/log/reports-log', [ReportLogController::class, 'index'])->name('reports.index');
 Route::get('logs', [ReportLogController::class, 'index'])->name('logs.index');
 

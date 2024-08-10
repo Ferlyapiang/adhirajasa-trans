@@ -57,7 +57,7 @@
           </a>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a href="/reports-log" class="nav-link {{ request()->is('reports-log') ? 'active' : '' }}">
+            <a href="{{ route('reports.index') }}" class="nav-link {{ request()->routeIs('reports.index') ? 'active' : '' }}">
                 <i class="far fa-circle nav-icon"></i>
                 <p>Data Logs</p>
               </a>
