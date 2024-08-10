@@ -5,7 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\Group;
-use App\Models\LogData; // Add this import
+use App\Models\LogData;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -43,8 +44,8 @@ class UserController extends Controller
 
         // Log the update action
         LogData::create([
-            'user_id' => auth()->id(), // Assuming you're using authentication
-            'name' => auth()->user()->name, // Name of the authenticated user
+            'user_id' => Auth::id(),
+            'name' => Auth::user()->name,
             'action' => 'update',
             'details' => 'Updated user ID: ' . $user->id . ' with data: ' . json_encode($request->only('name', 'email', 'status', 'group_id'))
         ]);
@@ -78,8 +79,8 @@ class UserController extends Controller
 
         // Log the insert action
         LogData::create([
-            'user_id' => auth()->id(),
-            'name' => auth()->user()->name, // Name of the authenticated user
+            'user_id' => Auth::id(),
+            'name' => Auth::user()->name,
             'action' => 'insert',
             'details' => 'Created user ID: ' . $user->id . ' with data: ' . json_encode($request->only('name', 'email', 'password', 'status', 'group_id'))
         ]);
@@ -94,8 +95,8 @@ class UserController extends Controller
 
         // Log the delete action
         LogData::create([
-            'user_id' => auth()->id(),
-            'name' => auth()->user()->name, // Name of the authenticated user
+            'user_id' => Auth::id(),
+            'name' => Auth::user()->name,
             'action' => 'delete',
             'details' => 'Deleted user ID: ' . $user->id . ' with data: ' . json_encode($user->only('name', 'email', 'status', 'group_id'))
         ]);
