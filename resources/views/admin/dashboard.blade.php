@@ -124,7 +124,7 @@
                                       <span class="p-2" style="font-size:14px; font-weight: 500"> Email</span>
                                   </div>    
                                   <div class="col-md-8">
-                                      <span style="font-size:14px; font-weight: 400; pl-5">: {{ Auth::user()->email ?? 'User' }}</span>
+                                    <span style="font-size:14px; font-weight: 400; padding-left: 5px;">: {{ Auth::user()->email ?? 'User' }}</span>
                                   </div>
                               </div>
                               <div class="row mt-3">

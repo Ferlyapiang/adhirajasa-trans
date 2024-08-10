@@ -126,26 +126,8 @@
 <script>
     $(document).ready(function() {
         // Check if the session has a success message
-        @if(session('success'))
+        if ("{{ session('success') }}") {
             $('#successModal').modal('show');
-        @endif
-    
-        // Function to filter table based on search input
-        $('#searchInput').on('keyup', function() {
-            var value = $(this).val().toLowerCase();
-            $('#userTableBody tr').filter(function() {
-                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
-            });
-        });
-    
-        // Function to handle items per page filter (if paginating data)
-        $('#itemsPerPage').on('change', function() {
-            var itemsPerPage = $(this).val();
-            // Assuming pagination logic is handled on the server side
-            // You would need to adjust this based on how you handle pagination
-            // For example, you might want to update the page with the new number of items
-            window.location.href = "{{ route('users.index') }}" + "?itemsPerPage=" + itemsPerPage;
-        });
+        }
     });
-    </script>
-    
+</script>

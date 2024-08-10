@@ -46,7 +46,7 @@
             <!-- /.content-header -->
 
             <!-- Main content -->
-            <<div class="container mt-3">
+            <div class="container mt-3">
                 <h1>Add User</h1>
                 
                 <form action="{{ route('users.store') }}" method="POST">
@@ -93,8 +93,6 @@
                     <button type="submit" class="btn btn-primary">Save User</button>
                 </form>
             </div>
-            
-            
             <!-- /.main content -->
 
         </div>
@@ -110,49 +108,31 @@
     <!-- Success Modal -->
     <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="successModalLabel">Success</h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="successModalLabel">Success</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    User added successfully!
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
             </div>
-            <div class="modal-body">
-              User added successfully!
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div>
-          </div>
         </div>
-      </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            // Check if the session has a success message
+            if ("{{ session('success') }}") {
+                $('#successModal').modal('show');
+            }
+        });
+    </script>
 </body>
 
 </html>
-
-<script>
-    $(document).ready(function() {
-        // Check if the session has a success message
-        @if(session('success'))
-            $('#successModal').modal('show');
-        @endif
-    
-        // Function to filter table based on search input
-        $('#searchInput').on('keyup', function() {
-            var value = $(this).val().toLowerCase();
-            $('#userTableBody tr').filter(function() {
-                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
-            });
-        });
-    
-        // Function to handle items per page filter (if paginating data)
-        $('#itemsPerPage').on('change', function() {
-            var itemsPerPage = $(this).val();
-            // Assuming pagination logic is handled on the server side
-            // You would need to adjust this based on how you handle pagination
-            // For example, you might want to update the page with the new number of items
-            window.location.href = "{{ route('users.index') }}" + "?itemsPerPage=" + itemsPerPage;
-        });
-    });
-    </script>
-    
