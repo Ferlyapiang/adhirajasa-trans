@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\Group;
+use App\Models\LogData; // Add this import
 
 class UserController extends Controller
 {
@@ -21,13 +22,9 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
-        // Ambil semua grup dari model Group
         $groups = Group::all();
-        
-        // Kirim data grup dan pengguna ke view
         return view('admin.users.edit', compact('user', 'groups'));
     }
-
 
     public function update(Request $request, User $user)
     {
@@ -38,21 +35,27 @@ class UserController extends Controller
             'group_id' => 'nullable|exists:groups,id'
         ]);
 
-        // Periksa apakah status pengguna berubah dari inactive ke active
         if ($user->status === 'inactive' && $request->status === 'active') {
             $user->status = 'active';
-            // Atur status menjadi 'active'
-            $user->save();
         }
 
         $user->update($request->only('name', 'email', 'status', 'group_id'));
+
+        // Log the update action
+        LogData::create([
+            'user_id' => auth()->id(), // Assuming you're using authentication
+            'name' => auth()->user()->name, // Name of the authenticated user
+            'action' => 'update',
+            'details' => 'Updated user ID: ' . $user->id . ' with data: ' . json_encode($request->only('name', 'email', 'status', 'group_id'))
+        ]);
 
         return redirect()->route('users.index')->with('success', 'User updated successfully.');
     }
 
     public function create()
     {
-        return view('admin.users.create');
+        $groups = Group::all();
+        return view('admin.users.create', compact('groups'));
     }
 
     public function store(Request $request)
@@ -73,12 +76,29 @@ class UserController extends Controller
             'group_id' => $request->group_id,
         ]);
 
+        // Log the insert action
+        LogData::create([
+            'user_id' => auth()->id(),
+            'name' => auth()->user()->name, // Name of the authenticated user
+            'action' => 'insert',
+            'details' => 'Created user ID: ' . $user->id . ' with data: ' . json_encode($request->only('name', 'email', 'password', 'status', 'group_id'))
+        ]);
+
         return redirect()->route('users.index')->with('success', 'User added successfully.');
     }
 
     public function destroy(User $user)
     {
-        $user->softDelete();
+        // Soft delete, assuming you have soft deletes enabled
+        $user->delete();
+
+        // Log the delete action
+        LogData::create([
+            'user_id' => auth()->id(),
+            'name' => auth()->user()->name, // Name of the authenticated user
+            'action' => 'delete',
+            'details' => 'Deleted user ID: ' . $user->id . ' with data: ' . json_encode($user->only('name', 'email', 'status', 'group_id'))
+        ]);
 
         return redirect()->route('users.index')->with('success', 'User deactivated successfully.');
     }
