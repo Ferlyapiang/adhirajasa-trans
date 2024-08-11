@@ -1,14 +1,15 @@
 <aside class="main-sidebar custom-sidebar elevation-4">
   <!-- Brand Logo -->
   <a href="{{ url('/dashboard') }}" class="brand-link mb-3">
-    <img src="{{ asset('ats/ATSLogo.png') }}" alt="AdminLTE Logo" class="brand-image elevation-2" style="opacity: .8; width: 35px; height: 30px;">
-    <span class="brand-text font-weight-light">ATS Digital</span>
+    <img src="{{ asset('ats/ATSLogo.png') }}" alt="ATS Logo" class="brand-image">
+    <span class="brand-text">ATS Digital</span>
   </a>
 
+
   <!-- Sidebar -->
-  <div class="sidebar mb-3">
+  <div class="sidebar mt-1">
     <!-- SidebarSearch Form -->
-    <div class="form-inline">
+    <div class="form-inline mt-2">
       <div class="input-group" data-widget="sidebar-search">
         <input id="sidebarSearch" class="form-control form-control-sidebar" type="search" placeholder="Search" aria-label="Search">
         <div class="input-group-append">
@@ -17,8 +18,8 @@
           </button>
         </div>
       </div>
+      <div id="noResults" class="no-results mt-2 d-none">No elements found</div>
     </div>
-
 
     <!-- Sidebar Menu -->
     <nav class="mt-2">
@@ -26,18 +27,13 @@
         <li class="nav-item">
           <a href="/dashboard" class="nav-link {{ request()->is('dashboard') ? 'active' : '' }}">
             <i class="nav-icon fa fa-home"></i>
-            <p>
-              Home
-            </p>
+            <p>Home</p>
           </a>
         </li>
         <li class="nav-item">
           <a class="nav-link {{ request()->is('management-user/*') ? 'active' : '' }}">
             <i class="nav-icon fa fa-list-alt"></i>
-            <p>
-              Management User
-              <i class="right fas fa-angle-left"></i>
-            </p>
+            <p>Management User<i class="right fas fa-angle-left"></i></p>
           </a>
           <ul class="nav nav-treeview">
             <li class="nav-item">
@@ -48,14 +44,10 @@
             </li>
           </ul>
         </li>
-
         <li class="nav-item">
           <a class="nav-link {{ request()->is('log/*') ? 'active' : '' }}">
             <i class="nav-icon fa fa-list-alt"></i>
-            <p>
-              Log
-              <i class="right fas fa-angle-left"></i>
-            </p>
+            <p>Log<i class="right fas fa-angle-left"></i></p>
           </a>
           <ul class="nav nav-treeview">
             <li class="nav-item">
@@ -69,141 +61,184 @@
         <li class="nav-item">
           <a class="nav-link {{ request()->is('master-data/*') ? 'active' : '' }}">
             <i class="nav-icon fa fa-list-alt"></i>
-            <p>
-              Master Data
-              <i class="right fas fa-angle-left"></i>
-            </p>
+            <p>Master Data<i class="right fas fa-angle-left"></i></p>
           </a>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a href="{{ route('master-data.customers.index') }}" class="nav-link {{ request()->routeIs('reports.index') ? 'active' : '' }}">
+              <a href="{{ route('master-data.customers.index') }}" class="nav-link {{ request()->routeIs('master-data.customers.index') ? 'active' : '' }}">
                 <i class="far fa-circle nav-icon"></i>
                 <p>Data Customer</p>
               </a>
             </li>
           </ul>
         </li>
-
       </ul>
     </nav>
     <!-- /.sidebar-menu -->
 
-    <div class="sidebar-footer mb-6">
-      <form action="{{ route('logout') }}" method="POST">
-          @csrf
-          <button type="submit" class="btn btn-danger btn-block">
-              <i class="fas fa-sign-out-alt"></i> Logout
-          </button>
+    <div class="sidebar-footer">
+      <form action="{{ route('logout') }}" method="POST" class="logout-form">
+        @csrf
+        <button type="submit" class="btn btn-danger btn-block">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
       </form>
-  </div>
-  
+    </div>
   </div>
   <!-- /.sidebar -->
 </aside>
 
+
+
 <style>
- .custom-sidebar {
-  background-color: #ffffff; /* Set the background color to white */
-  color: #000000; /* Set the text color to black for better contrast */
+/* Sidebar styling */
+.custom-sidebar {
+  background-color: #f8f9fa; /* Light background color for the sidebar */
+  color: #000; /* Black text color for contrast */
 }
 
-.nav-sidebar .nav-link.highlight {
-  background-color: #E7EDFF; /* Set background color for highlighted items */
-  color: #000000; /* Set text color for highlighted items */
+/* Brand Logo Styling */
+.brand-link {
+  display: flex;
+  align-items: center;
+  background-color: #ffffff; /* White background for better contrast */
+  padding: 10px; /* Add padding around the link */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+  transition: background-color 0.3s, box-shadow 0.3s; /* Smooth transitions */
 }
 
-.custom-sidebar .nav-link {
-  color: #000000; /* Set the text color of nav links */
+.brand-link:hover {
+  background-color: #f1f1f1; /* Light gray background on hover */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Enhanced shadow on hover */
 }
 
-.custom-sidebar .nav-link.active {
-  background-color: #E7EDFF; /* Set background color for active links */
-  color: #000000; /* Set text color of active links */
+.brand-image {
+  width: 13px; /* Slightly larger image */
+  height: 13px; /* Maintain aspect ratio */
 }
 
-.custom-sidebar .brand-link {
-  color: #000000; /* Set the color for the brand text */
+.brand-text {
+  font-size: 1.2rem; /* Increase font size for readability */
+  font-weight: 600; /* Semi-bold text */
+  color: #333; /* Dark gray color for text */
+  text-transform: uppercase; /* Uppercase text for a bolder look */
+  letter-spacing: 1px; /* Slightly spaced letters */
+  transition: color 0.3s; /* Smooth color transition */
 }
 
-.custom-sidebar .form-control-sidebar {
-  background-color: #e9ecef; /* Optional: background color for search input */
+.brand-link:hover .brand-text {
+  color: #007bff; /* Change text color on hover */
+}
+
+.form-control-sidebar {
+  border-radius: 20px; /* Rounded corners for input */
+  border: 1px solid #ced4da; /* Light border color */
+  background-color: #ffffff; /* White background for the input */
+}
+
+.btn-sidebar {
+  border-radius: 20px; /* Rounded corners to match input */
+  background-color: #007bff; /* Bootstrap primary color */
+  color: #ffffff; /* White text color */
+  border: 1px solid #007bff; /* Matching border color */
+}
+
+.btn-sidebar:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+  border-color: #0056b3; /* Matching border color */
 }
 
 .nav-sidebar .nav-link {
-  color: #000000; /* Set text color to black */
+  color: #000; /* Black text color for nav links */
+  border-radius: 8px; /* Rounded corners for nav items */
+  margin: 5px 0; /* Space between nav items */
 }
 
-/* Set text color for active nav link and background color */
 .nav-sidebar .nav-link.active {
-  color: #000000; /* Set text color to black */
-  background-color: #E7EDFF; /* Set background color to blue */
+  background-color: #e7edff; /* Light blue background for active items */
+  color: #000; /* Black text color for active items */
 }
 
-/* Set text color for active nav link in dropdown */
-.nav-sidebar .nav-treeview .nav-link.active {
-  color: #000000; /* Set text color to black */
-  background-color: #E7EDFF; /* Set background color to blue */
+.nav-sidebar .nav-treeview .nav-link {
+  padding-left: 20px; /* Indentation for nested items */
 }
 
-/* Optional: Change color on hover */
-.nav-sidebar .nav-link:hover {
-  color: #000000; /* Set text color to black on hover */
-}
-
-/* Style for the sidebar footer and logout button */
 .sidebar-footer {
   position: absolute;
-  bottom: 50px; /* Adjust based on the height of the new footer */
+  bottom: 0; /* Stick to the bottom of the sidebar */
   width: 100%;
-  padding: 10px;
-  background-color: #f8f9fa; /* Background color for the footer */
+  padding: 10px 15px; /* Add padding for better spacing */
+  background-color: #ffffff; /* White background for footer */
+  border-top: 1px solid #dee2e6; /* Subtle top border */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
 }
 
-.sidebar-footer .btn {
-  border-radius: 0; /* Remove border radius for a more rectangular look */
-  margin: 0; /* Remove margin */
+.logout-form .btn-danger {
+  background-color: #dc3545; /* Bootstrap danger color */
+  border-color: #dc3545; /* Matching border color */
+  font-size: 14px; /* Font size for readability */
+  padding: 10px 15px; /* Padding for balance */
+  border-radius: 5px; /* Rounded corners */
 }
 
-.sidebar-footer .btn-danger {
-  background-color: #dc3545; /* Bootstrap danger color for logout button */
-  border-color: #dc3545; /* Border color for logout button */
+.logout-form .btn-danger:hover {
+  background-color: #c82333; /* Darker red on hover */
+  border-color: #bd2130; /* Matching border color */
 }
 
-.sidebar-footer .btn-danger:hover {
-  background-color: #c82333; /* Darker color on hover */
-  border-color: #bd2130; /* Border color on hover */
+.logout-form .btn-danger i {
+  margin-right: 8px; /* Space between icon and text */
 }
+
+/* Styling for the 'No elements found' message */
+.no-results {
+  color: #6c757d; /* Gray text color */
+  text-align: center; /* Center the text */
+  padding: 10px; /* Add padding for better spacing */
+  font-size: 14px; /* Font size */
+}
+
+/* Ensure the search container has enough height */
+.form-inline {
+  margin-bottom: 1.5rem; /* Adjust margin if necessary */
+}
+
 </style>
+
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   const searchInput = document.getElementById('sidebarSearch');
   const navLinks = document.querySelectorAll('.nav-sidebar .nav-link');
+  const noResults = document.getElementById('noResults');
 
   searchInput.addEventListener('input', function() {
     const searchTerm = searchInput.value.toLowerCase();
+    let hasVisibleItems = false;
 
     if (searchTerm === '') {
-      // Jika pencarian kosong, tampilkan semua item dan hilangkan highlight
       navLinks.forEach(link => {
-        link.style.display = ''; // Tampilkan item
-        link.classList.remove('highlight'); // Hapus kelas highlight
+        link.style.display = ''; // Show all items
+        link.classList.remove('highlight'); // Remove highlight
       });
+      noResults.classList.add('d-none'); // Hide 'No elements found' message
     } else {
-      // Lakukan pencarian
       navLinks.forEach(link => {
         const text = link.textContent.toLowerCase();
         if (text.includes(searchTerm)) {
-          link.style.display = ''; // Tampilkan item
-          link.classList.add('highlight'); // Tambahkan kelas highlight
+          link.style.display = ''; // Show matching items
+          link.classList.add('highlight'); // Add highlight
+          hasVisibleItems = true; // Indicate that there are visible items
         } else {
-          link.style.display = 'none'; // Sembunyikan item
-          link.classList.remove('highlight'); // Hapus kelas highlight
+          link.style.display = 'none'; // Hide non-matching items
+          link.classList.remove('highlight'); // Remove highlight
         }
       });
+      noResults.classList.toggle('d-none', hasVisibleItems); // Show or hide 'No elements found' message
     }
   });
 });
+
 </script>
 
 
