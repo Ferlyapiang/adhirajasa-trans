@@ -65,6 +65,23 @@
             </li>
           </ul>
         </li>
+        <li class="nav-item">
+          <a class="nav-link {{ request()->is('master-data/*') ? 'active' : '' }}">
+            <i class="nav-icon fa fa-list-alt"></i>
+            <p>
+              Master Data
+              <i class="right fas fa-angle-left"></i>
+            </p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              <a href="{{ route('master-data.customers.index') }}" class="nav-link {{ request()->routeIs('master-data.customers.index') ? 'active' : '' }}">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Data Customer</p>
+              </a>
+            </li>
+          </ul>
+        </li>
 
       </ul>
     </nav>

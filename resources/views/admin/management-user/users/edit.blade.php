@@ -46,10 +46,10 @@
             <!-- /.content-header -->
 
             <!-- Main content -->
-            <div class="container">
+            <div class="container-fluid pl-4">
                 <h1>Edit User</h1>
             
-                <form action="{{ route('users.update', $user) }}" method="POST">
+                <form action="{{ route('management-user.users.update', $user->id) }}" method="POST">
                     @csrf
                     @method('PUT')
             

@@ -50,7 +50,7 @@ class UserController extends Controller
             'details' => 'Updated user ID: ' . $user->id . ' with data: ' . json_encode($request->only('name', 'email', 'status', 'group_id'))
         ]);
 
-        return redirect()->route('users.index')->with('success', 'User updated successfully.');
+        return redirect()->route('management-user.users.index')->with('success', 'User updated successfully.');
     }
 
     public function create()
@@ -85,7 +85,7 @@ class UserController extends Controller
             'details' => 'Created user ID: ' . $user->id . ' with data: ' . json_encode($request->only('name', 'email', 'password', 'status', 'group_id'))
         ]);
 
-        return redirect()->route('users.index')->with('success', 'User added successfully.');
+        return redirect()->route('management-user.users.index')->with('success', 'User added successfully.');
     }
 
     public function destroy(User $user)
@@ -101,6 +101,6 @@ class UserController extends Controller
             'details' => 'Deleted user ID: ' . $user->id . ' with data: ' . json_encode($user->only('name', 'email', 'status', 'group_id'))
         ]);
 
-        return redirect()->route('users.index')->with('success', 'User deactivated successfully.');
+        return redirect()->route('management-user.users.index')->with('success', 'User deactivated successfully.');
     }
 }

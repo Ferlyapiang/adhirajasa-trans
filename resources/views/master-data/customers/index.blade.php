@@ -1,3 +1,4 @@
+<!-- resources/views/customers/index.blade.php -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -40,7 +41,7 @@
                 <div class="container-fluid pl-4">
                     <div class="row mb-1">
                         <div class="col-sm-12" style="border: 1px solid #D0D4DB; border-radius: 10px; background-color: white; padding: 10px;">
-                            <h1 class="m-0" style="font-weight: 370; font-size: 16px; padding-left: 10px;">Management User | User</h1>
+                            <h1 class="m-0" style="font-weight: 370; font-size: 16px; padding-left: 10px;">Master Data | Customer</h1>
                         </div>
                     </div>
                 </div>
@@ -49,34 +50,42 @@
 
             <!-- Main content -->
             <div class="container-fluid pl-4">
-                <h1>Users</h1>
-                <a href="{{ route('management-user.users.create') }}" class="btn btn-primary mb-3">Add User</a>
+                <a href="{{ route('customers.create') }}" class="btn btn-primary mb-3">Add Customer</a>
 
                 <div class="table-responsive">
-                    <table id="userTable" class="table table-striped table-bordered">
+                    <table id="customerTable" class="table table-striped table-bordered">
                         <thead>
                             <tr>
                                 <th>Name</th>
+                                <th>No NPWP/KTP</th>
+                                <th>No HP</th>
                                 <th>Email</th>
+                                <th>Address</th>
                                 <th>Status</th>
-                                <th>Group</th>
+                                <th>Created At</th>
+                                <th>Updated At</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($users as $user)
+                            @foreach($customers as $customer)
                                 <tr>
-                                    <td>{{ $user->name }}</td>
-                                    <td>{{ $user->email }}</td>
-                                    <td>{{ $user->status }}</td>
-                                    <td>{{ $user->group->name ?? 'No Group' }}</td>
+                                    <td>{{ $customer->name }}</td>
+                                    <td>{{ $customer->no_npwp_ktp }}</td>
+                                    <td>{{ $customer->no_hp }}</td>
+                                    <td>{{ $customer->email }}</td>
+                                    <td>{{ $customer->address }}</td>
+                                    <td>{{ $customer->status }}</td>
+                                    <td>{{ $customer->created_at->format('Y-m-d H:i:s') }}</td>
+                                    <td>{{ $customer->updated_at->format('Y-m-d H:i:s') }}</td>
                                     <td>
-                                        <a href="{{ route('management-user.users.edit', $user) }}" class="btn btn-warning btn-sm">Edit</a>
-                                        <form action="{{ route('management-user.users.destroy', $user) }}" method="POST" style="display:inline;">
+                                        <a href="{{ route('customers.edit', $customer) }}" class="btn btn-warning btn-sm">Edit</a>
+                                        <form action="{{ route('customers.destroy', $customer) }}" method="POST" style="display:inline;">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                                         </form>
+                                        <a href="{{ route('customers.show', $customer) }}" class="btn btn-info btn-sm">Show</a>
                                     </td>
                                 </tr>
                             @endforeach
@@ -105,7 +114,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    Are you sure you want to delete <span id="userName"></span>? This action cannot be undone.
+                    Are you sure you want to delete <span id="customerName"></span>? This action cannot be undone.
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" id="cancelButton">Cancel</button>
@@ -120,19 +129,19 @@
     </div>
     <script>
     $(document).ready(function() {
-        var table = $('#userTable').DataTable();
+        var table = $('#customerTable').DataTable();
 
         $('#searchInput').on('keyup', function() {
             table.search($(this).val()).draw();
         });
 
-        $('#userTable').on('click', '.btn-danger', function(event) {
+        $('#customerTable').on('click', '.btn-danger', function(event) {
             event.preventDefault();
             var form = $(this).closest('form');
-            var userName = $(this).closest('tr').find('td').first().text();
+            var customerName = $(this).closest('tr').find('td').first().text();
             var actionUrl = form.attr('action');
 
-            $('#userName').text(userName);
+            $('#customerName').text(customerName);
             $('#deleteForm').attr('action', actionUrl);
 
             var modalElement = document.getElementById('confirmDeleteModal');
@@ -146,5 +155,4 @@
     });
     </script>
 </body>
-
 </html>

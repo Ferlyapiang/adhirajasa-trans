@@ -22,6 +22,6 @@ class ReportLogController extends Controller
         }
 
         // Return the view if not an AJAX request
-        return view('admin.reports.index');
+        return view('reports.logs.index');
     }
 }

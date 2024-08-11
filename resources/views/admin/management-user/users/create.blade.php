@@ -46,10 +46,10 @@
             <!-- /.content-header -->
 
             <!-- Main content -->
-            <div class="container mt-3">
+            <div class="container-fluid pl-4">
                 <h1>Add User</h1>
                 
-                <form action="{{ route('users.store') }}" method="POST">
+                <form action="{{ route('management-user.users.store') }}" method="POST">
                     @csrf
                     
                     <div class="form-group">

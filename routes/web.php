@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\ReportLogController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\CustomerController;
 
 // Login and Logout
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login.form');
@@ -28,13 +29,27 @@ Route::post('password/reset', [AuthController::class, 'resetPassword'])->name('r
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('auth');
 
 // User Management
-// Route::resource('users', UserController::class);
-// User Management
-Route::resource('/management-user/users', UserController::class)->names([
+// routes/web.php
+Route::resource('management-user/users', UserController::class)->names([
     'index' => 'management-user.users.index',
+    'create' => 'management-user.users.create',
+    'store' => 'management-user.users.store',
+    'show' => 'management-user.users.show',
+    'edit' => 'management-user.users.edit',
+    'update' => 'management-user.users.update',
+    'destroy' => 'management-user.users.destroy',
 ]);
+
 
 // Report Log
 Route::get('/log/reports-log', [ReportLogController::class, 'index'])->name('reports.index');
 Route::get('logs', [ReportLogController::class, 'index'])->name('logs.index');
 
+// Customer
+// Route::resource('/master-data/customers', CustomerController::class)->names([
+//     'index' => 'master-data.customers.index',
+// ]);
+
+Route::resource('/master-data/customers', CustomerController::class)->names([
+    'index' => 'master-data.customers.index',
+]);
