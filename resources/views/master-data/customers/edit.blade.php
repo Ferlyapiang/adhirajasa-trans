@@ -41,9 +41,10 @@
 
             <!-- Main content -->
             <div class="container-fluid pl-4">
+                <h1>Edit Customer</h1>
                 <div class="card">
                     <div class="card-body">
-                        <form action="{{ route('customers.update', $customer) }}" method="POST">
+                        <form action="{{ route('master-data.customers.update', $customer) }}" method="POST">
                             @csrf
                             @method('PUT')
                             <div class="mb-3">
@@ -75,7 +76,7 @@
                             </div>
                             <button type="submit" class="btn btn-primary">Update</button>
                         </form>
-                        <a href="{{ route('customers.index') }}" class="btn btn-secondary mt-3">Back to List</a>
+                        <a href="{{ route('master-data.customers.index') }}" class="btn btn-secondary mt-3">Back to List</a>
                     </div>
                 </div>
             </div>

@@ -12,6 +12,23 @@
 
     <!-- Theme style -->
     <link rel="stylesheet" href="{{ asset('lte/dist/css/adminlte.min.css') }}">
+    <style>
+        .confirmation-dialog {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .confirmation-dialog button {
+            margin: 0 5px;
+        }
+    </style>
 </head>
 <body class="hold-transition sidebar-mini">
     <div class="wrapper">
@@ -40,7 +57,8 @@
             <!-- /.content-header -->
 
             <!-- Main content -->
-            <div class="container-fluid pl-4">
+            <div class="container-fluid pl-4">    
+                <h1>Detail Customer</h1>
                 <div class="card">
                     <div class="card-body">
                         <dl class="row">
@@ -68,13 +86,9 @@
                             <dt class="col-sm-3">Updated At:</dt>
                             <dd class="col-sm-9">{{ $customer->updated_at->format('Y-m-d H:i:s') }}</dd>
                         </dl>
-                        <a href="{{ route('customers.edit', $customer) }}" class="btn btn-warning">Edit</a>
-                        <form action="{{ route('customers.destroy', $customer) }}" method="POST" style="display:inline;">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-danger">Delete</button>
-                        </form>
-                        <a href="{{ route('customers.index') }}" class="btn btn-secondary">Back to List</a>
+                        <a href="{{ route('master-data.customers.edit', $customer) }}" class="btn btn-warning">Edit</a>
+                        <button type="button" class="btn btn-danger" id="delete-button">Delete</button>
+                        <a href="{{ route('master-data.customers.index') }}" class="btn btn-secondary">Back to List</a>
                     </div>
                 </div>
             </div>
@@ -90,7 +104,47 @@
     </div>
     <!-- ./wrapper -->
 
+    <div id="confirmation-dialog" class="confirmation-dialog">
+        <p>Are you sure you want to delete this customer?</p>
+        <form id="delete-form" method="POST">
+            @csrf
+            @method('DELETE')
+            <button type="button" class="btn btn-secondary" onclick="closeDialog()">Cancel</button>
+            <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+    </div>
+
     <script src="{{ asset('lte/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('lte/dist/js/adminlte.min.js') }}"></script>
+    <script>
+        document.getElementById('delete-button').addEventListener('click', function() {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = "{{ route('master-data.customers.destroy', $customer) }}";
+
+            const csrfField = document.createElement('input');
+            csrfField.type = 'hidden';
+            csrfField.name = '_token';
+            csrfField.value = '{{ csrf_token() }}';
+            form.appendChild(csrfField);
+
+            const methodField = document.createElement('input');
+            methodField.type = 'hidden';
+            methodField.name = '_method';
+            methodField.value = 'DELETE';
+            form.appendChild(methodField);
+
+            document.body.appendChild(form);
+            document.getElementById('confirmation-dialog').style.display = 'block';
+
+            document.querySelector('#confirmation-dialog button[type="submit"]').onclick = function() {
+                form.submit();
+            };
+        });
+
+        function closeDialog() {
+            document.getElementById('confirmation-dialog').style.display = 'none';
+        }
+    </script>
 </body>
 </html>

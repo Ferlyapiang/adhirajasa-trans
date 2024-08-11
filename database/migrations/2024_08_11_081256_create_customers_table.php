@@ -14,7 +14,7 @@ class CreateCustomersTable extends Migration
             $table->string('name');
             $table->string('no_npwp_ktp', 191)->unique();
             $table->string('no_hp');
-            $table->string('email', 191)->unique();
+            $table->string('email', 191)->nullable()->unique(); // Make email nullable
             $table->text('address');
             $table->enum('status', ['active', 'inactive']);
             $table->timestamps(); // This will add 'created_at' and 'updated_at'

@@ -32,7 +32,10 @@
                 <div class="container-fluid pl-4">
                     <div class="row mb-1">
                         <div class="col-sm-12" style="border: 1px solid #D0D4DB; border-radius: 10px; background-color: white; padding: 10px;">
-                            <h1 class="m-0" style="font-weight: 370; font-size: 16px; padding-left: 10px;">Create Customer</h1>
+                            <h1 class="m-0" style="font-weight: bold; font-size: 16px; padding-left: 10px;">
+                                <span style="font-weight: 370;">Master Data |</span> 
+                                <span>Customer</span>
+                            </h1>
                         </div>
                     </div>
                 </div>
@@ -41,9 +44,10 @@
 
             <!-- Main content -->
             <div class="container-fluid pl-4">
+                <h1>Create Customer</h1>
                 <div class="card">
                     <div class="card-body">
-                        <form action="{{ route('customers.store') }}" method="POST">
+                        <form action="{{ route('master-data.customers.store') }}" method="POST">
                             @csrf
                             <div class="mb-3">
                                 <label for="name" class="form-label">Name:</label>
@@ -74,7 +78,7 @@
                             </div>
                             <div class="mb-3">
                                 <button type="submit" class="btn btn-primary">Save</button>
-                                <a href="{{ route('customers.index') }}" class="btn btn-secondary">Back to List</a>
+                                <a href="{{ route('master-data.customers.index') }}" class="btn btn-secondary">Back to List</a>
                             </div>
                         </form>
                     </div>

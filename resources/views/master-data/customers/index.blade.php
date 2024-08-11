@@ -53,7 +53,7 @@
 
             <!-- Main content -->
             <div class="container-fluid pl-4">
-                <a href="{{ route('customers.create') }}" class="btn btn-primary mb-3">Add Customer</a>
+                <a href="{{ route('master-data.customers.create') }}" class="btn btn-primary mb-3">Add Customer</a>
 
                 <div class="table-responsive">
                     <table id="customerTable" class="table table-striped table-bordered">
@@ -82,13 +82,13 @@
                                     <td>{{ $customer->created_at->format('Y-m-d H:i:s') }}</td>
                                     <td>{{ $customer->updated_at->format('Y-m-d H:i:s') }}</td>
                                     <td>
-                                        <a href="{{ route('customers.edit', $customer) }}" class="btn btn-warning btn-sm">Edit</a>
-                                        <form action="{{ route('customers.destroy', $customer) }}" method="POST" style="display:inline;">
+                                        <a href="{{ route('master-data.customers.edit', $customer) }}" class="btn btn-warning btn-sm">Edit</a>
+                                        <form action="{{ route('master-data.customers.destroy', $customer) }}" method="POST" style="display:inline;">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                                         </form>
-                                        <a href="{{ route('customers.show', $customer) }}" class="btn btn-info btn-sm">Show</a>
+                                        <a href="{{ route('master-data.customers.show', $customer) }}" class="btn btn-info btn-sm">Show</a>
                                     </td>
                                 </tr>
                             @endforeach

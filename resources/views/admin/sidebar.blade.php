@@ -10,7 +10,7 @@
     <!-- SidebarSearch Form -->
     <div class="form-inline">
       <div class="input-group" data-widget="sidebar-search">
-        <input class="form-control form-control-sidebar" type="search" placeholder="Search" aria-label="Search">
+        <input id="sidebarSearch" class="form-control form-control-sidebar" type="search" placeholder="Search" aria-label="Search">
         <div class="input-group-append">
           <button class="btn btn-sidebar">
             <i class="fas fa-search fa-fw"></i>
@@ -18,6 +18,7 @@
         </div>
       </div>
     </div>
+
 
     <!-- Sidebar Menu -->
     <nav class="mt-2">
@@ -75,7 +76,7 @@
           </a>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a href="{{ route('master-data.customers.index') }}" class="nav-link {{ request()->routeIs('master-data.customers.index') ? 'active' : '' }}">
+              <a href="{{ route('master-data.customers.index') }}" class="nav-link {{ request()->routeIs('reports.index') ? 'active' : '' }}">
                 <i class="far fa-circle nav-icon"></i>
                 <p>Data Customer</p>
               </a>
@@ -104,6 +105,11 @@
  .custom-sidebar {
   background-color: #ffffff; /* Set the background color to white */
   color: #000000; /* Set the text color to black for better contrast */
+}
+
+.nav-sidebar .nav-link.highlight {
+  background-color: #E7EDFF; /* Set background color for highlighted items */
+  color: #000000; /* Set text color for highlighted items */
 }
 
 .custom-sidebar .nav-link {
@@ -168,3 +174,36 @@
   border-color: #bd2130; /* Border color on hover */
 }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const searchInput = document.getElementById('sidebarSearch');
+  const navLinks = document.querySelectorAll('.nav-sidebar .nav-link');
+
+  searchInput.addEventListener('input', function() {
+    const searchTerm = searchInput.value.toLowerCase();
+
+    if (searchTerm === '') {
+      // Jika pencarian kosong, tampilkan semua item dan hilangkan highlight
+      navLinks.forEach(link => {
+        link.style.display = ''; // Tampilkan item
+        link.classList.remove('highlight'); // Hapus kelas highlight
+      });
+    } else {
+      // Lakukan pencarian
+      navLinks.forEach(link => {
+        const text = link.textContent.toLowerCase();
+        if (text.includes(searchTerm)) {
+          link.style.display = ''; // Tampilkan item
+          link.classList.add('highlight'); // Tambahkan kelas highlight
+        } else {
+          link.style.display = 'none'; // Sembunyikan item
+          link.classList.remove('highlight'); // Hapus kelas highlight
+        }
+      });
+    }
+  });
+});
+</script>
+
+
