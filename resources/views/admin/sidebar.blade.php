@@ -40,13 +40,14 @@
           </a>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a href="/users" class="nav-link {{ request()->is('users') ? 'active' : '' }}">
+              <a href="{{ route('management-user.users.index') }}" class="nav-link {{ request()->routeIs('management-user.users.index') ? 'active' : '' }}">
                 <i class="far fa-circle nav-icon"></i>
                 <p>User</p>
               </a>
             </li>
           </ul>
         </li>
+
         <li class="nav-item">
           <a class="nav-link {{ request()->is('log/*') ? 'active' : '' }}">
             <i class="nav-icon fa fa-list-alt"></i>
@@ -57,13 +58,14 @@
           </a>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-            <a href="{{ route('reports.index') }}" class="nav-link {{ request()->routeIs('reports.index') ? 'active' : '' }}">
+              <a href="{{ route('reports.index') }}" class="nav-link {{ request()->routeIs('reports.index') ? 'active' : '' }}">
                 <i class="far fa-circle nav-icon"></i>
                 <p>Data Logs</p>
               </a>
             </li>
           </ul>
         </li>
+
       </ul>
     </nav>
     <!-- /.sidebar-menu -->

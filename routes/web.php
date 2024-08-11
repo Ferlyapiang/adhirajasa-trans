@@ -28,7 +28,11 @@ Route::post('password/reset', [AuthController::class, 'resetPassword'])->name('r
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('auth');
 
 // User Management
-Route::resource('users', UserController::class);
+// Route::resource('users', UserController::class);
+// User Management
+Route::resource('/management-user/users', UserController::class)->names([
+    'index' => 'management-user.users.index',
+]);
 
 // Report Log
 Route::get('/log/reports-log', [ReportLogController::class, 'index'])->name('reports.index');
