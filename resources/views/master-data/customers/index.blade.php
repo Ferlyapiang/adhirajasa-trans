@@ -41,7 +41,10 @@
                 <div class="container-fluid pl-4">
                     <div class="row mb-1">
                         <div class="col-sm-12" style="border: 1px solid #D0D4DB; border-radius: 10px; background-color: white; padding: 10px;">
-                            <h1 class="m-0" style="font-weight: 370; font-size: 16px; padding-left: 10px;">Master Data | Customer</h1>
+                            <h1 class="m-0" style="font-weight: bold; font-size: 16px; padding-left: 10px;">
+                                <span style="font-weight: 370;">Master Data |</span> 
+                                <span>Customer</span>
+                            </h1>
                         </div>
                     </div>
                 </div>

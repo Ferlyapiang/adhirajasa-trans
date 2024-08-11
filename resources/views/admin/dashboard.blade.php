@@ -39,7 +39,7 @@
           <div class="container-fluid pl-4">
               <div class="row mb-1">
                   <div class="col-sm-12" style="border: 1px solid; border-color: #D0D4DB; border-radius: 10px; background-color: white; padding: 10px;">
-                      <h1 class="m-0" style="font-weight: 370; font-size: 16px; padding-left: 10px">Dashboard</h1>
+                      <h1 class="m-0" style="font-weight: 370; font-size: 16px; padding-left: 10px; font-weight: bold;">Dashboard</h1>
                   </div><!-- /.col -->
               </div><!-- /.row -->
           </div><!-- /.container-fluid -->
