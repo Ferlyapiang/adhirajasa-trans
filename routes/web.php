@@ -29,7 +29,6 @@ Route::post('password/reset', [AuthController::class, 'resetPassword'])->name('r
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('auth');
 
 // User Management
-// routes/web.php
 Route::resource('management-user/users', UserController::class)->names([
     'index' => 'management-user.users.index',
     'create' => 'management-user.users.create',
@@ -39,6 +38,7 @@ Route::resource('management-user/users', UserController::class)->names([
     'update' => 'management-user.users.update',
     'destroy' => 'management-user.users.destroy',
 ]);
+Route::post('/check-email', [UserController::class, 'checkEmail'])->name('check-email');
 
 
 // Report Log

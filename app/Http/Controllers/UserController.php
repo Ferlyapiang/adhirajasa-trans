@@ -103,4 +103,13 @@ class UserController extends Controller
 
         return redirect()->route('management-user.users.index')->with('success', 'User deactivated successfully.');
     }
+
+    public function checkEmail(Request $request)
+    {
+        $email = $request->input('email');
+        $exists = User::where('email', $email)->exists();
+        
+        return response()->json(['exists' => $exists]);
+    }
+
 }

@@ -49,7 +49,7 @@
             <div class="container-fluid pl-4">
                 <h1>Add User</h1>
                 
-                <form action="{{ route('management-user.users.store') }}" method="POST">
+                <form id="userForm" action="{{ route('management-user.users.store') }}" method="POST">
                     @csrf
                     
                     <div class="form-group">
@@ -60,6 +60,7 @@
                     <div class="form-group">
                         <label for="email">Email</label>
                         <input type="email" id="email" name="email" class="form-control" required>
+                        <span id="emailError" style="color: red; display: none;">Email already exists.</span>
                     </div>
                     
                     <div class="form-group">
@@ -70,6 +71,7 @@
                     <div class="form-group">
                         <label for="password_confirmation">Confirm Password</label>
                         <input type="password" id="password_confirmation" name="password_confirmation" class="form-control" required>
+                        <span id="passwordMismatch" style="color: red; display: none;">Passwords do not match.</span>
                     </div>
                     
                     <div class="form-group">
@@ -127,10 +129,43 @@
 
     <script>
         $(document).ready(function() {
+            $('#userForm').on('submit', function(event) {
+                var password = $('#password').val();
+                var passwordConfirmation = $('#password_confirmation').val();
+                
+                if (password !== passwordConfirmation) {
+                    $('#passwordMismatch').show();
+                    event.preventDefault(); // Prevent form submission
+                } else {
+                    $('#passwordMismatch').hide();
+                }
+            });
+
             // Check if the session has a success message
             if ("{{ session('success') }}") {
                 $('#successModal').modal('show');
             }
+
+            // Email validation on input change
+            $('#email').on('blur', function() {
+                var email = $(this).val();
+
+                $.ajax({
+                    url: "{{ route('check-email') }}",
+                    method: 'POST',
+                    data: {
+                        email: email,
+                        _token: "{{ csrf_token() }}"
+                    },
+                    success: function(response) {
+                        if (response.exists) {
+                            $('#emailError').show();
+                        } else {
+                            $('#emailError').hide();
+                        }
+                    }
+                });
+            });
         });
     </script>
 </body>

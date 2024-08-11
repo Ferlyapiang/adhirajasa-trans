@@ -49,7 +49,7 @@
             <div class="container-fluid pl-4">
                 <h1>Edit User</h1>
             
-                <form action="{{ route('management-user.users.update', $user->id) }}" method="POST">
+                <form id="userForm" action="{{ route('management-user.users.update', $user->id) }}" method="POST">
                     @csrf
                     @method('PUT')
             
@@ -61,6 +61,7 @@
                     <div class="form-group">
                         <label for="email">Email</label>
                         <input type="email" id="email" name="email" class="form-control" value="{{ old('email', $user->email) }}" required>
+                        <span id="emailError" style="color: red; display: none;">Email already exists.</span>
                     </div>
             
                     <div class="form-group">
@@ -86,8 +87,6 @@
                     <button type="submit" class="btn btn-primary">Update User</button>
                 </form>
             </div>
-            
-            
             <!-- /.main content -->
 
         </div>
@@ -103,31 +102,47 @@
     <!-- Success Modal -->
     <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="successModalLabel">Success</h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="successModalLabel">Success</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    User updated successfully!
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
             </div>
-            <div class="modal-body">
-              User added successfully!
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div>
-          </div>
         </div>
-      </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#userForm').on('submit', function(event) {
+                var email = $('#email').val();
+                var currentEmail = "{{ $user->email }}"; // Current email to exclude from check
+                
+                if (email !== currentEmail) {
+                    $.post("{{ route('check-email') }}", { email: email, _token: "{{ csrf_token() }}" }, function(response) {
+                        if (response.exists) {
+                            $('#emailError').show();
+                            event.preventDefault(); // Prevent form submission
+                        } else {
+                            $('#emailError').hide();
+                        }
+                    });
+                }
+            });
+
+            // Check if the session has a success message
+            if ("{{ session('success') }}") {
+                $('#successModal').modal('show');
+            }
+        });
+    </script>
 </body>
 
 </html>
-
-<script>
-    $(document).ready(function() {
-        // Check if the session has a success message
-        if ("{{ session('success') }}") {
-            $('#successModal').modal('show');
-        }
-    });
-</script>
