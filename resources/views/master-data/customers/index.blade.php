@@ -1,4 +1,3 @@
-<!-- resources/views/customers/index.blade.php -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -20,6 +19,54 @@
     <script src="https://cdn.datatables.net/1.13.3/js/jquery.dataTables.min.js"></script>
     <script src="{{ asset('lte/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('lte/dist/js/adminlte.min.js') }}"></script>
+
+    <style>
+        /* Custom styling for the DataTable */
+        #customerTable {
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #dee2e6; /* Optional: border for better visibility */
+        }
+
+        #customerTable thead {
+            background-color: #f8f9fa;
+        }
+
+        #customerTable thead th {
+            border-top: 1px solid #dee2e6;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        #customerTable tbody tr {
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        #customerTable tbody td {
+            border-left: 1px solid #dee2e6;
+        }
+
+        #customerTable tbody tr:last-child td {
+            border-bottom: 0;
+        }
+
+        /* Custom styling for the modal */
+        .modal-content {
+            border-radius: 10px;
+        }
+
+        .modal-header {
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .modal-footer {
+            border-top: 1px solid #dee2e6;
+        }
+
+        /* Optional: Custom button styling */
+        .btn-primary, .btn-warning, .btn-danger, .btn-info {
+            border-radius: 5px;
+        }
+    </style>
 </head>
 
 <body class="hold-transition sidebar-mini">
@@ -130,6 +177,7 @@
             </div>
         </div>
     </div>
+
     <script>
     $(document).ready(function() {
         var table = $('#customerTable').DataTable();
