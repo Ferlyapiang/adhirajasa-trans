@@ -70,6 +70,12 @@
                 <p>Data Customer</p>
               </a>
             </li>
+            <li class="nav-item">
+              <a href="{{ route('master-data.item-types.index') }}" class="nav-link {{ request()->routeIs('master-data.item-types.index') ? 'active' : '' }}">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Tipe Barang</p>
+              </a>
+            </li>
           </ul>
         </li>
       </ul>

@@ -2,11 +2,13 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BankDataController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\ReportLogController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\ItemTypeController;
 
 // Login and Logout
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login.form');
@@ -59,3 +61,26 @@ Route::resource('master-data/customers', CustomerController::class)->names([
     'update' => 'master-data.customers.update',
     'destroy' => 'master-data.customers.destroy',
 ]);
+
+// Item Type
+Route::resource('master-data/item-types', ItemTypeController::class)->names([
+    'index' => 'master-data.item-types.index',
+    'create' => 'master-data.item-types.create',
+    'store' => 'master-data.item-types.store',
+    'show' => 'master-data.item-types.show',
+    'edit' => 'master-data.item-types.edit',
+    'update' => 'master-data.item-types.update',
+    'destroy' => 'master-data.item-types.destroy',
+]);
+
+// Bank Item
+Route::resource('master-data/bank-data', BankDataController::class)->names([
+    'index' => 'master-data.bank-data.index',
+    'create' => 'master-data.bank-data.create',
+    'store' => 'master-data.bank-data.store',
+    'show' => 'master-data.bank-data.show',
+    'edit' => 'master-data.bank-data.edit',
+    'update' => 'master-data.bank-data.update',
+    'destroy' => 'master-data.bank-data.destroy',
+]);
+
