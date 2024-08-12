@@ -74,13 +74,9 @@ Route::resource('master-data/item-types', ItemTypeController::class)->names([
 ]);
 
 // Bank Item
-Route::resource('master-data/bank-data', BankDataController::class)->names([
-    'index' => 'master-data.bank-data.index',
-    'create' => 'master-data.bank-data.create',
-    'store' => 'master-data.bank-data.store',
-    'show' => 'master-data.bank-data.show',
-    'edit' => 'master-data.bank-data.edit',
-    'update' => 'master-data.bank-data.update',
-    'destroy' => 'master-data.bank-data.destroy',
-]);
-
+Route::get('master-data/bank-data', [BankDataController::class, 'index'])->name('master-data.bank-data.index');
+Route::get('master-data/bank-data/create', [BankDataController::class, 'create'])->name('master-data.bank-data.create');
+Route::post('master-data/bank-data', [BankDataController::class, 'store'])->name('master-data.bank-data.store');
+Route::get('master-data/bank-data/{bankData}/edit', [BankDataController::class, 'edit'])->name('master-data.bank-data.edit');
+Route::put('master-data/bank-data/{bankData}', [BankDataController::class, 'update'])->name('master-data.bank-data.update');
+Route::delete('master-data/bank-data/{bankData}', [BankDataController::class, 'destroy'])->name('master-data.bank-data.destroy');

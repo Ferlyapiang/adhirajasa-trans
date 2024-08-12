@@ -91,21 +91,22 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($bankData as $index => $data)
+                            @foreach($bankDatas as $index => $bankData)
                                 <tr>
                                     <td>{{ $index + 1 }}</td>
-                                    <td>{{ $data->bank_name }}</td>
-                                    <td>{{ $data->account_number }}</td>
-                                    <td>{{ $data->account_name }}</td>
-                                    <td>{{ $data->warehouse_name }}</td>
-                                    <td>{{ ucfirst($data->status) }}</td>
+                                    <td>{{ $bankData->bank_name }}</td>
+                                    <td>{{ $bankData->account_number }}</td>
+                                    <td>{{ $bankData->account_name }}</td>
+                                    <td>{{ $bankData->warehouse_name }}</td>
+                                    <td>{{ ucfirst($bankData->status) }}</td>
                                     <td>
-                                        <a href="{{ route('master-data.bank-data.edit', $data) }}" class="btn btn-warning btn-sm">Edit</a>
-                                        <form action="{{ route('master-data.bank-data.destroy', $data) }}" method="POST" style="display:inline;">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                                        </form>
+                                        <a href="{{ route('master-data.bank-data.edit', $bankData) }}" class="btn btn-warning btn-sm">Edit</a>
+                                        <form action="{{ route('master-data.bank-data.destroy', $bankData) }}" method="POST" style="display:inline;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                    </form>
+                                    </f>
                                     </td>
                                 </tr>
                             @endforeach

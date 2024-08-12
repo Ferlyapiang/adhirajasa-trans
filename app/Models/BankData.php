@@ -7,5 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 
 class BankData extends Model
 {
-    protected $fillable = ['bank_name', 'account_number', 'account_name', 'warehouse_name', 'status'];
+    use HasFactory;
+
+    // Tentukan nama tabel jika diperlukan
+    protected $table = 'bank_datas';
+
+    protected $fillable = [
+        'bank_name',
+        'account_number',
+        'account_name',
+        'warehouse_name',
+        'status'
+    ];
 }
+

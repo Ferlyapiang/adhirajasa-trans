@@ -11,8 +11,8 @@ class BankDataController extends Controller
 {
     public function index()
     {
-        $bankData = BankData::all();
-        return view('master-data.bank-data.index', compact('bankData'));
+        $bankDatas = BankData::all();
+        return view('master-data.bank-data.index', compact('bankDatas'));
     }
 
     public function create()
@@ -71,6 +71,7 @@ class BankDataController extends Controller
         return redirect()->route('master-data.bank-data.index')->with('success', 'Bank Data updated successfully.');
     }
 
+
     public function destroy(BankData $bankData)
     {
         // Log the delete action before deleting
@@ -85,4 +86,5 @@ class BankDataController extends Controller
 
         return redirect()->route('master-data.bank-data.index')->with('success', 'Bank Data deleted successfully.');
     }
+
 }

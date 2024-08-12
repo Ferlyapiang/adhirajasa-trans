@@ -76,6 +76,12 @@
                 <p>Tipe Barang</p>
               </a>
             </li>
+            <li class="nav-item">
+              <a href="{{ route('master-data.bank-data.index') }}" class="nav-link {{ request()->routeIs('master-data.bank-data.index') ? 'active' : '' }}">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Data Bank</p>
+              </a>
+            </li>
           </ul>
         </li>
       </ul>
