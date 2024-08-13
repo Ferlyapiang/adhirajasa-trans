@@ -9,6 +9,7 @@ use App\Http\Controllers\ReportLogController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ItemTypeController;
+use App\Http\Controllers\WarehouseController;
 
 // Login and Logout
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login.form');
@@ -80,3 +81,13 @@ Route::post('master-data/bank-data', [BankDataController::class, 'store'])->name
 Route::get('master-data/bank-data/{bankData}/edit', [BankDataController::class, 'edit'])->name('master-data.bank-data.edit');
 Route::put('master-data/bank-data/{bankData}', [BankDataController::class, 'update'])->name('master-data.bank-data.update');
 Route::delete('master-data/bank-data/{bankData}', [BankDataController::class, 'destroy'])->name('master-data.bank-data.destroy');
+
+// Warehouse
+Route::resource('master-data/warehouses', WarehouseController::class);
+
+Route::get('master-data/warehouses', [WarehouseController::class, 'index'])->name('warehouses.index');
+Route::get('master-data/warehouses/create', [WarehouseController::class, 'create'])->name('warehouses.create');
+Route::post('master-data/warehouses', [WarehouseController::class, 'store'])->name('warehouses.store');
+Route::get('master-data/warehouses/{warehouse}/edit', [WarehouseController::class, 'edit'])->name('warehouses.edit');
+Route::put('master-data/warehouses/{warehouse}', [WarehouseController::class, 'update'])->name('warehouses.update');
+Route::delete('master-data/warehouses/{warehouse}', [WarehouseController::class, 'destroy'])->name('warehouses.destroy');
