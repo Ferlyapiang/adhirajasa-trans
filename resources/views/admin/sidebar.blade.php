@@ -22,7 +22,7 @@
     </div>
 
     <!-- Sidebar Menu -->
-    <nav class="mt-2">
+    <nav class="mt-2 sidebar-scroll">
       <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
         <li class="nav-item">
           <a href="/dashboard" class="nav-link {{ request()->is('dashboard') ? 'active' : '' }}">
@@ -110,6 +110,11 @@
 
 <style>
 /* Sidebar styling */
+.sidebar-scroll {
+  height: 100vh; /* Atur tinggi sesuai kebutuhan */
+  overflow-y: auto; /* Tambahkan scroll vertikal jika konten melebihi tinggi */
+}
+
 .custom-sidebar {
   background-color: #f8f9fa; /* Light background color for the sidebar */
   color: #000; /* Black text color for contrast */
