@@ -88,6 +88,12 @@
                 <p>Data Gudang</p>
               </a>
             </li>
+            <li class="nav-item">
+              <a href="{{ route('master-data.barang.index') }}" class="nav-link {{ request()->routeIs('master-data.barang.index') ? 'active' : '' }}">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Data Barang</p>
+              </a>
+            </li>
           </ul>
         </li>
       </ul>
