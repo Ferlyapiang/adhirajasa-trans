@@ -16,11 +16,15 @@ return new class extends Migration
             $table->string('bank_name');
             $table->string('account_number');
             $table->string('account_name');
-            $table->string('warehouse_name');
+            $table->unsignedBigInteger('warehouse_id'); // Ensure this matches your schema
             $table->enum('status', ['active', 'inactive']);
             $table->timestamps();
+
+            // Define foreign key constraint
+            $table->foreign('warehouse_id')->references('id')->on('warehouses')->onDelete('cascade');
         });
     }
+
 
     /**
      * Reverse the migrations.

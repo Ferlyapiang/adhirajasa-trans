@@ -42,36 +42,44 @@
             <!-- /.content-header -->
 
             <!-- Main content -->
-            <div class="container">
+            <div class="container-fluid pl-4">
                 <h1 class="mb-4">Add Bank Data</h1>
 
                 <form action="{{ route('master-data.bank-data.store') }}" method="POST">
-                    @csrf
-                    <div class="form-group">
-                        <label for="bank_name">Nama Bank</label>
-                        <input type="text" id="bank_name" name="bank_name" class="form-control" required>
-                    </div>
-                    <div class="form-group mt-2">
-                        <label for="account_number">Nomor Rekening</label>
-                        <input type="text" id="account_number" name="account_number" class="form-control" required>
-                    </div>
-                    <div class="form-group mt-2">
-                        <label for="account_name">Nama Rekening</label>
-                        <input type="text" id="account_name" name="account_name" class="form-control" required>
-                    </div>
-                    <div class="form-group mt-2">
-                        <label for="warehouse_name">Nama Gudang</label>
-                        <input type="text" id="warehouse_name" name="warehouse_name" class="form-control" required>
-                    </div>
-                    <div class="form-group mt-2">
-                        <label for="status">Status</label>
-                        <select id="status" name="status" class="form-control" required>
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-primary mt-3">Save</button>
-                </form>
+    @csrf
+    <div class="form-group">
+        <label for="bank_name">Nama Bank</label>
+        <input type="text" id="bank_name" name="bank_name" class="form-control" required>
+    </div>
+    <div class="form-group mt-2">
+        <label for="account_number">Nomor Rekening</label>
+        <input type="text" id="account_number" name="account_number" class="form-control" required>
+    </div>
+    <div class="form-group mt-2">
+        <label for="account_name">Nama Rekening</label>
+        <input type="text" id="account_name" name="account_name" class="form-control" required>
+    </div>
+    <div class="form-group mt-2">
+        <label for="warehouse_name">Nama Gudang</label>
+        <select id="warehouse_name" name="warehouse_name" class="form-control" required>
+            @foreach($warehouses as $warehouse)
+                <option value="{{ $warehouse->name }}" {{ old('warehouse_name') == $warehouse->name ? 'selected' : '' }}>
+                    {{ $warehouse->name }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+    <div class="form-group mt-2">
+        <label for="status">Status</label>
+        <select id="status" name="status" class="form-control" required>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary mt-3">Save</button>
+</form>
+
+
             </div>
             <!-- /.container -->
 

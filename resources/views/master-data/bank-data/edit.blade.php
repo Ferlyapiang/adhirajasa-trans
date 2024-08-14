@@ -62,7 +62,13 @@
                     </div>
                     <div class="form-group mt-2">
                         <label for="warehouse_name">Nama Gudang</label>
-                        <input type="text" id="warehouse_name" name="warehouse_name" class="form-control" value="{{ $bankData->warehouse_name }}" required>
+                        <select id="warehouse_name" name="warehouse_name" class="form-control" required>
+                            @foreach($warehouses as $warehouse)
+                                <option value="{{ $warehouse->name }}" {{ $bankData->warehouse_name == $warehouse->name ? 'selected' : '' }}>
+                                    {{ $warehouse->name }}
+                                </option>
+                            @endforeach
+                        </select>
                     </div>
                     <div class="form-group mt-2">
                         <label for="status">Status</label>

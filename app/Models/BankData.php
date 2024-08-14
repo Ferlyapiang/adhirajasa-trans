@@ -16,8 +16,13 @@ class BankData extends Model
         'bank_name',
         'account_number',
         'account_name',
-        'warehouse_name',
+        'warehouse_id',
         'status'
     ];
+
+    public function warehouse()
+    {
+        return $this->belongsTo(Warehouse::class, 'warehouse_id');
+    }
 }
 
