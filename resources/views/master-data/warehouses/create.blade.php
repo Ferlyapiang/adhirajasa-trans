@@ -1,4 +1,3 @@
-<!-- resources/views/warehouses/create.blade.php -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -49,7 +48,7 @@
                 <h1>Tambah Gudang</h1>
                 <div class="card">
                     <div class="card-body">
-                        <form action="{{ route('warehouses.store') }}" method="POST">
+                        <form action="{{ route('master-data.warehouses.store') }}" method="POST">
                             @csrf
                             <div class="mb-3">
                                 <label for="name" class="form-label">Nama Gudang:</label>
@@ -57,7 +56,7 @@
                             </div>
                             <div class="mb-3">
                                 <label for="address" class="form-label">Alamat Gudang:</label>
-                                <input type="text" id="address" name="address" class="form-control" required>
+                                <textarea id="address" name="address" class="form-control" rows="4" required></textarea>
                             </div>
                             <div class="mb-3">
                                 <label for="status" class="form-label">Status:</label>
@@ -68,7 +67,7 @@
                             </div>
                             <button type="submit" class="btn btn-primary">Simpan</button>
                         </form>
-                        <a href="{{ route('warehouses.index') }}" class="btn btn-secondary mt-3">Back to List</a>
+                        <a href="{{ route('master-data.warehouses.index') }}" class="btn btn-secondary mt-3">Back to List</a>
                     </div>
                 </div>
             </div>

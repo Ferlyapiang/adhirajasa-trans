@@ -82,6 +82,12 @@
                 <p>Data Bank</p>
               </a>
             </li>
+            <li class="nav-item">
+              <a href="{{ route('master-data.warehouses.index') }}" class="nav-link {{ request()->routeIs('master-data.warehouses.index') ? 'active' : '' }}">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Data Gudang</p>
+              </a>
+            </li>
           </ul>
         </li>
       </ul>

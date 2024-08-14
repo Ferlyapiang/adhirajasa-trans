@@ -44,7 +44,7 @@
             <!-- Main content -->
             <div class="container">
                 <h1>Edit Gudang</h1>
-                <form action="{{ route('warehouses.update', $warehouse->id) }}" method="POST">
+                <form action="{{ route('master-data.warehouses.update', $warehouse->id) }}" method="POST">
                     @csrf
                     @method('PUT')
                     <div class="mb-3">
@@ -64,7 +64,7 @@
                     </div>
                     <button type="submit" class="btn btn-primary">Update</button>
                 </form>
-                <a href="{{ route('warehouses.index') }}" class="btn btn-secondary mt-3">Back to List</a>
+                <a href="{{ route('master-data.warehouses.index') }}" class="btn btn-secondary mt-3">Back to List</a>
             </div>
             <!-- /.container -->
 

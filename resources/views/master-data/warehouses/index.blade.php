@@ -99,9 +99,9 @@
             <!-- /.content-header -->
 
             <!-- Main content -->
-            <div class="container">
+            <div class="container-fluid pl-4">
                 <h1 class="mb-4">Data Gudang</h1>
-                <a href="{{ route('warehouses.create') }}" class="btn btn-primary mb-3">Tambah Gudang</a>
+                <a href="{{ route('master-data.warehouses.create') }}" class="btn btn-primary mb-3">Tambah Gudang</a>
 
                 <!-- Table responsive wrapper -->
                 <div class="table-responsive">
@@ -121,8 +121,8 @@
                                     <td>{{ $warehouse->address }}</td>
                                     <td>{{ $warehouse->status }}</td>
                                     <td>
-                                        <a href="{{ route('warehouses.edit', $warehouse->id) }}" class="btn btn-warning btn-sm">Edit</a>
-                                        <form action="{{ route('warehouses.destroy', $warehouse->id) }}" method="POST" style="display:inline;">
+                                        <a href="{{ route('master-data.warehouses.edit', $warehouse->id) }}" class="btn btn-warning btn-sm">Edit</a>
+                                        <form action="{{ route('master-data.warehouses.destroy', $warehouse->id) }}" method="POST" style="display:inline;">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-danger btn-sm">Delete</button>

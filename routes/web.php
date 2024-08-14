@@ -85,9 +85,9 @@ Route::delete('master-data/bank-data/{bankData}', [BankDataController::class, 'd
 // Warehouse
 Route::resource('master-data/warehouses', WarehouseController::class);
 
-Route::get('master-data/warehouses', [WarehouseController::class, 'index'])->name('warehouses.index');
-Route::get('master-data/warehouses/create', [WarehouseController::class, 'create'])->name('warehouses.create');
-Route::post('master-data/warehouses', [WarehouseController::class, 'store'])->name('warehouses.store');
-Route::get('master-data/warehouses/{warehouse}/edit', [WarehouseController::class, 'edit'])->name('warehouses.edit');
-Route::put('master-data/warehouses/{warehouse}', [WarehouseController::class, 'update'])->name('warehouses.update');
-Route::delete('master-data/warehouses/{warehouse}', [WarehouseController::class, 'destroy'])->name('warehouses.destroy');
+Route::get('master-data/warehouses', [WarehouseController::class, 'index'])->name('master-data.warehouses.index');
+Route::get('master-data/warehouses/create', [WarehouseController::class, 'create'])->name('master-data.warehouses.create');
+Route::post('master-data/warehouses', [WarehouseController::class, 'store'])->name('master-data.warehouses.store');
+Route::get('master-data/warehouses/{warehouse}/edit', [WarehouseController::class, 'edit'])->name('master-data.warehouses.edit');
+Route::put('master-data/warehouses/{warehouse}', [WarehouseController::class, 'update'])->name('master-data.warehouses.update');
+Route::delete('master-data/warehouses/{warehouse}', [WarehouseController::class, 'destroy'])->name('master-data.warehouses.destroy');

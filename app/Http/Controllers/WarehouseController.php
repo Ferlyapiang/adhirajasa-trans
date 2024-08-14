@@ -38,7 +38,7 @@ class WarehouseController extends Controller
             'details' => 'Created warehouse ID: ' . $warehouse->id . ' with data: ' . json_encode($request->all())
         ]);
 
-        return redirect()->route('warehouses.index')->with('success', 'Warehouse created successfully.');
+        return redirect()->route('master-data.warehouses.index')->with('success', 'Warehouse created successfully.');
     }
 
     public function edit(Warehouse $warehouse)
@@ -64,7 +64,7 @@ class WarehouseController extends Controller
             'details' => 'Updated warehouse ID: ' . $warehouse->id . ' with data: ' . json_encode($request->all())
         ]);
 
-        return redirect()->route('warehouses.index')->with('success', 'Warehouse updated successfully.');
+        return redirect()->route('master-data.warehouses.index')->with('success', 'Warehouse updated successfully.');
     }
 
     public function destroy(Warehouse $warehouse)
@@ -79,6 +79,6 @@ class WarehouseController extends Controller
 
         $warehouse->delete();
 
-        return redirect()->route('warehouses.index')->with('success', 'Warehouse deleted successfully.');
+        return redirect()->route('master-data.warehouses.index')->with('success', 'Warehouse deleted successfully.');
     }
 }
