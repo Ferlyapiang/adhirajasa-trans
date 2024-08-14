@@ -32,7 +32,7 @@
         </li>
         <li class="nav-item">
           <a class="nav-link {{ request()->is('management-user/*') ? 'active' : '' }}">
-            <i class="nav-icon fa fa-list-alt"></i>
+            <i class="nav-icon fa fa-users"></i>
             <p>Management User<i class="right fas fa-angle-left"></i></p>
           </a>
           <ul class="nav nav-treeview">
@@ -46,7 +46,7 @@
         </li>
         <li class="nav-item">
           <a class="nav-link {{ request()->is('log/*') ? 'active' : '' }}">
-            <i class="nav-icon fa fa-list-alt"></i>
+            <i class="nav-icon fa fa-chart-pie"></i>
             <p>Log<i class="right fas fa-angle-left"></i></p>
           </a>
           <ul class="nav nav-treeview">

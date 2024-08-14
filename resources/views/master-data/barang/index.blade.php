@@ -66,6 +66,25 @@
         .btn-primary, .btn-warning, .btn-danger, .btn-info {
             border-radius: 5px;
         }
+
+        /* Enhanced status styling with centered text and padding */
+        .status-active {
+            background-color: #d4edda; /* Light green */
+            color: #155724; /* Dark green text */
+            font-weight: bold;
+            text-transform: uppercase;
+            border-radius: 50px;
+
+        }
+
+        .status-inactive {
+            background-color: #f8d7da; /* Light red */
+            color: #721c24; /* Dark red text */
+            font-weight: bold;
+            text-transform: uppercase;
+            border-radius: 50px;
+        }
+
     </style>
 </head>
 
@@ -122,7 +141,9 @@
                             <td>{{ $barang->nomer_rak }}</td>
                             <td>{{ $barang->sku }}</td>
                             <td>{{ $barang->customer ? $barang->customer->name : 'N/A' }}</td> <!-- Display customer name -->
-                            <td>{{ $barang->status }}</td>
+                            <td class="{{ $barang->status == 'active' ? 'status-active' : 'status-inactive' }} text-center">
+                                {{ ucfirst($barang->status) }}
+                            </td>
                             <td>
                                 <a href="{{ route('master-data.barang.edit', $barang) }}" class="btn btn-warning btn-sm">Edit</a>
                                 <form action="{{ route('master-data.barang.destroy', $barang) }}" method="POST" style="display:inline;">

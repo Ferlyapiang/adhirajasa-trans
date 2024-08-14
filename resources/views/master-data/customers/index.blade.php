@@ -66,6 +66,35 @@
         .btn-primary, .btn-warning, .btn-danger, .btn-info {
             border-radius: 5px;
         }
+
+                /* Enhanced status styling with centered text, padding, and border-radius */
+        .status-active, .status-inactive {
+            display: inline-block;
+            padding: 5px 10px; /* Add padding */
+            border-radius: 50px; /* Rounded corners */
+            font-weight: bold;
+            text-transform: uppercase;
+            text-align: center; /* Center text */
+            margin: 0 auto; /* Center the status element itself if possible */
+        }
+
+        .status-active {
+            background-color: #d4edda; /* Light green */
+            color: #155724; /* Dark green text */
+            font-weight: bold;
+            text-transform: uppercase;
+            border-radius: 50px;
+
+        }
+
+        .status-inactive {
+            background-color: #f8d7da; /* Light red */
+            color: #721c24; /* Dark red text */
+            font-weight: bold;
+            text-transform: uppercase;
+            border-radius: 50px;
+        }
+
     </style>
 </head>
 
@@ -125,7 +154,10 @@
                                     <td>{{ $customer->no_hp }}</td>
                                     <td>{{ $customer->email }}</td>
                                     <td>{{ $customer->address }}</td>
-                                    <td>{{ $customer->status }}</td>
+                                    <td class="{{ $customer->status == 'active' ? 'status-active' : 'status-inactive' }} text-center">
+                                        {{ ucfirst($customer->status) }}
+                                    </td>
+                                    <!-- <td>{{ $customer->status }}</td> -->
                                     <td>{{ $customer->created_at->format('Y-m-d H:i:s') }}</td>
                                     <td>{{ $customer->updated_at->format('Y-m-d H:i:s') }}</td>
                                     <td>

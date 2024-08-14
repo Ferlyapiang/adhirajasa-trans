@@ -42,6 +42,16 @@
         #bankDataTable tbody tr:last-child td {
             border-bottom: 0;
         }
+
+        .status-active {
+            background-color: #d4edda; /* Light green */
+            color: #155724; /* Dark green text */
+        }
+
+        .status-inactive {
+            background-color: #f8d7da; /* Light red */
+            color: #721c24; /* Dark red text */
+        }
     </style>
 </head>
 <body class="hold-transition sidebar-mini">
@@ -98,7 +108,10 @@
                 <td>{{ $bankData->account_number }}</td>
                 <td>{{ $bankData->account_name }}</td>
                 <td>{{ $bankData->warehouse->name ?? 'N/A' }}</td>
-                <td>{{ ucfirst($bankData->status) }}</td>
+                <td class="{{ $bankData->status == 'active' ? 'status-active' : 'status-inactive' }} text-center">
+                    {{ ucfirst($bankData->status) }}
+                </td>
+                <!-- <td>{{ ucfirst($bankData->status) }}</td> -->
                 <td>
                     <a href="{{ route('master-data.bank-data.edit', $bankData) }}" class="btn btn-warning btn-sm">Edit</a>
                     <form action="{{ route('master-data.bank-data.destroy', $bankData) }}" method="POST" style="display:inline;">
