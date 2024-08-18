@@ -11,6 +11,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ItemTypeController;
 use App\Http\Controllers\WarehouseController;
 use App\Http\Controllers\BarangController;
+use App\Http\Controllers\BarangMasukController;
 
 // Login and Logout
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login.form');
@@ -98,3 +99,17 @@ Route::post('master-data/barang', [BarangController::class, 'store'])->name('mas
 Route::get('master-data/barang/{barang}/edit', [BarangController::class, 'edit'])->name('master-data.barang.edit');
 Route::put('master-data/barang/{barang}', [BarangController::class, 'update'])->name('master-data.barang.update');
 Route::delete('master-data/barang/{barang}', [BarangController::class, 'destroy'])->name('master-data.barang.destroy');
+
+// Barang Masuk
+Route::get('data-gudang/barang-masuk', [BarangMasukController::class, 'index'])->name('data-gudang.barang-masuk.index');
+Route::get('data-gudang/barang-masuk/create', [BarangMasukController::class, 'create'])->name('data-gudang.barang-masuk.create');
+Route::post('data-gudang/barang-masuk', [BarangMasukController::class, 'store'])->name('data-gudang.barang-masuk.store');
+Route::get('data-gudang/barang-masuk/{barangMasuk}/edit', [BarangMasukController::class, 'edit'])->name('data-gudang.barang-masuk.edit');
+Route::put('data-gudang/barang-masuk/{barangMasuk}', [BarangMasukController::class, 'update'])->name('data-gudang.barang-masuk.update');
+Route::delete('data-gudang/barang-masuk/{barangMasuk}', [BarangMasukController::class, 'destroy'])->name('data-gudang.barang-masuk.destroy');
+Route::get('/data-gudang/items-by-owner', [BarangMasukController::class, 'itemsByOwner'])->name('data-gudang.items-by-owner');
+
+
+// Route::resource('data-gudang/barang-masuk', BarangMasukController::class);
+
+
