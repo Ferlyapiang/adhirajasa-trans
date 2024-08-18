@@ -7,6 +7,10 @@ use App\Models\BarangMasuk;
 use App\Models\Customer;
 use App\Models\Warehouse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use App\Models\LogData;
+
 
 class BarangMasukController extends Controller
 {
@@ -27,59 +31,77 @@ class BarangMasukController extends Controller
 
     public function store(Request $request)
     {
-        // Validation
-        $request->validate([
-            'tanggal_masuk' => 'required|date',
-            'gudang_id' => 'required|exists:warehouses,id',
-            'customer_id' => 'required|exists:customers,id',
-            'nomer_container' => 'required|string',
-            'fifo_in' => 'required|numeric',
-            'fifo_out' => 'required|numeric',
-            'fifo_sisa' => 'required|numeric',
-            'items.*.barang_id' => 'required|exists:barangs,id',
-            'items.*.qty' => 'required|numeric',
-            'items.*.unit' => 'required|string',
-        ]);
-
-        // Generate JOC Number
-        $datePrefix = now()->format('Ymd');
-        $latestJoc = BarangMasuk::where('joc_number', 'like', 'JOC-' . $datePrefix . '%')
-            ->orderBy('joc_number', 'desc')
-            ->first();
-
-        if ($latestJoc) {
-            $lastNumber = (int)substr($latestJoc->joc_number, -4);
-            $newNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
-        } else {
-            $newNumber = '0001';
-        }
-
-        $jocNumber = 'JOC-' . $datePrefix . $newNumber;
-
-        // Create BarangMasuk record
-        $barangMasuk = BarangMasuk::create([
-            'joc_number' => $jocNumber,
-            'tanggal_masuk' => $request->tanggal_masuk,
-            'gudang_id' => $request->gudang_id,
-            'customer_id' => $request->customer_id,
-            'jenis_mobil' => $request->jenis_mobil ?? null,  // Handle nullable fields
-            'nomer_polisi' => $request->nomer_polisi ?? null,  // Handle nullable fields
-            'nomer_container' => $request->nomer_container,
-            'fifo_in' => $request->fifo_in,
-            'fifo_out' => $request->fifo_out,
-            'fifo_sisa' => $request->fifo_sisa,
-        ]);
-
-        // Store associated items
-        foreach ($request->items as $item) {
-            $barangMasuk->items()->create([
-                'barang_id' => $item['barang_id'],
-                'qty' => $item['qty'],
-                'unit' => $item['unit'],
+        try {
+            // Validation
+            $request->validate([
+                'tanggal_masuk' => 'required|date',
+                'gudang_id' => 'required|exists:warehouses,id',
+                'customer_id' => 'required|exists:customers,id',
+                'nomer_container' => 'required|string',
+                'fifo_in' => 'nullable|numeric',
+                'fifo_out' => 'nullable|numeric',
+                'fifo_sisa' => 'nullable|numeric',
+                'items.*.barang_id' => 'required|exists:barangs,id',
+                'items.*.qty' => 'required|numeric',
+                'items.*.unit' => 'required|string',
             ]);
-        }
 
-        return redirect()->route('data-gudang.barang-masuk.index')->with('success', 'Barang Masuk berhasil disimpan.');
+            // Generate JOC Number
+            $datePrefix = now()->format('Ymd');
+            $latestJoc = BarangMasuk::where('joc_number', 'like', 'JOC-' . $datePrefix . '%')
+                ->orderBy('joc_number', 'desc')
+                ->first();
+
+            if ($latestJoc) {
+                $lastNumber = (int)substr($latestJoc->joc_number, -4);
+                $newNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
+            } else {
+                $newNumber = '0001';
+            }
+
+            $jocNumber = 'JOC-' . $datePrefix . $newNumber;
+
+            // Create BarangMasuk record
+            $barangMasuk = BarangMasuk::create([
+                'joc_number' => $jocNumber,
+                'tanggal_masuk' => $request->tanggal_masuk,
+                'gudang_id' => $request->gudang_id,
+                'customer_id' => $request->customer_id,
+                'jenis_mobil' => $request->jenis_mobil ?? null,  // Handle nullable fields
+                'nomer_polisi' => $request->nomer_polisi ?? null,  // Handle nullable fields
+                'nomer_container' => $request->nomer_container,
+                'fifo_in' => $request->fifo_in ?? 0,
+                'fifo_out' => $request->fifo_out ?? 0,
+                'fifo_sisa' => $request->fifo_sisa ?? 0,
+            ]);
+
+            // Check if items is an array and not empty
+            if (isset($request->items) && is_array($request->items)) {
+                // Store associated items
+                foreach ($request->items as $item) {
+                    $barangMasuk->items()->create([
+                        'barang_id' => $item['barang_id'],
+                        'qty' => $item['qty'],
+                        'unit' => $item['unit'],
+                    ]);
+                }
+            }
+
+            // Log the success
+            LogData::create([
+                'user_id' => Auth::id(),
+                'name' => Auth::user()->name,
+                'action' => 'insert',
+                'details' => 'Created barang masuk ID: ' . $barangMasuk->id . ' with data: ' . json_encode($request->all())
+            ]);
+
+            // Return redirect with success message
+            return redirect()->route('data-gudang.barang-masuk.index')->with('success', 'Barang Masuk berhasil disimpan.');
+        } catch (\Exception $e) {
+            // Log error and return redirect with error message
+            Log::error('Error in storing Barang Masuk:', ['error' => $e->getMessage()]);
+            return redirect()->route('data-gudang.barang-masuk.index')->with('error', 'Terjadi kesalahan saat menyimpan data.');
+        }
     }
 
     public function edit(BarangMasuk $barangMasuk)
@@ -124,26 +146,24 @@ class BarangMasukController extends Controller
     }
 
     public function itemsByOwner(Request $request)
-{
-    try {
-        $pemilik = $request->input('pemilik');
+    {
+        try {
+            $pemilik = $request->input('pemilik');
 
-        if (!$pemilik) {
-            return response()->json(['error' => 'Pemilik is required'], 400);
+            if (!$pemilik) {
+                return response()->json(['error' => 'Pemilik is required'], 400);
+            }
+
+            // Fetch items based on pemilik
+            $barangs = Barang::where('pemilik', $pemilik) // Assuming `pemilik` is the foreign key column
+                ->select('id', 'nama_barang', 'jenis') // Select only necessary fields
+                ->get();
+
+            // Return items as JSON
+            return response()->json($barangs);
+        } catch (\Exception $e) {
+            // Return error message for debugging
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-
-        // Fetch items based on pemilik
-        $barangs = Barang::where('pemilik', $pemilik) // Assuming `pemilik` is the foreign key column
-            ->select('id', 'nama_barang', 'jenis') // Select only necessary fields
-            ->get();
-
-        // Return items as JSON
-        return response()->json($barangs);
-    } catch (\Exception $e) {
-        // Return error message for debugging
-        return response()->json(['error' => $e->getMessage()], 500);
     }
-}
-
-
 }
