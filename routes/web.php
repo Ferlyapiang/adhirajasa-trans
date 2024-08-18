@@ -107,7 +107,7 @@ Route::post('data-gudang/barang-masuk', [BarangMasukController::class, 'store'])
 Route::get('data-gudang/barang-masuk/{barangMasuk}/edit', [BarangMasukController::class, 'edit'])->name('data-gudang.barang-masuk.edit');
 Route::put('data-gudang/barang-masuk/{barangMasuk}', [BarangMasukController::class, 'update'])->name('data-gudang.barang-masuk.update');
 Route::delete('data-gudang/barang-masuk/{barangMasuk}', [BarangMasukController::class, 'destroy'])->name('data-gudang.barang-masuk.destroy');
-Route::get('/data-gudang/items-by-owner', [BarangMasukController::class, 'itemsByOwner'])->name('data-gudang.items-by-owner');
+Route::get('data-gudang/items-by-owner', [BarangMasukController::class, 'itemsByOwner'])->name('data-gudang.items-by-owner');
 
 
 // Route::resource('data-gudang/barang-masuk', BarangMasukController::class);

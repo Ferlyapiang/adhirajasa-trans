@@ -21,7 +21,7 @@ class BarangMasukController extends Controller
         $barangs = Barang::all();
         $pemilik = Customer::all();
         $gudangs = Warehouse::all();
-        
+
         return view('data-gudang.barang-masuk.create', compact('barangs', 'pemilik', 'gudangs'));
     }
 
@@ -124,16 +124,22 @@ class BarangMasukController extends Controller
     }
 
     public function itemsByOwner(Request $request)
-{
-    $customerId = $request->input('customer_id');
-    
-    if (!$customerId) {
-        return response()->json([]);
+    {
+        try {
+            $pemilik = $request->input('pemilik');
+
+            if (!$pemilik) {
+                return response()->json(['error' => 'Pemilik is required'], 400);
+            }
+
+            // Fetch items based on pemilik
+            $barangs = Barang::where('pemilik', $pemilik)->get();
+
+            // Return items as JSON
+            return response()->json($barangs);
+        } catch (\Exception $e) {
+            // Return error message for debugging
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
-
-    $barangs = Barang::where('customer_id', $customerId)->get();
-
-    return response()->json($barangs);
-}
-
 }

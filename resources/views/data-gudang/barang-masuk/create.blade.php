@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -12,6 +13,7 @@
     <!-- Theme style -->
     <link rel="stylesheet" href="{{ asset('lte/dist/css/adminlte.min.css') }}">
 </head>
+
 <body class="hold-transition sidebar-mini">
     <div class="wrapper">
 
@@ -32,7 +34,7 @@
                     <div class="row mb-1">
                         <div class="col-sm-12" style="border: 1px solid #D0D4DB; border-radius: 10px; background-color: white; padding: 10px;">
                             <h1 class="m-0" style="font-weight: bold; font-size: 16px; padding-left: 10px;">
-                                <span style="font-weight: 370;">Data Gudang |</span> 
+                                <span style="font-weight: 370;">Data Gudang |</span>
                                 <span>Barang Masuk</span>
                             </h1>
                         </div>
@@ -46,7 +48,7 @@
                 <h1>Tambah Barang Masuk</h1>
                 <form action="{{ route('data-gudang.barang-masuk.store') }}" method="POST">
                     @csrf
-                    
+
                     <div class="form-group">
                         <label for="tanggal_masuk">Tanggal Masuk</label>
                         <input type="date" name="tanggal_masuk" id="tanggal_masuk" class="form-control" placeholder="Select date" required>
@@ -56,7 +58,7 @@
                         <label for="gudang">Gudang</label>
                         <select name="gudang_id" id="gudang" class="form-control" required>
                             @foreach($gudangs as $gudang)
-                                <option value="{{ $gudang->id }}">{{ $gudang->name }}</option>
+                            <option value="{{ $gudang->id }}">{{ $gudang->name }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -65,7 +67,7 @@
                         <label for="nama_pemilik">Nama Pemilik</label>
                         <select name="customer_id" id="nama_pemilik" class="form-control" required>
                             @foreach($pemilik as $owner)
-                                <option value="{{ $owner->id }}">{{ $owner->name }}</option>
+                            <option value="{{ $owner->id }}">{{ $owner->name }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -151,32 +153,38 @@
     </div>
 
     <script>
-    $(document).ready(function () {
-        // Fetch items based on selected owner
-        $('#nama_pemilik').change(function () {
-            const customerId = $(this).val();
-            $.ajax({
-                url: "{{ route('data-gudang.items-by-owner') }}",
-                method: 'GET',
-                data: { customer_id: customerId },
-                success: function (data) {
-                    let options = '<option value="">Select Item</option>';
-                    $.each(data, function (key, item) {
-                        options += `<option value="${item.id}">${item.nama_barang}</option>`;
-                    });
-                    $('#item_name').html(options);
-                }
+        $(document).ready(function() {
+            // Fetch items based on selected owner
+            $('#nama_pemilik').change(function() {
+                const pemilik = $(this).val();
+                $.ajax({
+                    url: "{{ route('data-gudang.items-by-owner') }}",
+                    method: 'GET',
+                    data: {
+                        pemilik: pemilik
+                    },
+                    success: function(data) {
+                        let options = '<option value="">Select Item</option>';
+                        $.each(data, function(key, item) {
+                            options += `<option value="${item.id}">${item.nama_barang}</option>`;
+                        });
+                        $('#item_name').html(options);
+                    },
+                    error: function(xhr) {
+                        console.error('AJAX Error:', xhr.responseText);
+                    }
+                });
+
             });
-        });
 
-        // Add item to list
-        $('#add-item-to-list').click(function () {
-            const itemName = $('#item_name').val();
-            const itemQty = $('#item_qty').val();
-            const itemUnit = $('#item_unit').val();
+            // Add item to list
+            $('#add-item-to-list').click(function() {
+                const itemName = $('#item_name').val();
+                const itemQty = $('#item_qty').val();
+                const itemUnit = $('#item_unit').val();
 
-            if (itemName && itemQty && itemUnit) {
-                $('#items-container').append(`
+                if (itemName && itemQty && itemUnit) {
+                    $('#items-container').append(`
                     <div class="item">
                         <div class="form-group">
                             <label for="item_name[]">Nama Barang</label>
@@ -198,18 +206,19 @@
                     </div>
                 `);
 
-                $('#itemModal').modal('hide');
-                $('#item_name').val('');
-                $('#item_qty').val('');
-                $('#item_unit').val('');
-            }
-        });
+                    $('#itemModal').modal('hide');
+                    $('#item_name').val('');
+                    $('#item_qty').val('');
+                    $('#item_unit').val('');
+                }
+            });
 
-        // Remove item from list
-        $('#items-container').on('click', '.remove-item', function () {
-            $(this).parent().remove();
+            // Remove item from list
+            $('#items-container').on('click', '.remove-item', function() {
+                $(this).parent().remove();
+            });
         });
-    });
     </script>
 </body>
+
 </html>
