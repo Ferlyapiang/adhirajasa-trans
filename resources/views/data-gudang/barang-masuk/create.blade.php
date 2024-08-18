@@ -18,16 +18,23 @@
             border-collapse: collapse;
             margin: 20px 0;
         }
-        table, th, td {
+
+        table,
+        th,
+        td {
             border: 1px solid #ddd;
         }
-        th, td {
+
+        th,
+        td {
             padding: 8px;
             text-align: left;
         }
+
         th {
             background-color: #f2f2f2;
         }
+
         .btn-danger {
             color: #fff;
             background-color: #dc3545;
@@ -66,7 +73,7 @@
             <!-- /.content-header -->
 
             <!-- Main content -->
-            <div class="container">
+            <div class="container-fluid pl-4">
                 <h1>Tambah Barang Masuk</h1>
                 <form action="{{ route('data-gudang.barang-masuk.store') }}" method="POST">
                     @csrf
@@ -187,79 +194,79 @@
     </div>
 
     <!-- Edit Item Modal -->
-<div class="modal fade" id="editItemModal" tabindex="-1" role="dialog" aria-labelledby="editItemModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editItemModalLabel">Edit Item</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="edit_item_qty">Quantity</label>
-                    <input type="number" id="edit_item_qty" class="form-control" required>
+    <div class="modal fade" id="editItemModal" tabindex="-1" role="dialog" aria-labelledby="editItemModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editItemModalLabel">Edit Item</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
-                <div class="form-group">
-                    <label for="edit_item_unit">Unit</label>
-                    <input type="text" id="edit_item_unit" class="form-control" readonly required>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="edit_item_qty">Quantity</label>
+                        <input type="number" id="edit_item_qty" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_item_unit">Unit</label>
+                        <input type="text" id="edit_item_unit" class="form-control" readonly required>
+                    </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" id="update-item">Update Item</button>
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="update-item">Update Item</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
 
     <script>
         $(document).ready(function() {
-    let editRow; // Store the row to be edited
+            let editRow; // Store the row to be edited
 
-    // Fetch items based on selected owner
-    $('#nama_pemilik').change(function() {
-        const pemilik = $(this).val();
-        $.ajax({
-            url: "{{ route('data-gudang.items-by-owner') }}",
-            method: 'GET',
-            data: {
-                pemilik: pemilik
-            },
-            success: function(data) {
-                if (data.error) {
-                    console.error(data.error);
-                    return;
-                }
+            // Fetch items based on selected owner
+            $('#nama_pemilik').change(function() {
+                const pemilik = $(this).val();
+                $.ajax({
+                    url: "{{ route('data-gudang.items-by-owner') }}",
+                    method: 'GET',
+                    data: {
+                        pemilik: pemilik
+                    },
+                    success: function(data) {
+                        if (data.error) {
+                            console.error(data.error);
+                            return;
+                        }
 
-                let options = '<option value="">Select Item</option>';
-                $.each(data, function(key, item) {
-                    options += `<option value="${item.id}" data-jenis="${item.jenis}">${item.nama_barang}</option>`;
+                        let options = '<option value="">Select Item</option>';
+                        $.each(data, function(key, item) {
+                            options += `<option value="${item.id}" data-jenis="${item.jenis}">${item.nama_barang}</option>`;
+                        });
+                        $('#item_name').html(options);
+                    },
+                    error: function(xhr) {
+                        console.error('AJAX Error:', xhr.responseText);
+                    }
                 });
-                $('#item_name').html(options);
-            },
-            error: function(xhr) {
-                console.error('AJAX Error:', xhr.responseText);
-            }
-        });
-    });
+            });
 
-    // Fetch unit for selected item
-    $('#item_name').change(function() {
-        const unit = $('#item_name option:selected').data('jenis');
-        $('#item_unit').val(unit || '');
-    });
+            // Fetch unit for selected item
+            $('#item_name').change(function() {
+                const unit = $('#item_name option:selected').data('jenis');
+                $('#item_unit').val(unit || '');
+            });
 
-    // Add item to list
-    $('#add-item-to-list').click(function() {
-        const itemName = $('#item_name option:selected').text();
-        const itemQty = $('#item_qty').val();
-        const itemUnit = $('#item_unit').val();
+            // Add item to list
+            $('#add-item-to-list').click(function() {
+                const itemName = $('#item_name option:selected').text();
+                const itemQty = $('#item_qty').val();
+                const itemUnit = $('#item_unit').val();
 
-        if (itemName && itemQty && itemUnit) {
-            $('#items-table tbody').append(`
+                if (itemName && itemQty && itemUnit) {
+                    $('#items-table tbody').append(`
                 <tr>
                     <td>${itemName}</td>
                     <td>${itemQty}</td>
@@ -270,44 +277,43 @@
                     </td>
                 </tr>
             `);
-            $('#itemModal').modal('hide');
-        } else {
-            alert('Please fill in all fields');
-        }
-    });
+                    $('#itemModal').modal('hide');
+                } else {
+                    alert('Please fill in all fields');
+                }
+            });
 
-    // Remove item from list
-    $(document).on('click', '.remove-item', function() {
-        $(this).closest('tr').remove();
-    });
+            // Remove item from list
+            $(document).on('click', '.remove-item', function() {
+                $(this).closest('tr').remove();
+            });
 
-    // Open edit modal
-    $(document).on('click', '.edit-item', function() {
-        editRow = $(this).closest('tr');
-        const itemQty = editRow.find('td:eq(1)').text();
-        const itemUnit = editRow.find('td:eq(2)').text();
+            // Open edit modal
+            $(document).on('click', '.edit-item', function() {
+                editRow = $(this).closest('tr');
+                const itemQty = editRow.find('td:eq(1)').text();
+                const itemUnit = editRow.find('td:eq(2)').text();
 
-        $('#edit_item_qty').val(itemQty);
-        $('#edit_item_unit').val(itemUnit);
+                $('#edit_item_qty').val(itemQty);
+                $('#edit_item_unit').val(itemUnit);
 
-        $('#editItemModal').modal('show');
-    });
+                $('#editItemModal').modal('show');
+            });
 
-    // Update item in list
-    $('#update-item').click(function() {
-        const updatedQty = $('#edit_item_qty').val();
-        const updatedUnit = $('#edit_item_unit').val();
+            // Update item in list
+            $('#update-item').click(function() {
+                const updatedQty = $('#edit_item_qty').val();
+                const updatedUnit = $('#edit_item_unit').val();
 
-        if (updatedQty) {
-            editRow.find('td:eq(1)').text(updatedQty);
-            editRow.find('td:eq(2)').text(updatedUnit);
-            $('#editItemModal').modal('hide');
-        } else {
-            alert('Please enter a quantity');
-        }
-    });
-});
-
+                if (updatedQty) {
+                    editRow.find('td:eq(1)').text(updatedQty);
+                    editRow.find('td:eq(2)').text(updatedUnit);
+                    $('#editItemModal').modal('hide');
+                } else {
+                    alert('Please enter a quantity');
+                }
+            });
+        });
     </script>
 </body>
 
