@@ -141,8 +141,9 @@
 
                     <div class="form-group">
                         <label for="item_unit">Unit</label>
-                        <input type="text" id="item_unit" class="form-control" required>
+                        <input type="text" id="item_unit" class="form-control" readonly required>
                     </div>
+
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" id="add-item-to-list">Add Item</button>
@@ -154,70 +155,81 @@
 
     <script>
         $(document).ready(function() {
-            // Fetch items based on selected owner
-            $('#nama_pemilik').change(function() {
-                const pemilik = $(this).val();
-                $.ajax({
-                    url: "{{ route('data-gudang.items-by-owner') }}",
-                    method: 'GET',
-                    data: {
-                        pemilik: pemilik
-                    },
-                    success: function(data) {
-                        let options = '<option value="">Select Item</option>';
-                        $.each(data, function(key, item) {
-                            options += `<option value="${item.id}">${item.nama_barang}</option>`;
-                        });
-                        $('#item_name').html(options);
-                    },
-                    error: function(xhr) {
-                        console.error('AJAX Error:', xhr.responseText);
-                    }
-                });
-
-            });
-
-            // Add item to list
-            $('#add-item-to-list').click(function() {
-                const itemName = $('#item_name').val();
-                const itemQty = $('#item_qty').val();
-                const itemUnit = $('#item_unit').val();
-
-                if (itemName && itemQty && itemUnit) {
-                    $('#items-container').append(`
-                    <div class="item">
-                        <div class="form-group">
-                            <label for="item_name[]">Nama Barang</label>
-                            <input type="text" class="form-control" value="${$('#item_name option:selected').text()}" readonly>
-                            <input type="hidden" name="items[][barang_id]" value="${itemName}">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="item_qty[]">Quantity</label>
-                            <input type="number" name="items[][qty]" class="form-control" value="${itemQty}" readonly>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="item_unit[]">Unit</label>
-                            <input type="text" name="items[][unit]" class="form-control" value="${itemUnit}" readonly>
-                        </div>
-
-                        <button type="button" class="btn btn-danger remove-item">Remove Item</button>
-                    </div>
-                `);
-
-                    $('#itemModal').modal('hide');
-                    $('#item_name').val('');
-                    $('#item_qty').val('');
-                    $('#item_unit').val('');
+    // Fetch items based on selected owner
+    $('#nama_pemilik').change(function() {
+        const pemilik = $(this).val();
+        $.ajax({
+            url: "{{ route('data-gudang.items-by-owner') }}",
+            method: 'GET',
+            data: {
+                pemilik: pemilik
+            },
+            success: function(data) {
+                if (data.error) {
+                    console.error(data.error);
+                    return;
                 }
-            });
 
-            // Remove item from list
-            $('#items-container').on('click', '.remove-item', function() {
-                $(this).parent().remove();
-            });
+                let options = '<option value="">Select Item</option>';
+                $.each(data, function(key, item) {
+                    options += `<option value="${item.id}" data-jenis="${item.jenis}">${item.nama_barang}</option>`;
+                });
+                $('#item_name').html(options);
+            },
+            error: function(xhr) {
+                console.error('AJAX Error:', xhr.responseText);
+            }
         });
+    });
+
+    // Fetch jenis for selected item
+    $('#item_name').change(function() {
+        const jenis = $(this).find(':selected').data('jenis');
+        $('#item_unit').val(jenis || ''); // Assuming 'jenis' is what you want to show in item_unit
+    });
+
+    // Add item to list
+    $('#add-item-to-list').click(function() {
+        const itemName = $('#item_name').val();
+        const itemQty = $('#item_qty').val();
+        const itemUnit = $('#item_unit').val();
+
+        if (itemName && itemQty && itemUnit) {
+            $('#items-container').append(`
+                <div class="item">
+                    <div class="form-group">
+                        <label for="item_name[]">Nama Barang</label>
+                        <input type="text" class="form-control" value="${$('#item_name option:selected').text()}" readonly>
+                        <input type="hidden" name="items[][barang_id]" value="${itemName}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="item_qty[]">Quantity</label>
+                        <input type="number" name="items[][qty]" class="form-control" value="${itemQty}" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="item_unit[]">Unit</label>
+                        <input type="text" name="items[][unit]" class="form-control" value="${itemUnit}" readonly>
+                    </div>
+
+                    <button type="button" class="btn btn-danger remove-item">Remove Item</button>
+                </div>
+            `);
+
+            $('#itemModal').modal('hide');
+            $('#item_name').val('');
+            $('#item_qty').val('');
+            $('#item_unit').val('');
+        }
+    });
+
+    // Remove item from list
+    $('#items-container').on('click', '.remove-item', function() {
+        $(this).parent().remove();
+    });
+});
+
     </script>
 </body>
 

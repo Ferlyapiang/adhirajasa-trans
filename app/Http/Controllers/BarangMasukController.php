@@ -124,22 +124,26 @@ class BarangMasukController extends Controller
     }
 
     public function itemsByOwner(Request $request)
-    {
-        try {
-            $pemilik = $request->input('pemilik');
+{
+    try {
+        $pemilik = $request->input('pemilik');
 
-            if (!$pemilik) {
-                return response()->json(['error' => 'Pemilik is required'], 400);
-            }
-
-            // Fetch items based on pemilik
-            $barangs = Barang::where('pemilik', $pemilik)->get();
-
-            // Return items as JSON
-            return response()->json($barangs);
-        } catch (\Exception $e) {
-            // Return error message for debugging
-            return response()->json(['error' => $e->getMessage()], 500);
+        if (!$pemilik) {
+            return response()->json(['error' => 'Pemilik is required'], 400);
         }
+
+        // Fetch items based on pemilik
+        $barangs = Barang::where('pemilik', $pemilik) // Assuming `pemilik` is the foreign key column
+            ->select('id', 'nama_barang', 'jenis') // Select only necessary fields
+            ->get();
+
+        // Return items as JSON
+        return response()->json($barangs);
+    } catch (\Exception $e) {
+        // Return error message for debugging
+        return response()->json(['error' => $e->getMessage()], 500);
     }
+}
+
+
 }
