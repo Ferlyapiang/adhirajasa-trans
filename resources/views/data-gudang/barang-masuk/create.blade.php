@@ -194,126 +194,162 @@
     </div>
 
     <!-- Edit Item Modal -->
-    <div class="modal fade" id="editItemModal" tabindex="-1" role="dialog" aria-labelledby="editItemModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="editItemModalLabel">Edit Item</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+<div class="modal fade" id="editItemModal" tabindex="-1" role="dialog" aria-labelledby="editItemModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editItemModalLabel">Edit Item</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="edit_item_name">Nama Barang</label>
+                    <input type="text" id="edit_item_name" class="form-control" readonly>
                 </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="edit_item_qty">Quantity</label>
-                        <input type="number" id="edit_item_qty" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit_item_unit">Unit</label>
-                        <input type="text" id="edit_item_unit" class="form-control" readonly required>
-                    </div>
+
+                <div class="form-group">
+                    <label for="edit_item_qty">Quantity</label>
+                    <input type="number" id="edit_item_qty" class="form-control" required>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" id="update-item">Update Item</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <div class="form-group">
+                    <label for="edit_item_unit">Unit</label>
+                    <input type="text" id="edit_item_unit" class="form-control" readonly required>
                 </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="update-item">Update Item</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
+</div>
+
 
 
     <script>
         $(document).ready(function() {
-            let editRow; // Store the row to be edited
+    let editRow; // Store the row to be edited
+    let itemsInTable = []; // Array to keep track of items added to the table
 
-            // Fetch items based on selected owner
-            $('#nama_pemilik').change(function() {
-                const pemilik = $(this).val();
-                $.ajax({
-                    url: "{{ route('data-gudang.items-by-owner') }}",
-                    method: 'GET',
-                    data: {
-                        pemilik: pemilik
-                    },
-                    success: function(data) {
-                        if (data.error) {
-                            console.error(data.error);
-                            return;
-                        }
+    // Fetch items based on selected owner
+    $('#nama_pemilik').change(function() {
+        const pemilik = $(this).val();
+        $.ajax({
+            url: "{{ route('data-gudang.items-by-owner') }}",
+            method: 'GET',
+            data: {
+                pemilik: pemilik
+            },
+            success: function(data) {
+                if (data.error) {
+                    console.error(data.error);
+                    return;
+                }
 
-                        let options = '<option value="">Select Item</option>';
-                        $.each(data, function(key, item) {
-                            options += `<option value="${item.id}" data-jenis="${item.jenis}">${item.nama_barang}</option>`;
-                        });
-                        $('#item_name').html(options);
-                    },
-                    error: function(xhr) {
-                        console.error('AJAX Error:', xhr.responseText);
+                let options = '<option value="">Select Item</option>';
+                $.each(data, function(key, item) {
+                    if (!itemsInTable.includes(item.id)) {
+                        options += `<option value="${item.id}" data-jenis="${item.jenis}">${item.nama_barang}</option>`;
                     }
                 });
-            });
-
-            // Fetch unit for selected item
-            $('#item_name').change(function() {
-                const unit = $('#item_name option:selected').data('jenis');
-                $('#item_unit').val(unit || '');
-            });
-
-            // Add item to list
-            $('#add-item-to-list').click(function() {
-                const itemName = $('#item_name option:selected').text();
-                const itemQty = $('#item_qty').val();
-                const itemUnit = $('#item_unit').val();
-
-                if (itemName && itemQty && itemUnit) {
-                    $('#items-table tbody').append(`
-                <tr>
-                    <td>${itemName}</td>
-                    <td>${itemQty}</td>
-                    <td>${itemUnit}</td>
-                    <td>
-                        <button type="button" class="btn btn-warning btn-sm edit-item">Edit</button>
-                        <button type="button" class="btn btn-danger btn-sm remove-item">Remove</button>
-                    </td>
-                </tr>
-            `);
-                    $('#itemModal').modal('hide');
-                } else {
-                    alert('Please fill in all fields');
-                }
-            });
-
-            // Remove item from list
-            $(document).on('click', '.remove-item', function() {
-                $(this).closest('tr').remove();
-            });
-
-            // Open edit modal
-            $(document).on('click', '.edit-item', function() {
-                editRow = $(this).closest('tr');
-                const itemQty = editRow.find('td:eq(1)').text();
-                const itemUnit = editRow.find('td:eq(2)').text();
-
-                $('#edit_item_qty').val(itemQty);
-                $('#edit_item_unit').val(itemUnit);
-
-                $('#editItemModal').modal('show');
-            });
-
-            // Update item in list
-            $('#update-item').click(function() {
-                const updatedQty = $('#edit_item_qty').val();
-                const updatedUnit = $('#edit_item_unit').val();
-
-                if (updatedQty) {
-                    editRow.find('td:eq(1)').text(updatedQty);
-                    editRow.find('td:eq(2)').text(updatedUnit);
-                    $('#editItemModal').modal('hide');
-                } else {
-                    alert('Please enter a quantity');
-                }
-            });
+                $('#item_name').html(options);
+            },
+            error: function(xhr) {
+                console.error('AJAX Error:', xhr.responseText);
+            }
         });
+    });
+
+    // Fetch unit for selected item
+    $('#item_name').change(function() {
+        const unit = $('#item_name option:selected').data('jenis');
+        $('#item_unit').val(unit || '');
+    });
+
+    // Add item to list
+    $('#add-item-to-list').click(function() {
+        const itemName = $('#item_name option:selected').text();
+        const itemId = $('#item_name').val(); // Get the selected item's id
+        const itemQty = $('#item_qty').val();
+        const itemUnit = $('#item_unit').val();
+
+        if (itemName && itemQty && itemUnit) {
+            // Check if the item is already in the table
+            if (!itemsInTable.includes(itemId)) {
+                $('#items-table tbody').append(`
+                    <tr data-id="${itemId}">
+                        <td>${itemName}</td>
+                        <td>${itemQty}</td>
+                        <td>${itemUnit}</td>
+                        <td>
+                            <button type="button" class="btn btn-warning btn-sm edit-item">Edit</button>
+                            <button type="button" class="btn btn-danger btn-sm remove-item">Remove</button>
+                        </td>
+                    </tr>
+                `);
+
+                // Add the item ID to the itemsInTable array
+                itemsInTable.push(itemId);
+
+                // Clear the form fields
+                $('#item_name').val('');
+                $('#item_qty').val('');
+                $('#item_unit').val('');
+
+                $('#itemModal').modal('hide');
+            } else {
+                alert('This item is already in the list');
+            }
+        } else {
+            alert('Please fill in all fields');
+        }
+    });
+
+    // Remove item from list
+    $(document).on('click', '.remove-item', function() {
+        const row = $(this).closest('tr');
+        const itemId = row.data('id');
+
+        // Remove the item ID from the itemsInTable array
+        itemsInTable = itemsInTable.filter(id => id !== itemId);
+
+        row.remove();
+
+        // Optionally, you can re-fetch the items to update the dropdown
+        $('#nama_pemilik').change();
+    });
+
+    // Open edit modal
+    $(document).on('click', '.edit-item', function() {
+        editRow = $(this).closest('tr');
+        const itemName = editRow.find('td:eq(0)').text(); // Get the item name
+        const itemQty = editRow.find('td:eq(1)').text();
+        const itemUnit = editRow.find('td:eq(2)').text();
+
+        $('#edit_item_name').val(itemName); // Set item name in readonly field
+        $('#edit_item_qty').val(itemQty);
+        $('#edit_item_unit').val(itemUnit);
+
+        $('#editItemModal').modal('show');
+    });
+
+    // Update item in list
+    $('#update-item').click(function() {
+        const updatedQty = $('#edit_item_qty').val();
+        const updatedUnit = $('#edit_item_unit').val();
+
+        if (updatedQty) {
+            editRow.find('td:eq(1)').text(updatedQty);
+            editRow.find('td:eq(2)').text(updatedUnit);
+            $('#editItemModal').modal('hide');
+        } else {
+            alert('Please enter a quantity');
+        }
+    });
+});
+
     </script>
 </body>
 
