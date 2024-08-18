@@ -12,6 +12,28 @@
 
     <!-- Theme style -->
     <link rel="stylesheet" href="{{ asset('lte/dist/css/adminlte.min.css') }}">
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .btn-danger {
+            color: #fff;
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+    </style>
 </head>
 
 <body class="hold-transition sidebar-mini">
@@ -90,9 +112,20 @@
                     <h2>Items</h2>
                     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#itemModal">Add Item</button>
 
-                    <div id="items-container">
-                        <!-- Items will be added here dynamically -->
-                    </div>
+                    <!-- Items Table -->
+                    <table id="items-table">
+                        <thead>
+                            <tr>
+                                <th>Nama Barang</th>
+                                <th>Quantity</th>
+                                <th>Unit</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Items will be added here dynamically -->
+                        </tbody>
+                    </table>
 
                     <br><br>
                     <button type="submit" class="btn btn-primary">Simpan</button>
@@ -153,8 +186,39 @@
         </div>
     </div>
 
+    <!-- Edit Item Modal -->
+<div class="modal fade" id="editItemModal" tabindex="-1" role="dialog" aria-labelledby="editItemModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editItemModalLabel">Edit Item</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="edit_item_qty">Quantity</label>
+                    <input type="number" id="edit_item_qty" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit_item_unit">Unit</label>
+                    <input type="text" id="edit_item_unit" class="form-control" readonly required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="update-item">Update Item</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
     <script>
         $(document).ready(function() {
+    let editRow; // Store the row to be edited
+
     // Fetch items based on selected owner
     $('#nama_pemilik').change(function() {
         const pemilik = $(this).val();
@@ -182,51 +246,65 @@
         });
     });
 
-    // Fetch jenis for selected item
+    // Fetch unit for selected item
     $('#item_name').change(function() {
-        const jenis = $(this).find(':selected').data('jenis');
-        $('#item_unit').val(jenis || ''); // Assuming 'jenis' is what you want to show in item_unit
+        const unit = $('#item_name option:selected').data('jenis');
+        $('#item_unit').val(unit || '');
     });
 
     // Add item to list
     $('#add-item-to-list').click(function() {
-        const itemName = $('#item_name').val();
+        const itemName = $('#item_name option:selected').text();
         const itemQty = $('#item_qty').val();
         const itemUnit = $('#item_unit').val();
 
         if (itemName && itemQty && itemUnit) {
-            $('#items-container').append(`
-                <div class="item">
-                    <div class="form-group">
-                        <label for="item_name[]">Nama Barang</label>
-                        <input type="text" class="form-control" value="${$('#item_name option:selected').text()}" readonly>
-                        <input type="hidden" name="items[][barang_id]" value="${itemName}">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="item_qty[]">Quantity</label>
-                        <input type="number" name="items[][qty]" class="form-control" value="${itemQty}" readonly>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="item_unit[]">Unit</label>
-                        <input type="text" name="items[][unit]" class="form-control" value="${itemUnit}" readonly>
-                    </div>
-
-                    <button type="button" class="btn btn-danger remove-item">Remove Item</button>
-                </div>
+            $('#items-table tbody').append(`
+                <tr>
+                    <td>${itemName}</td>
+                    <td>${itemQty}</td>
+                    <td>${itemUnit}</td>
+                    <td>
+                        <button type="button" class="btn btn-warning btn-sm edit-item">Edit</button>
+                        <button type="button" class="btn btn-danger btn-sm remove-item">Remove</button>
+                    </td>
+                </tr>
             `);
-
             $('#itemModal').modal('hide');
-            $('#item_name').val('');
-            $('#item_qty').val('');
-            $('#item_unit').val('');
+        } else {
+            alert('Please fill in all fields');
         }
     });
 
     // Remove item from list
-    $('#items-container').on('click', '.remove-item', function() {
-        $(this).parent().remove();
+    $(document).on('click', '.remove-item', function() {
+        $(this).closest('tr').remove();
+    });
+
+    // Open edit modal
+    $(document).on('click', '.edit-item', function() {
+        editRow = $(this).closest('tr');
+        const itemQty = editRow.find('td:eq(1)').text();
+        const itemUnit = editRow.find('td:eq(2)').text();
+
+        $('#edit_item_qty').val(itemQty);
+        $('#edit_item_unit').val(itemUnit);
+
+        $('#editItemModal').modal('show');
+    });
+
+    // Update item in list
+    $('#update-item').click(function() {
+        const updatedQty = $('#edit_item_qty').val();
+        const updatedUnit = $('#edit_item_unit').val();
+
+        if (updatedQty) {
+            editRow.find('td:eq(1)').text(updatedQty);
+            editRow.find('td:eq(2)').text(updatedUnit);
+            $('#editItemModal').modal('hide');
+        } else {
+            alert('Please enter a quantity');
+        }
     });
 });
 
