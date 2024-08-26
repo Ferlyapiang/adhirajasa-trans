@@ -80,6 +80,7 @@ class BarangMasukController extends Controller
                 // Store associated items
                 foreach ($request->items as $item) {
                     $barangMasuk->items()->create([
+                        'barang_masuk_id' => $barangMasuk->id,
                         'barang_id' => $item['barang_id'],
                         'qty' => $item['qty'],
                         'unit' => $item['unit'],
