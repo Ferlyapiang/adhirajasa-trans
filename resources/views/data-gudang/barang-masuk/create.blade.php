@@ -75,7 +75,7 @@
             <!-- Main content -->
             <div class="container-fluid pl-4">
                 <h1>Tambah Barang Masuk</h1>
-                <form action="{{ route('data-gudang.barang-masuk.store') }}" method="POST">
+                <form id="barangMasukForm"  action="{{ route('data-gudang.barang-masuk.store') }}" method="POST">
                     @csrf
 
                     <div class="form-group">
@@ -118,7 +118,7 @@
 
                     <h2>Items</h2>
                     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#itemModal">Add Item</button>
-
+                    <input type="hidden" name="items" id="items-input" value="[]">
                     <!-- Items Table -->
                     <table id="items-table">
                         <thead>
@@ -230,55 +230,55 @@
 
     <script>
         $(document).ready(function() {
-            let editRow; // Store the row to be edited
-            let itemsInTable = []; // Array to keep track of items added to the table
+    let editRow; // Store the row to be edited
+    let itemsInTable = []; // Array to keep track of items added to the table
 
-            // Fetch items based on selected owner
-            $('#nama_pemilik').change(function() {
-                const pemilik = $(this).val();
-                $.ajax({
-                    url: "{{ route('data-gudang.items-by-owner') }}",
-                    method: 'GET',
-                    data: {
-                        pemilik: pemilik
-                    },
-                    success: function(data) {
-                        if (data.error) {
-                            console.error(data.error);
-                            return;
-                        }
+    // Fetch items based on selected owner
+    $('#nama_pemilik').change(function() {
+        const pemilik = $(this).val();
+        $.ajax({
+            url: "{{ route('data-gudang.items-by-owner') }}",
+            method: 'GET',
+            data: {
+                pemilik: pemilik
+            },
+            success: function(data) {
+                if (data.error) {
+                    console.error(data.error);
+                    return;
+                }
 
-                        let options = '<option value="">Select Item</option>';
-                        $.each(data, function(key, item) {
-                            if (!itemsInTable.includes(item.id)) {
-                                options += `<option value="${item.id}" data-jenis="${item.jenis}">${item.nama_barang}</option>`;
-                            }
-                        });
-                        $('#item_name').html(options);
-                    },
-                    error: function(xhr) {
-                        console.error('AJAX Error:', xhr.responseText);
+                let options = '<option value="">Select Item</option>';
+                $.each(data, function(key, item) {
+                    if (!itemsInTable.includes(item.id)) {
+                        options += `<option value="${item.id}" data-jenis="${item.jenis}">${item.nama_barang}</option>`;
                     }
                 });
-            });
+                $('#item_name').html(options);
+            },
+            error: function(xhr) {
+                console.error('AJAX Error:', xhr.responseText);
+            }
+        });
+    });
 
-            // Fetch unit for selected item
-            $('#item_name').change(function() {
-                const unit = $('#item_name option:selected').data('jenis');
-                $('#item_unit').val(unit || '');
-            });
+    // Fetch unit for selected item
+    $('#item_name').change(function() {
+        const unit = $('#item_name option:selected').data('jenis');
+        $('#item_unit').val(unit || '');
+    });
 
-            // Add item to list
-            $('#add-item-to-list').click(function() {
-                const itemName = $('#item_name option:selected').text();
-                const itemId = $('#item_name').val(); // Get the selected item's id
-                const itemQty = $('#item_qty').val();
-                const itemUnit = $('#item_unit').val();
+    // Add item to list
+    $('#add-item-to-list').click(function() {
+        const itemName = $('#item_name option:selected').text();
+        const itemId = $('#item_name').val(); // Get the selected item's id
+        const itemQty = $('#item_qty').val();
+        const itemUnit = $('#item_unit').val();
 
-                if (itemName && itemQty && itemUnit) {
-                    // Check if the item is already in the table
-                    if (!itemsInTable.includes(itemId)) {
-                        $('#items-table tbody').append(`
+        if (itemName && itemQty && itemUnit) {
+            // Check if the item is already in the table
+            if (!itemsInTable.includes(itemId)) {
+                $('#items-table tbody').append(`
                     <tr data-id="${itemId}">
                         <td>${itemName}</td>
                         <td>${itemQty}</td>
@@ -290,65 +290,82 @@
                     </tr>
                 `);
 
-                        // Add the item ID to the itemsInTable array
-                        itemsInTable.push(itemId);
+                // Add the item ID to the itemsInTable array
+                itemsInTable.push(itemId);
 
-                        // Clear the form fields
-                        $('#item_name').val('');
-                        $('#item_qty').val('');
-                        $('#item_unit').val('');
+                // Clear the form fields
+                $('#item_name').val('');
+                $('#item_qty').val('');
+                $('#item_unit').val('');
 
-                        $('#itemModal').modal('hide');
-                    } else {
-                        alert('This item is already in the list');
-                    }
-                } else {
-                    alert('Please fill in all fields');
-                }
-            });
+                $('#itemModal').modal('hide');
+                updateItemsInput(); // Update hidden input when item is added
+            } else {
+                alert('This item is already in the list');
+            }
+        } else {
+            alert('Please fill in all fields');
+        }
+    });
 
-            // Remove item from list
-            $(document).on('click', '.remove-item', function() {
-                const row = $(this).closest('tr');
-                const itemId = row.data('id');
+    // Remove item from list
+    $(document).on('click', '.remove-item', function() {
+        const row = $(this).closest('tr');
+        const itemId = row.data('id');
 
-                // Remove the item ID from the itemsInTable array
-                itemsInTable = itemsInTable.filter(id => id !== itemId);
+        // Remove the item ID from the itemsInTable array
+        itemsInTable = itemsInTable.filter(id => id !== itemId);
 
-                row.remove();
+        row.remove();
 
-                // Optionally, you can re-fetch the items to update the dropdown
-                $('#nama_pemilik').change();
-            });
+        updateItemsInput(); // Update hidden input when item is removed
+    });
 
-            // Open edit modal
-            $(document).on('click', '.edit-item', function() {
-                editRow = $(this).closest('tr');
-                const itemName = editRow.find('td:eq(0)').text(); // Get the item name
-                const itemQty = editRow.find('td:eq(1)').text();
-                const itemUnit = editRow.find('td:eq(2)').text();
+    // Open edit modal
+    $(document).on('click', '.edit-item', function() {
+        editRow = $(this).closest('tr');
+        const itemName = editRow.find('td:eq(0)').text(); // Get the item name
+        const itemQty = editRow.find('td:eq(1)').text();
+        const itemUnit = editRow.find('td:eq(2)').text();
 
-                $('#edit_item_name').val(itemName); // Set item name in readonly field
-                $('#edit_item_qty').val(itemQty);
-                $('#edit_item_unit').val(itemUnit);
+        $('#edit_item_name').val(itemName); // Set item name in readonly field
+        $('#edit_item_qty').val(itemQty);
+        $('#edit_item_unit').val(itemUnit);
 
-                $('#editItemModal').modal('show');
-            });
+        $('#editItemModal').modal('show');
+    });
 
-            // Update item in list
-            $('#update-item').click(function() {
-                const updatedQty = $('#edit_item_qty').val();
-                const updatedUnit = $('#edit_item_unit').val();
+    // Update item in list
+    $('#update-item').click(function() {
+        const updatedQty = $('#edit_item_qty').val();
+        const updatedUnit = $('#edit_item_unit').val();
 
-                if (updatedQty) {
-                    editRow.find('td:eq(1)').text(updatedQty);
-                    editRow.find('td:eq(2)').text(updatedUnit);
-                    $('#editItemModal').modal('hide');
-                } else {
-                    alert('Please enter a quantity');
-                }
+        if (updatedQty) {
+            editRow.find('td:eq(1)').text(updatedQty);
+            editRow.find('td:eq(2)').text(updatedUnit);
+            $('#editItemModal').modal('hide');
+            updateItemsInput(); // Update hidden input when item is updated
+        } else {
+            alert('Please enter a quantity');
+        }
+    });
+
+    // Function to update hidden input field
+    function updateItemsInput() {
+        const items = [];
+        $('#items-table tbody tr').each(function() {
+            const cells = $(this).children();
+            items.push({
+                barang_id: cells.eq(0).text(),
+                qty: cells.eq(1).text(),
+                unit: cells.eq(2).text()
             });
         });
+        $('#items-input').val(JSON.stringify(items));
+        console.log('Updated items input:', $('#items-input').val()); // Debug log
+    }
+});
+
     </script>
 </body>
 
