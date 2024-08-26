@@ -96,6 +96,20 @@
             </li>
           </ul>
         </li>
+        <li class="nav-item">
+          <a class="nav-link {{ request()->is('log/*') ? 'active' : '' }}">
+            <i class="nav-icon fa fa-chart-pie"></i>
+            <p>Data Gudang<i class="right fas fa-angle-left"></i></p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              <a href="{{ route('data-gudang.barang-masuk.index') }}" class="nav-link {{ request()->routeIs('data-gudang.barang-masuk.index') ? 'active' : '' }}">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Barang Masuk</p>
+              </a>
+            </li>
+          </ul>
+        </li>
       </ul>
     </nav>
     <!-- /.sidebar-menu -->
