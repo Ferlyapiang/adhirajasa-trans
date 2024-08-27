@@ -340,29 +340,33 @@
         const updatedQty = $('#edit_item_qty').val();
         const updatedUnit = $('#edit_item_unit').val();
 
-        if (updatedQty) {
+    if (updatedQty) {
             editRow.find('td:eq(1)').text(updatedQty);
             editRow.find('td:eq(2)').text(updatedUnit);
             $('#editItemModal').modal('hide');
-            updateItemsInput(); // Update hidden input when item is updated
+            updateItemsInput(); // Update hidden input when item is edited
         } else {
-            alert('Please enter a quantity');
+            alert('Please enter a valid quantity');
         }
     });
 
-    // Function to update hidden input field
+    // Function to update the hidden input field with the list of items
     function updateItemsInput() {
-        const items = [];
+        let items = [];
+
         $('#items-table tbody tr').each(function() {
-            const cells = $(this).children();
+            const itemId = $(this).data('id');
+            const itemQty = $(this).find('td:eq(1)').text();
+            const itemUnit = $(this).find('td:eq(2)').text();
+
             items.push({
-                barang_id: cells.eq(0).text(),
-                qty: cells.eq(1).text(),
-                unit: cells.eq(2).text()
+                id: itemId,
+                quantity: itemQty,
+                unit: itemUnit
             });
         });
+
         $('#items-input').val(JSON.stringify(items));
-        console.log('Updated items input:', $('#items-input').val()); // Debug log
     }
 });
 

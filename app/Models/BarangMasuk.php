@@ -28,6 +28,7 @@ class BarangMasuk extends Model
 class BarangMasukItem extends Model
 {
     protected $fillable = [
+        'barang_masuk_id',
         'barang_id',
         'qty',
         'unit',
