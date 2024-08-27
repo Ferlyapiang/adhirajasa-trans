@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -11,7 +12,7 @@
 
     <!-- Theme style -->
     <link rel="stylesheet" href="{{ asset('lte/dist/css/adminlte.min.css') }}">
-    
+
     <!-- DataTables CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.3/css/jquery.dataTables.min.css">
 
@@ -44,16 +45,21 @@
         }
 
         .status-active {
-            background-color: #d4edda; /* Light green */
-            color: #155724; /* Dark green text */
+            background-color: #d4edda;
+            /* Light green */
+            color: #155724;
+            /* Dark green text */
         }
 
         .status-inactive {
-            background-color: #f8d7da; /* Light red */
-            color: #721c24; /* Dark red text */
+            background-color: #f8d7da;
+            /* Light red */
+            color: #721c24;
+            /* Dark red text */
         }
     </style>
 </head>
+
 <body class="hold-transition sidebar-mini">
     <div class="wrapper">
 
@@ -72,9 +78,10 @@
             <div class="content-header">
                 <div class="container-fluid pl-4">
                     <div class="row mb-1">
-                        <div class="col-sm-12" style="border: 1px solid #D0D4DB; border-radius: 10px; background-color: white; padding: 10px;">
+                        <div class="col-sm-12"
+                            style="border: 1px solid #D0D4DB; border-radius: 10px; background-color: white; padding: 10px;">
                             <h1 class="m-0" style="font-weight: bold; font-size: 16px; padding-left: 10px;">
-                                <span style="font-weight: 370;">Master Data |</span> 
+                                <span style="font-weight: 370;">Master Data |</span>
                                 <span>Data Bank Perusahaan</span>
                             </h1>
                         </div>
@@ -88,42 +95,45 @@
                 <a href="{{ route('master-data.bank-data.create') }}" class="btn btn-primary mb-3">Add Bank Data</a>
 
                 <div class="table-responsive">
-                <table id="bankDataTable" class="table table-striped">
-    <thead>
-        <tr>
-            <th>No</th>
-            <th>Nama Bank</th>
-            <th>Nomor Rekening</th>
-            <th>Nama Rekening</th>
-            <th>Nama Gudang</th>
-            <th>Status</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach($bankDatas as $index => $bankData)
-            <tr>
-                <td>{{ $index + 1 }}</td>
-                <td>{{ $bankData->bank_name }}</td>
-                <td>{{ $bankData->account_number }}</td>
-                <td>{{ $bankData->account_name }}</td>
-                <td>{{ $bankData->warehouse->name ?? 'N/A' }}</td>
-                <td class="{{ $bankData->status == 'active' ? 'status-active' : 'status-inactive' }} text-center">
-                    {{ ucfirst($bankData->status) }}
-                </td>
-                <!-- <td>{{ ucfirst($bankData->status) }}</td> -->
-                <td>
-                    <a href="{{ route('master-data.bank-data.edit', $bankData) }}" class="btn btn-warning btn-sm">Edit</a>
-                    <form action="{{ route('master-data.bank-data.destroy', $bankData) }}" method="POST" style="display:inline;">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                    </form>
-                </td>
-            </tr>
-        @endforeach
-    </tbody>
-</table>
+                    <table id="bankDataTable" class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Nama Bank</th>
+                                <th>Nomor Rekening</th>
+                                <th>Nama Rekening</th>
+                                <th>Nama Gudang</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($bankDatas as $index => $bankData)
+                                <tr>
+                                    <td>{{ $index + 1 }}</td>
+                                    <td>{{ $bankData->bank_name }}</td>
+                                    <td>{{ $bankData->account_number }}</td>
+                                    <td>{{ $bankData->account_name }}</td>
+                                    <td>{{ $bankData->warehouse->name ?? 'N/A' }}</td>
+                                    <td
+                                        class="{{ $bankData->status == 'active' ? 'status-active' : 'status-inactive' }} text-center">
+                                        {{ ucfirst($bankData->status) }}
+                                    </td>
+                                    <!-- <td>{{ ucfirst($bankData->status) }}</td> -->
+                                    <td>
+                                        <a href="{{ route('master-data.bank-data.edit', $bankData) }}"
+                                            class="btn btn-warning btn-sm">Edit</a>
+                                        <form action="{{ route('master-data.bank-data.destroy', $bankData) }}"
+                                            method="POST" style="display:inline;">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
 
                 </div>
             </div>
@@ -150,4 +160,5 @@
         });
     </script>
 </body>
+
 </html>

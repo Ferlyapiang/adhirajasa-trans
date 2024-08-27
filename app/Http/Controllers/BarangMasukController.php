@@ -104,34 +104,81 @@ class BarangMasukController extends Controller
     }
 
 
-    public function edit(BarangMasuk $barangMasuk)
+    public function edit($id)
     {
+        $barangMasuk = BarangMasuk::findOrFail($id);
         $barangs = Barang::all();
         $pemilik = Customer::all();
         $gudangs = Warehouse::all();
-        return view('data-gudang.barang-masuk.edit', compact('barangMasuk', 'barangs', 'pemilik', 'gudangs'));
+        $items = $barangMasuk->items;
+
+        return view('data-gudang.barang-masuk.edit', compact('barangMasuk', 'barangs', 'pemilik', 'gudangs', 'items'));
     }
 
-    public function update(Request $request, BarangMasuk $barangMasuk)
-    {
+    public function update(Request $request, $id)
+{
+    try {
+        // Validation
         $request->validate([
             'tanggal_masuk' => 'required|date',
             'gudang_id' => 'required|exists:warehouses,id',
             'customer_id' => 'required|exists:customers,id',
-            'nomer_container' => 'nullable|string',
+            'nomer_container' => 'required|string',
+            'items.*.barang_id' => 'required|exists:barangs,id',
+            'items.*.qty' => 'required|numeric',
+            'items.*.unit' => 'required|string',
         ]);
 
+        // Find BarangMasuk record
+        $barangMasuk = BarangMasuk::findOrFail($id);
+
+        // Update BarangMasuk record
         $barangMasuk->update([
             'tanggal_masuk' => $request->tanggal_masuk,
             'gudang_id' => $request->gudang_id,
             'customer_id' => $request->customer_id,
-            'jenis_mobil' => $request->jenis_mobil ?? null,
-            'nomer_polisi' => $request->nomer_polisi ?? null,
+            'jenis_mobil' => $request->jenis_mobil ?? null,  // Handle nullable fields
+            'nomer_polisi' => $request->nomer_polisi ?? null,  // Handle nullable fields
             'nomer_container' => $request->nomer_container,
         ]);
 
-        return redirect()->route('data-gudang.barang-masuk.index')->with('success', 'Data barang masuk berhasil diperbarui.');
+        // Decode and update items
+        $items = json_decode($request->items, true);
+        Log::info('Decoded Items:', ['items' => $items]);
+
+        DB::transaction(function () use ($barangMasuk, $items) {
+            // Delete existing items
+            BarangMasukItem::where('barang_masuk_id', $barangMasuk->id)->delete();
+
+            // Insert or update items
+            foreach ($items as $item) {
+                Log::info('Saving Item:', ['item' => $item]);
+                BarangMasukItem::create([
+                    'barang_id' => $item['nama_barang'],
+                    'qty' => $item['quantity'],
+                    'unit' => $item['unit'],
+                    'barang_masuk_id' => $barangMasuk->id,
+                ]);
+            }
+        });
+
+        // Log the success
+        LogData::create([
+            'user_id' => Auth::id(),
+            'name' => Auth::user()->name,
+            'action' => 'update',
+            'details' => 'Updated barang masuk ID: ' . $barangMasuk->id . ' with data: ' . json_encode($request->all())
+        ]);
+
+        // Return redirect with success message
+        return redirect()->route('data-gudang.barang-masuk.index')->with('success', 'Barang Masuk berhasil diperbarui.');
+    } catch (\Exception $e) {
+        // Log error and return redirect with error message
+        Log::error('Error in updating Barang Masuk:', ['error' => $e->getMessage()]);
+        return redirect()->route('data-gudang.barang-masuk.index')->with('error', 'Terjadi kesalahan saat memperbarui data.');
     }
+}
+
 
     public function destroy(BarangMasuk $barangMasuk)
     {

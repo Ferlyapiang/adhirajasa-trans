@@ -1,6 +1,6 @@
-<!-- resources/views/data-gudang/barang-masuk/edit.blade.php -->
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -12,7 +12,37 @@
 
     <!-- Theme style -->
     <link rel="stylesheet" href="{{ asset('lte/dist/css/adminlte.min.css') }}">
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid #ddd;
+        }
+
+        th,
+        td {
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .btn-danger {
+            color: #fff;
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+    </style>
 </head>
+
 <body class="hold-transition sidebar-mini">
     <div class="wrapper">
 
@@ -33,7 +63,7 @@
                     <div class="row mb-1">
                         <div class="col-sm-12" style="border: 1px solid #D0D4DB; border-radius: 10px; background-color: white; padding: 10px;">
                             <h1 class="m-0" style="font-weight: bold; font-size: 16px; padding-left: 10px;">
-                                <span style="font-weight: 370;">Data Gudang |</span> 
+                                <span style="font-weight: 370;">Data Gudang |</span>
                                 <span>Barang Masuk</span>
                             </h1>
                         </div>
@@ -43,65 +73,82 @@
             <!-- /.content-header -->
 
             <!-- Main content -->
-            <div class="container">
+            <div class="container-fluid pl-4">
                 <h1>Edit Barang Masuk</h1>
-                <form action="{{ route('master-data.barang-masuk.update', $barangMasuk->id) }}" method="POST">
+                <form id="barangMasukForm" action="{{ route('data-gudang.barang-masuk.update', $barangMasuk->id) }}" method="POST">
                     @csrf
                     @method('PUT')
 
                     <div class="form-group">
                         <label for="tanggal_masuk">Tanggal Masuk</label>
-                        <input type="date" name="tanggal_masuk" id="tanggal_masuk" class="form-control" value="{{ $barangMasuk->tanggal_masuk }}" required>
+                        <input type="date" name="tanggal_masuk" id="tanggal_masuk" class="form-control" value="{{ $barangMasuk->tanggal_masuk }}" placeholder="Select date" required>
                     </div>
 
                     <div class="form-group">
-                        <label for="no_ref">No. Referensi</label>
-                        <input type="text" name="no_ref" id="no_ref" class="form-control" value="{{ $barangMasuk->no_ref }}" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="nama_barang">Nama Barang</label>
-                        <select name="nama_barang" id="nama_barang" class="form-control" required>
-                            @foreach($barangs as $barang)
-                                <option value="{{ $barang->id }}" {{ $barangMasuk->nama_barang == $barang->id ? 'selected' : '' }}>{{ $barang->nama_barang }}</option>
+                        <label for="gudang">Gudang</label>
+                        <select name="gudang_id" id="gudang" class="form-control" required>
+                            @foreach($gudangs as $gudang)
+                                <option value="{{ $gudang->id }}" {{ $gudang->id == $barangMasuk->gudang_id ? 'selected' : '' }}>{{ $gudang->name }}</option>
                             @endforeach
                         </select>
                     </div>
 
                     <div class="form-group">
                         <label for="nama_pemilik">Nama Pemilik</label>
-                        <select name="nama_pemilik" id="nama_pemilik" class="form-control" required>
+                        <select name="customer_id" id="nama_pemilik" class="form-control" required>
                             @foreach($pemilik as $owner)
-                                <option value="{{ $owner->id }}" {{ $barangMasuk->nama_pemilik == $owner->id ? 'selected' : '' }}>{{ $owner->nama_pemilik }}</option>
+                                <option value="{{ $owner->id }}" {{ $owner->id == $barangMasuk->customer_id ? 'selected' : '' }}>{{ $owner->name }}</option>
                             @endforeach
                         </select>
                     </div>
 
                     <div class="form-group">
-                        <label for="gudang">Gudang</label>
-                        <select name="gudang" id="gudang" class="form-control" required>
-                            @foreach($gudangs as $gudang)
-                                <option value="{{ $gudang->id }}" {{ $barangMasuk->gudang == $gudang->id ? 'selected' : '' }}>{{ $gudang->nama_gudang }}</option>
-                            @endforeach
-                        </select>
+                        <label for="jenis_mobil">Jenis Mobil (Optional)</label>
+                        <input type="text" name="jenis_mobil" id="jenis_mobil" class="form-control" value="{{ $barangMasuk->jenis_mobil }}">
                     </div>
 
                     <div class="form-group">
-                        <label for="jenis_mobil">Jenis Mobil</label>
-                        <input type="text" name="jenis_mobil" id="jenis_mobil" class="form-control" value="{{ $barangMasuk->jenis_mobil }}" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="nomer_polisi">Nomer Polisi</label>
-                        <input type="text" name="nomer_polisi" id="nomer_polisi" class="form-control" value="{{ $barangMasuk->nomer_polisi }}" required>
+                        <label for="nomer_polisi">Nomer Polisi (Optional)</label>
+                        <input type="text" name="nomer_polisi" id="nomer_polisi" class="form-control" value="{{ $barangMasuk->nomer_polisi }}">
                     </div>
 
                     <div class="form-group">
                         <label for="nomer_container">Nomer Container</label>
                         <input type="text" name="nomer_container" id="nomer_container" class="form-control" value="{{ $barangMasuk->nomer_container }}">
                     </div>
+
+                    <h2>Items</h2>
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#itemModal">Add Item</button>
+                    <input type="hidden" name="items" id="items-input" value="{{ json_encode($barangMasuk->items) }}">
+                    <!-- Items Table -->
+                    <table id="items-table">
+                        <thead>
+                            <tr>
+                                <th>Nama Barang</th>
+                                <th>Quantity</th>
+                                <th>Unit</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($barangMasuk->items as $item)
+                            <tr data-id="{{ $item->id }}">
+                                <td>{{ $item->barang->nama_barang ?? 'Unknown'  }}</td>
+                                <td>{{ $item->qty }}</td>
+                                <td>{{ $item->unit }}</td>
+                                <td style="display: none">{{ $item->barang_id }}</td>
+                                <td>
+                                    <button type="button" class="btn btn-warning btn-sm edit-item">Edit</button>
+                                    <button type="button" class="btn btn-danger btn-sm remove-item">Remove</button>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+
+                    <br><br>
                     <button type="submit" class="btn btn-primary">Update</button>
-                    <a href="{{ route('master-data.barang-masuk.index') }}" class="btn btn-secondary">Batal</a>
+                    <a href="{{ route('data-gudang.barang-masuk.index') }}" class="btn btn-secondary">Batal</a>
                 </form>
             </div>
             <!-- /.container-fluid -->
@@ -120,5 +167,172 @@
     <script src="{{ asset('lte/plugins/jquery/jquery.min.js') }}"></script>
     <script src="{{ asset('lte/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('lte/dist/js/adminlte.min.js') }}"></script>
+
+    <!-- Modal -->
+    <div class="modal fade" id="itemModal" tabindex="-1" role="dialog" aria-labelledby="itemModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="itemModalLabel">Add Item</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="item_name">Nama Barang</label>
+                        <select id="item_name" class="form-control" required>
+                            <!-- Options will be populated based on selected owner -->
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="item_qty">Quantity</label>
+                        <input type="number" id="item_qty" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="item_unit">Unit</label>
+                        <input type="text" id="item_unit" class="form-control" readonly required>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="add-item-to-list">Add Item</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Item Modal -->
+    <div class="modal fade" id="editItemModal" tabindex="-1" role="dialog" aria-labelledby="editItemModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editItemModalLabel">Edit Item</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="edit_item_name">Nama Barang</label>
+                        <input type="text" id="edit_item_name" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit_item_qty">Quantity</label>
+                        <input type="number" id="edit_item_qty" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit_item_unit">Unit</label>
+                        <input type="text" id="edit_item_unit" class="form-control" readonly required>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="update-item">Update Item</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        $(document).ready(function () {
+            var items = @json($barangMasuk->items);
+            
+            $('#add-item-to-list').click(function () {
+                var name = $('#item_name').val();
+                var qty = $('#item_qty').val();
+                var unit = $('#item_unit').val();
+                
+                if (name && qty && unit) {
+                    var newItem = {
+                        id: Date.now(), // Generate a unique ID for this item
+                        nama_barang: name,
+                        quantity: qty,
+                        unit: unit
+                    };
+                    
+                    $('#items-table tbody').append(`
+                        <tr data-id="${newItem.id}">
+                            <td>${name}</td>
+                            <td>${qty}</td>
+                            <td>${unit}</td>
+                            <td>
+                                <button type="button" class="btn btn-warning btn-sm edit-item">Edit</button>
+                                <button type="button" class="btn btn-danger btn-sm remove-item">Remove</button>
+                            </td>
+                        </tr>
+                    `);
+                    
+                    updateItemsInput();
+                    $('#itemModal').modal('hide');
+                }
+            });
+            
+            $(document).on('click', '.remove-item', function () {
+                $(this).closest('tr').remove();
+                updateItemsInput();
+            });
+            
+            $(document).on('click', '.edit-item', function () {
+                var row = $(this).closest('tr');
+                var id = row.data('id');
+                var name = row.find('td').eq(0).text();
+                var qty = row.find('td').eq(1).text();
+                var unit = row.find('td').eq(2).text();
+                
+                $('#edit_item_name').val(name);
+                $('#edit_item_qty').val(qty);
+                $('#edit_item_unit').val(unit);
+                
+                $('#update-item').data('id', id);
+                $('#editItemModal').modal('show');
+            });
+            
+            $('#update-item').click(function () {
+                var id = $(this).data('id');
+                var name = $('#edit_item_name').val();
+                var qty = $('#edit_item_qty').val();
+                var unit = $('#edit_item_unit').val();
+                
+                var row = $('#items-table tbody').find(`tr[data-id="${id}"]`);
+                
+                row.find('td').eq(0).text(name);
+                row.find('td').eq(1).text(qty);
+                row.find('td').eq(2).text(unit);
+                
+                updateItemsInput();
+                $('#editItemModal').modal('hide');
+            });
+            
+            function updateItemsInput() {
+                var items = [];
+                $('#items-table tbody tr').each(function () {
+                    var id = $(this).data('id');
+                    var name = $(this).find('td').eq(0).text();
+                    var qty = $(this).find('td').eq(1).text();
+                    var unit = $(this).find('td').eq(2).text();
+                    var barang_id_text = $(this).find('td').eq(3).text();
+                    var barang_id = parseInt(barang_id_text, 10);
+                    
+                    items.push({
+                        id: id,
+                        nama_barang: barang_id,
+                        quantity: qty,
+                        unit: unit
+                    });
+                });
+                $('#items-input').val(JSON.stringify(items));
+            }
+        });
+    </script>
+
 </body>
+
 </html>
