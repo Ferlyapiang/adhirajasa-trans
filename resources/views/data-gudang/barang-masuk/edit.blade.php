@@ -240,27 +240,64 @@
         </div>
     </div>
 
-    <!-- Scripts -->
     <script>
         $(document).ready(function () {
+            let editRow; // Store the row to be edited
+            let itemsInTable = []; // Array to keep track of items added to the table
+    
+            // Fetch items based on selected owner
+            $('#nama_pemilik').change(function() {
+                const pemilik = $(this).val();
+                $.ajax({
+                    url: "{{ route('data-gudang.items-by-owner') }}",
+                    method: 'GET',
+                    data: {
+                        pemilik: pemilik
+                    },
+                    success: function(data) {
+                        if (data.error) {
+                            console.error(data.error);
+                            return;
+                        }
+    
+                        let options = '<option value="">Select Item</option>';
+                        $.each(data, function(key, item) {
+                            if (!itemsInTable.includes(item.id)) {
+                                options += `<option value="${item.id}" data-nama="${item.nama_barang}" data-jenis="${item.jenis}">${item.nama_barang}</option>`;
+                            }
+                        });
+                        $('#item_name').html(options);
+                    },
+                    error: function(xhr) {
+                        console.error('AJAX Error:', xhr.responseText);
+                    }
+                });
+            });
+    
             var items = @json($barangMasuk->items);
+    
+            $('#item_name').change(function() {
+                const unit = $('#item_name option:selected').data('jenis');
+                $('#item_unit').val(unit || '');
+            });
             
             $('#add-item-to-list').click(function () {
-                var name = $('#item_name').val();
+                var id = $('#item_name').val();
+                var name = $('#item_name option:selected').data('nama');
                 var qty = $('#item_qty').val();
                 var unit = $('#item_unit').val();
                 
-                if (name && qty && unit) {
+                if (id && qty && unit) {
                     var newItem = {
-                        id: Date.now(), // Generate a unique ID for this item
-                        nama_barang: name,
+                        id: id, // Use item ID for unique identification
+                        nama_barang: name, // Store item name
                         quantity: qty,
                         unit: unit
                     };
                     
                     $('#items-table tbody').append(`
                         <tr data-id="${newItem.id}">
-                            <td>${name}</td>
+                            <td>${name}</td> <!-- Use item name for display -->
                             <td>${qty}</td>
                             <td>${unit}</td>
                             <td>
@@ -318,12 +355,11 @@
                     var name = $(this).find('td').eq(0).text();
                     var qty = $(this).find('td').eq(1).text();
                     var unit = $(this).find('td').eq(2).text();
-                    var barang_id_text = $(this).find('td').eq(3).text();
-                    var barang_id = parseInt(barang_id_text, 10);
+                    var barangID = $(this).find('td').eq(3).text();
                     
                     items.push({
                         id: id,
-                        nama_barang: barang_id,
+                        nama_barang: barangID, // Store item name
                         quantity: qty,
                         unit: unit
                     });
@@ -332,6 +368,7 @@
             }
         });
     </script>
+    
 
 </body>
 
