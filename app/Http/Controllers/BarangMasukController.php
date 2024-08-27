@@ -39,9 +39,6 @@ class BarangMasukController extends Controller
                 'gudang_id' => 'required|exists:warehouses,id',
                 'customer_id' => 'required|exists:customers,id',
                 'nomer_container' => 'required|string',
-                'fifo_in' => 'nullable|numeric',
-                'fifo_out' => 'nullable|numeric',
-                'fifo_sisa' => 'nullable|numeric',
                 'items.*.barang_id' => 'required|exists:barangs,id',
                 'items.*.qty' => 'required|numeric',
                 'items.*.unit' => 'required|string',
@@ -71,9 +68,6 @@ class BarangMasukController extends Controller
                 'jenis_mobil' => $request->jenis_mobil ?? null,  // Handle nullable fields
                 'nomer_polisi' => $request->nomer_polisi ?? null,  // Handle nullable fields
                 'nomer_container' => $request->nomer_container,
-                'fifo_in' => $request->fifo_in ?? 0,
-                'fifo_out' => $request->fifo_out ?? 0,
-                'fifo_sisa' => $request->fifo_sisa ?? 0,
             ]);
             $items = json_decode($request->items, true);
             Log::info('Decoded Items:', ['items' => $items]);
@@ -125,9 +119,6 @@ class BarangMasukController extends Controller
             'gudang_id' => 'required|exists:warehouses,id',
             'customer_id' => 'required|exists:customers,id',
             'nomer_container' => 'nullable|string',
-            'fifo_in' => 'required|numeric',
-            'fifo_out' => 'required|numeric',
-            'fifo_sisa' => 'required|numeric',
         ]);
 
         $barangMasuk->update([
@@ -137,9 +128,6 @@ class BarangMasukController extends Controller
             'jenis_mobil' => $request->jenis_mobil ?? null,
             'nomer_polisi' => $request->nomer_polisi ?? null,
             'nomer_container' => $request->nomer_container,
-            'fifo_in' => $request->fifo_in,
-            'fifo_out' => $request->fifo_out,
-            'fifo_sisa' => $request->fifo_sisa,
         ]);
 
         return redirect()->route('data-gudang.barang-masuk.index')->with('success', 'Data barang masuk berhasil diperbarui.');

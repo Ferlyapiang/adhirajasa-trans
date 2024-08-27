@@ -100,22 +100,6 @@
                         <label for="nomer_container">Nomer Container</label>
                         <input type="text" name="nomer_container" id="nomer_container" class="form-control" value="{{ $barangMasuk->nomer_container }}">
                     </div>
-
-                    <div class="form-group">
-                        <label for="fifo_in">FIFO In</label>
-                        <input type="number" name="fifo_in" id="fifo_in" class="form-control" value="{{ $barangMasuk->fifo_in }}" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="fifo_out">FIFO Out</label>
-                        <input type="number" name="fifo_out" id="fifo_out" class="form-control" value="{{ $barangMasuk->fifo_out }}" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="fifo_sisa">FIFO Sisa</label>
-                        <input type="number" name="fifo_sisa" id="fifo_sisa" class="form-control" value="{{ $barangMasuk->fifo_sisa }}" required>
-                    </div>
-
                     <button type="submit" class="btn btn-primary">Update</button>
                     <a href="{{ route('master-data.barang-masuk.index') }}" class="btn btn-secondary">Batal</a>
                 </form>

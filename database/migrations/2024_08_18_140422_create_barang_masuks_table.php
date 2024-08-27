@@ -20,9 +20,6 @@ return new class extends Migration
             $table->string('jenis_mobil')->nullable();
             $table->string('nomer_polisi')->nullable();
             $table->string('nomer_container');
-            $table->integer('fifo_in')->default(0);
-            $table->integer('fifo_out')->default(0);
-            $table->integer('fifo_sisa')->default(0);
             $table->timestamps();
         });
 

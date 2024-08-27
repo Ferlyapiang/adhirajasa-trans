@@ -24,6 +24,9 @@
             border-radius: 10px;
             overflow: hidden;
             border: 1px solid #dee2e6;
+            display: block;  /* Makes the table scrollable */
+            overflow-x: auto;  /* Enables horizontal scrolling */
+            white-space: nowrap;
         }
 
         #barangMasukTable thead {

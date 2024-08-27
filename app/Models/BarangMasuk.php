@@ -14,14 +14,16 @@ class BarangMasuk extends Model
         'jenis_mobil',
         'nomer_polisi',
         'nomer_container',
-        'fifo_in',
-        'fifo_out',
-        'fifo_sisa',
     ];
 
     public function items()
     {
         return $this->hasMany(BarangMasukItem::class);
+    }
+    
+    public function getFifoInAttribute()
+    {
+        return $this->items->sum('qty');
     }
 }
 
