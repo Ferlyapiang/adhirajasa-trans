@@ -245,34 +245,70 @@
             let editRow; // Store the row to be edited
             let itemsInTable = []; // Array to keep track of items added to the table
     
-            // Fetch items based on selected owner
-            $('#nama_pemilik').change(function() {
-                const pemilik = $(this).val();
-                $.ajax({
-                    url: "{{ route('data-gudang.items-by-owner') }}",
-                    method: 'GET',
-                    data: {
-                        pemilik: pemilik
-                    },
-                    success: function(data) {
-                        if (data.error) {
-                            console.error(data.error);
-                            return;
-                        }
+            // // Fetch items based on selected owner
+            // $('#nama_pemilik').change(function() {
+            //     const pemilik = $(this).val();
+            //     $.ajax({
+            //         url: "{{ route('data-gudang.items-by-owner') }}",
+            //         method: 'GET',
+            //         data: {
+            //             pemilik: pemilik
+            //         },
+            //         success: function(data) {
+            //             if (data.error) {
+            //                 console.error(data.error);
+            //                 return;
+            //             }
     
-                        let options = '<option value="">Select Item</option>';
-                        $.each(data, function(key, item) {
-                            if (!itemsInTable.includes(item.id)) {
-                                options += `<option value="${item.id}" data-nama="${item.nama_barang}" data-jenis="${item.jenis}">${item.nama_barang}</option>`;
-                            }
-                        });
-                        $('#item_name').html(options);
-                    },
-                    error: function(xhr) {
-                        console.error('AJAX Error:', xhr.responseText);
+            //             let options = '<option value="">Select Item</option>';
+            //             $.each(data, function(key, item) {
+            //                 if (!itemsInTable.includes(item.id)) {
+            //                     options += `<option value="${item.id}" data-nama="${item.nama_barang}" data-jenis="${item.jenis}">${item.nama_barang}</option>`;
+            //                 }
+            //             });
+            //             $('#item_name').html(options);
+            //         },
+            //         error: function(xhr) {
+            //             console.error('AJAX Error:', xhr.responseText);
+            //         }
+            //     });
+            // });
+            const pemilik = $('#nama_pemilik').val();
+            function fetchItemsForOwner(ownerId) {
+            $.ajax({
+                url: "{{ route('data-gudang.items-by-owner') }}",
+                method: 'GET',
+                data: {
+                    pemilik: ownerId
+                },
+                success: function(data) {
+                    if (data.error) {
+                        console.error(data.error);
+                        return;
                     }
-                });
+
+                    let options = '<option value="">Select Item</option>';
+                    $.each(data, function(key, item) {
+                        if (!itemsInTable.includes(item.id)) {
+                            options += `<option value="${item.id}" data-nama="${item.nama_barang}" data-jenis="${item.jenis}">${item.nama_barang}</option>`;
+                        }
+                    });
+                    $('#item_name').html(options);
+                },
+                error: function(xhr) {
+                    console.error('AJAX Error:', xhr.responseText);
+                }
             });
+        }
+
+        // Fetch items for the currently selected owner on page load
+        fetchItemsForOwner(pemilik);
+
+        // Optional: Update items when the owner changes
+        $('#nama_pemilik').change(function() {
+            const newPemilik = $(this).val();
+            fetchItemsForOwner(newPemilik);
+        });
     
             var items = @json($barangMasuk->items);
     
