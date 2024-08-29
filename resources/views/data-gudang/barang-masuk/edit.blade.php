@@ -244,146 +244,92 @@
         $(document).ready(function () {
             let editRow; // Store the row to be edited
             let itemsInTable = []; // Array to keep track of items added to the table
-    
-            // // Fetch items based on selected owner
-            // $('#nama_pemilik').change(function() {
-            //     const pemilik = $(this).val();
-            //     $.ajax({
-            //         url: "{{ route('data-gudang.items-by-owner') }}",
-            //         method: 'GET',
-            //         data: {
-            //             pemilik: pemilik
-            //         },
-            //         success: function(data) {
-            //             if (data.error) {
-            //                 console.error(data.error);
-            //                 return;
-            //             }
-    
-            //             let options = '<option value="">Select Item</option>';
-            //             $.each(data, function(key, item) {
-            //                 if (!itemsInTable.includes(item.id)) {
-            //                     options += `<option value="${item.id}" data-nama="${item.nama_barang}" data-jenis="${item.jenis}">${item.nama_barang}</option>`;
-            //                 }
-            //             });
-            //             $('#item_name').html(options);
-            //         },
-            //         error: function(xhr) {
-            //             console.error('AJAX Error:', xhr.responseText);
-            //         }
-            //     });
-            // });
             const pemilik = $('#nama_pemilik').val();
+        
             function fetchItemsForOwner(ownerId) {
-            $.ajax({
-                url: "{{ route('data-gudang.items-by-owner') }}",
-                method: 'GET',
-                data: {
-                    pemilik: ownerId
-                },
-                success: function(data) {
-                    if (data.error) {
-                        console.error(data.error);
-                        return;
+                $.ajax({
+                    url: "{{ route('data-gudang.items-by-owner') }}",
+                    method: 'GET',
+                    data: { pemilik: ownerId },
+                    success: function(data) {
+                        let options = '<option value="">Select Item</option>';
+                        $.each(data, function(key, item) {
+                            if (!itemsInTable.includes(item.id)) {
+                                options += `<option value="${item.id}" data-nama="${item.nama_barang}" data-jenis="${item.jenis}">${item.nama_barang}</option>`;
+                            }
+                        });
+                        $('#item_name').html(options);
+                    },
+                    error: function(xhr) {
+                        console.error('AJAX Error:', xhr.responseText);
                     }
-
-                    let options = '<option value="">Select Item</option>';
-                    $.each(data, function(key, item) {
-                        if (!itemsInTable.includes(item.id)) {
-                            options += `<option value="${item.id}" data-nama="${item.nama_barang}" data-jenis="${item.jenis}">${item.nama_barang}</option>`;
-                        }
-                    });
-                    $('#item_name').html(options);
-                },
-                error: function(xhr) {
-                    console.error('AJAX Error:', xhr.responseText);
-                }
+                });
+            }
+        
+            fetchItemsForOwner(pemilik);
+        
+            $('#nama_pemilik').change(function() {
+                fetchItemsForOwner($(this).val());
             });
-        }
-
-        // Fetch items for the currently selected owner on page load
-        fetchItemsForOwner(pemilik);
-
-        // Optional: Update items when the owner changes
-        $('#nama_pemilik').change(function() {
-            const newPemilik = $(this).val();
-            fetchItemsForOwner(newPemilik);
-        });
-    
-            var items = @json($barangMasuk->items);
-    
+        
             $('#item_name').change(function() {
-                const unit = $('#item_name option:selected').data('jenis');
-                $('#item_unit').val(unit || '');
+                $('#item_unit').val($('#item_name option:selected').data('jenis') || '');
             });
-            
+        
             $('#add-item-to-list').click(function () {
                 var id = $('#item_name').val();
                 var name = $('#item_name option:selected').data('nama');
                 var qty = $('#item_qty').val();
                 var unit = $('#item_unit').val();
-                
+        
                 if (id && qty && unit) {
-                    var newItem = {
-                        id: id, // Use item ID for unique identification
-                        nama_barang: name, // Store item name
-                        quantity: qty,
-                        unit: unit
-                    };
-                    
+                    var newItem = { id: id, nama_barang: name, quantity: qty, unit: unit };
+        
                     $('#items-table tbody').append(`
                         <tr data-id="${newItem.id}">
-                            <td>${name}</td> <!-- Use item name for display -->
-                            <td>${qty}</td>
-                            <td>${unit}</td>
+                            <td>${newItem.nama_barang}</td>
+                            <td>${newItem.quantity}</td>
+                            <td>${newItem.unit}</td>
+                            <td style="display: none">${newItem.id}</td>
                             <td>
                                 <button type="button" class="btn btn-warning btn-sm edit-item">Edit</button>
                                 <button type="button" class="btn btn-danger btn-sm remove-item">Remove</button>
                             </td>
                         </tr>
                     `);
-                    
+        
+                    itemsInTable.push(parseInt(newItem.id));
                     updateItemsInput();
                     $('#itemModal').modal('hide');
                 }
             });
-            
+        
             $(document).on('click', '.remove-item', function () {
-                $(this).closest('tr').remove();
+                var row = $(this).closest('tr');
+                itemsInTable = itemsInTable.filter(itemId => itemId !== parseInt(row.data('id')));
+                row.remove();
                 updateItemsInput();
             });
-            
+        
             $(document).on('click', '.edit-item', function () {
                 var row = $(this).closest('tr');
-                var id = row.data('id');
-                var name = row.find('td').eq(0).text();
-                var qty = row.find('td').eq(1).text();
-                var unit = row.find('td').eq(2).text();
-                
-                $('#edit_item_name').val(name);
-                $('#edit_item_qty').val(qty);
-                $('#edit_item_unit').val(unit);
-                
-                $('#update-item').data('id', id);
+                $('#edit_item_name').val(row.find('td').eq(0).text());
+                $('#edit_item_qty').val(row.find('td').eq(1).text());
+                $('#edit_item_unit').val(row.find('td').eq(2).text());
+                $('#update-item').data('id', row.data('id'));
                 $('#editItemModal').modal('show');
             });
-            
+        
             $('#update-item').click(function () {
                 var id = $(this).data('id');
-                var name = $('#edit_item_name').val();
-                var qty = $('#edit_item_qty').val();
-                var unit = $('#edit_item_unit').val();
-                
                 var row = $('#items-table tbody').find(`tr[data-id="${id}"]`);
-                
-                row.find('td').eq(0).text(name);
-                row.find('td').eq(1).text(qty);
-                row.find('td').eq(2).text(unit);
-                
+                row.find('td').eq(0).text($('#edit_item_name').val());
+                row.find('td').eq(1).text($('#edit_item_qty').val());
+                row.find('td').eq(2).text($('#edit_item_unit').val());
                 updateItemsInput();
                 $('#editItemModal').modal('hide');
             });
-            
+        
             function updateItemsInput() {
                 var items = [];
                 $('#items-table tbody tr').each(function () {
@@ -391,11 +337,12 @@
                     var name = $(this).find('td').eq(0).text();
                     var qty = $(this).find('td').eq(1).text();
                     var unit = $(this).find('td').eq(2).text();
-                    var barangID = $(this).find('td').eq(3).text();
-                    
+                    var barang_id = $(this).find('td').eq(3).text(); // Get the hidden barang_id
+        
                     items.push({
                         id: id,
-                        nama_barang: barangID, // Store item name
+                        // barang_id: barang_id, // Store barang_id
+                        nama_barang: barang_id,
                         quantity: qty,
                         unit: unit
                     });
@@ -403,7 +350,8 @@
                 $('#items-input').val(JSON.stringify(items));
             }
         });
-    </script>
+        </script>
+        
     
 
 </body>
