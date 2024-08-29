@@ -21,6 +21,23 @@ class BarangMasukController extends Controller
         return view('data-gudang.barang-masuk.index', compact('barangMasuks'));
     }
 
+    // BarangMasukController.php
+    public function showDetail($id)
+    // {
+    //     $barangMasuk = BarangMasuk::findOrFail($id);
+    //     return view('data-gudang.barang-masuk.detail', compact('barangMasuk'));
+    // }
+    {
+        $barangMasuk = BarangMasuk::findOrFail($id);
+        $barangs = Barang::all();
+        $pemilik = Customer::all();
+        $gudangs = Warehouse::all();
+        $items = $barangMasuk->items;
+
+        return view('data-gudang.barang-masuk.detail', compact('barangMasuk', 'barangs', 'pemilik', 'gudangs', 'items'));
+    }
+
+
     public function create()
     {
         $barangs = Barang::all();

@@ -4,7 +4,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Create Barang Masuk</title>
+    <title>Detail Barang Masuk</title>
+    
 
     <!-- Font Awesome Icons -->
     <link rel="icon" type="image/svg+xml" href="{{ asset('ats/ATSLogo.png') }}" />
@@ -75,55 +76,62 @@
 
             <!-- Main content -->
             <div class="container-fluid pl-4">
-                <h2>Tambah Barang Masuk {{ $barangMasuk->joc_number }}</h2>
-                <form id="barangMasukForm" action="{{ route('data-gudang.barang-masuk.store') }}" method="POST">
+                <h2>Detail Barang Masuk {{ $barangMasuk->joc_number }}</h2>
+                <form id="barangMasukForm" action="{{ route('data-gudang.barang-masuk.update', $barangMasuk->id) }}"
+                    method="POST">
                     @csrf
+                    @method('PUT')
 
                     <div class="form-group">
                         <label for="tanggal_masuk">Tanggal Masuk</label>
                         <input type="date" name="tanggal_masuk" id="tanggal_masuk" class="form-control"
-                            placeholder="Select date" required>
+                            value="{{ $barangMasuk->tanggal_masuk }}" placeholder="Select date" readonly>
                     </div>
 
                     <div class="form-group">
                         <label for="gudang">Gudang</label>
-                        <select name="gudang_id" id="gudang" class="form-control" required>
-                            <option value="" disabled selected>Pilih Gudang Penyimpanan</option>
+                        <select name="gudang_id" id="gudang" class="form-control" required disabled>
+                            <option value="" disabled selected>Pilih Nama Gudang Penyimpanan</option>
                             @foreach ($gudangs as $gudang)
-                                <option value="{{ $gudang->id }}">{{ $gudang->name }}</option>
+                                <option value="{{ $gudang->id }}"
+                                    {{ $gudang->id == $barangMasuk->gudang_id ? 'selected' : '' }}>{{ $gudang->name }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
 
                     <div class="form-group">
                         <label for="nama_pemilik">Nama Pemilik</label>
-                        <select name="customer_id" id="nama_pemilik" class="form-control" required>
+                        <select name="customer_id" id="nama_pemilik" class="form-control" required disabled>
                             <option value="" disabled selected>Pilih Nama Pemilik Barang</option>
                             @foreach ($pemilik as $owner)
-                                <option value="{{ $owner->id }}">{{ $owner->name }}</option>
+                                <option value="{{ $owner->id }}"
+                                    {{ $owner->id == $barangMasuk->customer_id ? 'selected' : '' }}>{{ $owner->name }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
 
                     <div class="form-group">
                         <label for="jenis_mobil">Jenis Mobil (Optional)</label>
-                        <input type="text" name="jenis_mobil" id="jenis_mobil" class="form-control">
+                        <input type="text" name="jenis_mobil" id="jenis_mobil" class="form-control"
+                            value="{{ $barangMasuk->jenis_mobil }}" readonly>
                     </div>
 
                     <div class="form-group">
                         <label for="nomer_polisi">Nomer Polisi (Optional)</label>
-                        <input type="text" name="nomer_polisi" id="nomer_polisi" class="form-control">
+                        <input type="text" name="nomer_polisi" id="nomer_polisi" class="form-control"
+                            value="{{ $barangMasuk->nomer_polisi }}" readonly>
                     </div>
 
                     <div class="form-group">
                         <label for="nomer_container">Nomer Container</label>
-                        <input type="text" name="nomer_container" id="nomer_container" class="form-control" required>
+                        <input type="text" name="nomer_container" id="nomer_container" class="form-control"
+                            value="{{ $barangMasuk->nomer_container }}" readonly>
                     </div>
 
                     <h2>Items</h2>
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#itemModal">Add
-                        Item</button>
-                    <input type="hidden" name="items" id="items-input" value="[]">
+                
                     <!-- Items Table -->
                     <table id="items-table">
                         <thead>
@@ -131,16 +139,21 @@
                                 <th>Nama Barang</th>
                                 <th>Quantity</th>
                                 <th>Unit</th>
-                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- Items will be added here dynamically -->
+                            @foreach ($barangMasuk->items as $item)
+                                <tr data-id="{{ $item->id }}">
+                                    <td>{{ $item->barang->nama_barang ?? 'Unknown' }}</td>
+                                    <td>{{ $item->qty }}</td>
+                                    <td>{{ $item->unit }}</td>
+                                    <td style="display: none">{{ $item->barang_id }}</td>
+                                </tr>
+                            @endforeach
                         </tbody>
                     </table>
 
                     <br><br>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
                     <a href="{{ route('data-gudang.barang-masuk.index') }}" class="btn btn-secondary">Batal</a>
                 </form>
             </div>
@@ -220,81 +233,38 @@
                         <label for="edit_item_qty">Quantity</label>
                         <input type="number" id="edit_item_qty" class="form-control" required>
                     </div>
+
                     <div class="form-group">
                         <label for="edit_item_unit">Unit</label>
                         <input type="text" id="edit_item_unit" class="form-control" readonly required>
                     </div>
+
+                    <input type="hidden" id="edit_item_id">
+
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" id="update-item">Update Item</button>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
     </div>
 
-
-
     <script>
-        $(document).ready(function() {
-            let editRow; // Store the row to be edited
-            let itemsInTable = []; // Array to keep track of items added to the table
-
-            // Fetch items based on selected owner
-            $('#nama_pemilik').change(function() {
-                const pemilik = $(this).val();
-                $.ajax({
-                    url: "{{ route('data-gudang.items-by-owner') }}",
-                    method: 'GET',
-                    data: {
-                        pemilik: pemilik
-                    },
-                    success: function(data) {
-                        if (data.error) {
-                            console.error(data.error);
-                            return;
-                        }
-
-                        let options = '<option value="">Select Item</option>';
-                        $.each(data, function(key, item) {
-                            if (!itemsInTable.includes(item.id)) {
-                                options +=
-                                    `<option value="${item.id}" data-jenis="${item.jenis}">${item.nama_barang}</option>`;
-                            }
-                        });
-                        $('#item_name').html(options);
-                    },
-                    error: function(xhr) {
-                        console.error('AJAX Error:', xhr.responseText);
-                    }
+        $(document).ready(function () {
+            $('#item_name').on('change', function () {
+                const itemId = $(this).val();
+                $.get(`/items/${itemId}`, function (data) {
+                    $('#item_unit').val(data.unit);
                 });
             });
 
-            $('#barangMasukForm').on('submit', function(event) {
-                if ($('#items-table tbody tr').length === 0) {
-                    event.preventDefault();
-                    alert('Tolong masukan Items setidaknya 1 barang.');
-                }
-            });
-
-            // Fetch unit for selected item
-            $('#item_name').change(function() {
-                const unit = $('#item_name option:selected').data('jenis');
-                $('#item_unit').val(unit || '');
-            });
-
-            // Add item to list
-            $('#add-item-to-list').click(function() {
+            $('#add-item-to-list').on('click', function () {
                 const itemName = $('#item_name option:selected').text();
-                const itemId = $('#item_name').val(); // Get the selected item's id
                 const itemQty = $('#item_qty').val();
                 const itemUnit = $('#item_unit').val();
 
                 if (itemName && itemQty && itemUnit) {
-                    // Check if the item is already in the table
-                    if (!itemsInTable.includes(itemId)) {
-                        $('#items-table tbody').append(`
-                    <tr data-id="${itemId}">
+                    const newRow = `<tr>
                         <td>${itemName}</td>
                         <td>${itemQty}</td>
                         <td>${itemUnit}</td>
@@ -302,87 +272,41 @@
                             <button type="button" class="btn btn-warning btn-sm edit-item">Edit</button>
                             <button type="button" class="btn btn-danger btn-sm remove-item">Remove</button>
                         </td>
-                    </tr>
-                `);
+                    </tr>`;
 
-                        // Add the item ID to the itemsInTable array
-                        itemsInTable.push(itemId);
-
-                        // Clear the form fields
-                        $('#item_name').val('');
-                        $('#item_qty').val('');
-                        $('#item_unit').val('');
-
-                        $('#itemModal').modal('hide');
-                        updateItemsInput(); // Update hidden input when item is added
-                    } else {
-                        alert('This item is already in the list');
-                    }
-                } else {
-                    alert('Please fill in all fields');
+                    $('#items-table tbody').append(newRow);
+                    $('#itemModal').modal('hide');
                 }
             });
 
-            // Remove item from list
-            $(document).on('click', '.remove-item', function() {
+            $(document).on('click', '.edit-item', function () {
                 const row = $(this).closest('tr');
+                const itemName = row.find('td').eq(0).text();
+                const itemQty = row.find('td').eq(1).text();
+                const itemUnit = row.find('td').eq(2).text();
                 const itemId = row.data('id');
 
-                // Remove the item ID from the itemsInTable array
-                itemsInTable = itemsInTable.filter(id => id !== itemId);
-
-                row.remove();
-
-                updateItemsInput(); // Update hidden input when item is removed
-            });
-
-            // Open edit modal
-            $(document).on('click', '.edit-item', function() {
-                editRow = $(this).closest('tr');
-                const itemName = editRow.find('td:eq(0)').text(); // Get the item name
-                const itemQty = editRow.find('td:eq(1)').text();
-                const itemUnit = editRow.find('td:eq(2)').text();
-
-                $('#edit_item_name').val(itemName); // Set item name in readonly field
+                $('#edit_item_name').val(itemName);
                 $('#edit_item_qty').val(itemQty);
                 $('#edit_item_unit').val(itemUnit);
+                $('#edit_item_id').val(itemId);
 
                 $('#editItemModal').modal('show');
             });
 
-            // Update item in list
-            $('#update-item').click(function() {
-                const updatedQty = $('#edit_item_qty').val();
-                const updatedUnit = $('#edit_item_unit').val();
+            $('#update-item').on('click', function () {
+                const itemId = $('#edit_item_id').val();
+                const itemQty = $('#edit_item_qty').val();
 
-                if (updatedQty) {
-                    editRow.find('td:eq(1)').text(updatedQty);
-                    editRow.find('td:eq(2)').text(updatedUnit);
-                    $('#editItemModal').modal('hide');
-                    updateItemsInput(); // Update hidden input when item is edited
-                } else {
-                    alert('Please enter a valid quantity');
-                }
+                const row = $(`#items-table tbody tr[data-id="${itemId}"]`);
+                row.find('td').eq(1).text(itemQty);
+
+                $('#editItemModal').modal('hide');
             });
 
-            // Function to update the hidden input field with the list of items
-            function updateItemsInput() {
-                let items = [];
-
-                $('#items-table tbody tr').each(function() {
-                    const itemId = $(this).data('id');
-                    const itemQty = $(this).find('td:eq(1)').text();
-                    const itemUnit = $(this).find('td:eq(2)').text();
-
-                    items.push({
-                        id: itemId,
-                        quantity: itemQty,
-                        unit: itemUnit
-                    });
-                });
-
-                $('#items-input').val(JSON.stringify(items));
-            }
+            $(document).on('click', '.remove-item', function () {
+                $(this).closest('tr').remove();
+            });
         });
     </script>
 </body>

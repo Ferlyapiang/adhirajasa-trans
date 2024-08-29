@@ -75,7 +75,7 @@
 
             <!-- Main content -->
             <div class="container-fluid pl-4">
-                <h1>Edit Barang Masuk</h1>
+                <h2>Edit Barang Masuk {{ $barangMasuk->joc_number }}</h2>
                 <form id="barangMasukForm" action="{{ route('data-gudang.barang-masuk.update', $barangMasuk->id) }}"
                     method="POST">
                     @csrf

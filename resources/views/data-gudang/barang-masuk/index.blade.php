@@ -111,7 +111,12 @@
                                             <tr>
                                                 <td>{{ $loop->iteration }}</td>
                                                 <td>{{ $barangMasuk->tanggal_masuk }}</td>
-                                                <td>{{ $barangMasuk->joc_number }}</td>
+                                                {{-- <td>{{ $barangMasuk->joc_number }}</td> --}}
+                                                <td>
+                                                    <a href="{{ route('data-gudang.barang-masuk.detail', $barangMasuk->id) }}">
+                                                        {{ $barangMasuk->joc_number }}
+                                                    </a>
+                                                </td>
                                                 <td>{{ $barangMasuk->jenis_mobil }}</td>
                                                 <td>{{ $barangMasuk->nomer_polisi }}</td>
                                                 <td>{{ $barangMasuk->nomer_container }}</td>
