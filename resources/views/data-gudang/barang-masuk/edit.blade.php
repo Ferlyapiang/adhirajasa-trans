@@ -61,7 +61,8 @@
             <div class="content-header">
                 <div class="container-fluid pl-4">
                     <div class="row mb-1">
-                        <div class="col-sm-12" style="border: 1px solid #D0D4DB; border-radius: 10px; background-color: white; padding: 10px;">
+                        <div class="col-sm-12"
+                            style="border: 1px solid #D0D4DB; border-radius: 10px; background-color: white; padding: 10px;">
                             <h1 class="m-0" style="font-weight: bold; font-size: 16px; padding-left: 10px;">
                                 <span style="font-weight: 370;">Data Gudang |</span>
                                 <span>Barang Masuk</span>
@@ -75,20 +76,25 @@
             <!-- Main content -->
             <div class="container-fluid pl-4">
                 <h1>Edit Barang Masuk</h1>
-                <form id="barangMasukForm" action="{{ route('data-gudang.barang-masuk.update', $barangMasuk->id) }}" method="POST">
+                <form id="barangMasukForm" action="{{ route('data-gudang.barang-masuk.update', $barangMasuk->id) }}"
+                    method="POST">
                     @csrf
                     @method('PUT')
 
                     <div class="form-group">
                         <label for="tanggal_masuk">Tanggal Masuk</label>
-                        <input type="date" name="tanggal_masuk" id="tanggal_masuk" class="form-control" value="{{ $barangMasuk->tanggal_masuk }}" placeholder="Select date" required>
+                        <input type="date" name="tanggal_masuk" id="tanggal_masuk" class="form-control"
+                            value="{{ $barangMasuk->tanggal_masuk }}" placeholder="Select date" required>
                     </div>
 
                     <div class="form-group">
                         <label for="gudang">Gudang</label>
                         <select name="gudang_id" id="gudang" class="form-control" required>
-                            @foreach($gudangs as $gudang)
-                                <option value="{{ $gudang->id }}" {{ $gudang->id == $barangMasuk->gudang_id ? 'selected' : '' }}>{{ $gudang->name }}</option>
+                            <option value="" disabled selected>Pilih Nama Gudang Penyimpanan</option>
+                            @foreach ($gudangs as $gudang)
+                                <option value="{{ $gudang->id }}"
+                                    {{ $gudang->id == $barangMasuk->gudang_id ? 'selected' : '' }}>{{ $gudang->name }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
@@ -96,30 +102,38 @@
                     <div class="form-group">
                         <label for="nama_pemilik">Nama Pemilik</label>
                         <select name="customer_id" id="nama_pemilik" class="form-control" required>
-                            @foreach($pemilik as $owner)
-                                <option value="{{ $owner->id }}" {{ $owner->id == $barangMasuk->customer_id ? 'selected' : '' }}>{{ $owner->name }}</option>
+                            <option value="" disabled selected>Pilih Nama Pemilik Barang</option>
+                            @foreach ($pemilik as $owner)
+                                <option value="{{ $owner->id }}"
+                                    {{ $owner->id == $barangMasuk->customer_id ? 'selected' : '' }}>{{ $owner->name }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
 
                     <div class="form-group">
                         <label for="jenis_mobil">Jenis Mobil (Optional)</label>
-                        <input type="text" name="jenis_mobil" id="jenis_mobil" class="form-control" value="{{ $barangMasuk->jenis_mobil }}">
+                        <input type="text" name="jenis_mobil" id="jenis_mobil" class="form-control"
+                            value="{{ $barangMasuk->jenis_mobil }}">
                     </div>
 
                     <div class="form-group">
                         <label for="nomer_polisi">Nomer Polisi (Optional)</label>
-                        <input type="text" name="nomer_polisi" id="nomer_polisi" class="form-control" value="{{ $barangMasuk->nomer_polisi }}">
+                        <input type="text" name="nomer_polisi" id="nomer_polisi" class="form-control"
+                            value="{{ $barangMasuk->nomer_polisi }}">
                     </div>
 
                     <div class="form-group">
                         <label for="nomer_container">Nomer Container</label>
-                        <input type="text" name="nomer_container" id="nomer_container" class="form-control" value="{{ $barangMasuk->nomer_container }}">
+                        <input type="text" name="nomer_container" id="nomer_container" class="form-control"
+                            value="{{ $barangMasuk->nomer_container }}" required>
                     </div>
 
                     <h2>Items</h2>
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#itemModal">Add Item</button>
-                    <input type="hidden" name="items" id="items-input" value="{{ json_encode($barangMasuk->items) }}">
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#itemModal">Add
+                        Item</button>
+                    <input type="hidden" name="items" id="items-input"
+                        value="{{ json_encode($barangMasuk->items) }}">
                     <!-- Items Table -->
                     <table id="items-table">
                         <thead>
@@ -131,17 +145,17 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($barangMasuk->items as $item)
-                            <tr data-id="{{ $item->id }}">
-                                <td>{{ $item->barang->nama_barang ?? 'Unknown'  }}</td>
-                                <td>{{ $item->qty }}</td>
-                                <td>{{ $item->unit }}</td>
-                                <td style="display: none">{{ $item->barang_id }}</td>
-                                <td>
-                                    <button type="button" class="btn btn-warning btn-sm edit-item">Edit</button>
-                                    <button type="button" class="btn btn-danger btn-sm remove-item">Remove</button>
-                                </td>
-                            </tr>
+                            @foreach ($barangMasuk->items as $item)
+                                <tr data-id="{{ $item->id }}">
+                                    <td>{{ $item->barang->nama_barang ?? 'Unknown' }}</td>
+                                    <td>{{ $item->qty }}</td>
+                                    <td>{{ $item->unit }}</td>
+                                    <td style="display: none">{{ $item->barang_id }}</td>
+                                    <td>
+                                        <button type="button" class="btn btn-warning btn-sm edit-item">Edit</button>
+                                        <button type="button" class="btn btn-danger btn-sm remove-item">Remove</button>
+                                    </td>
+                                </tr>
                             @endforeach
                         </tbody>
                     </table>
@@ -169,7 +183,8 @@
     <script src="{{ asset('lte/dist/js/adminlte.min.js') }}"></script>
 
     <!-- Modal -->
-    <div class="modal fade" id="itemModal" tabindex="-1" role="dialog" aria-labelledby="itemModalLabel" aria-hidden="true">
+    <div class="modal fade" id="itemModal" tabindex="-1" role="dialog" aria-labelledby="itemModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -206,7 +221,8 @@
     </div>
 
     <!-- Edit Item Modal -->
-    <div class="modal fade" id="editItemModal" tabindex="-1" role="dialog" aria-labelledby="editItemModalLabel" aria-hidden="true">
+    <div class="modal fade" id="editItemModal" tabindex="-1" role="dialog" aria-labelledby="editItemModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -239,23 +255,37 @@
             </div>
         </div>
     </div>
-
     <script>
-        $(document).ready(function () {
+        $(document).ready(function() {
             let editRow; // Store the row to be edited
             let itemsInTable = []; // Array to keep track of items added to the table
-            const pemilik = $('#nama_pemilik').val();
-        
+            let barangIdsInTable = []; // Array to keep track of barang_id from the table
+
+            // Initialize itemsInTable and barangIdsInTable with existing items from the table
+            $('#items-table tbody tr').each(function() {
+                const itemId = parseInt($(this).data('id'));
+                const barangId = $(this).find('td').eq(3).text().trim(); // Get the hidden barang_id
+                if (!isNaN(itemId)) {
+                    itemsInTable.push(itemId);
+                }
+                if (barangId) {
+                    barangIdsInTable.push(barangId);
+                }
+            });
+
             function fetchItemsForOwner(ownerId) {
                 $.ajax({
                     url: "{{ route('data-gudang.items-by-owner') }}",
                     method: 'GET',
-                    data: { pemilik: ownerId },
+                    data: {
+                        pemilik: ownerId
+                    },
                     success: function(data) {
-                        let options = '<option value="">Select Item</option>';
+                        let options = '<option value="" disabled selected>Select Item</option>';
                         $.each(data, function(key, item) {
                             if (!itemsInTable.includes(item.id)) {
-                                options += `<option value="${item.id}" data-nama="${item.nama_barang}" data-jenis="${item.jenis}">${item.nama_barang}</option>`;
+                                options +=
+                                    `<option value="${item.id}" data-nama="${item.nama_barang}" data-jenis="${item.jenis}">${item.nama_barang}</option>`;
                             }
                         });
                         $('#item_name').html(options);
@@ -265,80 +295,108 @@
                     }
                 });
             }
-        
-            fetchItemsForOwner(pemilik);
-        
+
+            fetchItemsForOwner($('#nama_pemilik').val());
+
             $('#nama_pemilik').change(function() {
                 fetchItemsForOwner($(this).val());
             });
-        
+
             $('#item_name').change(function() {
                 $('#item_unit').val($('#item_name option:selected').data('jenis') || '');
             });
-        
-            $('#add-item-to-list').click(function () {
-                var id = $('#item_name').val();
-                var name = $('#item_name option:selected').data('nama');
-                var qty = $('#item_qty').val();
-                var unit = $('#item_unit').val();
-        
+
+            $('#add-item-to-list').click(function() {
+                const id = parseInt($('#item_name').val());
+                const name = $('#item_name option:selected').data('nama');
+                const qty = $('#item_qty').val();
+                const unit = $('#item_unit').val();
+                const barangId = $('#item_name option:selected').val(); // Assume this is barang_id
+
+                // Check for duplicate item in the table
+                if (barangIdsInTable.includes(barangId)) {
+                    alert('This item is already in the table.');
+                    return; // Stop the function here if duplicate is found
+                }
+
                 if (id && qty && unit) {
-                    var newItem = { id: id, nama_barang: name, quantity: qty, unit: unit };
-        
+                    const newItem = {
+                        id: id,
+                        nama_barang: name,
+                        quantity: qty,
+                        unit: unit
+                    };
+
                     $('#items-table tbody').append(`
-                        <tr data-id="${newItem.id}">
-                            <td>${newItem.nama_barang}</td>
-                            <td>${newItem.quantity}</td>
-                            <td>${newItem.unit}</td>
-                            <td style="display: none">${newItem.id}</td>
-                            <td>
-                                <button type="button" class="btn btn-warning btn-sm edit-item">Edit</button>
-                                <button type="button" class="btn btn-danger btn-sm remove-item">Remove</button>
-                            </td>
-                        </tr>
-                    `);
-        
-                    itemsInTable.push(parseInt(newItem.id));
-                    updateItemsInput();
-                    $('#itemModal').modal('hide');
+                            <tr data-id="${newItem.id}">
+                                <td>${newItem.nama_barang}</td>
+                                <td>${newItem.quantity}</td>
+                                <td>${newItem.unit}</td>
+                                <td style="display: none">${barangId}</td>
+                                <td>
+                                    <button type="button" class="btn btn-warning btn-sm edit-item">Edit</button>
+                                    <button type="button" class="btn btn-danger btn-sm remove-item">Remove</button>
+                                </td>
+                            </tr>
+                        `);
+
+                    itemsInTable.push(newItem.id); // Add the new item id to the list
+                    barangIdsInTable.push(barangId); // Add the new barang_id to the list
+                    updateItemsInput(); // Update hidden input field
+                    $('#itemModal').modal('hide'); // Close the modal
+
+                    // Clear the input fields
+                    $('#item_name').val('');
+                    $('#item_qty').val('');
+                    $('#item_unit').val('');
+                } else {
+                    alert('Please fill in all the fields.');
                 }
             });
-        
-            $(document).on('click', '.remove-item', function () {
-                var row = $(this).closest('tr');
-                itemsInTable = itemsInTable.filter(itemId => itemId !== parseInt(row.data('id')));
-                row.remove();
-                updateItemsInput();
+
+            $(document).on('click', '.remove-item', function() {
+                const row = $(this).closest('tr');
+                const itemId = parseInt(row.data('id'));
+                const barangId = row.find('td').eq(3).text().trim(); // Get the hidden barang_id
+
+                itemsInTable = itemsInTable.filter(id => id !== itemId); // Remove the item id from the list
+                barangIdsInTable = barangIdsInTable.filter(id => id !==
+                barangId); // Remove the barang_id from the list
+                row.remove(); // Remove the row from the table
+                updateItemsInput(); // Update hidden input field
             });
-        
-            $(document).on('click', '.edit-item', function () {
-                var row = $(this).closest('tr');
-                $('#edit_item_name').val(row.find('td').eq(0).text());
-                $('#edit_item_qty').val(row.find('td').eq(1).text());
-                $('#edit_item_unit').val(row.find('td').eq(2).text());
-                $('#update-item').data('id', row.data('id'));
+
+            $(document).on('click', '.edit-item', function() {
+                editRow = $(this).closest('tr');
+                $('#edit_item_name').val(editRow.find('td').eq(0).text());
+                $('#edit_item_qty').val(editRow.find('td').eq(1).text());
+                $('#edit_item_unit').val(editRow.find('td').eq(2).text());
+                $('#update-item').data('id', editRow.data('id'));
                 $('#editItemModal').modal('show');
             });
-        
-            $('#update-item').click(function () {
-                var id = $(this).data('id');
-                var row = $('#items-table tbody').find(`tr[data-id="${id}"]`);
+
+            $('#update-item').click(function() {
+                const id = $(this).data('id');
+                const row = $('#items-table tbody').find(`tr[data-id="${id}"]`);
+                const barangId = row.find('td').eq(3).text().trim(); // Get the hidden barang_id
+
                 row.find('td').eq(0).text($('#edit_item_name').val());
                 row.find('td').eq(1).text($('#edit_item_qty').val());
                 row.find('td').eq(2).text($('#edit_item_unit').val());
-                updateItemsInput();
-                $('#editItemModal').modal('hide');
+
+                updateItemsInput(); // Update hidden input field
+                $('#editItemModal').modal('hide'); // Close the modal
             });
-        
+
             function updateItemsInput() {
-                var items = [];
-                $('#items-table tbody tr').each(function () {
+                const items = [];
+                $('#items-table tbody tr').each(function() {
                     var id = $(this).data('id');
                     var name = $(this).find('td').eq(0).text();
                     var qty = $(this).find('td').eq(1).text();
                     var unit = $(this).find('td').eq(2).text();
                     var barang_id = $(this).find('td').eq(3).text(); // Get the hidden barang_id
-        
+
                     items.push({
                         id: id,
                         // barang_id: barang_id, // Store barang_id
@@ -350,9 +408,7 @@
                 $('#items-input').val(JSON.stringify(items));
             }
         });
-        </script>
-        
-    
+    </script>
 
 </body>
 
