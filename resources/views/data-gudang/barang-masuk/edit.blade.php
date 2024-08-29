@@ -298,6 +298,13 @@
 
             fetchItemsForOwner($('#nama_pemilik').val());
 
+            $('#barangMasukForm').on('submit', function(event) {
+                if ($('#items-table tbody tr').length === 0) {
+                    event.preventDefault();
+                    alert('Tolong masukan Items setidaknya 1 barang.');
+                }
+            });
+
             $('#nama_pemilik').change(function() {
                 fetchItemsForOwner($(this).val());
             });

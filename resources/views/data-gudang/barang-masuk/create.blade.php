@@ -270,6 +270,13 @@
                 });
             });
 
+            $('#barangMasukForm').on('submit', function(event) {
+                if ($('#items-table tbody tr').length === 0) {
+                    event.preventDefault();
+                    alert('Tolong masukan Items setidaknya 1 barang.');
+                }
+            });
+
             // Fetch unit for selected item
             $('#item_name').change(function() {
                 const unit = $('#item_name option:selected').data('jenis');
