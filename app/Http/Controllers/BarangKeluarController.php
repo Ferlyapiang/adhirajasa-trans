@@ -42,7 +42,7 @@ class BarangKeluarController extends Controller
             $validated = $request->validate([
                 'tanggal_keluar' => 'required|date',
                 'gudang_id' => 'required|exists:warehouses,id',
-                'owner_id' => 'required|exists:customers,id',
+                'customer_id' => 'required|exists:customers,id',
                 'nomer_container' => 'required|string|max:191',
                 'nomer_polisi' => 'nullable|string|max:191',
                 'bank_transfer_id' => 'nullable|exists:bank_data,id',
