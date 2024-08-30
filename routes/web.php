@@ -12,6 +12,7 @@ use App\Http\Controllers\ItemTypeController;
 use App\Http\Controllers\WarehouseController;
 use App\Http\Controllers\BarangController;
 use App\Http\Controllers\BarangMasukController;
+use App\Http\Controllers\BarangKeluarController;
 
 // Login and Logout
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login.form');
@@ -114,3 +115,11 @@ Route::get('data-gudang/barang-masuk/{id}/detail', [BarangMasukController::class
 // Route::resource('data-gudang/barang-masuk', BarangMasukController::class);
 
 
+// Route for listing Barang Keluar
+Route::get('data-gudang/barang-keluar', [BarangKeluarController::class, 'index'])->name('data-gudang.barang-keluar.index');
+Route::get('data-gudang/barang-keluar/create', [BarangKeluarController::class, 'create'])->name('data-gudang.barang-keluar.create');
+Route::post('data-gudang/barang-keluar', [BarangKeluarController::class, 'store'])->name('data-gudang.barang-keluar.store');
+Route::get('data-gudang/barang-keluar/{barangKeluar}', [BarangKeluarController::class, 'show'])->name('data-gudang.barang-keluar.show');
+Route::get('data-gudang/barang-keluar/{barangKeluar}/edit', [BarangKeluarController::class, 'edit'])->name('data-gudang.barang-keluar.edit');
+Route::put('data-gudang/barang-keluar/{barangKeluar}', [BarangKeluarController::class, 'update'])->name('data-gudang.barang-keluar.update');
+Route::delete('data-gudang/barang-keluar/{barangKeluar}', [BarangKeluarController::class, 'destroy'])->name('data-gudang.barang-keluar.destroy');

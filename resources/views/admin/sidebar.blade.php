@@ -107,6 +107,10 @@
                 <i class="far fa-circle nav-icon"></i>
                 <p>Barang Masuk</p>
               </a>
+              <a href="{{ route('data-gudang.barang-keluar.index') }}" class="nav-link {{ request()->routeIs('data-gudang.barang-keluar.index') ? 'active' : '' }}">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Barang Keluar</p>
+              </a>
             </li>
           </ul>
         </li>
