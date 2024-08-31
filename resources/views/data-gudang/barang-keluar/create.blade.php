@@ -6,19 +6,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Barang Keluar</title>
 
-    <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="{{ asset('ats/ATSLogo.png') }}" />
-
-    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="{{ asset('lte/plugins/fontawesome-free/css/all.min.css') }}">
 
-    <!-- AdminLTE Theme style -->
+    <!-- Theme style -->
     <link rel="stylesheet" href="{{ asset('lte/dist/css/adminlte.min.css') }}">
 
     <!-- Custom CSS -->
     <style>
         .form-group {
             margin-bottom: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid #ddd;
+        }
+
+        th,
+        td {
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .btn-danger {
+            color: #fff;
+            background-color: #dc3545;
+            border-color: #dc3545;
         }
     </style>
 </head>
@@ -65,7 +90,7 @@
                                                 class="form-control @error('tanggal_keluar') is-invalid @enderror"
                                                 value="{{ old('tanggal_keluar') }}" required>
                                             @error('tanggal_keluar')
-                                                <span class="invalid-feedback">{{ $message }}</span>
+                                            <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
                                         </div>
 
@@ -75,13 +100,14 @@
                                                 class="form-control @error('gudang_id') is-invalid @enderror" required>
                                                 <option value="">Select Gudang</option>
                                                 @foreach ($warehouses as $warehouse)
-                                                    <option value="{{ $warehouse->id }}"
-                                                        {{ old('gudang_id') == $warehouse->id ? 'selected' : '' }}>
-                                                        {{ $warehouse->name }}</option>
+                                                <option value="{{ $warehouse->id }}"
+                                                    {{ old('gudang_id') == $warehouse->id ? 'selected' : '' }}>
+                                                    {{ $warehouse->name }}
+                                                </option>
                                                 @endforeach
                                             </select>
                                             @error('gudang_id')
-                                                <span class="invalid-feedback">{{ $message }}</span>
+                                            <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
                                         </div>
 
@@ -92,13 +118,14 @@
                                                 required>
                                                 <option value="">Select Pemilik Barang</option>
                                                 @foreach ($customers as $customer)
-                                                    <option value="{{ $customer->id }}"
-                                                        {{ old('customer_id') == $customer->id ? 'selected' : '' }}>
-                                                        {{ $customer->name }}</option>
+                                                <option value="{{ $customer->id }}"
+                                                    {{ old('customer_id') == $customer->id ? 'selected' : '' }}>
+                                                    {{ $customer->name }}
+                                                </option>
                                                 @endforeach
                                             </select>
                                             @error('customer_id')
-                                                <span class="invalid-feedback">{{ $message }}</span>
+                                            <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
                                         </div>
 
@@ -108,7 +135,7 @@
                                                 class="form-control @error('nomer_container') is-invalid @enderror"
                                                 value="{{ old('nomer_container') }}" required>
                                             @error('nomer_container')
-                                                <span class="invalid-feedback">{{ $message }}</span>
+                                            <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
                                         </div>
 
@@ -118,108 +145,56 @@
                                                 class="form-control @error('nomer_polisi') is-invalid @enderror"
                                                 value="{{ old('nomer_polisi') }}">
                                             @error('nomer_polisi')
-                                                <span class="invalid-feedback">{{ $message }}</span>
+                                            <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
                                         </div>
 
-                                        {{-- <div class="form-group">
-                                                    <label for="bank_transfer_id">Bank Transfer</label>
-                                                    <select name="bank_transfer_id" id="bank_transfer_id" class="form-control @error('bank_transfer_id') is-invalid @enderror">
-                                                        <option value="">Select Bank Transfer</option>
-                                                        @foreach ($bankTransfers as $bankTransfer)
-                                                            <option value="{{ $bankTransfer->id }}" {{ old('bank_transfer_id') == $bankTransfer->id ? 'selected' : '' }}>{{ $bankTransfer->name }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                    @error('bank_transfer_id')
-                                                        <span class="invalid-feedback">{{ $message }}</span>
-                                                    @enderror
-                                                </div> --}}
                                         <div class="form-group">
                                             <label for="bank_transfer_id">Bank Transfer</label>
                                             <select name="bank_transfer_id" id="bank_transfer_id"
                                                 class="form-control @error('bank_transfer_id') is-invalid @enderror">
                                                 <option value="">Select Bank Transfer</option>
                                                 @foreach ($bankTransfers as $bankTransfer)
-                                                    <option value="{{ $bankTransfer->id }}"
-                                                        {{ old('bank_transfer_id') == $bankTransfer->id ? 'selected' : '' }}>
-                                                        {{ $bankTransfer->bank_name }} -
-                                                        {{ $bankTransfer->account_number }}
-                                                    </option>
+                                                <option value="{{ $bankTransfer->id }}"
+                                                    {{ old('bank_transfer_id') == $bankTransfer->id ? 'selected' : '' }}>
+                                                    {{ $bankTransfer->bank_name }} -
+                                                    {{ $bankTransfer->account_number }}
+                                                </option>
                                                 @endforeach
                                             </select>
                                             @error('bank_transfer_id')
-                                                <span class="invalid-feedback">{{ $message }}</span>
+                                            <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
                                         </div>
 
-                                        <div class="form-group">
-                                            <label for="items">Items</label>
-                                            <table class="table" id="items-table">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Barang</th>
-                                                        <th>Qty</th>
-                                                        <th>Unit</th>
-                                                        <th>Harga</th>
-                                                        <th>Action</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr>
-                                                        <td>
-                                                            <select name="items[0][barang_id]"
-                                                                class="form-control @error('items.*.barang_id') is-invalid @enderror"
-                                                                required>
-                                                                <option value="">Select Barang</option>
-                                                                @foreach ($barangs as $barang)
-                                                                    <option value="{{ $barang->id }}"
-                                                                        {{ old('items.0.barang_id') == $barang->id ? 'selected' : '' }}>
-                                                                        {{ $barang->name }}</option>
-                                                                @endforeach
-                                                            </select>
-                                                            @error('items.*.barang_id')
-                                                                <span class="invalid-feedback">{{ $message }}</span>
-                                                            @enderror
-                                                        </td>
-                                                        <td>
-                                                            <input type="number" name="items[0][qty]"
-                                                                class="form-control @error('items.*.qty') is-invalid @enderror"
-                                                                value="{{ old('items.0.qty') }}" required>
-                                                            @error('items.*.qty')
-                                                                <span class="invalid-feedback">{{ $message }}</span>
-                                                            @enderror
-                                                        </td>
-                                                        <td>
-                                                            <input type="text" name="items[0][unit]"
-                                                                class="form-control @error('items.*.unit') is-invalid @enderror"
-                                                                value="{{ old('items.0.unit') }}" required>
-                                                            @error('items.*.unit')
-                                                                <span class="invalid-feedback">{{ $message }}</span>
-                                                            @enderror
-                                                        </td>
-                                                        <td>
-                                                            <input type="number" name="items[0][harga]"
-                                                                class="form-control @error('items.*.harga') is-invalid @enderror"
-                                                                value="{{ old('items.0.harga') }}" required>
-                                                            @error('items.*.harga')
-                                                                <span class="invalid-feedback">{{ $message }}</span>
-                                                            @enderror
-                                                        </td>
-                                                        <td>
-                                                            <button type="button"
-                                                                class="btn btn-danger remove-item">Remove</button>
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                            <button type="button" class="btn btn-primary" id="add-item">Add
-                                                Item</button>
+                                        <h2>Items</h2>
+                                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#itemModal">Add
+                                            Item</button>
+                                        <input type="hidden" name="items" id="items-input" value="[]">
+                                        <!-- Items Table -->
+                                        <table id="items-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Nomer Ref</th>
+                                                    <th>Nama Barang</th>
+                                                    <th>Quantity</th>
+                                                    <th>Unit</th>
+                                                    <th>Harga</th>
+                                                    <th>Total</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <!-- Items will be added here dynamically -->
+                                            </tbody>
+                                        </table>
+
+                                        <br><br>
+                                        <div class="card-footer">
+                                            <button type="submit" class="btn btn-success">Save</button>
+                                            <a href="{{ route('data-gudang.barang-keluar.index') }}"
+                                                class="btn btn-secondary">Cancel</a>
                                         </div>
-                                </div>
-                                <div class="card-footer">
-                                    <button type="submit" class="btn btn-success">Save</button>
-                                    <a href="{{ route('data-gudang.barang-keluar.index') }}"
-                                        class="btn btn-secondary">Cancel</a>
                                     </form>
                                 </div>
                                 <!-- /.card-body -->
@@ -239,50 +214,114 @@
     </div>
     <!-- ./wrapper -->
 
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- Bootstrap 4 -->
+    <script src="{{ asset('lte/plugins/jquery/jquery.min.js') }}"></script>
     <script src="{{ asset('lte/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-    <!-- AdminLTE App -->
     <script src="{{ asset('lte/dist/js/adminlte.min.js') }}"></script>
 
-    <!-- Page-specific script -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            let itemCount = 1;
-            const itemTemplate = `
-                <tr>
-                    <td>
-                        <select name="items[%ITEM_COUNT%][barang_id]" class="form-control" required>
-                            @foreach ($barangs as $barang)
-                                <option value="{{ $barang->id }}">{{ $barang->name }}</option>
-                            @endforeach
+    <!-- Modal -->
+    <div class="modal fade" id="itemModal" tabindex="-1" role="dialog" aria-labelledby="itemModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="itemModalLabel">Add Item</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="item_name">Nama Barang</label>
+                        <select id="item_name" class="form-control" required>
+                            <!-- Options will be populated based on selected customer -->
                         </select>
-                    </td>
-                    <td>
-                        <input type="number" name="items[%ITEM_COUNT%][qty]" class="form-control" required>
-                    </td>
-                    <td>
-                        <input type="text" name="items[%ITEM_COUNT%][unit]" class="form-control" required>
-                    </td>
-                    <td>
-                        <input type="number" name="items[%ITEM_COUNT%][harga]" class="form-control" required>
-                    </td>
-                    <td>
-                        <button type="button" class="btn btn-danger remove-item">Remove</button>
-                    </td>
-                </tr>
-            `;
+                    </div>
 
-            document.getElementById('add-item').addEventListener('click', function() {
-                const newItem = itemTemplate.replace(/%ITEM_COUNT%/g, itemCount++);
-                document.querySelector('#items-table tbody').insertAdjacentHTML('beforeend', newItem);
+                    <div class="form-group">
+                        <label for="item_qty">Quantity</label>
+                        <input type="number" id="item_qty" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="item_unit">Unit</label>
+                        <input type="text" id="item_unit" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="item_price">Price</label>
+                        <input type="number" id="item_price" class="form-control" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="add-item-btn">Add Item</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            let items = [];
+
+            function updateItemsTable() {
+                let itemsTableBody = $('#items-table tbody');
+                itemsTableBody.empty();
+                items.forEach((item, index) => {
+                    itemsTableBody.append(`
+                        <tr>
+                            <td>${item.ref}</td>
+                            <td>${item.name}</td>
+                            <td>${item.qty}</td>
+                            <td>${item.unit}</td>
+                            <td>${item.price}</td>
+                            <td>${item.total}</td>
+                            <td><button type="button" class="btn btn-danger btn-sm" onclick="removeItem(${index})">Remove</button></td>
+                        </tr>
+                    `);
+                });
+                $('#items-input').val(JSON.stringify(items));
+            }
+
+            function removeItem(index) {
+                items.splice(index, 1);
+                updateItemsTable();
+            }
+
+            $('#add-item-btn').click(function () {
+                const itemName = $('#item_name').val();
+                const itemQty = $('#item_qty').val();
+                const itemUnit = $('#item_unit').val();
+                const itemPrice = $('#item_price').val();
+                const itemTotal = itemQty * itemPrice;
+
+                items.push({
+                    ref: `REF${items.length + 1}`,
+                    name: itemName,
+                    qty: itemQty,
+                    unit: itemUnit,
+                    price: itemPrice,
+                    total: itemTotal
+                });
+
+                updateItemsTable();
+                $('#itemModal').modal('hide');
             });
 
-            document.querySelector('#items-table').addEventListener('click', function(e) {
-                if (e.target.classList.contains('remove-item')) {
-                    e.target.closest('tr').remove();
-                }
+            $('#customer_id').change(function () {
+                const customerId = $(this).val();
+                // Fetch items for the selected customer and populate the item_name dropdown
+                $.ajax({
+                    url: `/api/items/${customerId}`,
+                    method: 'GET',
+                    success: function (response) {
+                        const itemsDropdown = $('#item_name');
+                        itemsDropdown.empty();
+                        response.items.forEach(item => {
+                            itemsDropdown.append(`<option value="${item.id}">${item.name}</option>`);
+                        });
+                    }
+                });
             });
         });
     </script>

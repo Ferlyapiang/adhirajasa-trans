@@ -9,28 +9,25 @@ class BarangKeluarItem extends Model
 {
     use HasFactory;
 
+    protected $table = 'barang_keluar_items';
+
     protected $fillable = [
         'barang_keluar_id',
-        'barang_masuk_id',
         'barang_id',
+        'no_ref',
         'qty',
         'unit',
         'harga',
+        'total_harga',
     ];
 
-    // Relationship with BarangKeluar
+    // Define the relationship with BarangKeluar
     public function barangKeluar()
     {
         return $this->belongsTo(BarangKeluar::class);
     }
 
-    // Relationship with BarangMasuk
-    public function barangMasuk()
-    {
-        return $this->belongsTo(BarangMasuk::class, 'barang_masuk_id');
-    }
-
-    // Relationship with Barang
+    // Define the relationship with Barang
     public function barang()
     {
         return $this->belongsTo(Barang::class);

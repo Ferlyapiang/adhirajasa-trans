@@ -18,29 +18,36 @@ class BarangKeluar extends Model
         'nomer_container',
         'nomer_polisi',
         'bank_transfer_id',
+        'barang_masuk_id',
     ];
 
-    // Relationship with Gudang (Warehouse)
+    // Define the relationship with BarangKeluarItem
+    public function items()
+    {
+        return $this->hasMany(BarangKeluarItem::class);
+    }
+
+    // Define the relationship with BarangMasuk
+    public function barangMasuk()
+    {
+        return $this->belongsTo(BarangMasuk::class);
+    }
+
+    // Define the relationship with Gudang (Warehouse)
     public function gudang()
     {
         return $this->belongsTo(Warehouse::class);
     }
 
-    // Relationship with Owner
-    public function owner()
+    // Define the relationship with Customer
+    public function customer()
     {
         return $this->belongsTo(Customer::class);
     }
 
-    // Relationship with BankTransfer
+    // Define the relationship with BankTransfer (Assuming this is a model)
     public function bankTransfer()
     {
-        return $this->belongsTo(BankData::class, 'bank_transfer_id');
-    }
-
-    // Relationship with BarangKeluarItem
-    public function items()
-    {
-        return $this->hasMany(BarangKeluarItem::class);
+        return $this->belongsTo(BankData::class);
     }
 }

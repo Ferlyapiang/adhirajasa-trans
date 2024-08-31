@@ -8,7 +8,11 @@ use App\Models\Warehouse;
 use App\Models\Customer;
 use App\Models\BankData;
 use App\Models\Barang;
+use Illuminate\Support\Facades\Auth;
+use App\Models\LogData;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class BarangKeluarController extends Controller
 {
@@ -17,7 +21,7 @@ class BarangKeluarController extends Controller
      */
     public function index()
     {
-        $barangKeluars = BarangKeluar::with(['gudang', 'owner', 'bankTransfer'])->get();
+        $barangKeluars = BarangKeluar::with(['gudang', 'customer', 'bankTransfer'])->get();
         return view('data-gudang.barang-keluar.index', compact('barangKeluars'));
     }
 
@@ -33,49 +37,70 @@ class BarangKeluarController extends Controller
         return view('data-gudang.barang-keluar.create', compact('warehouses', 'customers', 'bankTransfers', 'barangs'));
     }
 
-
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-        {
-            $validated = $request->validate([
-                'tanggal_keluar' => 'required|date',
-                'gudang_id' => 'required|exists:warehouses,id',
-                'customer_id' => 'required|exists:customers,id',
-                'nomer_container' => 'required|string|max:191',
-                'nomer_polisi' => 'nullable|string|max:191',
-                'bank_transfer_id' => 'nullable|exists:bank_datas,id',
-                'items.*.barang_masuk_id' => 'required|exists:barang_masuks,id',
-                'items.*.barang_id' => 'required|exists:barangs,id',
-                'items.*.qty' => 'required|integer',
-                'items.*.unit' => 'required|string',
-                'items.*.harga' => 'required|numeric',
-            ]);
+    {
+        $validated = $request->validate([
+            'tanggal_keluar' => 'required|date',
+            'gudang_id' => 'required|exists:warehouses,id',
+            'customer_id' => 'required|exists:customers,id',
+            'nomer_container' => 'nullable|string|max:191',
+            'nomer_polisi' => 'nullable|string|max:191',
+            'bank_transfer_id' => 'nullable|exists:bank_datas,id',
+            'items' => 'required|array',
+            'items.*.barang_id' => 'required|exists:barangs,id',
+            'items.*.no_ref' => 'nullable|string|max:191',
+            'items.*.qty' => 'required|integer|min:1',
+            'items.*.unit' => 'required|string|max:50',
+            'items.*.harga' => 'nullable|numeric|min:0',
+            'items.*.total_harga' => 'nullable|numeric|min:0',
+        ]);
 
-            $barangKeluar = BarangKeluar::create($validated);
+        $barangKeluarData = [
+            'tanggal_keluar' => $validated['tanggal_keluar'],
+            'gudang_id' => $validated['gudang_id'],
+            'customer_id' => $validated['customer_id'],
+            'nomer_container' => $validated['nomer_container'],
+            'nomer_polisi' => $validated['nomer_polisi'],
+            'bank_transfer_id' => $validated['bank_transfer_id'],
+        ];
 
-            // Handle items
-            foreach ($request->input('items', []) as $item) {
-                $barangKeluar->items()->create([
-                    'barang_masuk_id' => $item['barang_masuk_id'],
+        $items = $validated['items'];
+
+        $barangKeluar = BarangKeluar::create($barangKeluarData);
+
+        DB::transaction(function () use ($barangKeluar, $items) {
+            foreach ($items as $item) {
+                BarangKeluarItem::create([
                     'barang_id' => $item['barang_id'],
+                    'no_ref' => $item['no_ref'],
                     'qty' => $item['qty'],
                     'unit' => $item['unit'],
                     'harga' => $item['harga'],
+                    'total_harga' => $item['total_harga'],
+                    'barang_keluar_id' => $barangKeluar->id,
                 ]);
             }
+        });
 
-            return redirect()->route('data-gudang.barang-keluar.index')->with('success', 'Barang Keluar created successfully.');
-        }
+        LogData::create([
+            'user_id' => Auth::id(),
+            'name' => Auth::user()->name,
+            'action' => 'insert',
+            'details' => 'Created barang Keluar ID: ' . $barangKeluar->id . ' with data: ' . json_encode($request->all())
+        ]);
 
+        return redirect()->route('data-gudang.barang-keluar.index')->with('success', 'Barang Keluar created successfully.');
+    }
 
     /**
      * Display the specified resource.
      */
     public function show(BarangKeluar $barangKeluar)
     {
-        $barangKeluar->load('items');
+        $barangKeluar->load('items.barang');
         return view('data-gudang.barang-keluar.show', compact('barangKeluar'));
     }
 
@@ -87,8 +112,9 @@ class BarangKeluarController extends Controller
         $warehouses = Warehouse::all();
         $customers = Customer::all();
         $bankTransfers = BankData::all();
+        $barangs = Barang::all(); // Fetch all Barang data
         $barangKeluar->load('items');
-        return view('data-gudang.barang-keluar.edit', compact('barangKeluar', 'warehouses', 'customers', 'bankTransfers'));
+        return view('data-gudang.barang-keluar.edit', compact('barangKeluar', 'warehouses', 'customers', 'bankTransfers', 'barangs'));
     }
 
     /**
@@ -100,26 +126,31 @@ class BarangKeluarController extends Controller
             'tanggal_keluar' => 'required|date',
             'gudang_id' => 'required|exists:warehouses,id',
             'customer_id' => 'required|exists:customers,id',
-            'nomer_container' => 'required|string|max:191',
+            'nomer_container' => 'nullable|string|max:191',
             'nomer_polisi' => 'nullable|string|max:191',
             'bank_transfer_id' => 'nullable|exists:bank_datas,id',
             'items' => 'array',
             'items.*.barang_id' => 'required|exists:barangs,id',
+            'items.*.no_ref' => 'nullable|string|max:191',
             'items.*.qty' => 'required|integer|min:1',
             'items.*.unit' => 'required|string|max:50',
-            'items.*.harga' => 'required|numeric|min:0',
+            'items.*.harga' => 'nullable|numeric|min:0',
+            'items.*.total_harga' => 'nullable|numeric|min:0',
         ]);
 
+        // Update BarangKeluar
         $barangKeluar->update($validated);
 
         // Handle items
-        $barangKeluar->items()->delete();
+        $barangKeluar->items()->delete(); // Delete old items
         foreach ($request->input('items', []) as $item) {
             $barangKeluar->items()->create([
                 'barang_id' => $item['barang_id'],
+                'no_ref' => $item['no_ref'],
                 'qty' => $item['qty'],
                 'unit' => $item['unit'],
                 'harga' => $item['harga'],
+                'total_harga' => $item['total_harga'],
             ]);
         }
 

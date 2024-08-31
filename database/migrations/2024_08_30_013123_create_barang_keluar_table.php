@@ -14,23 +14,26 @@ return new class extends Migration
         // Creating the barang_keluars table
         Schema::create('barang_keluars', function (Blueprint $table) {
             $table->id();
-            $table->date('tanggal_keluar');
+            $table->date('tanggal_keluar'); // Tanggal Keluar
             $table->foreignId('gudang_id')->constrained('warehouses')->onDelete('cascade'); // Gudang ID
-            $table->foreignId('customer_id')->constrained('customers')->onDelete('cascade'); // Pemilik Barang (Owner ID)
-            $table->string('nomer_container')->nullable();
-            $table->string('nomer_polisi')->nullable();
+            $table->foreignId('customer_id')->constrained('customers')->onDelete('cascade'); // Pemilik Barang (Customer ID)
+            $table->string('nomer_container')->nullable(); // Nomor Container (Opsional)
+            $table->string('nomer_polisi')->nullable(); // Nomor Polisi (Opsional)
             $table->foreignId('bank_transfer_id')->constrained('bank_datas')->onDelete('cascade'); // Transfer (ID Bank)
+            $table->foreignId('barang_masuk_id')->constrained('barang_masuks')->onDelete('cascade'); // Reference to barang_masuks table
             $table->timestamps();
         });
 
         // Creating the barang_keluar_items table
         Schema::create('barang_keluar_items', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('barang_keluar_id')->constrained('barang_keluars')->onDelete('cascade'); // Relating to barang_keluars table
+            $table->foreignId('barang_keluar_id')->constrained('barang_keluars')->onDelete('cascade'); // Relasi ke tabel barang_keluars
             $table->foreignId('barang_id')->constrained('barangs')->onDelete('cascade'); // Barang ID (Nama Barang)
-            $table->integer('qty'); // Quantity of Barang Keluar
-            $table->string('unit'); // Unit of Barang Keluar
-            $table->decimal('harga', 15, 2); // Harga of Barang Keluar
+            $table->string('no_ref')->nullable(); // Nomor Referensi (Opsional)
+            $table->integer('qty'); // Jumlah Barang Keluar
+            $table->string('unit'); // Satuan Barang Keluar
+            $table->decimal('harga', 15, 2)->nullable(); // Harga Barang (Opsional)
+            $table->decimal('total_harga', 15, 2)->nullable(); // Total Harga (Opsional)
             $table->timestamps();
         });
     }

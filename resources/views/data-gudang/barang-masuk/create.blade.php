@@ -75,7 +75,7 @@
 
             <!-- Main content -->
             <div class="container-fluid pl-4">
-                <h2>Tambah Barang Masuk {{ $barangMasuk->joc_number }}</h2>
+                <h2>Tambah Barang Masuk</h2>
                 <form id="barangMasukForm" action="{{ route('data-gudang.barang-masuk.store') }}" method="POST">
                     @csrf
 
