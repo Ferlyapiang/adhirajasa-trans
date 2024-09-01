@@ -9,10 +9,8 @@ use App\Models\Customer;
 use App\Models\BankData;
 use App\Models\Barang;
 use App\Models\BarangMasuk;
-use App\Models\BarangMasukItem;
 use Illuminate\Support\Facades\Auth;
 use App\Models\LogData;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -174,18 +172,19 @@ class BarangKeluarController extends Controller
         // Mengambil semua BarangMasuk yang sesuai dengan customer_id dan gudang_id
         $barangMasuk = BarangMasuk::where('customer_id', $customerId)
             ->where('gudang_id', $warehouseId) // Menambahkan filter untuk gudang_id
-            ->with('items') // Memuat relasi BarangMasukItem
+            ->with('items.barang') // Memuat relasi BarangMasukItem dan Barang
             ->orderBy('joc_number', 'asc') // Mengurutkan berdasarkan joc_number yang paling lama
             ->get();
-
+    
         // Mengambil data BarangMasuk beserta item-itemnya
         $items = $barangMasuk->flatMap(function ($barangMasuk) {
             return $barangMasuk->items->map(function ($item) use ($barangMasuk) {
-                // Menambahkan informasi barang_masuk_id dari BarangMasuk ke BarangMasukItem
+                // Menambahkan informasi barang_masuk_id dan nama barang ke BarangMasukItem
                 return [
                     'id' => $item->id,
                     'barang_masuk_id' => $item->barang_masuk_id,
                     'barang_id' => $item->barang_id,
+                    'barang_name' => $item->barang->nama_barang, // Mengambil nama barang dari model Barang
                     'qty' => $item->qty,
                     'unit' => $item->unit,
                     'joc_number' => $barangMasuk->joc_number, // Menambahkan joc_number
@@ -194,9 +193,11 @@ class BarangKeluarController extends Controller
                 ];
             });
         });
-
+    
         return response()->json(['items' => $items]);
     }
+    
+
 
     public function getCustomersByWarehouse($warehouseId)
     {
