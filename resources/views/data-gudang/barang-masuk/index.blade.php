@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -24,25 +25,54 @@
             border-radius: 10px;
             overflow: hidden;
             border: 1px solid #dee2e6;
-            display: block;  /* Makes the table scrollable */
-            overflow-x: auto;  /* Enables horizontal scrolling */
+            display: block;
+            /* Makes the table scrollable */
+            overflow-x: auto;
+            /* Enables horizontal scrolling */
             white-space: nowrap;
         }
 
         #barangMasukTable thead {
-            background-color: #f8f9fa;
+            background-color: transparent;
+            /* Remove background color from header */
         }
 
         #barangMasukTable thead th {
             border-top: 1px solid #dee2e6;
             border-bottom: 2px solid #dee2e6;
+            text-align: center;
+            /* Center-align header text */
         }
 
         #barangMasukTable tbody tr {
             border-bottom: 1px solid #dee2e6;
         }
 
-        /* Custom modal styling */
+        #barangMasukTable th[colspan="3"] {
+            background-color: transparent;
+            /* Remove background color from combined header */
+        }
+
+        #barangMasukTable th {
+            background-color: transparent;
+            /* Remove background color from all headers */
+        }
+
+        #barangMasukTable td:nth-child(9) {
+            background-color: #d1e7dd;
+            /* Light green for FIFO IN */
+        }
+
+        #barangMasukTable td:nth-child(10) {
+            background-color: #f8d7da;
+            /* Light red for FIFO OUT */
+        }
+
+        #barangMasukTable td:nth-child(11) {
+            background-color: #fff3cd;
+            /* Light yellow for FIFO Sisa */
+        }
+
         .modal-content {
             border-radius: 10px;
         }
@@ -55,7 +85,9 @@
             border-top: 1px solid #dee2e6;
         }
     </style>
+
 </head>
+
 <body class="hold-transition sidebar-mini">
     <div class="wrapper">
         <!-- Navbar -->
@@ -90,39 +122,46 @@
                                     <h3 class="card-title">Daftar Barang Masuk</h3>
                                     <a href="{{ route('data-gudang.barang-masuk.create') }}" class="btn btn-primary float-right">Tambah Barang Masuk</a>
                                 </div>
-                                <div class="card-body">
+                                <div class="table-responsive">
                                     <table id="barangMasukTable" class="table table-bordered table-striped">
                                         <thead>
                                             <tr>
-                                                <th>No</th>
-                                                <th>Tanggal Masuk</th>
-                                                <th>No Ref (JOC)</th>
-                                                <th>Jenis Mobil</th>
-                                                <th>Nomer Polisi</th>
-                                                <th>Nomer Container</th>
-                                                <th>FIFO (IN)</th>
-                                                <th>FIFO (OUT)</th>
-                                                <th>FIFO (Sisa)</th>
-                                                <th>Detail</th>
+                                                <th rowspan="2">No</th>
+                                                <th rowspan="2">Tanggal Masuk</th>
+                                                <th rowspan="2">No Ref (JOC)</th>
+                                                <th rowspan="2">Nama Barang</th>
+                                                <th rowspan="2">Nama Pemilik</th>
+                                                <th rowspan="2">Jenis Mobil</th>
+                                                <th rowspan="2">Nomer Polisi</th>
+                                                <th rowspan="2">Nomer Container</th>
+                                                <th colspan="3">FIFO</th>
+                                                <th rowspan="2">Detail</th>
+                                            </tr>
+                                            <tr>
+                                                <th>IN</th>
+                                                <th>OUT</th>
+                                                <th>SISA</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @foreach($barangMasuks as $barangMasuk)
+                                            @foreach ($barangMasuks as $index => $barangMasuk)
+                                            @foreach ($barangMasuk->items as $item)
                                             <tr>
                                                 <td>{{ $loop->iteration }}</td>
                                                 <td>{{ $barangMasuk->tanggal_masuk }}</td>
-                                                {{-- <td>{{ $barangMasuk->joc_number }}</td> --}}
                                                 <td>
                                                     <a href="{{ route('data-gudang.barang-masuk.detail', $barangMasuk->id) }}">
                                                         {{ $barangMasuk->joc_number }}
                                                     </a>
                                                 </td>
+                                                <td>{{ $item->barang->nama_barang }}</td>
+                                                <td>{{ $barangMasuk->customer->name }}</td>
                                                 <td>{{ $barangMasuk->jenis_mobil }}</td>
                                                 <td>{{ $barangMasuk->nomer_polisi }}</td>
                                                 <td>{{ $barangMasuk->nomer_container }}</td>
                                                 <td>{{ $barangMasuk->fifo_in }}</td>
                                                 <td>{{ $barangMasuk->fifo_out }}</td>
-                                                <td>{{ $barangMasuk->fifo_sisa }}</td>
+                                                <td style="font-weight: bold">{{ $barangMasuk->fifo_sisa }}</td>
                                                 <td>
                                                     <a href="{{ route('data-gudang.barang-masuk.edit', $barangMasuk->id) }}" class="btn btn-warning btn-sm">Edit</a>
                                                     <form action="{{ route('data-gudang.barang-masuk.destroy', $barangMasuk->id) }}" method="POST" style="display:inline;">
@@ -133,8 +172,10 @@
                                                 </td>
                                             </tr>
                                             @endforeach
+                                            @endforeach
                                         </tbody>
                                     </table>
+
                                 </div>
                                 <!-- /.card-body -->
                             </div>
@@ -161,7 +202,7 @@
     <script src="https://cdn.datatables.net/1.13.3/js/jquery.dataTables.min.js"></script>
     <!-- AdminLTE App -->
     <script src="{{ asset('lte/dist/js/adminlte.min.js') }}"></script>
-    
+
     <!-- Page-specific script -->
     <script>
         $(document).ready(function() {
@@ -169,4 +210,5 @@
         });
     </script>
 </body>
+
 </html>

@@ -20,12 +20,32 @@ class BarangMasuk extends Model
     {
         return $this->hasMany(BarangMasukItem::class);
     }
-    
-    public function getFifoInAttribute()
+
+    // Define the relationship with BarangMasuk
+    public function barangMasuk()
     {
-        return $this->items->sum('qty');
+        return $this->belongsTo(BarangMasuk::class);
     }
+
+    // Define the relationship with Gudang (Warehouse)
+    public function gudang()
+    {
+        return $this->belongsTo(Warehouse::class);
+    }
+
+    // Define the relationship with Customer
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class);
+    }
+
+    public function bankTransfer()
+    {
+        return $this->belongsTo(BankData::class);
+    }
+
 }
+
 
 class BarangMasukItem extends Model
 {

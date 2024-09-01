@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Barang;
 use App\Models\BarangMasuk;
 use App\Models\BarangMasukItem;
+use App\Models\BarangKeluar;
 use App\Models\Customer;
 use App\Models\Warehouse;
 use Illuminate\Http\Request;
@@ -15,18 +16,47 @@ use Illuminate\Support\Facades\DB;
 
 class BarangMasukController extends Controller
 {
+
     public function index()
     {
-        $barangMasuks = BarangMasuk::with('items')->get();
+        $barangMasuks = BarangMasuk::with(['items', 'customer'])
+            ->orderBy('tanggal_masuk', 'desc')
+            ->get();
+
+        $barangKeluars = BarangKeluar::with('items')->get();
+        $fifoData = [];
+
+        foreach ($barangMasuks as $barangMasuk) {
+            $fifo_in = $barangMasuk->items->sum('qty');
+            $fifo_out = 0;
+
+            foreach ($barangKeluars as $barangKeluar) {
+                foreach ($barangKeluar->items as $item) {
+                    if ($item->barang_masuk_id === $barangMasuk->id) {
+                        $fifo_out += $item->qty;
+                    }
+                }
+            }
+
+            $fifoData[$barangMasuk->id] = [
+                'fifo_in' => $fifo_in,
+                'fifo_out' => $fifo_out,
+                'fifo_sisa' => $fifo_in - $fifo_out,
+            ];
+        }
+
+        foreach ($barangMasuks as $barangMasuk) {
+            if (isset($fifoData[$barangMasuk->id])) {
+                $barangMasuk->fifo_in = $fifoData[$barangMasuk->id]['fifo_in'];
+                $barangMasuk->fifo_out = $fifoData[$barangMasuk->id]['fifo_out'];
+                $barangMasuk->fifo_sisa = $fifoData[$barangMasuk->id]['fifo_sisa'];
+            }
+        }
+
         return view('data-gudang.barang-masuk.index', compact('barangMasuks'));
     }
 
-    // BarangMasukController.php
     public function showDetail($id)
-    // {
-    //     $barangMasuk = BarangMasuk::findOrFail($id);
-    //     return view('data-gudang.barang-masuk.detail', compact('barangMasuk'));
-    // }
     {
         $barangMasuk = BarangMasuk::findOrFail($id);
         $barangs = Barang::all();
@@ -133,68 +163,68 @@ class BarangMasukController extends Controller
     }
 
     public function update(Request $request, $id)
-{
-    try {
-        // Validation
-        $request->validate([
-            'tanggal_masuk' => 'required|date',
-            'gudang_id' => 'required|exists:warehouses,id',
-            'customer_id' => 'required|exists:customers,id',
-            'nomer_container' => 'required|string',
-            'items.*.barang_id' => 'required|exists:barangs,id',
-            'items.*.qty' => 'required|numeric',
-            'items.*.unit' => 'required|string',
-        ]);
+    {
+        try {
+            // Validation
+            $request->validate([
+                'tanggal_masuk' => 'required|date',
+                'gudang_id' => 'required|exists:warehouses,id',
+                'customer_id' => 'required|exists:customers,id',
+                'nomer_container' => 'required|string',
+                'items.*.barang_id' => 'required|exists:barangs,id',
+                'items.*.qty' => 'required|numeric',
+                'items.*.unit' => 'required|string',
+            ]);
 
-        // Find BarangMasuk record
-        $barangMasuk = BarangMasuk::findOrFail($id);
+            // Find BarangMasuk record
+            $barangMasuk = BarangMasuk::findOrFail($id);
 
-        // Update BarangMasuk record
-        $barangMasuk->update([
-            'tanggal_masuk' => $request->tanggal_masuk,
-            'gudang_id' => $request->gudang_id,
-            'customer_id' => $request->customer_id,
-            'jenis_mobil' => $request->jenis_mobil ?? null,  // Handle nullable fields
-            'nomer_polisi' => $request->nomer_polisi ?? null,  // Handle nullable fields
-            'nomer_container' => $request->nomer_container,
-        ]);
+            // Update BarangMasuk record
+            $barangMasuk->update([
+                'tanggal_masuk' => $request->tanggal_masuk,
+                'gudang_id' => $request->gudang_id,
+                'customer_id' => $request->customer_id,
+                'jenis_mobil' => $request->jenis_mobil ?? null,  // Handle nullable fields
+                'nomer_polisi' => $request->nomer_polisi ?? null,  // Handle nullable fields
+                'nomer_container' => $request->nomer_container,
+            ]);
 
-        // Decode and update items
-        $items = json_decode($request->items, true);
-        Log::info('Decoded Items:', ['items' => $items]);
+            // Decode and update items
+            $items = json_decode($request->items, true);
+            Log::info('Decoded Items:', ['items' => $items]);
 
-        DB::transaction(function () use ($barangMasuk, $items) {
-            // Delete existing items
-            BarangMasukItem::where('barang_masuk_id', $barangMasuk->id)->delete();
+            DB::transaction(function () use ($barangMasuk, $items) {
+                // Delete existing items
+                BarangMasukItem::where('barang_masuk_id', $barangMasuk->id)->delete();
 
-            // Insert or update items
-            foreach ($items as $item) {
-                Log::info('Saving Item:', ['item' => $item]);
-                BarangMasukItem::create([
-                    'barang_id' => $item['nama_barang'],
-                    'qty' => $item['quantity'],
-                    'unit' => $item['unit'],
-                    'barang_masuk_id' => $barangMasuk->id,
-                ]);
-            }
-        });
+                // Insert or update items
+                foreach ($items as $item) {
+                    Log::info('Saving Item:', ['item' => $item]);
+                    BarangMasukItem::create([
+                        'barang_id' => $item['nama_barang'],
+                        'qty' => $item['quantity'],
+                        'unit' => $item['unit'],
+                        'barang_masuk_id' => $barangMasuk->id,
+                    ]);
+                }
+            });
 
-        // Log the success
-        LogData::create([
-            'user_id' => Auth::id(),
-            'name' => Auth::user()->name,
-            'action' => 'update',
-            'details' => 'Updated barang masuk ID: ' . $barangMasuk->id . ' with data: ' . json_encode($request->all())
-        ]);
+            // Log the success
+            LogData::create([
+                'user_id' => Auth::id(),
+                'name' => Auth::user()->name,
+                'action' => 'update',
+                'details' => 'Updated barang masuk ID: ' . $barangMasuk->id . ' with data: ' . json_encode($request->all())
+            ]);
 
-        // Return redirect with success message
-        return redirect()->route('data-gudang.barang-masuk.index')->with('success', 'Barang Masuk berhasil diperbarui.');
-    } catch (\Exception $e) {
-        // Log error and return redirect with error message
-        Log::error('Error in updating Barang Masuk:', ['error' => $e->getMessage()]);
-        return redirect()->route('data-gudang.barang-masuk.index')->with('error', 'Terjadi kesalahan saat memperbarui data.');
+            // Return redirect with success message
+            return redirect()->route('data-gudang.barang-masuk.index')->with('success', 'Barang Masuk berhasil diperbarui.');
+        } catch (\Exception $e) {
+            // Log error and return redirect with error message
+            Log::error('Error in updating Barang Masuk:', ['error' => $e->getMessage()]);
+            return redirect()->route('data-gudang.barang-masuk.index')->with('error', 'Terjadi kesalahan saat memperbarui data.');
+        }
     }
-}
 
 
     public function destroy(BarangMasuk $barangMasuk)
