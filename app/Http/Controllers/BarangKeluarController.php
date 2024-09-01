@@ -8,11 +8,14 @@ use App\Models\Warehouse;
 use App\Models\Customer;
 use App\Models\BankData;
 use App\Models\Barang;
+use App\Models\BarangMasuk;
+use App\Models\BarangMasukItem;
 use Illuminate\Support\Facades\Auth;
 use App\Models\LogData;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+
 
 class BarangKeluarController extends Controller
 {
@@ -165,5 +168,46 @@ class BarangKeluarController extends Controller
         $barangKeluar->items()->delete();
         $barangKeluar->delete();
         return redirect()->route('data-gudang.barang-keluar.index')->with('success', 'Barang Keluar deleted successfully.');
+    }
+    public function getItemsByCustomer($customerId, $warehouseId)
+    {
+        // Mengambil semua BarangMasuk yang sesuai dengan customer_id dan gudang_id
+        $barangMasuk = BarangMasuk::where('customer_id', $customerId)
+            ->where('gudang_id', $warehouseId) // Menambahkan filter untuk gudang_id
+            ->with('items') // Memuat relasi BarangMasukItem
+            ->orderBy('joc_number', 'asc') // Mengurutkan berdasarkan joc_number yang paling lama
+            ->get();
+
+        // Mengambil data BarangMasuk beserta item-itemnya
+        $items = $barangMasuk->flatMap(function ($barangMasuk) {
+            return $barangMasuk->items->map(function ($item) use ($barangMasuk) {
+                // Menambahkan informasi barang_masuk_id dari BarangMasuk ke BarangMasukItem
+                return [
+                    'id' => $item->id,
+                    'barang_masuk_id' => $item->barang_masuk_id,
+                    'barang_id' => $item->barang_id,
+                    'qty' => $item->qty,
+                    'unit' => $item->unit,
+                    'joc_number' => $barangMasuk->joc_number, // Menambahkan joc_number
+                    'created_at' => $item->created_at,
+                    'updated_at' => $item->updated_at,
+                ];
+            });
+        });
+
+        return response()->json(['items' => $items]);
+    }
+
+    public function getCustomersByWarehouse($warehouseId)
+    {
+        // Mengambil pelanggan yang terkait dengan gudang_id yang diberikan
+        $customers = BarangMasuk::where('gudang_id', $warehouseId)
+            ->distinct('customer_id') // Menghindari duplikasi pelanggan
+            ->pluck('customer_id')    // Mengambil hanya customer_id
+            ->map(function ($customerId) {
+                return Customer::find($customerId);
+            });
+
+        return response()->json(['customers' => $customers]);
     }
 }

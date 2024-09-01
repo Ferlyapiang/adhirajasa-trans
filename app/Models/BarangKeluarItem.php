@@ -13,6 +13,7 @@ class BarangKeluarItem extends Model
 
     protected $fillable = [
         'barang_keluar_id',
+        'barang_masuk_id',
         'barang_id',
         'no_ref',
         'qty',
@@ -31,5 +32,10 @@ class BarangKeluarItem extends Model
     public function barang()
     {
         return $this->belongsTo(Barang::class);
+    }
+
+    public function barangMasuk()
+    {
+        return $this->belongsTo(BarangMasuk::class, 'barang_masuk_id');
     }
 }

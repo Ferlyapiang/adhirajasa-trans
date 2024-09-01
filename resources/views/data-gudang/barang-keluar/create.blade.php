@@ -94,7 +94,7 @@
                                             @enderror
                                         </div>
 
-                                        <div class="form-group">
+                                        <!-- <div class="form-group">
                                             <label for="gudang_id">Gudang</label>
                                             <select name="gudang_id" id="gudang_id"
                                                 class="form-control @error('gudang_id') is-invalid @enderror" required>
@@ -123,6 +123,34 @@
                                                     {{ $customer->name }}
                                                 </option>
                                                 @endforeach
+                                            </select>
+                                            @error('customer_id')
+                                            <span class="invalid-feedback">{{ $message }}</span>
+                                            @enderror
+                                        </div> -->
+                                        <div class="form-group">
+                                            <label for="gudang_id">Gudang</label>
+                                            <select name="gudang_id" id="gudang_id"
+                                                class="form-control @error('gudang_id') is-invalid @enderror" required>
+                                                <option value="">Select Gudang</option>
+                                                @foreach ($warehouses as $warehouse)
+                                                <option value="{{ $warehouse->id }}"
+                                                    {{ old('gudang_id') == $warehouse->id ? 'selected' : '' }}>
+                                                    {{ $warehouse->name }}
+                                                </option>
+                                                @endforeach
+                                            </select>
+                                            @error('gudang_id')
+                                            <span class="invalid-feedback">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="customer_id">Pemilik Barang</label>
+                                            <select name="customer_id" id="customer_id"
+                                                class="form-control @error('customer_id') is-invalid @enderror" required>
+                                                <option value="">Select Pemilik Barang</option>
+                                                <!-- Options akan diisi melalui JavaScript -->
                                             </select>
                                             @error('customer_id')
                                             <span class="invalid-feedback">{{ $message }}</span>
@@ -261,58 +289,84 @@
     </div>
 
     <script>
-        $(document).ready(function () {
-            let items = [];
+    $(document).ready(function () {
+        let items = [];
 
-            function updateItemsTable() {
-                let itemsTableBody = $('#items-table tbody');
-                itemsTableBody.empty();
-                items.forEach((item, index) => {
-                    itemsTableBody.append(`
-                        <tr>
-                            <td>${item.ref}</td>
-                            <td>${item.name}</td>
-                            <td>${item.qty}</td>
-                            <td>${item.unit}</td>
-                            <td>${item.price}</td>
-                            <td>${item.total}</td>
-                            <td><button type="button" class="btn btn-danger btn-sm" onclick="removeItem(${index})">Remove</button></td>
-                        </tr>
-                    `);
-                });
-                $('#items-input').val(JSON.stringify(items));
-            }
+        function updateItemsTable() {
+            let itemsTableBody = $('#items-table tbody');
+            itemsTableBody.empty();
+            items.forEach((item, index) => {
+                itemsTableBody.append(`
+                    <tr>
+                        <td>${item.ref}</td>
+                        <td>${item.name}</td>
+                        <td>${item.qty}</td>
+                        <td>${item.unit}</td>
+                        <td>${item.price}</td>
+                        <td>${item.total}</td>
+                        <td><button type="button" class="btn btn-danger btn-sm" onclick="removeItem(${index})">Remove</button></td>
+                    </tr>
+                `);
+            });
+            $('#items-input').val(JSON.stringify(items));
+        }
 
-            function removeItem(index) {
-                items.splice(index, 1);
-                updateItemsTable();
-            }
+        function removeItem(index) {
+            items.splice(index, 1);
+            updateItemsTable();
+        }
 
-            $('#add-item-btn').click(function () {
-                const itemName = $('#item_name').val();
-                const itemQty = $('#item_qty').val();
-                const itemUnit = $('#item_unit').val();
-                const itemPrice = $('#item_price').val();
-                const itemTotal = itemQty * itemPrice;
+        $('#add-item-btn').click(function () {
+            const itemName = $('#item_name option:selected').text(); // Mengambil nama barang dari dropdown
+            const itemQty = $('#item_qty').val();
+            const itemUnit = $('#item_unit').val();
+            const itemPrice = $('#item_price').val();
+            const itemTotal = itemQty * itemPrice;
 
-                items.push({
-                    ref: `REF${items.length + 1}`,
-                    name: itemName,
-                    qty: itemQty,
-                    unit: itemUnit,
-                    price: itemPrice,
-                    total: itemTotal
-                });
-
-                updateItemsTable();
-                $('#itemModal').modal('hide');
+            items.push({
+                ref: `REF${items.length + 1}`,
+                name: itemName, // Menggunakan nama barang yang benar
+                qty: itemQty,
+                unit: itemUnit,
+                price: itemPrice,
+                total: itemTotal
             });
 
-            $('#customer_id').change(function () {
-                const customerId = $(this).val();
-                // Fetch items for the selected customer and populate the item_name dropdown
+            updateItemsTable();
+            $('#itemModal').modal('hide');
+        });
+
+        $('#gudang_id').change(function () {
+            const warehouseId = $(this).val();
+
+            // Kosongkan dropdown customer_id
+            $('#customer_id').empty();
+            $('#customer_id').append('<option value="">Select Pemilik Barang</option>');
+
+            if (warehouseId) {
                 $.ajax({
-                    url: `/api/items/${customerId}`,
+                    url: `/api/customers/${warehouseId}`,
+                    method: 'GET',
+                    success: function (response) {
+                        response.customers.forEach(customer => {
+                            $('#customer_id').append(`<option value="${customer.id}">${customer.name}</option>`);
+                        });
+                    },
+                    error: function () {
+                        $('#customer_id').append('<option value="">No customers found</option>');
+                    }
+                });
+            }
+        });
+
+        $('#customer_id').change(function () {
+            const customerId = $(this).val();
+            const warehouseId = $('#gudang_id').val(); // Ambil nilai gudang_id
+
+            // Fetch items for the selected customer and warehouse, and populate the item_name dropdown
+            if (customerId && warehouseId) {
+                $.ajax({
+                    url: `/api/items/${customerId}/${warehouseId}`, // Update URL dengan warehouseId
                     method: 'GET',
                     success: function (response) {
                         const itemsDropdown = $('#item_name');
@@ -322,9 +376,12 @@
                         });
                     }
                 });
-            });
+            }
         });
-    </script>
+
+    });
+</script>
+
 </body>
 
 </html>

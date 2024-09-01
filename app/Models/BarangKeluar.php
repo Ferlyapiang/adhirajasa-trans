@@ -18,7 +18,6 @@ class BarangKeluar extends Model
         'nomer_container',
         'nomer_polisi',
         'bank_transfer_id',
-        'barang_masuk_id',
     ];
 
     // Define the relationship with BarangKeluarItem

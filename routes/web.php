@@ -123,3 +123,8 @@ Route::get('data-gudang/barang-keluar/{barangKeluar}', [BarangKeluarController::
 Route::get('data-gudang/barang-keluar/{barangKeluar}/edit', [BarangKeluarController::class, 'edit'])->name('data-gudang.barang-keluar.edit');
 Route::put('data-gudang/barang-keluar/{barangKeluar}', [BarangKeluarController::class, 'update'])->name('data-gudang.barang-keluar.update');
 Route::delete('data-gudang/barang-keluar/{barangKeluar}', [BarangKeluarController::class, 'destroy'])->name('data-gudang.barang-keluar.destroy');
+
+
+Route::get('/api/items/{customerId}/{warehouseId}', [BarangKeluarController::class, 'getItemsByCustomer']);
+Route::get('/api/customers/{warehouseId}', [BarangKeluarController::class, 'getCustomersByWarehouse']);
+

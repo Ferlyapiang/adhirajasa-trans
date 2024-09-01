@@ -28,6 +28,7 @@ return new class extends Migration
         Schema::create('barang_keluar_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('barang_keluar_id')->constrained('barang_keluars')->onDelete('cascade'); // Relasi ke tabel barang_keluars
+            $table->foreignId('barang_masuk_id')->constrained('barang_masuks')->onDelete('cascade');
             $table->foreignId('barang_id')->constrained('barangs')->onDelete('cascade'); // Barang ID (Nama Barang)
             $table->string('no_ref')->nullable(); // Nomor Referensi (Opsional)
             $table->integer('qty'); // Jumlah Barang Keluar
