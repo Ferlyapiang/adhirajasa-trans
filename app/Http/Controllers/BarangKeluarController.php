@@ -42,61 +42,69 @@ class BarangKeluarController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
-        dd($request->all());
-        $validated = $request->validate([
-            'tanggal_keluar' => 'required|date',
-            'gudang_id' => 'required|exists:warehouses,id',
-            'customer_id' => 'required|exists:customers,id',
-            'nomer_container' => 'nullable|string|max:191',
-            'nomer_polisi' => 'nullable|string|max:191',
-            'bank_transfer_id' => 'nullable|exists:bank_datas,id',
-            'items' => 'required|array',
-            'items.*.barang_id' => 'required|exists:barangs,id',
-            'items.*.no_ref' => 'nullable|string|max:191',
-            'items.*.qty' => 'required|integer|min:1',
-            'items.*.unit' => 'required|string|max:50',
-            'items.*.harga' => 'nullable|numeric|min:0',
-            'items.*.total_harga' => 'nullable|numeric|min:0',
+{
+    $validated = $request->validate([
+        'tanggal_keluar' => 'required|date',
+        'gudang_id' => 'required|exists:warehouses,id',
+        'customer_id' => 'required|exists:customers,id',
+        'nomer_container' => 'nullable|string|max:191',
+        'nomer_polisi' => 'nullable|string|max:191',
+        'bank_transfer_id' => 'nullable|exists:bank_datas,id',
+        'items' => 'required|array',
+        'items.*.barang_id' => 'required|exists:barangs,id',
+        'items.*.no_ref' => 'nullable|string|max:191',
+        'items.*.qty' => 'required|integer|min:1',
+        'items.*.unit' => 'required|string|max:50',
+        'items.*.harga' => 'nullable|numeric|min:0',
+        'items.*.total_harga' => 'nullable|numeric|min:0',
+        'items.*.barang_masuk_id' => 'required|exists:barang_masuks,id', // Adjust validation to include barang_masuk_id
+    ]);
+
+    // Prepare Barang Keluar data
+    $barangKeluarData = [
+        'tanggal_keluar' => $validated['tanggal_keluar'],
+        'gudang_id' => $validated['gudang_id'],
+        'customer_id' => $validated['customer_id'],
+        'nomer_container' => $validated['nomer_container'],
+        'nomer_polisi' => $validated['nomer_polisi'],
+        'bank_transfer_id' => $validated['bank_transfer_id'],
+    ];
+
+    // Extract items data
+    $items = $validated['items'];
+
+    // Database transaction
+    DB::transaction(function () use ($barangKeluarData, $items) {
+    $barangKeluar = BarangKeluar::create($barangKeluarData);
+    dd($barangKeluar); // Check if BarangKeluar is created successfully
+
+    foreach ($items as $item) {
+        dd($item); // Check each item before creating BarangKeluarItem
+        BarangKeluarItem::create([
+            'barang_id' => $item['barang_id'],
+            'no_ref' => $item['no_ref'],
+            'qty' => $item['qty'],
+            'unit' => $item['unit'],
+            'harga' => $item['harga'],
+            'total_harga' => $item['total_harga'],
+            'barang_masuk_id' => $item['barang_masuk_id'],
+            'barang_keluar_id' => $barangKeluar->id,
         ]);
-    
-        $barangKeluarData = [
-            'tanggal_keluar' => $validated['tanggal_keluar'],
-            'gudang_id' => $validated['gudang_id'],
-            'customer_id' => $validated['customer_id'],
-            'nomer_container' => $validated['nomer_container'],
-            'nomer_polisi' => $validated['nomer_polisi'],
-            'bank_transfer_id' => $validated['bank_transfer_id'],
-        ];
-    
-        $items = $validated['items'];
-    
-        DB::transaction(function () use ($barangKeluarData, $items) {
-            $barangKeluar = BarangKeluar::create($barangKeluarData);
-    
-            foreach ($items as $item) {
-                BarangKeluarItem::create([
-                    'barang_id' => $item['barang_id'],
-                    'no_ref' => $item['no_ref'],
-                    'qty' => $item['qty'],
-                    'unit' => $item['unit'],
-                    'harga' => $item['harga'],
-                    'total_harga' => $item['total_harga'],
-                    'barang_masuk_id' => $item['total_harga'],
-                    'barang_keluar_id' => $barangKeluar->id,
-                ]);
-            }
-    
-            LogData::create([
-                'user_id' => Auth::id(),
-                'name' => Auth::user()->name,
-                'action' => 'insert',
-                'details' => 'Created barang Keluar ID: ' . $barangKeluar->id . ' with data: ' . json_encode(request()->all())
-            ]);
-        });
-    
-        return redirect()->route('data-gudang.barang-keluar.index')->with('success', 'Barang Keluar created successfully.');
     }
+
+    LogData::create([
+        'user_id' => Auth::id(),
+        'name' => Auth::user()->name,
+        'action' => 'insert',
+        'details' => 'Created barang Keluar ID: ' . $barangKeluar->id . ' with data: ' . json_encode(request()->all())
+    ]);
+});
+
+
+    // Redirect with success message
+    return redirect()->route('data-gudang.barang-keluar.index')->with('success', 'Barang Keluar created successfully.');
+}
+
     
 
     /**
