@@ -43,6 +43,7 @@ class BarangKeluarController extends Controller
      */
     public function store(Request $request)
     {
+        dd($request->all());
         $validated = $request->validate([
             'tanggal_keluar' => 'required|date',
             'gudang_id' => 'required|exists:warehouses,id',
@@ -81,6 +82,7 @@ class BarangKeluarController extends Controller
                     'unit' => $item['unit'],
                     'harga' => $item['harga'],
                     'total_harga' => $item['total_harga'],
+                    'barang_masuk_id' => $item['total_harga'],
                     'barang_keluar_id' => $barangKeluar->id,
                 ]);
             }
