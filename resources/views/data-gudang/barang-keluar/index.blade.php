@@ -2,8 +2,8 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Barang Keluar List</title>
 
     <!-- Favicon -->
@@ -15,10 +15,45 @@
     <!-- AdminLTE Theme style -->
     <link rel="stylesheet" href="{{ asset('lte/dist/css/adminlte.min.css') }}">
 
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.3/css/jquery.dataTables.min.css">
+
     <!-- Custom CSS -->
     <style>
-        .form-group {
-            margin-bottom: 1rem;
+        /* Custom styling for the DataTable */
+        #barangKeluarTable {
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #dee2e6;
+            display: block;  /* Makes the table scrollable */
+            overflow-x: auto;  /* Enables horizontal scrolling */
+            white-space: nowrap;
+        }
+
+        #barangKeluarTable thead {
+            background-color: #f8f9fa;
+        }
+
+        #barangKeluarTable thead th {
+            border-top: 1px solid #dee2e6;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        #barangKeluarTable tbody tr {
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        /* Custom modal styling */
+        .modal-content {
+            border-radius: 10px;
+        }
+
+        .modal-header {
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .modal-footer {
+            border-top: 1px solid #dee2e6;
         }
     </style>
 </head>
@@ -62,7 +97,7 @@
                                     </div>
                                 </div>
                                 <div class="card-body">
-                                    <table id="barang-keluar-table" class="table table-bordered table-striped">
+                                    <table id="barangKeluarTable" class="table table-bordered table-striped">
                                         <thead>
                                             <tr>
                                                 <th>No</th>
@@ -79,7 +114,7 @@
                                             @foreach ($barangKeluars as $index => $barangKeluar)
                                                 <tr>
                                                     <td>{{ $index + 1 }}</td>
-                                                    <td>{{ $barangKeluar->tanggal_keluar->format('Y-m-d') }}</td>
+                                                    <td>{{ $barangKeluar->tanggal_keluar }}</td>
                                                     <td>{{ $barangKeluar->gudang->name }}</td>
                                                     <td>{{ $barangKeluar->customer->name }}</td>
                                                     <td>{{ $barangKeluar->nomer_container }}</td>
@@ -123,16 +158,16 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- Bootstrap 4 -->
     <script src="{{ asset('lte/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <!-- DataTables & Plugins -->
+    <script src="https://cdn.datatables.net/1.13.3/js/jquery.dataTables.min.js"></script>
+    <script src="{{ asset('lte/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
     <!-- AdminLTE App -->
     <script src="{{ asset('lte/dist/js/adminlte.min.js') }}"></script>
-    <!-- DataTables -->
-    <script src="{{ asset('lte/plugins/datatables/jquery.dataTables.min.js') }}"></script>
-    <script src="{{ asset('lte/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
 
     <!-- Page-specific script -->
     <script>
-        $(function() {
-            $('#barang-keluar-table').DataTable({
+        $(document).ready(function() {
+            $('#barangKeluarTable').DataTable({
                 "responsive": true,
                 "autoWidth": false,
                 "lengthChange": false,
