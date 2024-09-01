@@ -370,13 +370,13 @@
         }
 
         items.push({
-            barang_id: itemId, 
+            barang_id: parseInt(itemId, 10),
             no_ref: itemJocNumber,  // Ensure JOC Number is added here
             qty: itemQty,
             unit: itemUnit,
             harga: itemPrice,
             total_harga: itemTotal,
-            barang_masuk_id: itemBarangMasukID,
+            barang_masuk_id: parseInt(itemBarangMasukID, 10),
             name: $('#item_name option:selected').text(),
             sisa_barang: itemSisaBarang
         });

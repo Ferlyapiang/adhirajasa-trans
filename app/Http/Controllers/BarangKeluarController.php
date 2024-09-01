@@ -14,6 +14,9 @@ use App\Models\LogData;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+use Illuminate\Support\Facades\Log;
+
+
 
 class BarangKeluarController extends Controller
 {
@@ -43,6 +46,10 @@ class BarangKeluarController extends Controller
      */
     public function store(Request $request)
 {
+    // Decode JSON string to array if items are sent as a JSON string
+    $request->merge(['items' => json_decode($request->input('items'), true)]);
+
+    // Validate the request data
     $validated = $request->validate([
         'tanggal_keluar' => 'required|date',
         'gudang_id' => 'required|exists:warehouses,id',
@@ -57,7 +64,7 @@ class BarangKeluarController extends Controller
         'items.*.unit' => 'required|string|max:50',
         'items.*.harga' => 'nullable|numeric|min:0',
         'items.*.total_harga' => 'nullable|numeric|min:0',
-        'items.*.barang_masuk_id' => 'required|exists:barang_masuks,id', // Adjust validation to include barang_masuk_id
+        'items.*.barang_masuk_id' => 'required|exists:barang_masuks,id',
     ]);
 
     // Prepare Barang Keluar data
@@ -73,37 +80,60 @@ class BarangKeluarController extends Controller
     // Extract items data
     $items = $validated['items'];
 
-    // Database transaction
-    DB::transaction(function () use ($barangKeluarData, $items) {
-    $barangKeluar = BarangKeluar::create($barangKeluarData);
-    dd($barangKeluar); // Check if BarangKeluar is created successfully
+    try {
+        // Database transaction
+        DB::transaction(function () use ($barangKeluarData, $items) {
+            // Create Barang Keluar record
+            $barangKeluar = BarangKeluar::create($barangKeluarData);
 
-    foreach ($items as $item) {
-        dd($item); // Check each item before creating BarangKeluarItem
-        BarangKeluarItem::create([
-            'barang_id' => $item['barang_id'],
-            'no_ref' => $item['no_ref'],
-            'qty' => $item['qty'],
-            'unit' => $item['unit'],
-            'harga' => $item['harga'],
-            'total_harga' => $item['total_harga'],
-            'barang_masuk_id' => $item['barang_masuk_id'],
-            'barang_keluar_id' => $barangKeluar->id,
+            // Iterate over items and create BarangKeluarItem
+            foreach ($items as $item) {
+                Log::info('Processing Item:', [
+                    'barang_id' => (int) $item['barang_id'],
+                    'barang_masuk_id' => (int) $item['barang_masuk_id'],
+                ]);
+
+                BarangKeluarItem::create([
+                    'barang_id' => (int) $item['barang_id'],
+                    'no_ref' => $item['no_ref'],
+                    'qty' => $item['qty'],
+                    'unit' => $item['unit'],
+                    'harga' => $item['harga'],
+                    'total_harga' => $item['total_harga'],
+                    'barang_masuk_id' => (int) $item['barang_masuk_id'],
+                    'barang_keluar_id' => $barangKeluar->id,
+                ]);
+            }
+
+            // Log the operation
+            LogData::create([
+                'user_id' => Auth::check() ? Auth::id() : null,
+                'name' => Auth::check() ? Auth::user()->name : 'unknown',
+                'action' => 'insert',
+                'details' => 'Created Barang Keluar ID: ' . $barangKeluar->id . ' with data: ' . json_encode($barangKeluarData)
+            ]);
+        });
+
+        // Redirect with success message
+        return redirect()->route('data-gudang.barang-keluar.index')->with('success', 'Barang Keluar created successfully.');
+
+    } catch (\Exception $e) {
+        // Log the exception
+        Log::error('Exception caught:', [
+            'user_id' => Auth::check() ? Auth::id() : 'unknown',
+            'user_name' => Auth::check() ? Auth::user()->name : 'unknown',
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString() // Optional: add stack trace for debugging
         ]);
+
+        // Redirect with error message
+        return redirect()->back()->with('error', 'An error occurred: ' . $e->getMessage());
     }
-
-    LogData::create([
-        'user_id' => Auth::id(),
-        'name' => Auth::user()->name,
-        'action' => 'insert',
-        'details' => 'Created barang Keluar ID: ' . $barangKeluar->id . ' with data: ' . json_encode(request()->all())
-    ]);
-});
-
-
-    // Redirect with success message
-    return redirect()->route('data-gudang.barang-keluar.index')->with('success', 'Barang Keluar created successfully.');
 }
+
+
+
+
 
     
 
