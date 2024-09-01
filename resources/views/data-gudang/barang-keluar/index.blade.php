@@ -100,8 +100,11 @@
                                             <tr>
                                                 <th>No</th>
                                                 <th>Tanggal Keluar</th>
+                                                <th>No Ref</th>
+                                                <th>Nama Barang</th>
                                                 <th>Gudang</th>
                                                 <th>Pemilik Barang</th>
+                                                <th>qty</th>
                                                 <th>Nomer Container</th>
                                                 <th>Nomer Polisi</th>
                                                 <th>Bank Transfer</th>
@@ -110,27 +113,32 @@
                                         </thead>
                                         <tbody>
                                             @foreach ($barangKeluars as $index => $barangKeluar)
-                                            <tr>
-                                                <td>{{ $index + 1 }}</td>
-                                                <td>{{ $barangKeluar->tanggal_keluar }}</td>
-                                                <td>{{ $barangKeluar->gudang->name }}</td>
-                                                <td>{{ $barangKeluar->customer->name }}</td>
-                                                <td>{{ $barangKeluar->nomer_container }}</td>
-                                                <td>{{ $barangKeluar->nomer_polisi }}</td>
-                                                <td>{{ $barangKeluar->bankTransfer->bank_name }} - {{ $barangKeluar->bankTransfer->account_number }}</td>
-                                                <td>
-                                                    <a href="{{ route('data-gudang.barang-keluar.edit', $barangKeluar->id) }}" class="btn btn-warning btn-sm">
-                                                        <i class="fas fa-edit"></i> Edit
-                                                    </a>
-                                                    <form action="{{ route('data-gudang.barang-keluar.destroy', $barangKeluar->id) }}" method="POST" style="display:inline;">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">
-                                                            <i class="fas fa-trash"></i> Delete
-                                                        </button>
-                                                    </form>
-                                                </td>
-                                            </tr>
+                                                @foreach ($barangKeluar->items as $item)
+                                                    <tr>
+                                                        <td>{{ $index + 1 }}</td>
+                                                        <td>{{ $barangKeluar->tanggal_keluar }}</td>
+                                                        <td>{{ $item->no_ref }}</td>
+                                                        <td>{{ $item->barang->nama_barang }}</td>
+                                                        <td>{{ $barangKeluar->gudang->name }}</td>
+                                                        <td>{{ $barangKeluar->customer->name }}</td>
+                                                        <td>{{ $item->qty }}</td>
+                                                        <td>{{ $barangKeluar->nomer_container }}</td>
+                                                        <td>{{ $barangKeluar->nomer_polisi }}</td>
+                                                        <td>{{ $barangKeluar->bankTransfer->bank_name }} - {{ $barangKeluar->bankTransfer->account_number }}</td>
+                                                        <td>
+                                                            <a href="{{ route('data-gudang.barang-keluar.edit', $barangKeluar->id) }}" class="btn btn-warning btn-sm">
+                                                                <i class="fas fa-edit"></i> Edit
+                                                            </a>
+                                                            <form action="{{ route('data-gudang.barang-keluar.destroy', $barangKeluar->id) }}" method="POST" style="display:inline;">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">
+                                                                    <i class="fas fa-trash"></i> Delete
+                                                                </button>
+                                                            </form>
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
                                             @endforeach
                                         </tbody>
                                     </table>

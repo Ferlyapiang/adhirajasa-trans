@@ -25,12 +25,12 @@ class BarangKeluarController extends Controller
      */
     public function index()
     {
-        $barangKeluars = BarangKeluar::with(['gudang', 'customer', 'bankTransfer'])
-            ->orderBy('tanggal_keluar', 'desc') // Tambahkan ini untuk urutkan ascending
+        $barangKeluars = BarangKeluar::with(['gudang', 'customer', 'bankTransfer', 'items.barang'])
+            ->orderBy('tanggal_keluar', 'desc') // Mengurutkan berdasarkan tanggal_keluar secara menurun
             ->get();
+
         return view('data-gudang.barang-keluar.index', compact('barangKeluars'));
     }
-
 
     /**
      * Show the form for creating a new resource.
@@ -133,12 +133,6 @@ class BarangKeluarController extends Controller
         }
     }
 
-
-
-
-
-
-
     /**
      * Display the specified resource.
      */
@@ -212,29 +206,47 @@ class BarangKeluarController extends Controller
     }
     public function getItemsByCustomer($customerId, $warehouseId)
     {
-        // Mengambil semua BarangMasuk yang sesuai dengan customer_id dan gudang_id
+
         $barangMasuk = BarangMasuk::where('customer_id', $customerId)
-            ->where('gudang_id', $warehouseId) // Menambahkan filter untuk gudang_id
-            ->with('items.barang') // Memuat relasi BarangMasukItem dan Barang
-            ->orderBy('joc_number', 'asc') // Mengurutkan berdasarkan joc_number yang paling lama
+            ->where('gudang_id', $warehouseId)
+            ->with('items.barang')
+            ->orderBy('joc_number', 'asc')
             ->get();
 
-        // Mengambil data BarangMasuk beserta item-itemnya
-        $items = $barangMasuk->flatMap(function ($barangMasuk) {
-            return $barangMasuk->items->map(function ($item) use ($barangMasuk) {
-                // Menambahkan informasi barang_masuk_id dan nama barang ke BarangMasukItem
-                return [
-                    'id' => $item->id,
-                    'barang_masuk_id' => $item->barang_masuk_id,
-                    'barang_id' => $item->barang_id,
-                    'barang_name' => $item->barang->nama_barang, // Mengambil nama barang dari model Barang
-                    'qty' => $item->qty,
-                    'unit' => $item->unit,
-                    'joc_number' => $barangMasuk->joc_number, // Menambahkan joc_number
-                    'created_at' => $item->created_at,
-                    'updated_at' => $item->updated_at,
-                ];
+
+        $barangKeluarSummary = BarangKeluarItem::select('barang_id', 'no_ref', DB::raw('SUM(qty) as total_qty_keluar'))
+            ->join('barang_keluars', 'barang_keluar_items.barang_keluar_id', '=', 'barang_keluars.id')
+            ->whereIn('barang_keluars.customer_id', [$customerId])
+            ->whereIn('barang_keluars.gudang_id', [$warehouseId])
+            ->groupBy('barang_id', 'no_ref')
+            ->get()
+            ->keyBy(function ($item) {
+                return $item->barang_id . '-' . $item->no_ref;
             });
+
+        $items = $barangMasuk->flatMap(function ($barangMasuk) use ($barangKeluarSummary) {
+            return $barangMasuk->items->map(function ($item) use ($barangMasuk, $barangKeluarSummary) {
+                $key = $item->barang_id . '-' . $barangMasuk->joc_number;
+                $totalQtyKeluar = $barangKeluarSummary->get($key, (object) ['total_qty_keluar' => 0])->total_qty_keluar;
+                $qtyMasuk = $item->qty;
+
+
+                if ($qtyMasuk > $totalQtyKeluar || $qtyMasuk - $totalQtyKeluar < 0) {
+                    return [
+                        'id' => $item->id,
+                        'barang_masuk_id' => $item->barang_masuk_id,
+                        'barang_id' => $item->barang_id,
+                        'barang_name' => $item->barang->nama_barang,
+                        'qty' => $item->qty,
+                        'unit' => $item->unit,
+                        'joc_number' => $barangMasuk->joc_number,
+                        'created_at' => $item->created_at,
+                        'updated_at' => $item->updated_at,
+                    ];
+                }
+
+                return null;
+            })->filter();
         });
 
         return response()->json(['items' => $items]);
@@ -244,10 +256,9 @@ class BarangKeluarController extends Controller
 
     public function getCustomersByWarehouse($warehouseId)
     {
-        // Mengambil pelanggan yang terkait dengan gudang_id yang diberikan
         $customers = BarangMasuk::where('gudang_id', $warehouseId)
-            ->distinct('customer_id') // Menghindari duplikasi pelanggan
-            ->pluck('customer_id')    // Mengambil hanya customer_id
+            ->distinct('customer_id')
+            ->pluck('customer_id')
             ->map(function ($customerId) {
                 return Customer::find($customerId);
             });
