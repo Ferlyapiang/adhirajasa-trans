@@ -58,7 +58,7 @@ class BarangKeluarController extends Controller
             'items.*.harga' => 'nullable|numeric|min:0',
             'items.*.total_harga' => 'nullable|numeric|min:0',
         ]);
-
+    
         $barangKeluarData = [
             'tanggal_keluar' => $validated['tanggal_keluar'],
             'gudang_id' => $validated['gudang_id'],
@@ -67,12 +67,12 @@ class BarangKeluarController extends Controller
             'nomer_polisi' => $validated['nomer_polisi'],
             'bank_transfer_id' => $validated['bank_transfer_id'],
         ];
-
+    
         $items = $validated['items'];
-
-        $barangKeluar = BarangKeluar::create($barangKeluarData);
-
-        DB::transaction(function () use ($barangKeluar, $items) {
+    
+        DB::transaction(function () use ($barangKeluarData, $items) {
+            $barangKeluar = BarangKeluar::create($barangKeluarData);
+    
             foreach ($items as $item) {
                 BarangKeluarItem::create([
                     'barang_id' => $item['barang_id'],
@@ -84,17 +84,18 @@ class BarangKeluarController extends Controller
                     'barang_keluar_id' => $barangKeluar->id,
                 ]);
             }
+    
+            LogData::create([
+                'user_id' => Auth::id(),
+                'name' => Auth::user()->name,
+                'action' => 'insert',
+                'details' => 'Created barang Keluar ID: ' . $barangKeluar->id . ' with data: ' . json_encode(request()->all())
+            ]);
         });
-
-        LogData::create([
-            'user_id' => Auth::id(),
-            'name' => Auth::user()->name,
-            'action' => 'insert',
-            'details' => 'Created barang Keluar ID: ' . $barangKeluar->id . ' with data: ' . json_encode($request->all())
-        ]);
-
+    
         return redirect()->route('data-gudang.barang-keluar.index')->with('success', 'Barang Keluar created successfully.');
     }
+    
 
     /**
      * Display the specified resource.
