@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Barang Keluar List</title>
+    <title>Adhirajasa Trans Sejahtera - Data Barang Keluar</title>
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="{{ asset('ats/ATSLogo.png') }}" />
@@ -25,8 +25,10 @@
             border-radius: 10px;
             overflow: hidden;
             border: 1px solid #dee2e6;
-            display: block;  /* Makes the table scrollable */
-            overflow-x: auto;  /* Enables horizontal scrolling */
+            display: block;
+            /* Makes the table scrollable */
+            overflow-x: auto;
+            /* Enables horizontal scrolling */
             white-space: nowrap;
         }
 
@@ -75,7 +77,7 @@
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1 class="m-0">Barang Keluar List</h1>
+                            <h1 class="m-0">Data Barang Keluar</h1>
                         </div>
                     </div>
                 </div>
@@ -89,12 +91,8 @@
                         <div class="col-lg-12">
                             <div class="card">
                                 <div class="card-header">
-                                    <h3 class="card-title">List of Barang Keluar</h3>
-                                    <div class="card-tools">
-                                        <a href="{{ route('data-gudang.barang-keluar.create') }}" class="btn btn-primary">
-                                            <i class="fas fa-plus"></i> Add New
-                                        </a>
-                                    </div>
+                                    <h3 class="card-title">Daftar Barang Keluar</h3>
+                                    <a href="{{ route('data-gudang.barang-keluar.create') }}" class="btn btn-primary float-right">Tambah Barang Keluar</a>
                                 </div>
                                 <div class="card-body">
                                     <table id="barangKeluarTable" class="table table-bordered table-striped">
@@ -112,27 +110,27 @@
                                         </thead>
                                         <tbody>
                                             @foreach ($barangKeluars as $index => $barangKeluar)
-                                                <tr>
-                                                    <td>{{ $index + 1 }}</td>
-                                                    <td>{{ $barangKeluar->tanggal_keluar }}</td>
-                                                    <td>{{ $barangKeluar->gudang->name }}</td>
-                                                    <td>{{ $barangKeluar->customer->name }}</td>
-                                                    <td>{{ $barangKeluar->nomer_container }}</td>
-                                                    <td>{{ $barangKeluar->nomer_polisi }}</td>
-                                                    <td>{{ $barangKeluar->bankTransfer->bank_name }} - {{ $barangKeluar->bankTransfer->account_number }}</td>
-                                                    <td>
-                                                        <a href="{{ route('data-gudang.barang-keluar.edit', $barangKeluar->id) }}" class="btn btn-warning btn-sm">
-                                                            <i class="fas fa-edit"></i> Edit
-                                                        </a>
-                                                        <form action="{{ route('data-gudang.barang-keluar.destroy', $barangKeluar->id) }}" method="POST" style="display:inline;">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">
-                                                                <i class="fas fa-trash"></i> Delete
-                                                            </button>
-                                                        </form>
-                                                    </td>
-                                                </tr>
+                                            <tr>
+                                                <td>{{ $index + 1 }}</td>
+                                                <td>{{ $barangKeluar->tanggal_keluar }}</td>
+                                                <td>{{ $barangKeluar->gudang->name }}</td>
+                                                <td>{{ $barangKeluar->customer->name }}</td>
+                                                <td>{{ $barangKeluar->nomer_container }}</td>
+                                                <td>{{ $barangKeluar->nomer_polisi }}</td>
+                                                <td>{{ $barangKeluar->bankTransfer->bank_name }} - {{ $barangKeluar->bankTransfer->account_number }}</td>
+                                                <td>
+                                                    <a href="{{ route('data-gudang.barang-keluar.edit', $barangKeluar->id) }}" class="btn btn-warning btn-sm">
+                                                        <i class="fas fa-edit"></i> Edit
+                                                    </a>
+                                                    <form action="{{ route('data-gudang.barang-keluar.destroy', $barangKeluar->id) }}" method="POST" style="display:inline;">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">
+                                                            <i class="fas fa-trash"></i> Delete
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                            </tr>
                                             @endforeach
                                         </tbody>
                                     </table>
@@ -160,22 +158,13 @@
     <script src="{{ asset('lte/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <!-- DataTables & Plugins -->
     <script src="https://cdn.datatables.net/1.13.3/js/jquery.dataTables.min.js"></script>
-    <script src="{{ asset('lte/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
     <!-- AdminLTE App -->
     <script src="{{ asset('lte/dist/js/adminlte.min.js') }}"></script>
 
     <!-- Page-specific script -->
     <script>
         $(document).ready(function() {
-            $('#barangKeluarTable').DataTable({
-                "responsive": true,
-                "autoWidth": false,
-                "lengthChange": false,
-                "paging": true,
-                "searching": true,
-                "ordering": true,
-                "info": true,
-            });
+            $('#barangKeluarTable').DataTable();
         });
     </script>
 </body>
