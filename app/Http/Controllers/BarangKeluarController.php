@@ -142,28 +142,16 @@ class BarangKeluarController extends Controller
         return view('data-gudang.barang-keluar.show', compact('barangKeluar'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    // public function edit(BarangKeluar $barangKeluar)
-    // {
-    //     $warehouses = Warehouse::all();
-    //     $customers = Customer::all();
-    //     $bankTransfers = BankData::all();
-    //     $barangs = Barang::all(); // Fetch all Barang data
-    //     $barangKeluar->load('items');
-    //     return view('data-gudang.barang-keluar.edit', compact('barangKeluar', 'warehouses', 'customers', 'bankTransfers', 'barangs'));
-    // }
     public function edit($id)
-{
-    $barangKeluar = BarangKeluar::with('items')->findOrFail($id); // Fetch Barang Keluar data along with its items
-    $warehouses = Warehouse::all();
-    $customers = Customer::all();
-    $bankTransfers = BankData::all();
-    $barangs = Barang::all(); // Fetch all Barang data
-    
-    return view('data-gudang.barang-keluar.edit', compact('barangKeluar', 'warehouses', 'customers', 'bankTransfers', 'barangs'));
-}
+    {
+        $barangKeluar = BarangKeluar::with('items')->findOrFail($id); // Fetch Barang Keluar data along with its items
+        $warehouses = Warehouse::all();
+        $customers = Customer::all();
+        $bankTransfers = BankData::all();
+        $barangs = Barang::all(); // Fetch all Barang data
+
+        return view('data-gudang.barang-keluar.edit', compact('barangKeluar', 'warehouses', 'customers', 'bankTransfers', 'barangs'));
+    }
 
 
     /**
@@ -173,7 +161,7 @@ class BarangKeluarController extends Controller
     {
         // Decode JSON string to array if items are sent as a JSON string
         $request->merge(['items' => json_decode($request->input('items'), true)]);
-    
+
         // Validate the request data
         $validated = $request->validate([
             'tanggal_keluar' => 'required|date',
@@ -191,7 +179,7 @@ class BarangKeluarController extends Controller
             'items.*.total_harga' => 'nullable|numeric|min:0',
             'items.*.barang_masuk_id' => 'required|exists:barang_masuks,id',
         ]);
-    
+
         // Prepare Barang Keluar data
         $barangKeluarData = [
             'tanggal_keluar' => $validated['tanggal_keluar'],
@@ -201,20 +189,20 @@ class BarangKeluarController extends Controller
             'nomer_polisi' => $validated['nomer_polisi'],
             'bank_transfer_id' => $validated['bank_transfer_id'],
         ];
-    
+
         // Extract items data
         $items = $validated['items'];
-    
+
         try {
             // Database transaction
             DB::transaction(function () use ($id, $barangKeluarData, $items) {
                 // Update Barang Keluar record
                 $barangKeluar = BarangKeluar::findOrFail($id);
                 $barangKeluar->update($barangKeluarData);
-    
+
                 // Delete existing items related to this Barang Keluar
                 BarangKeluarItem::where('barang_keluar_id', $id)->delete();
-    
+
                 // Iterate over items and create BarangKeluarItem
                 foreach ($items as $item) {
                     BarangKeluarItem::create([
@@ -228,7 +216,7 @@ class BarangKeluarController extends Controller
                         'barang_keluar_id' => $barangKeluar->id,
                     ]);
                 }
-    
+
                 // Log the operation
                 LogData::create([
                     'user_id' => Auth::check() ? Auth::id() : null,
@@ -237,7 +225,7 @@ class BarangKeluarController extends Controller
                     'details' => 'Updated Barang Keluar ID: ' . $barangKeluar->id . ' with data: ' . json_encode($barangKeluarData)
                 ]);
             });
-    
+
             // Redirect with success message
             return redirect()->route('data-gudang.barang-keluar.index')->with('success', 'Barang Keluar updated successfully.');
         } catch (\Exception $e) {
@@ -248,12 +236,12 @@ class BarangKeluarController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString() // Optional: add stack trace for debugging
             ]);
-    
+
             // Redirect with error message
             return redirect()->back()->with('error', 'An error occurred: ' . $e->getMessage());
         }
     }
-    
+
 
     /**
      * Remove the specified resource from storage.

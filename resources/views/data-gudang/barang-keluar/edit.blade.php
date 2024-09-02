@@ -21,11 +21,14 @@
             margin: 20px 0;
         }
 
-        table, th, td {
+        table,
+        th,
+        td {
             border: 1px solid #ddd;
         }
 
-        th, td {
+        th,
+        td {
             padding: 8px;
             text-align: left;
         }
@@ -68,191 +71,219 @@
 
             <!-- Main content -->
             <div class="container">
-                <form action="{{ route('data-gudang.barang-keluar.update', $barangKeluar->id) }}" method="POST" id="barangKeluarForm">
-                    @csrf
-                    @method('PUT')
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">Form Barang Keluar</h3>
+                                </div>
+                                <div class="card-body">
+                                    <form action="{{ route('data-gudang.barang-keluar.update', $barangKeluar->id) }}" method="POST" id="barangKeluarForm">
+                                        @csrf
+                                        @method('PUT')
 
-                    <div class="mb-3">
-                        <label for="tanggal_keluar" class="form-label">Tanggal Keluar</label>
-                        <input type="date" class="form-control @error('tanggal_keluar') is-invalid @enderror" id="tanggal_keluar" name="tanggal_keluar" value="{{ old('tanggal_keluar', $barangKeluar->tanggal_keluar) }}" required>
-                        @error('tanggal_keluar')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
+                                        <div class="form-group">
+                                            <label for="tanggal_keluar">Tanggal Keluar</label>
+                                            <input type="date" name="tanggal_keluar" id="tanggal_keluar"
+                                                class="form-control @error('tanggal_keluar') is-invalid @enderror"
+                                                value="{{ old('tanggal_keluar', $barangKeluar->tanggal_keluar) }}" required>
+                                            @error('tanggal_keluar')
+                                            <span class="invalid-feedback">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="gudang_id">Gudang</label>
+                                            <select name="gudang_id" id="gudang_id"
+                                                class="form-control @error('gudang_id') is-invalid @enderror" required>
+                                                <option value="">Select Gudang</option>
+                                                @foreach ($warehouses as $warehouse)
+                                                <option value="{{ $warehouse->id }}"
+                                                    {{ old('gudang_id', $barangKeluar->gudang_id) == $warehouse->id ? 'selected' : '' }}>
+                                                    {{ $warehouse->name }}
+                                                </option>
+                                                @endforeach
+                                            </select>
+                                            @error('gudang_id')
+                                            <span class="invalid-feedback">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="customer_id">Customer</label>
+                                            <select name="customer_id" id="customer_id"
+                                                class="form-control @error('customer_id') is-invalid @enderror" required>
+                                                <option value="">Select Customer</option>
+                                                @foreach ($customers as $customer)
+                                                <option value="{{ $customer->id }}"
+                                                    {{ old('customer_id', $barangKeluar->customer_id) == $customer->id ? 'selected' : '' }}>
+                                                    {{ $customer->name }}
+                                                </option>
+                                                @endforeach
+                                            </select>
+                                            @error('customer_id')
+                                            <span class="invalid-feedback">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="nomer_container">Nomor Container</label>
+                                            <input type="text" name="nomer_container" id="nomer_container"
+                                                class="form-control @error('nomer_container') is-invalid @enderror"
+                                                value="{{ old('nomer_container', $barangKeluar->nomer_container) }}">
+                                            @error('nomer_container')
+                                            <span class="invalid-feedback">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="nomer_polisi">Nomor Polisi</label>
+                                            <input type="text" name="nomer_polisi" id="nomer_polisi"
+                                                class="form-control @error('nomer_polisi') is-invalid @enderror"
+                                                value="{{ old('nomer_polisi', $barangKeluar->nomer_polisi) }}">
+                                            @error('nomer_polisi')
+                                            <span class="invalid-feedback">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="bank_transfer_id">Bank Transfer</label>
+                                            <select name="bank_transfer_id" id="bank_transfer_id"
+                                                class="form-control @error('bank_transfer_id') is-invalid @enderror">
+                                                <option value="">-- None --</option>
+                                                @foreach ($bankTransfers as $bankTransfer)
+                                                <option value="{{ $bankTransfer->id }}"
+                                                    {{ old('bank_transfer_id', $barangKeluar->bank_transfer_id) == $bankTransfer->id ? 'selected' : '' }}>
+                                                    {{ $bankTransfer->bank_name }} -
+                                                    {{ $bankTransfer->account_number }}
+                                                </option>
+                                                @endforeach
+                                            </select>
+                                            @error('bank_transfer_id')
+                                            <span class="invalid-feedback">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+
+                                        <h2>Items</h2>
+                                        <!-- Button trigger modal -->
+                                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#itemModal">
+                                            Add Item
+                                        </button>
+
+                                        <input type="hidden" name="items" id="items-input" value="[]">
+
+                                        <!-- Items Table -->
+                                        <table class="table" id="items-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Nomer Ref</th>
+                                                    <th>Nama Barang</th>
+                                                    <th>Quantity</th>
+                                                    <th>Unit</th>
+                                                    <th>Harga</th>
+                                                    <th>Total</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach($barangKeluar->items as $item)
+                                                <tr>
+                                                    <td>{{ $item->no_ref }}</td>
+                                                    <td>{{ $item->barang->nama_barang }}</td>
+                                                    <td>{{ $item->qty }}</td>
+                                                    <td>{{ $item->unit }}</td>
+                                                    <td>{{ number_format($item->harga, 2) }}</td>
+                                                    <td>{{ number_format($item->total_harga, 2) }}</td>
+                                                    <td>
+                                                        <button type="button" class="btn btn-danger remove-item">Remove</button>
+                                                    </td>
+                                                </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+
+                                        <br><br>
+                                        <div class="card-footer">
+                                            <button type="submit" class="btn btn-success">Save</button>
+                                            <a href="{{ route('data-gudang.barang-keluar.index') }}" class="btn btn-secondary">Cancel</a>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-
-                    <div class="mb-3">
-                        <label for="gudang_id" class="form-label">Gudang</label>
-                        <select class="form-select @error('gudang_id') is-invalid @enderror" id="gudang_id" name="gudang_id" required>
-                            @foreach($warehouses as $warehouse)
-                            <option value="{{ $warehouse->id }}" {{ old('gudang_id', $barangKeluar->gudang_id) == $warehouse->id ? 'selected' : '' }}>
-                                {{ $warehouse->name }}
-                            </option>
-                            @endforeach
-                        </select>
-                        @error('gudang_id')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="customer_id" class="form-label">Customer</label>
-                        <select class="form-select @error('customer_id') is-invalid @enderror" id="customer_id" name="customer_id" required>
-                            @foreach($customers as $customer)
-                            <option value="{{ $customer->id }}" {{ old('customer_id', $barangKeluar->customer_id) == $customer->id ? 'selected' : '' }}>
-                                {{ $customer->name }}
-                            </option>
-                            @endforeach
-                        </select>
-                        @error('customer_id')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="nomer_container" class="form-label">Nomor Container</label>
-                        <input type="text" class="form-control @error('nomer_container') is-invalid @enderror" id="nomer_container" name="nomer_container" value="{{ old('nomer_container', $barangKeluar->nomer_container) }}">
-                        @error('nomer_container')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="nomer_polisi" class="form-label">Nomor Polisi</label>
-                        <input type="text" class="form-control @error('nomer_polisi') is-invalid @enderror" id="nomer_polisi" name="nomer_polisi" value="{{ old('nomer_polisi', $barangKeluar->nomer_polisi) }}">
-                        @error('nomer_polisi')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="bank_transfer_id" class="form-label">Bank Transfer</label>
-                        <select class="form-select @error('bank_transfer_id') is-invalid @enderror" id="bank_transfer_id" name="bank_transfer_id">
-                            <option value="">-- None --</option>
-                            @foreach($bankTransfers as $bankTransfer)
-                            <option value="{{ $bankTransfer->id }}" {{ old('bank_transfer_id', $barangKeluar->bank_transfer_id) == $bankTransfer->id ? 'selected' : '' }}>
-                                {{ $bankTransfer->name }}
-                            </option>
-                            @endforeach
-                        </select>
-                        @error('bank_transfer_id')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <h2>Items</h2>
-                    <!-- Button trigger modal -->
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#itemModal">
-                        Add Item
-                    </button>
-
-                    <input type="hidden" name="items" id="items-input" value="[]">
-
-                    <!-- Items Table -->
-                    <table class="table" id="items-table">
-                        <thead>
-                            <tr>
-                                <th>Nomer Ref</th>
-                                <th>Nama Barang</th>
-                                <th>Quantity</th>
-                                <th>Unit</th>
-                                <th>Harga</th>
-                                <th>Total</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($barangKeluar->items as $item)
-                            <tr>
-                                <td>{{ $item->no_ref }}</td>
-                                <td>{{ $item->barang->name }}</td>
-                                <td>{{ $item->qty }}</td>
-                                <td>{{ $item->unit }}</td>
-                                <td>{{ number_format($item->harga, 2) }}</td>
-                                <td>{{ number_format($item->total_harga, 2) }}</td>
-                                <td>
-                                    <button type="button" class="btn btn-danger remove-item">Remove</button>
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-
-                    <br><br>
-                    <div class="card-footer">
-                        <button type="submit" class="btn btn-success">Save</button>
-                        <a href="{{ route('data-gudang.barang-keluar.index') }}" class="btn btn-secondary">Cancel</a>
-                    </div>
-                </form>
+                </div>
+                <!-- /.content -->
             </div>
-            <!-- /.content -->
-        </div>
-        <!-- /.content-wrapper -->
+            <!-- /.content-wrapper -->
 
-        <!-- Footer -->
+            <!-- Footer -->
+           
+            <!-- /.footer -->
+        </div>
         @include('admin.footer')
-        <!-- /.footer -->
-    </div>
-    <!-- ./wrapper -->
+        <!-- ./wrapper -->
 
-    <script src="{{ asset('lte/plugins/jquery/jquery.min.js') }}"></script>
-    <script src="{{ asset('lte/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ asset('lte/dist/js/adminlte.min.js') }}"></script>
+        <script src="{{ asset('lte/plugins/jquery/jquery.min.js') }}"></script>
+        <script src="{{ asset('lte/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+        <script src="{{ asset('lte/dist/js/adminlte.min.js') }}"></script>
 
-    <!-- Modal -->
-    <div class="modal fade" id="itemModal" tabindex="-1" role="dialog" aria-labelledby="itemModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="itemModalLabel">Add Item</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="modal_barang_id" class="form-label">Barang</label>
-                        <select class="form-select" id="modal_barang_id">
-                            @foreach($barangs as $barang)
-                            <option value="{{ $barang->id }}">{{ $barang->name }}</option>
-                            @endforeach
-                        </select>
+        <!-- Modal -->
+        <div class="modal fade" id="itemModal" tabindex="-1" role="dialog" aria-labelledby="itemModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="itemModalLabel">Add Item</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
                     </div>
-                    <div class="mb-3">
-                        <label for="modal_no_ref" class="form-label">No. Ref</label>
-                        <input type="text" class="form-control" id="modal_no_ref">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="modal_barang_id" class="form-label">Barang</label>
+                            <select class="form-select" id="modal_barang_id">
+                                @foreach($barangs as $barang)
+                                <option value="{{ $barang->id }}">{{ $barang->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="modal_no_ref" class="form-label">No. Ref</label>
+                            <input type="text" class="form-control" id="modal_no_ref">
+                        </div>
+                        <div class="mb-3">
+                            <label for="modal_qty" class="form-label">Quantity</label>
+                            <input type="number" class="form-control" id="modal_qty">
+                        </div>
+                        <div class="mb-3">
+                            <label for="modal_unit" class="form-label">Unit</label>
+                            <input type="text" class="form-control" id="modal_unit">
+                        </div>
+                        <div class="mb-3">
+                            <label for="modal_harga" class="form-label">Harga</label>
+                            <input type="number" step="0.01" class="form-control" id="modal_harga">
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="modal_qty" class="form-label">Quantity</label>
-                        <input type="number" class="form-control" id="modal_qty">
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="addItemButton">Add Item</button>
                     </div>
-                    <div class="mb-3">
-                        <label for="modal_unit" class="form-label">Unit</label>
-                        <input type="text" class="form-control" id="modal_unit">
-                    </div>
-                    <div class="mb-3">
-                        <label for="modal_harga" class="form-label">Harga</label>
-                        <input type="number" step="0.01" class="form-control" id="modal_harga">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="addItemButton">Add Item</button>
                 </div>
             </div>
         </div>
-    </div>
 
-    <script>
-        $(document).ready(function() {
-            $('#addItemButton').on('click', function() {
-                let barangId = $('#modal_barang_id').val();
-                let noRef = $('#modal_no_ref').val();
-                let qty = $('#modal_qty').val();
-                let unit = $('#modal_unit').val();
-                let harga = $('#modal_harga').val();
-                let total = (qty * harga).toFixed(2);
+        <script>
+            $(document).ready(function() {
+                $('#addItemButton').on('click', function() {
+                    let barangId = $('#modal_barang_id').val();
+                    let noRef = $('#modal_no_ref').val();
+                    let qty = $('#modal_qty').val();
+                    let unit = $('#modal_unit').val();
+                    let harga = $('#modal_harga').val();
+                    let total = (qty * harga).toFixed(2);
 
-                let row = `<tr>
+                    let row = `<tr>
                     <td>${noRef}</td>
                     <td>${barangId}</td>
                     <td>${qty}</td>
@@ -262,27 +293,34 @@
                     <td><button type="button" class="btn btn-danger remove-item">Remove</button></td>
                 </tr>`;
 
-                $('#items-table tbody').append(row);
+                    $('#items-table tbody').append(row);
 
-                // Update hidden input with item data
-                let items = $('#items-input').val() ? JSON.parse($('#items-input').val()) : [];
-                items.push({ barang_id: barangId, no_ref: noRef, qty: qty, unit: unit, harga: harga, total_harga: total });
-                $('#items-input').val(JSON.stringify(items));
+                    // Update hidden input with item data
+                    let items = $('#items-input').val() ? JSON.parse($('#items-input').val()) : [];
+                    items.push({
+                        barang_id: barangId,
+                        no_ref: noRef,
+                        qty: qty,
+                        unit: unit,
+                        harga: harga,
+                        total_harga: total
+                    });
+                    $('#items-input').val(JSON.stringify(items));
 
-                $('#itemModal').modal('hide');
+                    $('#itemModal').modal('hide');
+                });
+
+                $('#items-table').on('click', '.remove-item', function() {
+                    $(this).closest('tr').remove();
+
+                    // Update hidden input to remove the deleted item
+                    let items = $('#items-input').val() ? JSON.parse($('#items-input').val()) : [];
+                    let index = $(this).closest('tr').index();
+                    items.splice(index, 1);
+                    $('#items-input').val(JSON.stringify(items));
+                });
             });
-
-            $('#items-table').on('click', '.remove-item', function() {
-                $(this).closest('tr').remove();
-
-                // Update hidden input to remove the deleted item
-                let items = $('#items-input').val() ? JSON.parse($('#items-input').val()) : [];
-                let index = $(this).closest('tr').index();
-                items.splice(index, 1);
-                $('#items-input').val(JSON.stringify(items));
-            });
-        });
-    </script>
+        </script>
 </body>
 
 </html>
