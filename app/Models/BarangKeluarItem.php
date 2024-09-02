@@ -25,15 +25,16 @@ class BarangKeluarItem extends Model
     // Define the relationship with BarangKeluar
     public function barangKeluar()
     {
-        return $this->belongsTo(BarangKeluar::class);
+        return $this->belongsTo(BarangKeluar::class, 'barang_keluar_id');
     }
 
     // Define the relationship with Barang
     public function barang()
     {
-        return $this->belongsTo(Barang::class);
+        return $this->belongsTo(Barang::class, 'barang_id');
     }
 
+    // Define the relationship with BarangMasuk
     public function barangMasuk()
     {
         return $this->belongsTo(BarangMasuk::class, 'barang_masuk_id');

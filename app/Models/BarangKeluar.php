@@ -23,30 +23,30 @@ class BarangKeluar extends Model
     // Define the relationship with BarangKeluarItem
     public function items()
     {
-        return $this->hasMany(BarangKeluarItem::class);
+        return $this->hasMany(BarangKeluarItem::class, 'barang_keluar_id');
     }
 
     // Define the relationship with BarangMasuk
     public function barangMasuk()
     {
-        return $this->belongsTo(BarangMasuk::class);
+        return $this->hasManyThrough(BarangMasuk::class, BarangKeluarItem::class, 'barang_keluar_id', 'id', 'id', 'barang_masuk_id');
     }
 
     // Define the relationship with Gudang (Warehouse)
     public function gudang()
     {
-        return $this->belongsTo(Warehouse::class);
+        return $this->belongsTo(Warehouse::class, 'gudang_id');
     }
 
     // Define the relationship with Customer
     public function customer()
     {
-        return $this->belongsTo(Customer::class);
+        return $this->belongsTo(Customer::class, 'customer_id');
     }
 
-    // Define the relationship with BankTransfer (Assuming this is a model)
+    // Define the relationship with BankTransfer (BankData)
     public function bankTransfer()
     {
-        return $this->belongsTo(BankData::class);
+        return $this->belongsTo(BankData::class, 'bank_transfer_id');
     }
 }

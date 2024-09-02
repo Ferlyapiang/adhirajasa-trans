@@ -20,7 +20,6 @@ return new class extends Migration
             $table->string('nomer_container')->nullable(); // Nomor Container (Opsional)
             $table->string('nomer_polisi')->nullable(); // Nomor Polisi (Opsional)
             $table->foreignId('bank_transfer_id')->constrained('bank_datas')->onDelete('cascade'); // Transfer (ID Bank)
-            $table->foreignId('barang_masuk_id')->constrained('barang_masuks')->onDelete('cascade'); // Reference to barang_masuks table
             $table->timestamps();
         });
 
