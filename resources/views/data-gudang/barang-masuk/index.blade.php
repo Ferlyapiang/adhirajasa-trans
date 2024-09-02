@@ -54,17 +54,17 @@
             border-bottom: 1px solid #dee2e6;
         }
 
-        #barangMasukTable td:nth-child(9) {
+        #barangMasukTable td:nth-child(10) {
             background-color: #d1e7dd;
             /* Light green for FIFO IN */
         }
 
-        #barangMasukTable td:nth-child(10) {
+        #barangMasukTable td:nth-child(11) {
             background-color: #f8d7da;
             /* Light red for FIFO OUT */
         }
 
-        #barangMasukTable td:nth-child(11) {
+        #barangMasukTable td:nth-child(12) {
             background-color: #fff3cd;
             /* Light yellow for FIFO Sisa */
         }
@@ -129,6 +129,7 @@
                                                     <th rowspan="2">No Ref (JOC)</th>
                                                     <th rowspan="2">Nama Barang</th>
                                                     <th rowspan="2">Nama Pemilik</th>
+                                                    <th rowspan="2">Gudang</th>
                                                     <th rowspan="2">Jenis Mobil</th>
                                                     <th rowspan="2">Nomer Polisi</th>
                                                     <th rowspan="2">Nomer Container</th>
@@ -155,6 +156,7 @@
                                                     </td>
                                                     <td>{{ $item->barang->nama_barang }}</td>
                                                     <td>{{ $barangMasuk->customer->name }}</td>
+                                                    <td>{{ $barangMasuk->gudang->name }}</td>
                                                     <td>{{ $barangMasuk->jenis_mobil }}</td>
                                                     <td>{{ $barangMasuk->nomer_polisi }}</td>
                                                     <td>{{ $barangMasuk->nomer_container }}</td>
