@@ -23,39 +23,35 @@
         /* Custom styling for the DataTable */
         #barangMasukTable {
             border-radius: 10px;
-            overflow: hidden;
             border: 1px solid #dee2e6;
-            display: block;
-            /* Makes the table scrollable */
-            overflow-x: auto;
-            /* Enables horizontal scrolling */
-            white-space: nowrap;
+            width: 100%;
+            table-layout: auto;
+            /* Ensure table takes up the full width of its container */
+        }
+
+        .table-responsive {
+            max-height: 400px;
+            /* Set the maximum height for scrolling */
+            overflow-y: auto;
+            /* Enable vertical scrolling */
         }
 
         #barangMasukTable thead {
-            background-color: transparent;
-            /* Remove background color from header */
+            background-color: #f8f9fa;
+            position: sticky;
+            top: 0;
+            /* Sticky header to keep it visible when scrolling */
+            z-index: 1;
+            /* Ensure the header is above the other rows */
         }
 
         #barangMasukTable thead th {
             border-top: 1px solid #dee2e6;
             border-bottom: 2px solid #dee2e6;
-            text-align: center;
-            /* Center-align header text */
         }
 
         #barangMasukTable tbody tr {
             border-bottom: 1px solid #dee2e6;
-        }
-
-        #barangMasukTable th[colspan="3"] {
-            background-color: transparent;
-            /* Remove background color from combined header */
-        }
-
-        #barangMasukTable th {
-            background-color: transparent;
-            /* Remove background color from all headers */
         }
 
         #barangMasukTable td:nth-child(9) {
@@ -73,6 +69,7 @@
             /* Light yellow for FIFO Sisa */
         }
 
+        /* Modal styling */
         .modal-content {
             border-radius: 10px;
         }
@@ -123,29 +120,30 @@
                                     <a href="{{ route('data-gudang.barang-masuk.create') }}" class="btn btn-primary float-right">Tambah Barang Masuk</a>
                                 </div>
                                 <div class="card-body">
-                                    <table id="barangMasukTable" class="table table-bordered table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th rowspan="2">No</th>
-                                                <th rowspan="2">Tanggal Masuk</th>
-                                                <th rowspan="2">No Ref (JOC)</th>
-                                                <th rowspan="2">Nama Barang</th>
-                                                <th rowspan="2">Nama Pemilik</th>
-                                                <th rowspan="2">Jenis Mobil</th>
-                                                <th rowspan="2">Nomer Polisi</th>
-                                                <th rowspan="2">Nomer Container</th>
-                                                <th colspan="3">FIFO</th>
-                                                <th rowspan="2">Detail</th>
-                                            </tr>
-                                            <tr>
-                                                <th>IN</th>
-                                                <th>OUT</th>
-                                                <th>SISA</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @php $counter = 1; @endphp
-                                            @foreach ($barangMasuks as $barangMasuk)
+                                    <div class="table-responsive">
+                                        <table id="barangMasukTable" class="table table-bordered table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th rowspan="2">No</th>
+                                                    <th rowspan="2">Tanggal Masuk</th>
+                                                    <th rowspan="2">No Ref (JOC)</th>
+                                                    <th rowspan="2">Nama Barang</th>
+                                                    <th rowspan="2">Nama Pemilik</th>
+                                                    <th rowspan="2">Jenis Mobil</th>
+                                                    <th rowspan="2">Nomer Polisi</th>
+                                                    <th rowspan="2">Nomer Container</th>
+                                                    <th colspan="3">FIFO</th>
+                                                    <th rowspan="2">Detail</th>
+                                                </tr>
+                                                <tr>
+                                                    <th>IN</th>
+                                                    <th>OUT</th>
+                                                    <th>SISA</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @php $counter = 1; @endphp
+                                                @foreach ($barangMasuks as $barangMasuk)
                                                 @foreach ($barangMasuk->items as $item)
                                                 <tr>
                                                     <td>{{ $counter++ }}</td>
@@ -173,11 +171,12 @@
                                                     </td>
                                                 </tr>
                                                 @endforeach
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
+
                                 <!-- /.card-body -->
                             </div>
                             <!-- /.card -->
@@ -187,6 +186,7 @@
             </div>
             <!-- /.content -->
         </div>
+
         <!-- /.content-wrapper -->
 
         <!-- Footer -->
