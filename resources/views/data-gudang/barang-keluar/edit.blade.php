@@ -194,8 +194,8 @@
                                                     <td>{{ $item->barang->nama_barang }}</td>
                                                     <td>{{ $item->qty }}</td>
                                                     <td>{{ $item->unit }}</td>
-                                                    <td>{{ number_format($item->harga, 2) }}</td>
-                                                    <td>{{ number_format($item->total_harga, 2) }}</td>
+                                                    <td>Rp. {{ number_format($item->harga, 2) }}</td>
+                                                    <td>Rp. {{ number_format($item->total_harga, 2) }}</td>
                                                     <td>
                                                         <button type="button" class="btn btn-danger remove-item">Remove</button>
                                                     </td>
@@ -220,7 +220,7 @@
             <!-- /.content-wrapper -->
 
             <!-- Footer -->
-           
+
             <!-- /.footer -->
         </div>
         @include('admin.footer')
@@ -230,6 +230,7 @@
         <script src="{{ asset('lte/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
         <script src="{{ asset('lte/dist/js/adminlte.min.js') }}"></script>
 
+        <!-- Modal -->
         <!-- Modal -->
         <div class="modal fade" id="itemModal" tabindex="-1" role="dialog" aria-labelledby="itemModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
@@ -263,7 +264,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="modal_harga" class="form-label">Harga</label>
-                            <input type="number" step="0.01" class="form-control" id="modal_harga">
+                            <input type="text" class="form-control" id="modal_harga"> <!-- Change to text -->
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -274,76 +275,106 @@
             </div>
         </div>
 
+
         <script>
-$(document).ready(function() {
-    // Function to update the hidden input with table data
-    function updateItemsInput() {
-        let items = [];
-        $('#items-table tbody tr').each(function() {
-            let row = $(this);
-            let item = {
-                barang_id: row.find('td:eq(1)').data('barang-id'), // Assuming barang_id is stored as data attribute in table cell
-                no_ref: row.find('td:eq(0)').text(),
-                qty: row.find('td:eq(2)').text(),
-                unit: row.find('td:eq(3)').text(),
-                harga: row.find('td:eq(4)').text(),
-                total_harga: row.find('td:eq(5)').text()
-            };
-            items.push(item);
-        });
-        $('#items-input').val(JSON.stringify(items));
-    }
+            $(document).ready(function() {
+                function formatCurrency(amount) {
+                    let number = parseFloat(amount);
+                    if (isNaN(number)) return 'Rp. 0';
+                    return `Rp. ${number.toLocaleString('id-ID', { minimumFractionDigits: 0 })}`;
+                }
 
-    // Initialize hidden input with existing table data
-    updateItemsInput();
+                function parseCurrency(value) {
+                    return parseFloat(value.replace(/[^0-9,]/g, '').replace(',', '.')) || 0;
+                }
 
-    // Handle adding new item (if needed)
-    $('#addItemButton').on('click', function() {
-        let barangId = $('#modal_barang_id').val();
-        let barangName = $('#modal_barang_id option:selected').text();
-        let noRef = $('#modal_no_ref').val();
-        let qty = $('#modal_qty').val();
-        let unit = $('#modal_unit').val();
-        let harga = $('#modal_harga').val();
-        let total = (qty * harga).toFixed(2);
+                function toRawNumber(value) {
+                    return parseFloat(value.replace(/[^0-9]/g, '')) || 0;
+                }
 
-        // Append the new row to the table
-        let row = `<tr>
-            <td>${noRef}</td>
-            <td data-barang-id="${barangId}">${barangName}</td>
-            <td>${qty}</td>
-            <td>${unit}</td>
-            <td>${parseFloat(harga).toFixed(2)}</td>
-            <td>${total}</td>
-            <td><button type="button" class="btn btn-danger remove-item">Remove</button></td>
-        </tr>`;
-
-        $('#items-table tbody').append(row);
-
-        // Update the hidden input with the new table data
-        updateItemsInput();
-
-        // Clear the modal input fields after adding
-        $('#modal_barang_id').val('');
-        $('#modal_no_ref').val('');
-        $('#modal_qty').val('');
-        $('#modal_unit').val('');
-        $('#modal_harga').val('');
-
-        $('#itemModal').modal('hide');
-    });
-
-    // Remove item from the table and update the hidden input
-    $('#items-table').on('click', '.remove-item', function() {
-        $(this).closest('tr').remove();
-        // Update the hidden input with the remaining table data
-        updateItemsInput();
-    });
-});
-</script>
+                function toInteger(value) {
+                    return parseInt(value, 10) || 0; // Konversi ke integer
+                }
 
 
+                // Function to update the hidden input with table data
+                function updateItemsInput() {
+                    let items = [];
+                    $('#items-table tbody tr').each(function() {
+                        let row = $(this);
+                        let item = {
+                            barang_id: row.find('td:eq(1)').data('barang-id'),
+                            no_ref: row.find('td:eq(0)').text(),
+                            qty: toInteger(row.find('td:eq(2)').text()), // Konversi ke integer
+                            unit: row.find('td:eq(3)').text(),
+                            harga: toRawNumber(row.find('td:eq(4)').text()), // Konversi string ke angka mentah
+                            total_harga: toRawNumber(row.find('td:eq(5)').text()) // Konversi string ke angka mentah
+                        };
+                        items.push(item);
+                    });
+                    $('#items-input').val(JSON.stringify(items));
+                }
 
+
+                // Initialize hidden input with existing table data
+                updateItemsInput();
+
+                // Handle adding new item
+                $('#addItemButton').on('click', function() {
+                    let barangId = $('#modal_barang_id').val();
+                    let barangName = $('#modal_barang_id option:selected').text();
+                    let noRef = $('#modal_no_ref').val();
+                    let qty = toInteger($('#modal_qty').val()); // Pastikan konversi ke integer
+                    let unit = $('#modal_unit').val();
+                    let harga = parseCurrency($('#modal_harga').val()); // Pastikan konversi harga
+                    let total = (qty * harga).toFixed(2);
+
+                    // Format harga dan total untuk tampilan
+                    let formattedHarga = formatCurrency(harga);
+                    let formattedTotal = formatCurrency(total);
+
+                    // Tambahkan baris baru ke tabel
+                    let row = `<tr>
+        <td>${noRef}</td>
+        <td data-barang-id="${barangId}">${barangName}</td>
+        <td>${qty}</td> <!-- qty sebagai integer -->
+        <td>${unit}</td>
+        <td>${formattedHarga}</td>
+        <td>${formattedTotal}</td>
+        <td><button type="button" class="btn btn-danger remove-item">Remove</button></td>
+    </tr>`;
+
+                    $('#items-table tbody').append(row);
+
+                    // Update input tersembunyi dengan data tabel baru
+                    updateItemsInput();
+
+                    // Bersihkan input modal setelah menambahkan
+                    $('#modal_barang_id').val('');
+                    $('#modal_no_ref').val('');
+                    $('#modal_qty').val('');
+                    $('#modal_unit').val('');
+                    $('#modal_harga').val('');
+
+                    $('#itemModal').modal('hide');
+                });
+
+
+                // Remove item from the table and update the hidden input
+                $('#items-table').on('click', '.remove-item', function() {
+                    $(this).closest('tr').remove();
+                    // Update the hidden input with the remaining table data
+                    updateItemsInput();
+                });
+
+                // Ensure input fields are formatted as currency
+                $('#modal_harga').on('input', function() {
+                    let value = $(this).val();
+                    let parsedValue = parseCurrency(value);
+                    $(this).val(formatCurrency(parsedValue));
+                });
+            });
+        </script>
 </body>
 
 </html>
