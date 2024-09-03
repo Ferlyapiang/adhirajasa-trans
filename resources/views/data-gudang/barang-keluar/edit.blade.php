@@ -173,6 +173,7 @@
 
                                         <input type="hidden" name="items" id="items-input" value="[]">
 
+
                                         <!-- Items Table -->
                                         <table class="table" id="items-table">
                                             <thead>
@@ -274,53 +275,75 @@
         </div>
 
         <script>
-            $(document).ready(function() {
-                $('#addItemButton').on('click', function() {
-                    let barangId = $('#modal_barang_id').val();
-                    let noRef = $('#modal_no_ref').val();
-                    let qty = $('#modal_qty').val();
-                    let unit = $('#modal_unit').val();
-                    let harga = $('#modal_harga').val();
-                    let total = (qty * harga).toFixed(2);
+$(document).ready(function() {
+    // Function to update the hidden input with table data
+    function updateItemsInput() {
+        let items = [];
+        $('#items-table tbody tr').each(function() {
+            let row = $(this);
+            let item = {
+                barang_id: row.find('td:eq(1)').data('barang-id'), // Assuming barang_id is stored as data attribute in table cell
+                no_ref: row.find('td:eq(0)').text(),
+                qty: row.find('td:eq(2)').text(),
+                unit: row.find('td:eq(3)').text(),
+                harga: row.find('td:eq(4)').text(),
+                total_harga: row.find('td:eq(5)').text()
+            };
+            items.push(item);
+        });
+        $('#items-input').val(JSON.stringify(items));
+    }
 
-                    let row = `<tr>
-                    <td>${noRef}</td>
-                    <td>${barangId}</td>
-                    <td>${qty}</td>
-                    <td>${unit}</td>
-                    <td>${parseFloat(harga).toFixed(2)}</td>
-                    <td>${total}</td>
-                    <td><button type="button" class="btn btn-danger remove-item">Remove</button></td>
-                </tr>`;
+    // Initialize hidden input with existing table data
+    updateItemsInput();
 
-                    $('#items-table tbody').append(row);
+    // Handle adding new item (if needed)
+    $('#addItemButton').on('click', function() {
+        let barangId = $('#modal_barang_id').val();
+        let barangName = $('#modal_barang_id option:selected').text();
+        let noRef = $('#modal_no_ref').val();
+        let qty = $('#modal_qty').val();
+        let unit = $('#modal_unit').val();
+        let harga = $('#modal_harga').val();
+        let total = (qty * harga).toFixed(2);
 
-                    // Update hidden input with item data
-                    let items = $('#items-input').val() ? JSON.parse($('#items-input').val()) : [];
-                    items.push({
-                        barang_id: barangId,
-                        no_ref: noRef,
-                        qty: qty,
-                        unit: unit,
-                        harga: harga,
-                        total_harga: total
-                    });
-                    $('#items-input').val(JSON.stringify(items));
+        // Append the new row to the table
+        let row = `<tr>
+            <td>${noRef}</td>
+            <td data-barang-id="${barangId}">${barangName}</td>
+            <td>${qty}</td>
+            <td>${unit}</td>
+            <td>${parseFloat(harga).toFixed(2)}</td>
+            <td>${total}</td>
+            <td><button type="button" class="btn btn-danger remove-item">Remove</button></td>
+        </tr>`;
 
-                    $('#itemModal').modal('hide');
-                });
+        $('#items-table tbody').append(row);
 
-                $('#items-table').on('click', '.remove-item', function() {
-                    $(this).closest('tr').remove();
+        // Update the hidden input with the new table data
+        updateItemsInput();
 
-                    // Update hidden input to remove the deleted item
-                    let items = $('#items-input').val() ? JSON.parse($('#items-input').val()) : [];
-                    let index = $(this).closest('tr').index();
-                    items.splice(index, 1);
-                    $('#items-input').val(JSON.stringify(items));
-                });
-            });
-        </script>
+        // Clear the modal input fields after adding
+        $('#modal_barang_id').val('');
+        $('#modal_no_ref').val('');
+        $('#modal_qty').val('');
+        $('#modal_unit').val('');
+        $('#modal_harga').val('');
+
+        $('#itemModal').modal('hide');
+    });
+
+    // Remove item from the table and update the hidden input
+    $('#items-table').on('click', '.remove-item', function() {
+        $(this).closest('tr').remove();
+        // Update the hidden input with the remaining table data
+        updateItemsInput();
+    });
+});
+</script>
+
+
+
 </body>
 
 </html>
