@@ -248,7 +248,7 @@ class BarangKeluarController extends Controller
     $request->merge(['items' => json_decode($request->input('items'), true)]);
     
     // Dump and die to inspect the request data after merging
-    dd($request->all());
+    // dd($request->all());
 
     // Validate the request data
     $validated = $request->validate([
@@ -269,7 +269,7 @@ class BarangKeluarController extends Controller
     ]);
 
     // Dump and die to inspect the validated data
-    dd($validated);
+    // dd($validated);
 
     // Prepare Barang Keluar data
     $barangKeluarData = [
@@ -285,7 +285,7 @@ class BarangKeluarController extends Controller
     $items = $validated['items'];
 
     // Dump and die to inspect Barang Keluar data and items before transaction
-    dd($barangKeluarData, $items);
+    // dd($barangKeluarData, $items);
 
     try {
         // Database transaction

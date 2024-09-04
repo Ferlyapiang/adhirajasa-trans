@@ -79,7 +79,8 @@
                                     <h3 class="card-title">Form Barang Keluar</h3>
                                 </div>
                                 <div class="card-body">
-                                    <form action="{{ route('data-gudang.barang-keluar.update', $barangKeluar->id) }}" method="POST" id="barangKeluarForm">
+                                    <form action="{{ route('data-gudang.barang-keluar.update', $barangKeluar->id) }}"
+                                        method="POST" id="barangKeluarForm">
                                         @csrf
                                         @method('PUT')
 
@@ -87,43 +88,46 @@
                                             <label for="tanggal_keluar">Tanggal Keluar</label>
                                             <input type="date" name="tanggal_keluar" id="tanggal_keluar"
                                                 class="form-control @error('tanggal_keluar') is-invalid @enderror"
-                                                value="{{ old('tanggal_keluar', $barangKeluar->tanggal_keluar) }}" required>
+                                                value="{{ old('tanggal_keluar', $barangKeluar->tanggal_keluar) }}"
+                                                required>
                                             @error('tanggal_keluar')
-                                            <span class="invalid-feedback">{{ $message }}</span>
+                                                <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
                                         </div>
 
                                         <div class="form-group">
                                             <label for="gudang_id">Gudang</label>
                                             <select name="gudang_id" id="gudang_id"
-                                                class="form-control @error('gudang_id') is-invalid @enderror" required>
+                                                class="form-control @error('gudang_id') is-invalid @enderror"
+                                                style="pointer-events: none; background-color: #e9ecef;" required>
                                                 <option value="">Select Gudang</option>
                                                 @foreach ($warehouses as $warehouse)
-                                                <option value="{{ $warehouse->id }}"
-                                                    {{ old('gudang_id', $barangKeluar->gudang_id) == $warehouse->id ? 'selected' : '' }}>
-                                                    {{ $warehouse->name }}
-                                                </option>
+                                                    <option value="{{ $warehouse->id }}"
+                                                        {{ old('gudang_id', $barangKeluar->gudang_id) == $warehouse->id ? 'selected' : '' }}>
+                                                        {{ $warehouse->name }}
+                                                    </option>
                                                 @endforeach
                                             </select>
                                             @error('gudang_id')
-                                            <span class="invalid-feedback">{{ $message }}</span>
+                                                <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
                                         </div>
 
                                         <div class="form-group">
                                             <label for="customer_id">Customer</label>
                                             <select name="customer_id" id="customer_id"
-                                                class="form-control @error('customer_id') is-invalid @enderror" required>
+                                                class="form-control @error('customer_id') is-invalid @enderror"
+                                                style="pointer-events: none; background-color: #e9ecef;" required>
                                                 <option value="">Select Customer</option>
                                                 @foreach ($customers as $customer)
-                                                <option value="{{ $customer->id }}"
-                                                    {{ old('customer_id', $barangKeluar->customer_id) == $customer->id ? 'selected' : '' }}>
-                                                    {{ $customer->name }}
-                                                </option>
+                                                    <option value="{{ $customer->id }}"
+                                                        {{ old('customer_id', $barangKeluar->customer_id) == $customer->id ? 'selected' : '' }}>
+                                                        {{ $customer->name }}
+                                                    </option>
                                                 @endforeach
                                             </select>
                                             @error('customer_id')
-                                            <span class="invalid-feedback">{{ $message }}</span>
+                                                <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
                                         </div>
 
@@ -133,7 +137,7 @@
                                                 class="form-control @error('nomer_container') is-invalid @enderror"
                                                 value="{{ old('nomer_container', $barangKeluar->nomer_container) }}">
                                             @error('nomer_container')
-                                            <span class="invalid-feedback">{{ $message }}</span>
+                                                <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
                                         </div>
 
@@ -143,7 +147,7 @@
                                                 class="form-control @error('nomer_polisi') is-invalid @enderror"
                                                 value="{{ old('nomer_polisi', $barangKeluar->nomer_polisi) }}">
                                             @error('nomer_polisi')
-                                            <span class="invalid-feedback">{{ $message }}</span>
+                                                <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
                                         </div>
 
@@ -153,21 +157,22 @@
                                                 class="form-control @error('bank_transfer_id') is-invalid @enderror">
                                                 <option value="">-- None --</option>
                                                 @foreach ($bankTransfers as $bankTransfer)
-                                                <option value="{{ $bankTransfer->id }}"
-                                                    {{ old('bank_transfer_id', $barangKeluar->bank_transfer_id) == $bankTransfer->id ? 'selected' : '' }}>
-                                                    {{ $bankTransfer->bank_name }} -
-                                                    {{ $bankTransfer->account_number }}
-                                                </option>
+                                                    <option value="{{ $bankTransfer->id }}"
+                                                        {{ old('bank_transfer_id', $barangKeluar->bank_transfer_id) == $bankTransfer->id ? 'selected' : '' }}>
+                                                        {{ $bankTransfer->bank_name }} -
+                                                        {{ $bankTransfer->account_number }}
+                                                    </option>
                                                 @endforeach
                                             </select>
                                             @error('bank_transfer_id')
-                                            <span class="invalid-feedback">{{ $message }}</span>
+                                                <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
                                         </div>
 
                                         <h2>Items</h2>
                                         <!-- Button trigger modal -->
-                                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#itemModal">
+                                        <button type="button" class="btn btn-primary" data-toggle="modal"
+                                            data-target="#itemModal">
                                             Add Item
                                         </button>
 
@@ -188,18 +193,22 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                @foreach($barangKeluar->items as $item)
-                                                <tr>
-                                                    <td>{{ $item->no_ref }}</td>
-                                                    <td>{{ $item->barang->nama_barang }}</td>
-                                                    <td>{{ $item->qty }}</td>
-                                                    <td>{{ $item->unit }}</td>
-                                                    <td>Rp. {{ number_format($item->harga, 2) }}</td>
-                                                    <td>Rp. {{ number_format($item->total_harga, 2) }}</td>
-                                                    <td>
-                                                        <button type="button" class="btn btn-danger remove-item">Remove</button>
-                                                    </td>
-                                                </tr>
+                                                @foreach ($barangKeluar->items as $item)
+                                                    <tr>
+                                                        <td>{{ $item->no_ref }}</td>
+                                                        <td>{{ $item->barang->nama_barang }}</td>
+                                                        <td>{{ $item->qty }}</td>
+                                                        <td>{{ $item->unit }}</td>
+                                                        <td>Rp. {{ number_format($item->harga) }}</td>
+                                                        <td>Rp. {{ number_format($item->total_harga) }}</td>
+                                                        {{-- <td>{{ $item->barang_id }}</td> --}}
+                                                        <td data-barang-id="{{ $item->barang_id }}">{{ $item->barang_id }}</td>
+                                                        <td data-barang-id="{{ $item->barang_masuk_id }}">{{ $item->barang_masuk_id }}</td>
+                                                        <td>
+                                                            <button type="button"
+                                                                class="btn btn-danger remove-item">Remove</button>
+                                                        </td>
+                                                    </tr>
                                                 @endforeach
                                             </tbody>
                                         </table>
@@ -207,7 +216,8 @@
                                         <br><br>
                                         <div class="card-footer">
                                             <button type="submit" class="btn btn-success">Save</button>
-                                            <a href="{{ route('data-gudang.barang-keluar.index') }}" class="btn btn-secondary">Cancel</a>
+                                            <a href="{{ route('data-gudang.barang-keluar.index') }}"
+                                                class="btn btn-secondary">Cancel</a>
                                         </div>
                                     </form>
                                 </div>
@@ -232,7 +242,8 @@
 
         <!-- Modal -->
         <!-- Modal -->
-        <div class="modal fade" id="itemModal" tabindex="-1" role="dialog" aria-labelledby="itemModalLabel" aria-hidden="true">
+        <div class="modal fade" id="itemModal" tabindex="-1" role="dialog" aria-labelledby="itemModalLabel"
+            aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -245,8 +256,8 @@
                         <div class="mb-3">
                             <label for="modal_barang_id" class="form-label">Barang</label>
                             <select class="form-select" id="modal_barang_id">
-                                @foreach($barangs as $barang)
-                                <option value="{{ $barang->id }}">{{ $barang->name }}</option>
+                                @foreach ($barangs as $barang)
+                                    <option value="{{ $barang->id }}">{{ $barang->name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -278,11 +289,18 @@
 
         <script>
             $(document).ready(function() {
+                //     function formatCurrency(amount) {
+                //     let number = parseFloat(amount);
+                //     if (isNaN(number)) return 'Rp. 0';
+                //     return `Rp. ${number.toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).replace(/,/g, '.')}`;
+                // }
+
                 function formatCurrency(amount) {
                     let number = parseFloat(amount);
                     if (isNaN(number)) return 'Rp. 0';
                     return `Rp. ${number.toLocaleString('id-ID', { minimumFractionDigits: 0 })}`;
                 }
+
 
                 function parseCurrency(value) {
                     return parseFloat(value.replace(/[^0-9,]/g, '').replace(',', '.')) || 0;
@@ -302,18 +320,25 @@
                     let items = [];
                     $('#items-table tbody tr').each(function() {
                         let row = $(this);
+                        let barangIdText = row.find('td:eq(6)').text();
+                        let barangId = parseInt(barangIdText, 10); 
+                        let barangMasukIdText = row.find('td:eq(7)').text();
+                        let barangMasukId = parseInt(barangMasukIdText, 10);
                         let item = {
-                            barang_id: row.find('td:eq(1)').data('barang-id'),
+                            barang_id: barangId, 
                             no_ref: row.find('td:eq(0)').text(),
-                            qty: toInteger(row.find('td:eq(2)').text()), // Konversi ke integer
+                            qty: toInteger(row.find('td:eq(2)').text()),
                             unit: row.find('td:eq(3)').text(),
-                            harga: toRawNumber(row.find('td:eq(4)').text()), // Konversi string ke angka mentah
-                            total_harga: toRawNumber(row.find('td:eq(5)').text()) // Konversi string ke angka mentah
+                            harga: toRawNumber(row.find('td:eq(4)').text()),
+                            total_harga: toRawNumber(row.find('td:eq(5)').text()),
+                            barang_masuk_id: barangMasukId,
                         };
+
                         items.push(item);
                     });
                     $('#items-input').val(JSON.stringify(items));
                 }
+
 
 
                 // Initialize hidden input with existing table data
