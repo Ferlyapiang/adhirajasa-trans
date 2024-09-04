@@ -253,14 +253,24 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        <div class="mb-3">
+                        {{-- <div class="mb-3">
                             <label for="modal_barang_id" class="form-label">Barang</label>
                             <select class="form-select" id="modal_barang_id">
                                 @foreach ($barangs as $barang)
                                     <option value="{{ $barang->id }}">{{ $barang->name }}</option>
                                 @endforeach
                             </select>
+                        </div> --}}
+                        <div class="mb-3">
+                            <label for="modal_barang_id" class="form-label">Barang</label>
+                            <select class="form-select" id="modal_barang_id">
+                                @foreach ($barangs as $barang)
+                                    <option value="{{ $barang->id }}">{{ $barang->nama_barang }}</option>
+                                @endforeach
+                            </select>
                         </div>
+                        
+                        
                         <div class="mb-3">
                             <label for="modal_no_ref" class="form-label">No. Ref</label>
                             <input type="text" class="form-control" id="modal_no_ref">
@@ -324,6 +334,7 @@
                         let barangId = parseInt(barangIdText, 10); 
                         let barangMasukIdText = row.find('td:eq(7)').text();
                         let barangMasukId = parseInt(barangMasukIdText, 10);
+                        
                         let item = {
                             barang_id: barangId, 
                             no_ref: row.find('td:eq(0)').text(),

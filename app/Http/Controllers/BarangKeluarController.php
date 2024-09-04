@@ -9,6 +9,7 @@ use App\Models\Customer;
 use App\Models\BankData;
 use App\Models\Barang;
 use App\Models\BarangMasuk;
+use App\Models\BarangMasukItem;
 use Illuminate\Support\Facades\Auth;
 use App\Models\LogData;
 use Illuminate\Http\Request;
@@ -142,16 +143,55 @@ class BarangKeluarController extends Controller
         return view('data-gudang.barang-keluar.show', compact('barangKeluar'));
     }
 
-    public function edit($id)
-    {
-        $barangKeluar = BarangKeluar::with('items')->findOrFail($id); // Fetch Barang Keluar data along with its items
-        $warehouses = Warehouse::all();
-        $customers = Customer::all();
-        $bankTransfers = BankData::all();
-        $barangs = Barang::all(); // Fetch all Barang data
+    // public function edit($id)
+    // {
+    //     $barangKeluar = BarangKeluar::with('items')->findOrFail($id); // Fetch Barang Keluar data along with its items
+    //     $warehouses = Warehouse::all();
+    //     $customers = Customer::all();
+    //     $bankTransfers = BankData::all();
+    //     $barangs = Barang::all(); // Fetch all Barang data
 
-        return view('data-gudang.barang-keluar.edit', compact('barangKeluar', 'warehouses', 'customers', 'bankTransfers', 'barangs'));
-    }
+    //     return view('data-gudang.barang-keluar.edit', compact('barangKeluar', 'warehouses', 'customers', 'bankTransfers', 'barangs'));
+    // }
+
+    public function edit($id)
+{
+    // Fetch Barang Keluar data along with its items
+    $barangKeluar = BarangKeluar::with('items')->findOrFail($id);
+
+    // Get all warehouses, customers, and bank transfers
+    $warehouses = Warehouse::all();
+    $customers = Customer::all();
+    $bankTransfers = BankData::all();
+
+    // Get barang_keluar_items related to the current barang_keluar_id
+    $barangKeluarItems = $barangKeluar->items;
+
+    // Extract unique barang_masuk_ids from barang_keluar_items
+    $barangMasukIds = $barangKeluarItems->pluck('barang_masuk_id')->unique();
+
+    // Fetch barang_masuk_items related to the extracted barang_masuk_ids
+    $barangMasukItems = BarangMasukItem::whereIn('barang_masuk_id', $barangMasukIds)->get();
+
+    // Group barang_masuk_items by barang_masuk_id
+    $groupedBarangMasukItems = $barangMasukItems->groupBy('barang_masuk_id');
+
+    // Extract unique barang_ids from barang_masuk_items
+    $barangIds = $barangMasukItems->pluck('barang_id')->unique();
+
+    // Fetch filtered Barang items based on the extracted barang_ids
+    $filteredBarangs = Barang::whereIn('id', $barangIds)->get();
+
+    return view('data-gudang.barang-keluar.edit', [
+        'barangKeluar' => $barangKeluar,
+        'warehouses' => $warehouses,
+        'customers' => $customers,
+        'bankTransfers' => $bankTransfers,
+        'barangs' => $filteredBarangs,
+        'groupedBarangMasukItems' => $groupedBarangMasukItems
+    ]);
+}
+
 
 
     /**
