@@ -257,10 +257,18 @@
                         <div class="mb-3">
                             <label for="modal_barang_id" class="form-label">Barang</label>
                             <select class="form-select" id="modal_barang_id">
-                                <option value="" data-jenis="">-- Pilih Barang --</option>
+                                <option value="" data-jenis="" data-barang-masuk-id="">-- Pilih Barang --</option>
                                 @foreach ($barangs as $barang)
-                                    <option value="{{ $barang->id }}" data-jenis="{{ $barang->jenis }}">
-                                        {{ $barang->nama_barang }}</option>
+                                    @foreach ($groupedBarangMasukItems as $barangMasukId => $items)
+                                        @foreach ($items as $item)
+                                            @if ($barang->id === $item->barang_id)
+                                                <option value="{{ $barang->id }}" data-jenis="{{ $barang->jenis }}"
+                                                    data-barang-masuk-id="{{ $item->barang_masuk_id }}">
+                                                    {{ $barang->nama_barang }}
+                                                </option>
+                                            @endif
+                                        @endforeach
+                                    @endforeach
                                 @endforeach
                             </select>
                         </div>
@@ -283,7 +291,13 @@
                             <label for="modal_harga" class="form-label">Harga</label>
                             <input type="text" class="form-control" id="modal_harga"> <!-- Change to text -->
                         </div>
+                        <input type="hidden" id="modal_barang_masuk_id">
                     </div>
+                    <div class="mb-3" style="display: none;">
+                        <label for="modal_barang_masuk_id" class="form-label">Barang Masuk ID</label>
+                        <input type="text" class="form-control" id="modal_barang_masuk_id" readonly>
+                    </div>
+
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                         <button type="button" class="btn btn-primary" id="addItemButton">Add Item</button>
@@ -296,25 +310,23 @@
         <script>
             $(document).ready(function() {
 
-                document.getElementById('modal_barang_id').addEventListener('change', function() {
-                    // Get the selected option
+                $('#modal_barang_id').on('change', function() {
                     var selectedOption = this.options[this.selectedIndex];
-
-                    // Get the jenis (unit) from the data-jenis attribute
                     var jenis = selectedOption.getAttribute('data-jenis');
+                    var barangMasukId = selectedOption.getAttribute('data-barang-masuk-id');
 
                     // Set the value of the modal_unit input field
-                    document.getElementById('modal_unit').value = jenis ? jenis :
-                    ''; // If no unit, set to empty
-                });
+                    $('#modal_unit').val(jenis ? jenis : '');
 
+                    // Set the value of the hidden input field for barang_masuk_id
+                    $('#modal_barang_masuk_id').val(barangMasukId ? barangMasukId : '');
+                });
 
                 function formatCurrency(amount) {
                     let number = parseFloat(amount);
                     if (isNaN(number)) return 'Rp. 0';
                     return `Rp. ${number.toLocaleString('id-ID', { minimumFractionDigits: 0 })}`;
                 }
-
 
                 function parseCurrency(value) {
                     return parseFloat(value.replace(/[^0-9,]/g, '').replace(',', '.')) || 0;
@@ -325,19 +337,16 @@
                 }
 
                 function toInteger(value) {
-                    return parseInt(value, 10) || 0; // Konversi ke integer
+                    return parseInt(value, 10) || 0; // Convert to integer
                 }
-
 
                 // Function to update the hidden input with table data
                 function updateItemsInput() {
                     let items = [];
                     $('#items-table tbody tr').each(function() {
                         let row = $(this);
-                        let barangIdText = row.find('td:eq(6)').text();
-                        let barangId = parseInt(barangIdText, 10);
-                        let barangMasukIdText = row.find('td:eq(7)').text();
-                        let barangMasukId = parseInt(barangMasukIdText, 10);
+                        let barangId = parseInt(row.find('td:eq(6)').text(), 10);
+                        let barangMasukId = parseInt(row.find('td:eq(7)').text(), 10);
 
                         let item = {
                             barang_id: barangId,
@@ -354,8 +363,6 @@
                     $('#items-input').val(JSON.stringify(items));
                 }
 
-
-
                 // Initialize hidden input with existing table data
                 updateItemsInput();
 
@@ -364,48 +371,60 @@
                     let barangId = $('#modal_barang_id').val();
                     let barangName = $('#modal_barang_id option:selected').text();
                     let noRef = $('#modal_no_ref').val();
-                    let qty = toInteger($('#modal_qty').val()); // Pastikan konversi ke integer
+                    let qty = toInteger($('#modal_qty').val());
                     let unit = $('#modal_unit').val();
-                    let harga = parseCurrency($('#modal_harga').val()); // Pastikan konversi harga
+                    let harga = parseCurrency($('#modal_harga').val());
                     let total = (qty * harga).toFixed(2);
+                    let barangMasukId = $('#modal_barang_masuk_id').val();
 
-                    // Format harga dan total untuk tampilan
+                    // Debugging
+                    console.log('barangId:', barangId);
+                    console.log('barangName:', barangName);
+                    console.log('noRef:', noRef);
+                    console.log('qty:', qty);
+                    console.log('unit:', unit);
+                    console.log('harga:', harga);
+                    console.log('total:', total);
+                    console.log('barangMasukId:', barangMasukId);
+
                     let formattedHarga = formatCurrency(harga);
                     let formattedTotal = formatCurrency(total);
 
-                    // Tambahkan baris baru ke tabel
                     let row = `<tr>
         <td>${noRef}</td>
         <td data-barang-id="${barangId}">${barangName}</td>
-        <td>${qty}</td> <!-- qty sebagai integer -->
+        <td>${qty}</td>
         <td>${unit}</td>
         <td>${formattedHarga}</td>
         <td>${formattedTotal}</td>
+        <td>${barangMasukId}</td> <!-- Include barang_masuk_id -->
+        <td>${barangId}</td>
         <td><button type="button" class="btn btn-danger remove-item">Remove</button></td>
     </tr>`;
 
                     $('#items-table tbody').append(row);
-
-                    // Update input tersembunyi dengan data tabel baru
                     updateItemsInput();
 
-                    // Bersihkan input modal setelah menambahkan
+                    // Clear modal input fields
                     $('#modal_barang_id').val('');
                     $('#modal_no_ref').val('');
                     $('#modal_qty').val('');
                     $('#modal_unit').val('');
                     $('#modal_harga').val('');
+                    $('#modal_barang_masuk_id').val('');
 
                     $('#itemModal').modal('hide');
                 });
 
-
                 // Remove item from the table and update the hidden input
                 $('#items-table').on('click', '.remove-item', function() {
                     $(this).closest('tr').remove();
-                    // Update the hidden input with the remaining table data
+                    // Update hidden input with remaining table data
                     updateItemsInput();
                 });
+
+                // Update hidden input with new table data
+
 
                 // Ensure input fields are formatted as currency
                 $('#modal_harga').on('input', function() {

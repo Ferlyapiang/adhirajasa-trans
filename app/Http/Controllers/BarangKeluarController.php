@@ -147,44 +147,40 @@ class BarangKeluarController extends Controller
     {
         // Fetch Barang Keluar data along with its items
         $barangKeluar = BarangKeluar::with('items')->findOrFail($id);
-
+    
         // Get all warehouses, customers, and bank transfers
         $warehouses = Warehouse::all();
         $customers = Customer::all();
         $bankTransfers = BankData::all();
-
+    
         // Get barang_keluar_items related to the current barang_keluar_id
         $barangKeluarItems = $barangKeluar->items;
-
+    
         // Extract unique barang_masuk_ids from barang_keluar_items
         $barangMasukIds = $barangKeluarItems->pluck('barang_masuk_id')->unique();
-
+    
         // Fetch barang_masuk_items related to the extracted barang_masuk_ids
         $barangMasukItems = BarangMasukItem::whereIn('barang_masuk_id', $barangMasukIds)->get();
-
+    
         // Group barang_masuk_items by barang_masuk_id
         $groupedBarangMasukItems = $barangMasukItems->groupBy('barang_masuk_id');
-
+    
         // Extract unique barang_ids from barang_masuk_items
         $barangIds = $barangMasukItems->pluck('barang_id')->unique();
-
+    
         // Fetch filtered Barang items based on the extracted barang_ids
         $filteredBarangs = Barang::whereIn('id', $barangIds)->get();
-
-        // ADDITIONAL: Fetch filtered Barang items based on barang_masuk_id
-        $additionalFilteredBarangs = Barang::whereIn('id', $barangKeluar->items->pluck('barang_masuk_id')->unique())->get();
-
+    
         return view('data-gudang.barang-keluar.edit', [
             'barangKeluar' => $barangKeluar,
             'warehouses' => $warehouses,
             'customers' => $customers,
             'bankTransfers' => $bankTransfers,
-            'barangs' => $filteredBarangs, // Existing filtered barangs
-            'additionalBarangs' => $additionalFilteredBarangs, // Newly added filtered barangs
-            'groupedBarangMasukItems' => $groupedBarangMasukItems
+            'barangs' => $filteredBarangs,
+            'groupedBarangMasukItems' => $groupedBarangMasukItems, // Pass grouped items
         ]);
     }
-
+    
 
 
     /**
@@ -281,7 +277,7 @@ class BarangKeluarController extends Controller
         $request->merge(['items' => json_decode($request->input('items'), true)]);
 
         // Dump and die to inspect the request data after merging
-        // dd($request->all());
+        dd($request->all());
 
         // Validate the request data
         $validated = $request->validate([
