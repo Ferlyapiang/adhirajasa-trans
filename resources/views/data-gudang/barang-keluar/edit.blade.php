@@ -202,8 +202,10 @@
                                                         <td>Rp. {{ number_format($item->harga) }}</td>
                                                         <td>Rp. {{ number_format($item->total_harga) }}</td>
                                                         {{-- <td>{{ $item->barang_id }}</td> --}}
-                                                        <td data-barang-id="{{ $item->barang_id }}">{{ $item->barang_id }}</td>
-                                                        <td data-barang-id="{{ $item->barang_masuk_id }}">{{ $item->barang_masuk_id }}</td>
+                                                        <td data-barang-id="{{ $item->barang_id }}">
+                                                            {{ $item->barang_id }}</td>
+                                                        <td data-barang-id="{{ $item->barang_masuk_id }}">
+                                                            {{ $item->barang_masuk_id }}</td>
                                                         <td>
                                                             <button type="button"
                                                                 class="btn btn-danger remove-item">Remove</button>
@@ -241,7 +243,6 @@
         <script src="{{ asset('lte/dist/js/adminlte.min.js') }}"></script>
 
         <!-- Modal -->
-        <!-- Modal -->
         <div class="modal fade" id="itemModal" tabindex="-1" role="dialog" aria-labelledby="itemModalLabel"
             aria-hidden="true">
             <div class="modal-dialog" role="document">
@@ -253,24 +254,18 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        {{-- <div class="mb-3">
-                            <label for="modal_barang_id" class="form-label">Barang</label>
-                            <select class="form-select" id="modal_barang_id">
-                                @foreach ($barangs as $barang)
-                                    <option value="{{ $barang->id }}">{{ $barang->name }}</option>
-                                @endforeach
-                            </select>
-                        </div> --}}
                         <div class="mb-3">
                             <label for="modal_barang_id" class="form-label">Barang</label>
                             <select class="form-select" id="modal_barang_id">
+                                <option value="" data-jenis="">-- Pilih Barang --</option>
                                 @foreach ($barangs as $barang)
-                                    <option value="{{ $barang->id }}">{{ $barang->nama_barang }}</option>
+                                    <option value="{{ $barang->id }}" data-jenis="{{ $barang->jenis }}">
+                                        {{ $barang->nama_barang }}</option>
                                 @endforeach
                             </select>
                         </div>
-                        
-                        
+
+
                         <div class="mb-3">
                             <label for="modal_no_ref" class="form-label">No. Ref</label>
                             <input type="text" class="form-control" id="modal_no_ref">
@@ -281,7 +276,8 @@
                         </div>
                         <div class="mb-3">
                             <label for="modal_unit" class="form-label">Unit</label>
-                            <input type="text" class="form-control" id="modal_unit">
+                            <input type="text" class="form-control" id="modal_unit" readonly>
+                            <!-- Make it readonly -->
                         </div>
                         <div class="mb-3">
                             <label for="modal_harga" class="form-label">Harga</label>
@@ -299,11 +295,19 @@
 
         <script>
             $(document).ready(function() {
-                //     function formatCurrency(amount) {
-                //     let number = parseFloat(amount);
-                //     if (isNaN(number)) return 'Rp. 0';
-                //     return `Rp. ${number.toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).replace(/,/g, '.')}`;
-                // }
+
+                document.getElementById('modal_barang_id').addEventListener('change', function() {
+                    // Get the selected option
+                    var selectedOption = this.options[this.selectedIndex];
+
+                    // Get the jenis (unit) from the data-jenis attribute
+                    var jenis = selectedOption.getAttribute('data-jenis');
+
+                    // Set the value of the modal_unit input field
+                    document.getElementById('modal_unit').value = jenis ? jenis :
+                    ''; // If no unit, set to empty
+                });
+
 
                 function formatCurrency(amount) {
                     let number = parseFloat(amount);
@@ -331,12 +335,12 @@
                     $('#items-table tbody tr').each(function() {
                         let row = $(this);
                         let barangIdText = row.find('td:eq(6)').text();
-                        let barangId = parseInt(barangIdText, 10); 
+                        let barangId = parseInt(barangIdText, 10);
                         let barangMasukIdText = row.find('td:eq(7)').text();
                         let barangMasukId = parseInt(barangMasukIdText, 10);
-                        
+
                         let item = {
-                            barang_id: barangId, 
+                            barang_id: barangId,
                             no_ref: row.find('td:eq(0)').text(),
                             qty: toInteger(row.find('td:eq(2)').text()),
                             unit: row.find('td:eq(3)').text(),
