@@ -414,15 +414,13 @@
                     $('#items-table tbody tr').each(function() {
                         let row = $(this);
                         let item = {
-                            barang_id: toInteger(row.find('td:eq(7)')
-                                .text()), // Assuming barang_id is in the 8th column
+                            barang_id: toInteger(row.find('td:eq(7)').text()),
                             no_ref: row.find('td:eq(0)').text(),
                             qty: toInteger(row.find('td:eq(2)').text()),
                             unit: row.find('td:eq(3)').text(),
                             harga: toRawNumber(row.find('td:eq(4)').text()),
                             total_harga: toRawNumber(row.find('td:eq(5)').text()),
-                            barang_masuk_id: toInteger(row.find('td:eq(6)')
-                                .text()) // Assuming barang_masuk_id is in the 7th column
+                            barang_masuk_id: toInteger(row.find('td:eq(6)').text())
                         };
                         items.push(item);
                     });
@@ -446,8 +444,7 @@
                     let itemExists = false;
                     $('#items-table tbody tr').each(function() {
                         let jocNumber = $(this).find('td:eq(0)').text();
-                        let rowBarangId = $(this).find('td:eq(7)')
-                            .text(); // Assuming barang_id is in the 8th column
+                        let rowBarangId = $(this).find('td:eq(7)').text(); 
                         if (toInteger(rowBarangId) === toInteger(barangId) && jocNumber === noRef) {
                             itemExists = true;
                             return false;
@@ -468,7 +465,10 @@
             <td>${formattedTotal}</td>
             <td style="display: none">${barangMasukId}</td>
             <td style="display: none">${barangId}</td>
-            <td><button type="button" class="btn btn-danger remove-item">Remove</button></td>
+            <td>
+                <button type="button"class="btn btn-warning edit-item">Edit</button>
+                <button type="button" class="btn btn-danger remove-item">Remove</button>
+            </td>
         </tr>`;
 
                     $('#items-table tbody').append(row);
@@ -525,7 +525,7 @@
 
                     // Set modal fields with row data
                     $('#edit_modal_barang_id').val(barangId)
-                .change(); // Correct select ID and set selected value
+                .change();
                     $('#edit_modal_no_ref').val(noRef);
                     $('#edit_modal_qty').val(qty);
                     $('#edit_modal_unit').val(unit);
