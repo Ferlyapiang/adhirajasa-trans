@@ -442,12 +442,20 @@
                     return;
                 }
 
-                const itemExists = items.some(item => item.name === $('#item_name option:selected').text());
+                // Get the selected item's name
+                const itemName = $('#item_name option:selected').text();
+
+                const itemExists = items.some(item =>
+                    item.barang_id === parseInt(itemId, 10) &&
+                    item.name === itemName &&
+                    item.no_ref === itemJocNumber
+                );
                 if (itemExists) {
-                    alert('Nama barang telah ada dalam daftar!');
+                    alert('Barang telah ada dalam daftar!');
                     return;
                 }
 
+                // Add the new item to the items array
                 items.push({
                     barang_id: parseInt(itemId, 10),
                     no_ref: itemJocNumber,
@@ -456,13 +464,17 @@
                     harga: itemPrice,
                     total_harga: itemTotal,
                     barang_masuk_id: parseInt(itemBarangMasukID, 10),
-                    name: $('#item_name option:selected').text(),
+                    name: itemName,
                     sisa_barang: itemSisaBarang
                 });
 
+                // Increment the Joc number (if needed)
                 nextJocNumber++;
 
+                // Update the items table
                 updateItemsTable();
+
+                // Hide the modal
                 $('#itemModal').modal('hide');
 
                 // Reset form fields
@@ -473,6 +485,7 @@
                 $('#item_joc_number').val('');
                 $('#item_sisa_barang').val('');
             });
+
 
 
             $('#gudang_id').change(function() {
@@ -489,7 +502,7 @@
                             response.customers.forEach(customer => {
                                 $('#customer_id').append(
                                     `<option value="${customer.id}">${customer.name}</option>`
-                                    );
+                                );
                             });
                         },
                         error: function() {
@@ -510,15 +523,15 @@
                         method: 'GET',
                         success: function(response) {
                             const itemsDropdown = $(
-                            '#item_name, #edit_item_name'); // Populate both dropdowns
+                                '#item_name, #edit_item_name'); // Populate both dropdowns
                             itemsDropdown.empty();
                             itemsDropdown.append(
                                 '<option value="" disabled selected>Pilih Nama Barang</option>'
-                                );
+                            );
                             response.items.forEach(item => {
                                 itemsDropdown.append(
                                     `<option value="${item.barang_id}" data-unit="${item.unit}" data-joc-number="${item.joc_number}" data-barang-masuk-id="${item.barang_masuk_id}" data-sisa-barang="${item.qty}">${item.barang_name}</option>`
-                                    );
+                                );
                             });
 
                             // Reset fields after repopulating dropdown

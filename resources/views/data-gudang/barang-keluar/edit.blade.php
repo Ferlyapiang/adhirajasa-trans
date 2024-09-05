@@ -199,13 +199,14 @@
                                                         <td>{{ $item->barang->nama_barang }}</td>
                                                         <td>{{ $item->qty }}</td>
                                                         <td>{{ $item->unit }}</td>
-                                                        <td>Rp. {{ number_format($item->harga) }}</td>
-                                                        <td>Rp. {{ number_format($item->total_harga) }}</td>
+                                                        <td>Rp. {{ number_format($item->harga, 0, ',', '.') }}</td>
+                                                        <td>Rp. {{ number_format($item->total_harga, 0, ',', '.') }}
+                                                        </td>
                                                         {{-- <td>{{ $item->barang_id }}</td> --}}
-                                                        <td style="display: none" data-barang-id="{{ $item->barang_id }}">
-                                                            {{ $item->barang_id }}</td>
                                                         <td style="display: none" data-barang-id="{{ $item->barang_masuk_id }}">
                                                             {{ $item->barang_masuk_id }}</td>
+                                                        <td style="display: none" data-barang-id="{{ $item->barang_id }}">
+                                                            {{ $item->barang_id }}</td>
                                                         <td>
                                                             <button type="button"
                                                                 class="btn btn-danger remove-item">Remove</button>
@@ -257,12 +258,14 @@
                         <div class="mb-3">
                             <label for="modal_barang_id" class="form-label">Barang</label>
                             <select class="form-select" id="modal_barang_id">
-                                <option value="" data-jenis="" data-barang-masuk-id="">-- Pilih Barang --</option>
+                                <option value="" data-jenis="" data-barang-masuk-id="">-- Pilih Barang --
+                                </option>
                                 @foreach ($barangs as $barang)
                                     @foreach ($groupedBarangMasukItems as $barangMasukId => $items)
                                         @foreach ($items as $item)
                                             @if ($barang->id === $item->barang_id)
-                                                <option value="{{ $barang->id }}" data-jenis="{{ $barang->jenis }}"
+                                                <option value="{{ $barang->id }}"
+                                                    data-jenis="{{ $barang->jenis }}"
                                                     data-barang-masuk-id="{{ $item->barang_masuk_id }}">
                                                     {{ $barang->nama_barang }}
                                                 </option>
@@ -308,87 +311,106 @@
                 const barangSelect = $('#modal_barang_id');
                 const noRefInput = $('#modal_no_ref');
                 const barangMasukData = @json($barangMasuks); // Convert PHP data to JSON
-        
+
                 // Update No. Ref input when barang_id changes
                 barangSelect.on('change', function() {
                     const selectedOption = this.options[this.selectedIndex];
                     const barangMasukId = $(selectedOption).data('barang-masuk-id');
-                    
+
                     if (barangMasukId && barangMasukData[barangMasukId]) {
                         noRefInput.val(barangMasukData[barangMasukId].joc_number);
                     } else {
                         noRefInput.val(''); // Clear value if not found
                     }
-        
+
                     const jenis = $(selectedOption).data('jenis');
                     $('#modal_unit').val(jenis ? jenis : '');
                     $('#modal_barang_masuk_id').val(barangMasukId ? barangMasukId : '');
                 });
-        
+
                 function formatCurrency(amount) {
                     let number = parseFloat(amount);
                     if (isNaN(number)) return 'Rp. 0';
                     return `Rp. ${number.toLocaleString('id-ID', { minimumFractionDigits: 0 })}`;
                 }
-        
+
                 function parseCurrency(value) {
                     return parseFloat(value.replace(/[^0-9,]/g, '').replace(',', '.')) || 0;
                 }
-        
+
                 function toRawNumber(value) {
                     return parseFloat(value.replace(/[^0-9]/g, '')) || 0;
                 }
-        
+
                 function toInteger(value) {
                     return parseInt(value, 10) || 0;
                 }
-        
+
                 function updateItemsInput() {
                     let items = [];
                     $('#items-table tbody tr').each(function() {
                         let row = $(this);
                         let item = {
-                            barang_id: toInteger(row.find('td:eq(7)').text()), // Assuming the barang_id is in the 8th column
+                            barang_id: toInteger(row.find('td:eq(7)')
+                        .text()), // Assuming barang_id is in the 8th column
                             no_ref: row.find('td:eq(0)').text(),
                             qty: toInteger(row.find('td:eq(2)').text()),
                             unit: row.find('td:eq(3)').text(),
                             harga: toRawNumber(row.find('td:eq(4)').text()),
                             total_harga: toRawNumber(row.find('td:eq(5)').text()),
-                            barang_masuk_id: toInteger(row.find('td:eq(6)').text()) // Assuming the barang_masuk_id is in the 7th column
+                            barang_masuk_id: toInteger(row.find('td:eq(6)')
+                            .text()) // Assuming barang_masuk_id is in the 7th column
                         };
                         items.push(item);
                     });
                     $('#items-input').val(JSON.stringify(items));
                 }
-        
+
                 $('#addItemButton').on('click', function() {
                     let barangId = barangSelect.val();
                     let barangName = barangSelect.find('option:selected').text();
-                    let noRef = noRefInput.val();
+                    let noRef = $('#modal_no_ref').val();
                     let qty = toInteger($('#modal_qty').val());
                     let unit = $('#modal_unit').val();
                     let harga = parseCurrency($('#modal_harga').val());
                     let total = (qty * harga).toFixed(2);
                     let barangMasukId = $('#modal_barang_masuk_id').val();
-        
+
                     let formattedHarga = formatCurrency(harga);
                     let formattedTotal = formatCurrency(total);
-        
+
+                    // Check if the item with the same barang_id already exists in the table
+                    let itemExists = false;
+                    $('#items-table tbody tr').each(function() {
+                        let jocNumber = $(this).find('td:eq(0)').text();
+                        let rowBarangId = $(this).find('td:eq(7)')
+                    .text(); // Assuming barang_id is in the 8th column
+                        if (toInteger(rowBarangId) === toInteger(barangId) && jocNumber === noRef) {
+                            itemExists = true;
+                            return false;
+                        }
+                    });
+
+                    if (itemExists) {
+                        alert('Barang tersebut sudah ada di tabel.');
+                        return;
+                    }
+
                     let row = `<tr>
-                        <td>${noRef}</td>
-                        <td data-barang-id="${barangId}">${barangName}</td>
-                        <td>${qty}</td>
-                        <td>${unit}</td>
-                        <td>${formattedHarga}</td>
-                        <td>${formattedTotal}</td>
-                        <td style="display: none">${barangMasukId}</td>
-                        <td style="display: none">${barangId}</td>
-                        <td><button type="button" class="btn btn-danger remove-item">Remove</button></td>
-                    </tr>`;
-        
+            <td>${noRef}</td>
+            <td data-barang-id="${barangId}">${barangName}</td>
+            <td>${qty}</td>
+            <td>${unit}</td>
+            <td>${formattedHarga}</td>
+            <td>${formattedTotal}</td>
+            <td style="display: none">${barangMasukId}</td>
+            <td style="display: none">${barangId}</td>
+            <td><button type="button" class="btn btn-danger remove-item">Remove</button></td>
+        </tr>`;
+
                     $('#items-table tbody').append(row);
                     updateItemsInput();
-        
+
                     // Clear modal input fields
                     barangSelect.val('');
                     noRefInput.val('');
@@ -396,15 +418,15 @@
                     $('#modal_unit').val('');
                     $('#modal_harga').val('');
                     $('#modal_barang_masuk_id').val('');
-        
+
                     $('#itemModal').modal('hide');
                 });
-        
+
                 $('#items-table').on('click', '.remove-item', function() {
                     $(this).closest('tr').remove();
                     updateItemsInput();
                 });
-        
+
                 // Ensure harga input is formatted as currency
                 $('#modal_harga').on('input', function() {
                     let value = $(this).val();
@@ -413,7 +435,7 @@
                 });
             });
         </script>
-        
+
 </body>
 
 </html>
