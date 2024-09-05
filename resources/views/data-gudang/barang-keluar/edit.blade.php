@@ -202,9 +202,9 @@
                                                         <td>Rp. {{ number_format($item->harga) }}</td>
                                                         <td>Rp. {{ number_format($item->total_harga) }}</td>
                                                         {{-- <td>{{ $item->barang_id }}</td> --}}
-                                                        <td data-barang-id="{{ $item->barang_id }}">
+                                                        <td style="display: none" data-barang-id="{{ $item->barang_id }}">
                                                             {{ $item->barang_id }}</td>
-                                                        <td data-barang-id="{{ $item->barang_masuk_id }}">
+                                                        <td style="display: none" data-barang-id="{{ $item->barang_masuk_id }}">
                                                             {{ $item->barang_masuk_id }}</td>
                                                         <td>
                                                             <button type="button"
@@ -276,7 +276,7 @@
 
                         <div class="mb-3">
                             <label for="modal_no_ref" class="form-label">No. Ref</label>
-                            <input type="text" class="form-control" id="modal_no_ref">
+                            <input type="text" class="form-control" id="modal_no_ref" readonly>
                         </div>
                         <div class="mb-3">
                             <label for="modal_qty" class="form-label">Quantity</label>
@@ -293,10 +293,6 @@
                         </div>
                         <input type="hidden" id="modal_barang_masuk_id">
                     </div>
-                    <div class="mb-3" style="display: none;">
-                        <label for="modal_barang_masuk_id" class="form-label">Barang Masuk ID</label>
-                        <input type="text" class="form-control" id="modal_barang_masuk_id" readonly>
-                    </div>
 
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -309,124 +305,107 @@
 
         <script>
             $(document).ready(function() {
-
-                $('#modal_barang_id').on('change', function() {
-                    var selectedOption = this.options[this.selectedIndex];
-                    var jenis = selectedOption.getAttribute('data-jenis');
-                    var barangMasukId = selectedOption.getAttribute('data-barang-masuk-id');
-
-                    // Set the value of the modal_unit input field
+                const barangSelect = $('#modal_barang_id');
+                const noRefInput = $('#modal_no_ref');
+                const barangMasukData = @json($barangMasuks); // Convert PHP data to JSON
+        
+                // Update No. Ref input when barang_id changes
+                barangSelect.on('change', function() {
+                    const selectedOption = this.options[this.selectedIndex];
+                    const barangMasukId = $(selectedOption).data('barang-masuk-id');
+                    
+                    if (barangMasukId && barangMasukData[barangMasukId]) {
+                        noRefInput.val(barangMasukData[barangMasukId].joc_number);
+                    } else {
+                        noRefInput.val(''); // Clear value if not found
+                    }
+        
+                    const jenis = $(selectedOption).data('jenis');
                     $('#modal_unit').val(jenis ? jenis : '');
-
-                    // Set the value of the hidden input field for barang_masuk_id
                     $('#modal_barang_masuk_id').val(barangMasukId ? barangMasukId : '');
                 });
-
+        
                 function formatCurrency(amount) {
                     let number = parseFloat(amount);
                     if (isNaN(number)) return 'Rp. 0';
                     return `Rp. ${number.toLocaleString('id-ID', { minimumFractionDigits: 0 })}`;
                 }
-
+        
                 function parseCurrency(value) {
                     return parseFloat(value.replace(/[^0-9,]/g, '').replace(',', '.')) || 0;
                 }
-
+        
                 function toRawNumber(value) {
                     return parseFloat(value.replace(/[^0-9]/g, '')) || 0;
                 }
-
+        
                 function toInteger(value) {
-                    return parseInt(value, 10) || 0; // Convert to integer
+                    return parseInt(value, 10) || 0;
                 }
-
-                // Function to update the hidden input with table data
+        
                 function updateItemsInput() {
                     let items = [];
                     $('#items-table tbody tr').each(function() {
                         let row = $(this);
-                        let barangId = parseInt(row.find('td:eq(6)').text(), 10);
-                        let barangMasukId = parseInt(row.find('td:eq(7)').text(), 10);
-
                         let item = {
-                            barang_id: barangId,
+                            barang_id: toInteger(row.find('td:eq(7)').text()), // Assuming the barang_id is in the 8th column
                             no_ref: row.find('td:eq(0)').text(),
                             qty: toInteger(row.find('td:eq(2)').text()),
                             unit: row.find('td:eq(3)').text(),
                             harga: toRawNumber(row.find('td:eq(4)').text()),
                             total_harga: toRawNumber(row.find('td:eq(5)').text()),
-                            barang_masuk_id: barangMasukId,
+                            barang_masuk_id: toInteger(row.find('td:eq(6)').text()) // Assuming the barang_masuk_id is in the 7th column
                         };
-
                         items.push(item);
                     });
                     $('#items-input').val(JSON.stringify(items));
                 }
-
-                // Initialize hidden input with existing table data
-                updateItemsInput();
-
-                // Handle adding new item
+        
                 $('#addItemButton').on('click', function() {
-                    let barangId = $('#modal_barang_id').val();
-                    let barangName = $('#modal_barang_id option:selected').text();
-                    let noRef = $('#modal_no_ref').val();
+                    let barangId = barangSelect.val();
+                    let barangName = barangSelect.find('option:selected').text();
+                    let noRef = noRefInput.val();
                     let qty = toInteger($('#modal_qty').val());
                     let unit = $('#modal_unit').val();
                     let harga = parseCurrency($('#modal_harga').val());
                     let total = (qty * harga).toFixed(2);
                     let barangMasukId = $('#modal_barang_masuk_id').val();
-
-                    // Debugging
-                    console.log('barangId:', barangId);
-                    console.log('barangName:', barangName);
-                    console.log('noRef:', noRef);
-                    console.log('qty:', qty);
-                    console.log('unit:', unit);
-                    console.log('harga:', harga);
-                    console.log('total:', total);
-                    console.log('barangMasukId:', barangMasukId);
-
+        
                     let formattedHarga = formatCurrency(harga);
                     let formattedTotal = formatCurrency(total);
-
+        
                     let row = `<tr>
-        <td>${noRef}</td>
-        <td data-barang-id="${barangId}">${barangName}</td>
-        <td>${qty}</td>
-        <td>${unit}</td>
-        <td>${formattedHarga}</td>
-        <td>${formattedTotal}</td>
-        <td>${barangMasukId}</td> <!-- Include barang_masuk_id -->
-        <td>${barangId}</td>
-        <td><button type="button" class="btn btn-danger remove-item">Remove</button></td>
-    </tr>`;
-
+                        <td>${noRef}</td>
+                        <td data-barang-id="${barangId}">${barangName}</td>
+                        <td>${qty}</td>
+                        <td>${unit}</td>
+                        <td>${formattedHarga}</td>
+                        <td>${formattedTotal}</td>
+                        <td style="display: none">${barangMasukId}</td>
+                        <td style="display: none">${barangId}</td>
+                        <td><button type="button" class="btn btn-danger remove-item">Remove</button></td>
+                    </tr>`;
+        
                     $('#items-table tbody').append(row);
                     updateItemsInput();
-
+        
                     // Clear modal input fields
-                    $('#modal_barang_id').val('');
-                    $('#modal_no_ref').val('');
+                    barangSelect.val('');
+                    noRefInput.val('');
                     $('#modal_qty').val('');
                     $('#modal_unit').val('');
                     $('#modal_harga').val('');
                     $('#modal_barang_masuk_id').val('');
-
+        
                     $('#itemModal').modal('hide');
                 });
-
-                // Remove item from the table and update the hidden input
+        
                 $('#items-table').on('click', '.remove-item', function() {
                     $(this).closest('tr').remove();
-                    // Update hidden input with remaining table data
                     updateItemsInput();
                 });
-
-                // Update hidden input with new table data
-
-
-                // Ensure input fields are formatted as currency
+        
+                // Ensure harga input is formatted as currency
                 $('#modal_harga').on('input', function() {
                     let value = $(this).val();
                     let parsedValue = parseCurrency(value);
@@ -434,6 +413,7 @@
                 });
             });
         </script>
+        
 </body>
 
 </html>

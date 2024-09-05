@@ -52,7 +52,7 @@ class BarangKeluarController extends Controller
     {
         // Decode JSON string to array if items are sent as a JSON string
         $request->merge(['items' => json_decode($request->input('items'), true)]);
-        dd($request->all());
+        // dd($request->all());
         // Validate the request data
         $validated = $request->validate([
             'tanggal_keluar' => 'required|date',
@@ -144,132 +144,48 @@ class BarangKeluarController extends Controller
     }
 
     public function edit($id)
-    {
-        // Fetch Barang Keluar data along with its items
-        $barangKeluar = BarangKeluar::with('items')->findOrFail($id);
-    
-        // Get all warehouses, customers, and bank transfers
-        $warehouses = Warehouse::all();
-        $customers = Customer::all();
-        $bankTransfers = BankData::all();
-    
-        // Get barang_keluar_items related to the current barang_keluar_id
-        $barangKeluarItems = $barangKeluar->items;
-    
-        // Extract unique barang_masuk_ids from barang_keluar_items
-        $barangMasukIds = $barangKeluarItems->pluck('barang_masuk_id')->unique();
-    
-        // Fetch barang_masuk_items related to the extracted barang_masuk_ids
-        $barangMasukItems = BarangMasukItem::whereIn('barang_masuk_id', $barangMasukIds)->get();
-    
-        // Group barang_masuk_items by barang_masuk_id
-        $groupedBarangMasukItems = $barangMasukItems->groupBy('barang_masuk_id');
-    
-        // Extract unique barang_ids from barang_masuk_items
-        $barangIds = $barangMasukItems->pluck('barang_id')->unique();
-    
-        // Fetch filtered Barang items based on the extracted barang_ids
-        $filteredBarangs = Barang::whereIn('id', $barangIds)->get();
-    
-        return view('data-gudang.barang-keluar.edit', [
-            'barangKeluar' => $barangKeluar,
-            'warehouses' => $warehouses,
-            'customers' => $customers,
-            'bankTransfers' => $bankTransfers,
-            'barangs' => $filteredBarangs,
-            'groupedBarangMasukItems' => $groupedBarangMasukItems, // Pass grouped items
-        ]);
-    }
-    
+{
+    // Fetch Barang Keluar data along with its items
+    $barangKeluar = BarangKeluar::with('items')->findOrFail($id);
+
+    // Get all warehouses, customers, and bank transfers
+    $warehouses = Warehouse::all();
+    $customers = Customer::all();
+    $bankTransfers = BankData::all();
+
+    // Get barang_keluar_items related to the current barang_keluar_id
+    $barangKeluarItems = $barangKeluar->items;
+
+    // Extract unique barang_masuk_ids from barang_keluar_items
+    $barangMasukIds = $barangKeluarItems->pluck('barang_masuk_id')->unique();
+
+    // Fetch barang_masuk_items related to the extracted barang_masuk_ids
+    $barangMasukItems = BarangMasukItem::whereIn('barang_masuk_id', $barangMasukIds)->get();
+
+    // Group barang_masuk_items by barang_masuk_id
+    $groupedBarangMasukItems = $barangMasukItems->groupBy('barang_masuk_id');
+
+    // Extract unique barang_ids from barang_masuk_items
+    $barangIds = $barangMasukItems->pluck('barang_id')->unique();
+
+    // Fetch filtered Barang items based on the extracted barang_ids
+    $filteredBarangs = Barang::whereIn('id', $barangIds)->get();
+
+    // Fetch Barang Masuk data based on the barang_masuk_ids
+    $barangMasuks = BarangMasuk::whereIn('id', $barangMasukIds)->get()->keyBy('id');
+
+    return view('data-gudang.barang-keluar.edit', [
+        'barangKeluar' => $barangKeluar,
+        'warehouses' => $warehouses,
+        'customers' => $customers,
+        'bankTransfers' => $bankTransfers,
+        'barangs' => $filteredBarangs,
+        'groupedBarangMasukItems' => $groupedBarangMasukItems,
+        'barangMasuks' => $barangMasuks, // Pass Barang Masuk data
+    ]);
+}
 
 
-    /**
-     * Update the specified resource in storage.
-     */
-    // public function update(Request $request, $id)
-    // {
-    //     // Decode JSON string to array if items are sent as a JSON string
-    //     $request->merge(['items' => json_decode($request->input('items'), true)]);
-
-    //     // Validate the request data
-    //     $validated = $request->validate([
-    //         'tanggal_keluar' => 'required|date',
-    //         'gudang_id' => 'required|exists:warehouses,id',
-    //         'customer_id' => 'required|exists:customers,id',
-    //         'nomer_container' => 'nullable|string|max:191',
-    //         'nomer_polisi' => 'nullable|string|max:191',
-    //         'bank_transfer_id' => 'nullable|exists:bank_datas,id',
-    //         'items' => 'required|array',
-    //         'items.*.barang_id' => 'required|exists:barangs,id',
-    //         'items.*.no_ref' => 'nullable|string|max:191',
-    //         'items.*.qty' => 'required|integer|min:1',
-    //         'items.*.unit' => 'required|string|max:50',
-    //         'items.*.harga' => 'nullable|numeric|min:0',
-    //         'items.*.total_harga' => 'nullable|numeric|min:0',
-    //         'items.*.barang_masuk_id' => 'required|exists:barang_masuks,id',
-    //     ]);
-
-    //     // Prepare Barang Keluar data
-    //     $barangKeluarData = [
-    //         'tanggal_keluar' => $validated['tanggal_keluar'],
-    //         'gudang_id' => $validated['gudang_id'],
-    //         'customer_id' => $validated['customer_id'],
-    //         'nomer_container' => $validated['nomer_container'],
-    //         'nomer_polisi' => $validated['nomer_polisi'],
-    //         'bank_transfer_id' => $validated['bank_transfer_id'],
-    //     ];
-
-    //     // Extract items data
-    //     $items = $validated['items'];
-
-    //     try {
-    //         // Database transaction
-    //         DB::transaction(function () use ($id, $barangKeluarData, $items) {
-    //             // Update Barang Keluar record
-    //             $barangKeluar = BarangKeluar::findOrFail($id);
-    //             $barangKeluar->update($barangKeluarData);
-
-    //             // Delete existing items related to this Barang Keluar
-    //             BarangKeluarItem::where('barang_keluar_id', $id)->delete();
-
-    //             // Iterate over items and create BarangKeluarItem
-    //             foreach ($items as $item) {
-    //                 BarangKeluarItem::create([
-    //                     'barang_id' => (int) $item['barang_id'],
-    //                     'no_ref' => $item['no_ref'],
-    //                     'qty' => $item['qty'],
-    //                     'unit' => $item['unit'],
-    //                     'harga' => $item['harga'],
-    //                     'total_harga' => $item['total_harga'],
-    //                     'barang_masuk_id' => (int) $item['barang_masuk_id'],
-    //                     'barang_keluar_id' => $barangKeluar->id,
-    //                 ]);
-    //             }
-
-    //             // Log the operation
-    //             LogData::create([
-    //                 'user_id' => Auth::check() ? Auth::id() : null,
-    //                 'name' => Auth::check() ? Auth::user()->name : 'unknown',
-    //                 'action' => 'update',
-    //                 'details' => 'Updated Barang Keluar ID: ' . $barangKeluar->id . ' with data: ' . json_encode($barangKeluarData)
-    //             ]);
-    //         });
-
-    //         // Redirect with success message
-    //         return redirect()->route('data-gudang.barang-keluar.index')->with('success', 'Barang Keluar updated successfully.');
-    //     } catch (\Exception $e) {
-    //         // Log the exception
-    //         Log::error('Exception caught:', [
-    //             'user_id' => Auth::check() ? Auth::id() : 'unknown',
-    //             'user_name' => Auth::check() ? Auth::user()->name : 'unknown',
-    //             'message' => $e->getMessage(),
-    //             'trace' => $e->getTraceAsString() // Optional: add stack trace for debugging
-    //         ]);
-
-    //         // Redirect with error message
-    //         return redirect()->back()->with('error', 'An error occurred: ' . $e->getMessage());
-    //     }
-    // }
 
     public function update(Request $request, $id)
     {
@@ -277,7 +193,7 @@ class BarangKeluarController extends Controller
         $request->merge(['items' => json_decode($request->input('items'), true)]);
 
         // Dump and die to inspect the request data after merging
-        dd($request->all());
+        // dd($request->all());
 
         // Validate the request data
         $validated = $request->validate([
