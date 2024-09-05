@@ -208,6 +208,7 @@
                                                         <td style="display: none" data-barang-id="{{ $item->barang_id }}">
                                                             {{ $item->barang_id }}</td>
                                                         <td>
+                                                            <button type="button" class="btn btn-warning edit-item">Edit</button>
                                                             <button type="button"
                                                                 class="btn btn-danger remove-item">Remove</button>
                                                         </td>
@@ -255,9 +256,13 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        <div class="mb-3">
+                        <div class="form-group">
+                            <label for="modal_no_ref" class="form-label">No. Ref</label>
+                            <input type="text" class="form-control" id="modal_no_ref" placeholder="Auto-generated" readonly>
+                        </div>
+                        <div class="form-group">
                             <label for="modal_barang_id" class="form-label">Barang</label>
-                            <select class="form-select" id="modal_barang_id">
+                            <select class="form-control" id="modal_barang_id">
                                 <option value="" data-jenis="" data-barang-masuk-id="">-- Pilih Barang --
                                 </option>
                                 @foreach ($barangs as $barang)
@@ -275,22 +280,16 @@
                                 @endforeach
                             </select>
                         </div>
-
-
-                        <div class="mb-3">
-                            <label for="modal_no_ref" class="form-label">No. Ref</label>
-                            <input type="text" class="form-control" id="modal_no_ref" readonly>
-                        </div>
-                        <div class="mb-3">
+                        <div class="form-group">
                             <label for="modal_qty" class="form-label">Quantity</label>
                             <input type="number" class="form-control" id="modal_qty">
                         </div>
-                        <div class="mb-3">
+                        <div class="form-group">
                             <label for="modal_unit" class="form-label">Unit</label>
                             <input type="text" class="form-control" id="modal_unit" readonly>
                             <!-- Make it readonly -->
                         </div>
-                        <div class="mb-3">
+                        <div class="form-group">
                             <label for="modal_harga" class="form-label">Harga</label>
                             <input type="text" class="form-control" id="modal_harga"> <!-- Change to text -->
                         </div>
@@ -304,6 +303,61 @@
                 </div>
             </div>
         </div>
+
+        <!-- Modal Edit Item -->
+        <div class="modal fade" id="editItemModal" tabindex="-1" role="dialog" aria-labelledby="editItemModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editItemModalLabel">Edit Item</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="edit_modal_no_ref" class="form-label">No. Ref</label>
+                            <input type="text" class="form-control" id="edit_modal_no_ref" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_modal_barang_id" class="form-label">Barang</label>
+                            <select class="form-control" id="edit_modal_barang_id" disabled>
+                                <option value="" data-jenis="" data-barang-masuk-id="">-- Pilih Barang --</option>
+                                @foreach ($barangs as $barang)
+                                    @foreach ($groupedBarangMasukItems as $barangMasukId => $items)
+                                        @foreach ($items as $item)
+                                            @if ($barang->id === $item->barang_id)
+                                                <option value="{{ $barang->id }}" data-jenis="{{ $barang->jenis }}" data-barang-masuk-id="{{ $item->barang_masuk_id }}">
+                                                    {{ $barang->nama_barang }}
+                                                </option>
+                                            @endif
+                                        @endforeach
+                                    @endforeach
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_modal_qty" class="form-label">Quantity</label>
+                            <input type="number" class="form-control" id="edit_modal_qty">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_modal_unit" class="form-label">Unit</label>
+                            <input type="text" class="form-control" id="edit_modal_unit" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_modal_harga" class="form-label">Harga</label>
+                            <input type="text" class="form-control" id="edit_modal_harga">
+                        </div>
+                        <input type="hidden" id="edit_modal_barang_masuk_id">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="saveEditItemButton">Save changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
 
 
         <script>
@@ -433,6 +487,65 @@
                     let parsedValue = parseCurrency(value);
                     $(this).val(formatCurrency(parsedValue));
                 });
+
+                let currentEditingRow;
+                $('#items-table').on('click', '.edit-item', function() {
+        currentEditingRow = $(this).closest('tr'); // Get the current row to edit
+
+        let barangId = currentEditingRow.find('td:eq(7)').text(); // barang_id in 8th column
+        let barangName = currentEditingRow.find('td:eq(1)').text();
+        let noRef = currentEditingRow.find('td:eq(0)').text();
+        let qty = currentEditingRow.find('td:eq(2)').text();
+        let unit = currentEditingRow.find('td:eq(3)').text();
+        let harga = currentEditingRow.find('td:eq(4)').text();
+        let barangMasukId = currentEditingRow.find('td:eq(6)').text(); // barang_masuk_id in 7th column
+
+        // Set modal fields with row data
+        $('#edit_modal_barang_id').val(barangId).change();
+        $('#edit_modal_no_ref').val(noRef);
+        $('#edit_modal_qty').val(qty);
+        $('#edit_modal_unit').val(unit);
+        $('#edit_modal_harga').val(harga);
+        $('#edit_modal_barang_masuk_id').val(barangMasukId);
+
+        // Show the modal
+        $('#editItemModal').modal('show');
+    });
+
+    // Save changes when 'Save changes' button is clicked
+    $('#saveEditItemButton').on('click', function() {
+        let barangId = $('#edit_modal_barang_id').val();
+        let barangName = $('#edit_modal_barang_id option:selected').text();
+        let noRef = $('#edit_modal_no_ref').val();
+        let qty = toInteger($('#edit_modal_qty').val());
+        let unit = $('#edit_modal_unit').val();
+        let harga = parseCurrency($('#edit_modal_harga').val());
+        let total = (qty * harga).toFixed(2);
+        let barangMasukId = $('#edit_modal_barang_masuk_id').val();
+
+        let formattedHarga = formatCurrency(harga);
+        let formattedTotal = formatCurrency(total);
+
+        // Update the current row with the edited values
+        currentEditingRow.find('td:eq(0)').text(noRef);
+        currentEditingRow.find('td:eq(1)').text(barangName);
+        currentEditingRow.find('td:eq(2)').text(qty);
+        currentEditingRow.find('td:eq(3)').text(unit);
+        currentEditingRow.find('td:eq(4)').text(formattedHarga);
+        currentEditingRow.find('td:eq(5)').text(formattedTotal);
+        currentEditingRow.find('td:eq(6)').text(barangMasukId); // Update barang_masuk_id (7th column)
+        currentEditingRow.find('td:eq(7)').text(barangId); // Update barang_id (8th column)
+
+        // Close modal after saving
+        $('#editItemModal').modal('hide');
+    });
+
+    // Ensure harga input is formatted as currency in the edit modal
+    $('#edit_modal_harga').on('input', function() {
+        let value = $(this).val();
+        let parsedValue = parseCurrency(value);
+        $(this).val(formatCurrency(parsedValue));
+    });
             });
         </script>
 
