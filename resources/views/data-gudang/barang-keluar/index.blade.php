@@ -100,12 +100,12 @@
                                             <tr>
                                                 <th>No</th>
                                                 <th>Tanggal Keluar</th>
+                                                <th>Nomer Invoice</th>
                                                 <th>No Ref</th>
                                                 <th>Nama Barang</th>
                                                 <th>Gudang</th>
                                                 <th>Pemilik Barang</th>
                                                 <th>qty</th>
-                                                <th>Nomer Container</th>
                                                 <th>Nomer Polisi</th>
                                                 <th>Bank Transfer</th>
                                                 <th>Action</th>
@@ -117,6 +117,7 @@
                                                     <tr>
                                                         <td>{{ $index + 1 }}</td>
                                                         <td>{{ $barangKeluar->tanggal_keluar }}</td>
+                                                        <td>{{ $barangKeluar->nomer_invoice }}</td>
                                                         <td><a href="{{ route('data-gudang.barang-keluar.show', $barangKeluar->id) }}">
                                                             {{ $item->no_ref }}
                                                         </a>
@@ -125,7 +126,6 @@
                                                         <td>{{ $barangKeluar->gudang->name }}</td>
                                                         <td>{{ $barangKeluar->customer->name }}</td>
                                                         <td>{{ $item->qty }}</td>
-                                                        <td>{{ $barangKeluar->nomer_container }}</td>
                                                         <td>{{ $barangKeluar->nomer_polisi }}</td>
                                                         <td>{{ $barangKeluar->bankTransfer->bank_name }} - {{ $barangKeluar->bankTransfer->account_number }}</td>
                                                         <td>

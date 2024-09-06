@@ -17,7 +17,7 @@ return new class extends Migration
             $table->date('tanggal_keluar'); // Tanggal Keluar
             $table->foreignId('gudang_id')->constrained('warehouses')->onDelete('cascade'); // Gudang ID
             $table->foreignId('customer_id')->constrained('customers')->onDelete('cascade'); // Pemilik Barang (Customer ID)
-            $table->string('nomer_container')->nullable(); // Nomor Container (Opsional)
+            $table->string('nomer_invoice')->nullable(); // Nomor Container (Opsional)
             $table->string('nomer_polisi')->nullable(); // Nomor Polisi (Opsional)
             $table->foreignId('bank_transfer_id')->constrained('bank_datas')->onDelete('cascade'); // Transfer (ID Bank)
             $table->timestamps();

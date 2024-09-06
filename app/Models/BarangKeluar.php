@@ -15,7 +15,7 @@ class BarangKeluar extends Model
         'tanggal_keluar',
         'gudang_id',
         'customer_id',
-        'nomer_container',
+        'nomer_invoice',
         'nomer_polisi',
         'bank_transfer_id',
     ];

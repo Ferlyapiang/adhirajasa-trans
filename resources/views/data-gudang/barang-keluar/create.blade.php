@@ -85,6 +85,15 @@
                                     <form action="{{ route('data-gudang.barang-keluar.store') }}" method="POST">
                                         @csrf
                                         <div class="form-group">
+                                            <label for="nomer_invoice">Nomer Invoice</label>
+                                            <input type="text" name="nomer_invoice" id="nomer_invoice"
+                                                class="form-control @error('nomer_invoice') is-invalid @enderror"
+                                                value="{{ old('nomer_invoice') }}" required>
+                                            @error('nomer_invoice')
+                                                <span class="invalid-feedback">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                        <div class="form-group">
                                             <label for="tanggal_keluar">Tanggal Keluar</label>
                                             <input type="date" name="tanggal_keluar" id="tanggal_keluar"
                                                 class="form-control @error('tanggal_keluar') is-invalid @enderror"
@@ -122,17 +131,6 @@
                                                 <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
                                         </div>
-
-                                        <div class="form-group">
-                                            <label for="nomer_container">Nomer Container</label>
-                                            <input type="text" name="nomer_container" id="nomer_container"
-                                                class="form-control @error('nomer_container') is-invalid @enderror"
-                                                value="{{ old('nomer_container') }}" required>
-                                            @error('nomer_container')
-                                                <span class="invalid-feedback">{{ $message }}</span>
-                                            @enderror
-                                        </div>
-
                                         <div class="form-group">
                                             <label for="nomer_polisi">Nomer Polisi</label>
                                             <input type="text" name="nomer_polisi" id="nomer_polisi"

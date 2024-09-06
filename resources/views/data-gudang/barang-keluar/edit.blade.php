@@ -85,6 +85,16 @@
                                         @method('PUT')
 
                                         <div class="form-group">
+                                            <label for="nomer_invoice">Nomor Invoice</label>
+                                            <input type="text" name="nomer_invoice" id="nomer_invoice"
+                                                class="form-control @error('nomer_invoice') is-invalid @enderror"
+                                                value="{{ old('nomer_invoice', $barangKeluar->nomer_invoice) }}">
+                                            @error('nomer_invoice')
+                                                <span class="invalid-feedback">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+
+                                        <div class="form-group">
                                             <label for="tanggal_keluar">Tanggal Keluar</label>
                                             <input type="date" name="tanggal_keluar" id="tanggal_keluar"
                                                 class="form-control @error('tanggal_keluar') is-invalid @enderror"
@@ -127,16 +137,6 @@
                                                 @endforeach
                                             </select>
                                             @error('customer_id')
-                                                <span class="invalid-feedback">{{ $message }}</span>
-                                            @enderror
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label for="nomer_container">Nomor Container</label>
-                                            <input type="text" name="nomer_container" id="nomer_container"
-                                                class="form-control @error('nomer_container') is-invalid @enderror"
-                                                value="{{ old('nomer_container', $barangKeluar->nomer_container) }}">
-                                            @error('nomer_container')
                                                 <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
                                         </div>
