@@ -76,7 +76,14 @@
                         <div class="col-lg-12">
                             <div class="card">
                                 <div class="card-header">
-                                    <h3 class="card-title">Form Barang Keluar</h3>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h3 class="card-title">Form Barang Keluar</h3>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <a href="{{ route('pdf.invoice-barang-keluar', ['id' => $barangKeluar->id]) }}" class="btn btn-success float-right mr-2">Download PDF</a>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="card-body">
                                     <form action="{{ route('data-gudang.barang-keluar.update', $barangKeluar->id) }}"

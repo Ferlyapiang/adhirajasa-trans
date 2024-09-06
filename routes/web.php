@@ -13,6 +13,8 @@ use App\Http\Controllers\WarehouseController;
 use App\Http\Controllers\BarangController;
 use App\Http\Controllers\BarangMasukController;
 use App\Http\Controllers\BarangKeluarController;
+use App\Http\Controllers\PDFController;
+
 
 // Login and Logout
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login.form');
@@ -128,3 +130,4 @@ Route::delete('data-gudang/barang-keluar/{barangKeluar}', [BarangKeluarControlle
 Route::get('/api/items/{customerId}/{warehouseId}', [BarangKeluarController::class, 'getItemsByCustomer']);
 Route::get('/api/customers/{warehouseId}', [BarangKeluarController::class, 'getCustomersByWarehouse']);
 
+Route::get('/download-pdf/{id}', [PDFController::class, 'BarangKeluar_download'])->name('pdf.invoice-barang-keluar');
