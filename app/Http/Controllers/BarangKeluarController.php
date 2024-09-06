@@ -27,7 +27,7 @@ class BarangKeluarController extends Controller
     public function index()
     {
         $barangKeluars = BarangKeluar::with(['gudang', 'customer', 'bankTransfer', 'items.barang'])
-            ->orderBy('tanggal_keluar', 'desc') // Mengurutkan berdasarkan tanggal_keluar secara menurun
+            ->orderBy('tanggal_keluar', 'desc')
             ->get();
 
         return view('data-gudang.barang-keluar.index', compact('barangKeluars'));
@@ -41,7 +41,7 @@ class BarangKeluarController extends Controller
         $warehouses = Warehouse::all();
         $customers = Customer::all();
         $bankTransfers = BankData::all();
-        $barangs = Barang::all(); // Fetch all Barang data
+        $barangs = Barang::all();
         return view('data-gudang.barang-keluar.create', compact('warehouses', 'customers', 'bankTransfers', 'barangs'));
     }
 
@@ -50,10 +50,8 @@ class BarangKeluarController extends Controller
      */
     public function store(Request $request)
     {
-        // Decode JSON string to array if items are sent as a JSON string
         $request->merge(['items' => json_decode($request->input('items'), true)]);
-        // dd($request->all());
-        // Validate the request data
+
         $validated = $request->validate([
             'tanggal_keluar' => 'required|date',
             'gudang_id' => 'required|exists:warehouses,id',
@@ -71,7 +69,6 @@ class BarangKeluarController extends Controller
             'items.*.barang_masuk_id' => 'required|exists:barang_masuks,id',
         ]);
 
-        // Prepare Barang Keluar data
         $barangKeluarData = [
             'tanggal_keluar' => $validated['tanggal_keluar'],
             'gudang_id' => $validated['gudang_id'],
@@ -81,16 +78,13 @@ class BarangKeluarController extends Controller
             'bank_transfer_id' => $validated['bank_transfer_id'],
         ];
 
-        // Extract items data
         $items = $validated['items'];
 
         try {
-            // Database transaction
             DB::transaction(function () use ($barangKeluarData, $items) {
-                // Create Barang Keluar record
+
                 $barangKeluar = BarangKeluar::create($barangKeluarData);
 
-                // Iterate over items and create BarangKeluarItem
                 foreach ($items as $item) {
                     Log::info('Processing Item:', [
                         'barang_id' => (int) $item['barang_id'],
@@ -109,7 +103,6 @@ class BarangKeluarController extends Controller
                     ]);
                 }
 
-                // Log the operation
                 LogData::create([
                     'user_id' => Auth::check() ? Auth::id() : null,
                     'name' => Auth::check() ? Auth::user()->name : 'unknown',
@@ -118,18 +111,15 @@ class BarangKeluarController extends Controller
                 ]);
             });
 
-            // Redirect with success message
             return redirect()->route('data-gudang.barang-keluar.index')->with('success', 'Barang Keluar created successfully.');
         } catch (\Exception $e) {
-            // Log the exception
             Log::error('Exception caught:', [
                 'user_id' => Auth::check() ? Auth::id() : 'unknown',
                 'user_name' => Auth::check() ? Auth::user()->name : 'unknown',
                 'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString() // Optional: add stack trace for debugging
+                'trace' => $e->getTraceAsString()
             ]);
 
-            // Redirect with error message
             return redirect()->back()->with('error', 'An error occurred: ' . $e->getMessage());
         }
     }
@@ -137,41 +127,55 @@ class BarangKeluarController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(BarangKeluar $barangKeluar)
+    public function show($id)
     {
-        $barangKeluar->load('items.barang');
-        return view('data-gudang.barang-keluar.show', compact('barangKeluar'));
-    }
-
-    public function edit($id)
-    {
-        // Fetch Barang Keluar data along with its items
         $barangKeluar = BarangKeluar::with('items')->findOrFail($id);
 
-        // Get all warehouses, customers, and bank transfers
         $warehouses = Warehouse::all();
         $customers = Customer::all();
         $bankTransfers = BankData::all();
 
-        // Get barang_keluar_items related to the current barang_keluar_id
+        $barangKeluarItems = $barangKeluar->items;
+        $barangMasukIds = $barangKeluarItems->pluck('barang_masuk_id')->unique();
+        $barangMasukItems = BarangMasukItem::whereIn('barang_masuk_id', $barangMasukIds)->get();
+        $groupedBarangMasukItems = $barangMasukItems->groupBy('barang_masuk_id');
+        $barangIds = $barangMasukItems->pluck('barang_id')->unique();
+        $filteredBarangs = Barang::whereIn('id', $barangIds)->get();
+        $barangMasuks = BarangMasuk::whereIn('id', $barangMasukIds)->get()->keyBy('id');
+
+        return view('data-gudang.barang-keluar.detail', [
+            'barangKeluar' => $barangKeluar,
+            'warehouses' => $warehouses,
+            'customers' => $customers,
+            'bankTransfers' => $bankTransfers,
+            'barangs' => $filteredBarangs,
+            'groupedBarangMasukItems' => $groupedBarangMasukItems,
+            'barangMasuks' => $barangMasuks,
+        ]);
+    }
+
+
+    public function edit($id)
+    {
+        $barangKeluar = BarangKeluar::with('items')->findOrFail($id);
+
+        $warehouses = Warehouse::all();
+        $customers = Customer::all();
+        $bankTransfers = BankData::all();
+
         $barangKeluarItems = $barangKeluar->items;
 
-        // Extract unique barang_masuk_ids from barang_keluar_items
         $barangMasukIds = $barangKeluarItems->pluck('barang_masuk_id')->unique();
 
-        // Fetch barang_masuk_items related to the extracted barang_masuk_ids
+
         $barangMasukItems = BarangMasukItem::whereIn('barang_masuk_id', $barangMasukIds)->get();
 
-        // Group barang_masuk_items by barang_masuk_id
         $groupedBarangMasukItems = $barangMasukItems->groupBy('barang_masuk_id');
 
-        // Extract unique barang_ids from barang_masuk_items
         $barangIds = $barangMasukItems->pluck('barang_id')->unique();
 
-        // Fetch filtered Barang items based on the extracted barang_ids
         $filteredBarangs = Barang::whereIn('id', $barangIds)->get();
 
-        // Fetch Barang Masuk data based on the barang_masuk_ids
         $barangMasuks = BarangMasuk::whereIn('id', $barangMasukIds)->get()->keyBy('id');
 
         return view('data-gudang.barang-keluar.edit', [
@@ -181,21 +185,14 @@ class BarangKeluarController extends Controller
             'bankTransfers' => $bankTransfers,
             'barangs' => $filteredBarangs,
             'groupedBarangMasukItems' => $groupedBarangMasukItems,
-            'barangMasuks' => $barangMasuks, // Pass Barang Masuk data
+            'barangMasuks' => $barangMasuks,
         ]);
     }
 
-
-
     public function update(Request $request, $id)
     {
-        // Decode JSON string to array if items are sent as a JSON string
         $request->merge(['items' => json_decode($request->input('items'), true)]);
 
-        // Dump and die to inspect the request data after merging
-        // dd($request->all());
-
-        // Validate the request data
         $validated = $request->validate([
             'tanggal_keluar' => 'required|date',
             'gudang_id' => 'required|exists:warehouses,id',
@@ -213,10 +210,6 @@ class BarangKeluarController extends Controller
             'items.*.barang_masuk_id' => 'required|exists:barang_masuks,id',
         ]);
 
-        // Dump and die to inspect the validated data
-        // dd($validated);
-
-        // Prepare Barang Keluar data
         $barangKeluarData = [
             'tanggal_keluar' => $validated['tanggal_keluar'],
             'gudang_id' => $validated['gudang_id'],
@@ -226,23 +219,15 @@ class BarangKeluarController extends Controller
             'bank_transfer_id' => $validated['bank_transfer_id'],
         ];
 
-        // Extract items data
         $items = $validated['items'];
 
-        // Dump and die to inspect Barang Keluar data and items before transaction
-        // dd($barangKeluarData, $items);
-
         try {
-            // Database transaction
             DB::transaction(function () use ($id, $barangKeluarData, $items) {
-                // Update Barang Keluar record
                 $barangKeluar = BarangKeluar::findOrFail($id);
                 $barangKeluar->update($barangKeluarData);
 
-                // Delete existing items related to this Barang Keluar
                 BarangKeluarItem::where('barang_keluar_id', $id)->delete();
 
-                // Iterate over items and create BarangKeluarItem
                 foreach ($items as $item) {
                     BarangKeluarItem::create([
                         'barang_id' => (int) $item['barang_id'],
@@ -256,7 +241,6 @@ class BarangKeluarController extends Controller
                     ]);
                 }
 
-                // Log the operation
                 LogData::create([
                     'user_id' => Auth::check() ? Auth::id() : null,
                     'name' => Auth::check() ? Auth::user()->name : 'unknown',
@@ -265,23 +249,18 @@ class BarangKeluarController extends Controller
                 ]);
             });
 
-            // Redirect with success message
             return redirect()->route('data-gudang.barang-keluar.index')->with('success', 'Barang Keluar updated successfully.');
         } catch (\Exception $e) {
-            // Log the exception
             Log::error('Exception caught:', [
                 'user_id' => Auth::check() ? Auth::id() : 'unknown',
                 'user_name' => Auth::check() ? Auth::user()->name : 'unknown',
                 'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString() // Optional: add stack trace for debugging
+                'trace' => $e->getTraceAsString()
             ]);
 
-            // Redirect with error message
             return redirect()->back()->with('error', 'An error occurred: ' . $e->getMessage());
         }
     }
-
-
 
     /**
      * Remove the specified resource from storage.

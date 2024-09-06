@@ -167,22 +167,24 @@
                                             Item</button>
                                         <input type="hidden" name="items" id="items-input" value="[]">
                                         <!-- Items Table -->
-                                        <table id="items-table">
-                                            <thead>
-                                                <tr>
-                                                    <th>Nomer Ref</th>
-                                                    <th>Nama Barang</th>
-                                                    <th>Quantity</th>
-                                                    <th>Unit</th>
-                                                    <th>Harga</th>
-                                                    <th>Total</th>
-                                                    <th>Actions</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <!-- Items will be added here dynamically -->
-                                            </tbody>
-                                        </table>
+                                        <div class="table-responsive">
+                                            <table id="items-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Nomer Ref</th>
+                                                        <th>Nama Barang</th>
+                                                        <th>Quantity</th>
+                                                        <th>Unit</th>
+                                                        <th>Harga</th>
+                                                        <th>Total</th>
+                                                        <th>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <!-- Items will be added here dynamically -->
+                                                </tbody>
+                                            </table>
+                                        </div>
 
                                         <br><br>
                                         <div class="card-footer">
@@ -213,7 +215,6 @@
     <script src="{{ asset('lte/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('lte/dist/js/adminlte.min.js') }}"></script>
 
-    <!-- Modal -->
     <!-- Modal -->
     <div class="modal fade" id="itemModal" tabindex="-1" role="dialog" aria-labelledby="itemModalLabel"
         aria-hidden="true">

@@ -2,18 +2,19 @@
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Detail Barang Masuk</title>
-    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detail Barang Keluar</title>
 
-    <!-- Font Awesome Icons -->
     <link rel="icon" type="image/svg+xml" href="{{ asset('ats/ATSLogo.png') }}" />
     <link rel="stylesheet" href="{{ asset('lte/plugins/fontawesome-free/css/all.min.css') }}">
-
-    <!-- Theme style -->
     <link rel="stylesheet" href="{{ asset('lte/dist/css/adminlte.min.css') }}">
+
     <style>
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -46,7 +47,6 @@
 
 <body class="hold-transition sidebar-mini">
     <div class="wrapper">
-
         <!-- Navbar -->
         @include('admin.header')
         <!-- /.navbar -->
@@ -55,19 +55,14 @@
         @include('admin.sidebar')
         <!-- /.sidebar -->
 
-        <!-- Content Wrapper. Contains page content -->
+        <!-- Content Wrapper -->
         <div class="content-wrapper">
-
-            <!-- Content Header (Page header) -->
+            <!-- Content Header -->
             <div class="content-header">
-                <div class="container-fluid pl-4">
-                    <div class="row mb-1">
-                        <div class="col-sm-12"
-                            style="border: 1px solid #D0D4DB; border-radius: 10px; background-color: white; padding: 10px;">
-                            <h1 class="m-0" style="font-weight: bold; font-size: 16px; padding-left: 10px;">
-                                <span style="font-weight: 370;">Data Gudang |</span>
-                                <span>Barang Masuk</span>
-                            </h1>
+                <div class="container-fluid">
+                    <div class="row mb-2">
+                        <div class="col-sm-6">
+                            <h1 class="m-0">Detail Barang Keluar</h1>
                         </div>
                     </div>
                 </div>
@@ -75,240 +70,159 @@
             <!-- /.content-header -->
 
             <!-- Main content -->
-            <div class="container-fluid pl-4">
-                <h2>Detail Barang Masuk {{ $barangMasuk->joc_number }}</h2>
-                <form id="barangMasukForm" action="{{ route('data-gudang.barang-masuk.update', $barangMasuk->id) }}"
-                    method="POST">
-                    @csrf
-                    @method('PUT')
+            <div class="container">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">Form Barang Keluar</h3>
+                                </div>
+                                <div class="card-body">
+                                    <form action="{{ route('data-gudang.barang-keluar.update', $barangKeluar->id) }}"
+                                        method="POST" id="barangKeluarForm">
+                                        @csrf
+                                        @method('PUT')
 
-                    <div class="form-group">
-                        <label for="tanggal_masuk">Tanggal Masuk</label>
-                        <input type="date" name="tanggal_masuk" id="tanggal_masuk" class="form-control"
-                            value="{{ $barangMasuk->tanggal_masuk }}" placeholder="Select date" readonly>
+                                        <div class="form-group">
+                                            <label for="tanggal_keluar">Tanggal Keluar</label>
+                                            <input type="date" name="tanggal_keluar" id="tanggal_keluar"
+                                                class="form-control @error('tanggal_keluar') is-invalid @enderror"
+                                                value="{{ old('tanggal_keluar', $barangKeluar->tanggal_keluar) }}"
+                                                readonly>
+                                            @error('tanggal_keluar')
+                                                <span class="invalid-feedback">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="gudang_id">Gudang</label>
+                                            <select name="gudang_id" id="gudang_id"
+                                                class="form-control @error('gudang_id') is-invalid @enderror" disabled>
+                                                <option value="">Select Gudang</option>
+                                                @foreach ($warehouses as $warehouse)
+                                                    <option value="{{ $warehouse->id }}"
+                                                        {{ old('gudang_id', $barangKeluar->gudang_id) == $warehouse->id ? 'selected' : '' }}>
+                                                        {{ $warehouse->name }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            @error('gudang_id')
+                                                <span class="invalid-feedback">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="customer_id">Customer</label>
+                                            <select name="customer_id" id="customer_id"
+                                                class="form-control @error('customer_id') is-invalid @enderror" disabled>
+                                                <option value="">Select Customer</option>
+                                                @foreach ($customers as $customer)
+                                                    <option value="{{ $customer->id }}"
+                                                        {{ old('customer_id', $barangKeluar->customer_id) == $customer->id ? 'selected' : '' }}>
+                                                        {{ $customer->name }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            @error('customer_id')
+                                                <span class="invalid-feedback">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="nomer_container">Nomor Container</label>
+                                            <input type="text" name="nomer_container" id="nomer_container"
+                                                class="form-control @error('nomer_container') is-invalid @enderror"
+                                                value="{{ old('nomer_container', $barangKeluar->nomer_container) }}"
+                                                readonly>
+                                            @error('nomer_container')
+                                                <span class="invalid-feedback">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="nomer_polisi">Nomor Polisi</label>
+                                            <input type="text" name="nomer_polisi" id="nomer_polisi"
+                                                class="form-control @error('nomer_polisi') is-invalid @enderror"
+                                                value="{{ old('nomer_polisi', $barangKeluar->nomer_polisi) }}"
+                                                readonly>
+                                            @error('nomer_polisi')
+                                                <span class="invalid-feedback">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="bank_transfer_id">Bank Transfer</label>
+                                            <select name="bank_transfer_id" id="bank_transfer_id"
+                                                class="form-control @error('bank_transfer_id') is-invalid @enderror"
+                                                disabled>
+                                                <option value="">-- None --</option>
+                                                @foreach ($bankTransfers as $bankTransfer)
+                                                    <option value="{{ $bankTransfer->id }}"
+                                                        {{ old('bank_transfer_id', $barangKeluar->bank_transfer_id) == $bankTransfer->id ? 'selected' : '' }}>
+                                                        {{ $bankTransfer->bank_name }} -
+                                                        {{ $bankTransfer->account_number }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            @error('bank_transfer_id')
+                                                <span class="invalid-feedback">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+
+                                        <h2>Items</h2>
+
+                                        <input type="hidden" name="items" id="items-input" value="[]">
+
+                                        <!-- Items Table -->
+                                        <div class="table-responsive">
+                                            <table class="table" id="items-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Nomer Ref</th>
+                                                        <th>Nama Barang</th>
+                                                        <th>Quantity</th>
+                                                        <th>Unit</th>
+                                                        <th>Harga</th>
+                                                        <th>Total</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach ($barangKeluar->items as $item)
+                                                        <tr>
+                                                            <td>{{ $item->no_ref }}</td>
+                                                            <td>{{ $item->barang->nama_barang }}</td>
+                                                            <td>{{ $item->qty }}</td>
+                                                            <td>{{ $item->unit }}</td>
+                                                            <td>Rp. {{ number_format($item->harga, 0, ',', '.') }}</td>
+                                                            <td>Rp. {{ number_format($item->total_harga, 0, ',', '.') }}</td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+    
+                                        </div>
+                                        <br><br>
+                                        <div class="card-footer">
+                                            <a href="{{ route('data-gudang.barang-keluar.index') }}"
+                                                class="btn btn-secondary">Back</a>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-
-                    <div class="form-group">
-                        <label for="gudang">Gudang</label>
-                        <select name="gudang_id" id="gudang" class="form-control" required disabled>
-                            <option value="" disabled selected>Pilih Nama Gudang Penyimpanan</option>
-                            @foreach ($gudangs as $gudang)
-                                <option value="{{ $gudang->id }}"
-                                    {{ $gudang->id == $barangMasuk->gudang_id ? 'selected' : '' }}>{{ $gudang->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="nama_pemilik">Nama Pemilik</label>
-                        <select name="customer_id" id="nama_pemilik" class="form-control" required disabled>
-                            <option value="" disabled selected>Pilih Nama Pemilik Barang</option>
-                            @foreach ($pemilik as $owner)
-                                <option value="{{ $owner->id }}"
-                                    {{ $owner->id == $barangMasuk->customer_id ? 'selected' : '' }}>{{ $owner->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="jenis_mobil">Jenis Mobil (Optional)</label>
-                        <input type="text" name="jenis_mobil" id="jenis_mobil" class="form-control"
-                            value="{{ $barangMasuk->jenis_mobil }}" readonly>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="nomer_polisi">Nomer Polisi (Optional)</label>
-                        <input type="text" name="nomer_polisi" id="nomer_polisi" class="form-control"
-                            value="{{ $barangMasuk->nomer_polisi }}" readonly>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="nomer_container">Nomer Container</label>
-                        <input type="text" name="nomer_container" id="nomer_container" class="form-control"
-                            value="{{ $barangMasuk->nomer_container }}" readonly>
-                    </div>
-
-                    <h2>Items</h2>
-                
-                    <!-- Items Table -->
-                    <table id="items-table">
-                        <thead>
-                            <tr>
-                                <th>Nama Barang</th>
-                                <th>Quantity</th>
-                                <th>Unit</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($barangMasuk->items as $item)
-                                <tr data-id="{{ $item->id }}">
-                                    <td>{{ $item->barang->nama_barang ?? 'Unknown' }}</td>
-                                    <td>{{ $item->qty }}</td>
-                                    <td>{{ $item->unit }}</td>
-                                    <td style="display: none">{{ $item->barang_id }}</td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-
-                    <br><br>
-                    <a href="{{ route('data-gudang.barang-masuk.index') }}" class="btn btn-secondary">Batal</a>
-                </form>
+                </div>
+                <!-- /.content -->
             </div>
-            <!-- /.container-fluid -->
+            <!-- /.content-wrapper -->
 
+            <!-- Footer -->
+
+            <!-- /.footer -->
         </div>
-        <!-- /.content-wrapper -->
-
-        <!-- Main Footer -->
         @include('admin.footer')
-        <!-- /.footer -->
-
-    </div>
-    <!-- ./wrapper -->
-
-    <!-- REQUIRED SCRIPTS -->
-    <script src="{{ asset('lte/plugins/jquery/jquery.min.js') }}"></script>
-    <script src="{{ asset('lte/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ asset('lte/dist/js/adminlte.min.js') }}"></script>
-
-    <!-- Modal -->
-    <div class="modal fade" id="itemModal" tabindex="-1" role="dialog" aria-labelledby="itemModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="itemModalLabel">Add Item</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="item_name">Nama Barang</label>
-                        <select id="item_name" class="form-control" required>
-                            <!-- Options will be populated based on selected owner -->
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="item_qty">Quantity</label>
-                        <input type="number" id="item_qty" class="form-control" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="item_unit">Unit</label>
-                        <input type="text" id="item_unit" class="form-control" readonly required>
-                    </div>
-
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" id="add-item-to-list">Add Item</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Edit Item Modal -->
-    <div class="modal fade" id="editItemModal" tabindex="-1" role="dialog" aria-labelledby="editItemModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="editItemModalLabel">Edit Item</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="edit_item_name">Nama Barang</label>
-                        <input type="text" id="edit_item_name" class="form-control" readonly>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="edit_item_qty">Quantity</label>
-                        <input type="number" id="edit_item_qty" class="form-control" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="edit_item_unit">Unit</label>
-                        <input type="text" id="edit_item_unit" class="form-control" readonly required>
-                    </div>
-
-                    <input type="hidden" id="edit_item_id">
-
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        $(document).ready(function () {
-            $('#item_name').on('change', function () {
-                const itemId = $(this).val();
-                $.get(`/items/${itemId}`, function (data) {
-                    $('#item_unit').val(data.unit);
-                });
-            });
-
-            $('#add-item-to-list').on('click', function () {
-                const itemName = $('#item_name option:selected').text();
-                const itemQty = $('#item_qty').val();
-                const itemUnit = $('#item_unit').val();
-
-                if (itemName && itemQty && itemUnit) {
-                    const newRow = `<tr>
-                        <td>${itemName}</td>
-                        <td>${itemQty}</td>
-                        <td>${itemUnit}</td>
-                        <td>
-                            <button type="button" class="btn btn-warning btn-sm edit-item">Edit</button>
-                            <button type="button" class="btn btn-danger btn-sm remove-item">Remove</button>
-                        </td>
-                    </tr>`;
-
-                    $('#items-table tbody').append(newRow);
-                    $('#itemModal').modal('hide');
-                }
-            });
-
-            $(document).on('click', '.edit-item', function () {
-                const row = $(this).closest('tr');
-                const itemName = row.find('td').eq(0).text();
-                const itemQty = row.find('td').eq(1).text();
-                const itemUnit = row.find('td').eq(2).text();
-                const itemId = row.data('id');
-
-                $('#edit_item_name').val(itemName);
-                $('#edit_item_qty').val(itemQty);
-                $('#edit_item_unit').val(itemUnit);
-                $('#edit_item_id').val(itemId);
-
-                $('#editItemModal').modal('show');
-            });
-
-            $('#update-item').on('click', function () {
-                const itemId = $('#edit_item_id').val();
-                const itemQty = $('#edit_item_qty').val();
-
-                const row = $(`#items-table tbody tr[data-id="${itemId}"]`);
-                row.find('td').eq(1).text(itemQty);
-
-                $('#editItemModal').modal('hide');
-            });
-
-            $(document).on('click', '.remove-item', function () {
-                $(this).closest('tr').remove();
-            });
-        });
-    </script>
+        <!-- ./wrapper -->
 </body>
 
 </html>

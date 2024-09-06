@@ -178,47 +178,49 @@
 
                                         <input type="hidden" name="items" id="items-input" value="[]">
 
+                                        <div class="table-responsive">
+                                            <table class="table" id="items-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Nomer Ref</th>
+                                                        <th>Nama Barang</th>
+                                                        <th>Quantity</th>
+                                                        <th>Unit</th>
+                                                        <th>Harga</th>
+                                                        <th>Total</th>
+                                                        <th>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach ($barangKeluar->items as $item)
+                                                        <tr>
+                                                            <td>{{ $item->no_ref }}</td>
+                                                            <td>{{ $item->barang->nama_barang }}</td>
+                                                            <td>{{ $item->qty }}</td>
+                                                            <td>{{ $item->unit }}</td>
+                                                            <td>Rp. {{ number_format($item->harga, 0, ',', '.') }}</td>
+                                                            <td>Rp. {{ number_format($item->total_harga, 0, ',', '.') }}
+                                                            </td>
+                                                            {{-- <td>{{ $item->barang_id }}</td> --}}
+                                                            <td style="display: none"
+                                                                data-barang-id="{{ $item->barang_masuk_id }}">
+                                                                {{ $item->barang_masuk_id }}</td>
+                                                            <td style="display: none"
+                                                                data-barang-id="{{ $item->barang_id }}">
+                                                                {{ $item->barang_id }}</td>
+                                                            <td>
+                                                                <button type="button"
+                                                                    class="btn btn-warning edit-item">Edit</button>
+                                                                <button type="button"
+                                                                    class="btn btn-danger remove-item">Remove</button>
+                                                            </td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>    
+                                        </div>
 
                                         <!-- Items Table -->
-                                        <table class="table" id="items-table">
-                                            <thead>
-                                                <tr>
-                                                    <th>Nomer Ref</th>
-                                                    <th>Nama Barang</th>
-                                                    <th>Quantity</th>
-                                                    <th>Unit</th>
-                                                    <th>Harga</th>
-                                                    <th>Total</th>
-                                                    <th>Actions</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach ($barangKeluar->items as $item)
-                                                    <tr>
-                                                        <td>{{ $item->no_ref }}</td>
-                                                        <td>{{ $item->barang->nama_barang }}</td>
-                                                        <td>{{ $item->qty }}</td>
-                                                        <td>{{ $item->unit }}</td>
-                                                        <td>Rp. {{ number_format($item->harga, 0, ',', '.') }}</td>
-                                                        <td>Rp. {{ number_format($item->total_harga, 0, ',', '.') }}
-                                                        </td>
-                                                        {{-- <td>{{ $item->barang_id }}</td> --}}
-                                                        <td style="display: none"
-                                                            data-barang-id="{{ $item->barang_masuk_id }}">
-                                                            {{ $item->barang_masuk_id }}</td>
-                                                        <td style="display: none"
-                                                            data-barang-id="{{ $item->barang_id }}">
-                                                            {{ $item->barang_id }}</td>
-                                                        <td>
-                                                            <button type="button"
-                                                                class="btn btn-warning edit-item">Edit</button>
-                                                            <button type="button"
-                                                                class="btn btn-danger remove-item">Remove</button>
-                                                        </td>
-                                                    </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
 
                                         <br><br>
                                         <div class="card-footer">
