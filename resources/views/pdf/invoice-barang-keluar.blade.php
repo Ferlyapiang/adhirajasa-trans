@@ -56,6 +56,14 @@
             overflow: hidden;
         }
 
+        table thead {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: white;
+            /* Ensure header background is solid */
+        }
+
         table,
         th,
         td {
@@ -128,7 +136,7 @@
         </div>
 
         <div>
-            <h2>Invoice</h2>
+            <h1>Invoice</h1>
             <table>
                 <thead>
                     <tr>

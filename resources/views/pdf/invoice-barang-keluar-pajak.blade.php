@@ -56,6 +56,14 @@
             overflow: hidden;
         }
 
+        table thead {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: white;
+            /* Ensure header background is solid */
+        }
+
         table,
         th,
         td {
@@ -72,6 +80,7 @@
             background-color: #4472C4;
             color: white;
         }
+
 
         .description {
             font-size: 16px;
@@ -128,7 +137,7 @@
         </div>
 
         <div>
-            <h2>Invoice</h2>
+            <h1>Invoice</h1>
             <table>
                 <thead>
                     <tr>
