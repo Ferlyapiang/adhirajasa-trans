@@ -12,6 +12,8 @@ class CreateWarehousesTable extends Migration
             $table->id();
             $table->string('name');
             $table->string('address');
+            $table->string('phone_number')->nullable();
+            $table->string('email')->nullable();
             $table->enum('status', ['active', 'inactive']);
             $table->timestamps();
         });

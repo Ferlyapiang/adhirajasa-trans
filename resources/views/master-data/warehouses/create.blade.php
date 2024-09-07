@@ -59,6 +59,14 @@
                                 <textarea id="address" name="address" class="form-control" rows="4" required></textarea>
                             </div>
                             <div class="mb-3">
+                                <label for="phone_number" class="form-label">Nomer Telpon:</label>
+                                <input type="text" id="phone_number" name="phone_number" class="form-control">
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email:</label>
+                                <input type="text" id="email" name="email" class="form-control">
+                            </div>
+                            <div class="mb-3">
                                 <label for="status" class="form-label">Status:</label>
                                 <select id="status" name="status" class="form-select" required>
                                     <option value="active">Active</option>

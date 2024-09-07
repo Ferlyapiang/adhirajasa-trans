@@ -21,6 +21,8 @@ class Warehouse extends Model
         'name',
         'address',
         'status',
+        'phone_number',
+        'email'
     ];
 
     // Optionally define any attributes that should be hidden from arrays or JSON representations

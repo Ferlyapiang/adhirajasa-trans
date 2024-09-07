@@ -111,6 +111,8 @@
                                 <th>Nama Gudang</th>
                                 <th>Alamat Gudang</th>
                                 <th>Status</th>
+                                <th>Nomer Telpon</th>
+                                <th>Email</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -120,6 +122,8 @@
                                     <td>{{ $warehouse->name }}</td>
                                     <td>{{ $warehouse->address }}</td>
                                     <td>{{ $warehouse->status }}</td>
+                                    <td>{{ $warehouse->phone_number }}</td>
+                                    <td>{{ $warehouse->email }}</td>
                                     <td>
                                         <a href="{{ route('master-data.warehouses.edit', $warehouse->id) }}" class="btn btn-warning btn-sm">Edit</a>
                                         <form action="{{ route('master-data.warehouses.destroy', $warehouse->id) }}" method="POST" style="display:inline;">

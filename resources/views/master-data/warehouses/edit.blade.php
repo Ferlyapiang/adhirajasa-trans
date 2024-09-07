@@ -56,6 +56,14 @@
                         <input type="text" id="address" name="address" class="form-control" value="{{ old('address', $warehouse->address) }}" required>
                     </div>
                     <div class="mb-3">
+                        <label for="phone_number" class="form-label">Nomer Telpon:</label>
+                        <input type="text" id="phone_number" name="phone_number" class="form-control" value="{{ old('phone_number', $warehouse->phone_number) }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email:</label>
+                        <input type="text" id="email" name="email" class="form-control" value="{{ old('email', $warehouse->email) }}">
+                    </div>
+                    <div class="mb-3">
                         <label for="status" class="form-label">Status:</label>
                         <select id="status" name="status" class="form-select" required>
                             <option value="active" {{ old('status', $warehouse->status) == 'active' ? 'selected' : '' }}>Active</option>

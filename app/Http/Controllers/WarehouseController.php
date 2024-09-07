@@ -26,6 +26,8 @@ class WarehouseController extends Controller
             'name' => 'required|string|max:255',
             'address' => 'required|string|max:255',
             'status' => 'required|in:active,inactive',
+            'phone_number' => 'nullable|string|max:255',
+            'email' => 'nullable|string|max:255',
         ]);
 
         $warehouse = Warehouse::create($request->all());
@@ -52,6 +54,8 @@ class WarehouseController extends Controller
             'name' => 'required|string|max:255',
             'address' => 'required|string|max:255',
             'status' => 'required|in:active,inactive',
+            'phone_number' => 'nullable|string|max:255',
+            'email' => 'nullable|string|max:255',
         ]);
 
         $warehouse->update($request->all());
