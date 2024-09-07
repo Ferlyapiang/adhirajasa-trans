@@ -130,4 +130,5 @@ Route::delete('data-gudang/barang-keluar/{barangKeluar}', [BarangKeluarControlle
 Route::get('/api/items/{customerId}/{warehouseId}', [BarangKeluarController::class, 'getItemsByCustomer']);
 Route::get('/api/customers/{warehouseId}', [BarangKeluarController::class, 'getCustomersByWarehouse']);
 
-Route::get('/download-pdf/{id}', [PDFController::class, 'BarangKeluar_download'])->name('pdf.invoice-barang-keluar');
+Route::get('/download-pdf/{id}', [PDFController::class, 'BarangKeluar_download_pdf'])->name('pdf.invoice-barang-keluar');
+Route::get('/download-pdf/pajak/{id}', [PDFController::class, 'BarangKeluar_pajak_download_pdf'])->name('pdf.invoice-barang-keluar-pajak');

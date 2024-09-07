@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invoice Barang Keluar Tanpa Pajak {{ $customers->find($barangKeluar->customer_id)->name }}</title>
+    <title>Invoice Barang Keluar Dengan Pajak {{ $customers->find($barangKeluar->customer_id)->name }}</title>
     <style>
         .container {
             font-family: Arial, sans-serif;
@@ -151,12 +151,6 @@
             {{ $customers->find($barangKeluar->customer_id)->address ?? 'N/A' }}<br>
             {{ $customers->find($barangKeluar->customer_id)->no_hp ?? 'N/A' }}<br>
         </div>
-        <h1>BILL TO</h1>
-        <div class="header-info" style="font-weight: bold; font-size: 16px">
-            {{ $customers->find($barangKeluar->customer_id)->name ?? 'N/A' }}<br>
-            {{ $customers->find($barangKeluar->customer_id)->address ?? 'N/A' }}<br>
-            {{ $customers->find($barangKeluar->customer_id)->no_hp ?? 'N/A' }}<br>
-        </div>
 
         <table>
             <thead>
@@ -191,20 +185,42 @@
             <tfoot>
                 @php
                 use App\Helpers\NumberToWords;
-                $terbilang = NumberToWords::convert($total);
+
+                $ppn_rate = 0.011; // Tarif PPN 1.1%
+                $pph_rate = 0.02; // Tarif PPH 23 (2%)
+
+                $ppn = $total * $ppn_rate;
+                $pph = $total * $pph_rate;
+                $total_after_tax = $total + $ppn + $pph;
+
+                $total_before_tax_words = NumberToWords::convert($total);
+                $ppn_words = NumberToWords::convert($ppn);
+                $pph_words = NumberToWords::convert($pph);
+                $total_after_tax_words = NumberToWords::convert($total_after_tax);
                 @endphp
+                <tr style="background-color: #f2f2f2;" style="background-color: #f2f2f2; border-top: 2px solid #ddd;">
+                    <td colspan="4" style="text-align: right; font-weight: bold; padding: 10px;">Total Harga Sebelum Pajak:</td>
+                    <td colspan="3" style="font-weight: bold; padding: 10px;">Rp. {{ number_format($total, 0, ',', '.') }}</td>
+                </tr>
+                <tr style="background-color: #e9ecef;">
+                    <td colspan="4" style="text-align: right; font-weight: bold; padding: 10px;">PPN 1.1%:</td>
+                    <td colspan="3" style="font-weight: bold; padding: 10px;">Rp. {{ number_format($ppn, 0, ',', '.') }}</td>
+                </tr>
+                <tr style="background-color: #f9f9f9;">
+                    <td colspan="4" style="text-align: right; font-weight: bold; padding: 10px;">PPH 23 (2%):</td>
+                    <td colspan="3" style="font-weight: bold; padding: 10px;">Rp. {{ number_format($pph, 0, ',', '.') }}</td>
+                </tr>
                 <tr style="background-color: #94ca19; color: white;">
-                    <td colspan="6" style="text-align: right; font-weight: bold;">Total:</td>
-                    <td>Rp. {{ number_format($total, 0, ',', '.') }}</td>
+                    <td colspan="4" style="text-align: right; font-weight: bold; padding: 10px;">Total Invoice Setelah Kena Pajak:</td>
+                    <td colspan="3" style="font-weight: bold; padding: 10px;">Rp. {{ number_format($total_after_tax, 0, ',', '.') }}</td>
                 </tr>
                 <tr style="background-color: #f2f2f2;">
-                    <td colspan="7" style="text-align: right; font-weight: bold;">Terbilang: {{ strtoupper($terbilang) }}</td>
+                    <td colspan="7" style="text-align: right; font-weight: bold; padding: 10px;">
+                        Terbilang: {{ strtoupper($total_after_tax_words) }}
+                    </td>
                 </tr>
             </tfoot>
         </table>
-
-
-
         <div class="wire-transfer">
             <strong class="header">W I R E T R A N S F E R</strong>
 

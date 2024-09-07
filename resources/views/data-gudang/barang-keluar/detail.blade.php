@@ -81,7 +81,8 @@
                                             <h3 class="card-title">Form Barang Keluar</h3>
                                         </div>
                                         <div class="col-md-6">
-                                            <a href="{{ route('pdf.invoice-barang-keluar', ['id' => $barangKeluar->id]) }}" class="btn btn-success float-right mr-2">Download PDF</a>
+                                            <a href="{{ route('pdf.invoice-barang-keluar', ['id' => $barangKeluar->id]) }}" class="btn btn-secondary float-right mr-2">Tanpa Pajak PDF</a>
+                                            <a href="{{ route('pdf.invoice-barang-keluar-pajak', ['id' => $barangKeluar->id]) }}" class="btn btn-success float-right mr-2">Download Pajak PDF</a>
                                         </div>
                                     </div>
                                 </div>
@@ -229,11 +230,11 @@
                                                     $pph_words = NumberToWords::convert($pph);
                                                     $total_after_tax_words = NumberToWords::convert($total_after_tax);
                                                     @endphp
-                                                    <tr style="background-color: #f2f2f2; border-top: 2px solid #ddd;">
+                                                    <tr style="background-color: #e9ecef; border-top: 2px solid #ddd;">
                                                         <td colspan="5" style="text-align: right; font-weight: bold; padding: 10px;">Total Harga Sebelum Pajak:</td>
                                                         <td style="font-weight: bold; padding: 10px;">Rp. {{ number_format($total_before_tax, 0, ',', '.') }}</td>
                                                     </tr>
-                                                    <tr style="background-color: #e9ecef;">
+                                                    <tr style="background-color: #f2f2f2;">
                                                         <td colspan="5" style="text-align: right; font-weight: bold; padding: 10px;">PPN 1.1%:</td>
                                                         <td style="font-weight: bold; padding: 10px;">Rp. {{ number_format($ppn, 0, ',', '.') }}</td>
                                                     </tr>

@@ -375,9 +375,8 @@
 $(document).ready(function() {
     const barangSelect = $('#modal_barang_id');
     const noRefInput = $('#modal_no_ref');
-    const barangMasukData = @json($barangMasuks); // Convert PHP data to JSON
+    const barangMasukData = @json($barangMasuks);
 
-    // Update No. Ref input when barang_id changes
     barangSelect.on('change', function() {
         const selectedOption = this.options[this.selectedIndex];
         const barangMasukId = $(selectedOption).data('barang-masuk-id');
@@ -385,7 +384,7 @@ $(document).ready(function() {
         if (barangMasukId && barangMasukData[barangMasukId]) {
             noRefInput.val(barangMasukData[barangMasukId].joc_number);
         } else {
-            noRefInput.val(''); // Clear value if not found
+            noRefInput.val('');
         }
 
         const jenis = $(selectedOption).data('jenis');
@@ -429,7 +428,6 @@ $(document).ready(function() {
         $('#items-input').val(JSON.stringify(items));
     }
 
-    // Saat halaman dimuat, panggil fungsi updateItemsInput untuk mengisi data awal ke dalam input tersembunyi
     updateItemsInput();
 
     $('#addItemButton').on('click', function() {
