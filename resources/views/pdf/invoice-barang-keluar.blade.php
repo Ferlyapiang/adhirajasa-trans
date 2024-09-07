@@ -151,13 +151,6 @@
             {{ $customers->find($barangKeluar->customer_id)->address ?? 'N/A' }}<br>
             {{ $customers->find($barangKeluar->customer_id)->no_hp ?? 'N/A' }}<br>
         </div>
-        <h1>BILL TO</h1>
-        <div class="header-info" style="font-weight: bold; font-size: 16px">
-            {{ $customers->find($barangKeluar->customer_id)->name ?? 'N/A' }}<br>
-            {{ $customers->find($barangKeluar->customer_id)->address ?? 'N/A' }}<br>
-            {{ $customers->find($barangKeluar->customer_id)->no_hp ?? 'N/A' }}<br>
-        </div>
-
         <table>
             <thead>
                 <tr>
