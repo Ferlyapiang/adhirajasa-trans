@@ -162,7 +162,13 @@
                 </tr>
             </thead>
             <tbody>
+                @php
+                    $total = 0; // Inisialisasi variabel untuk menyimpan total harga
+                @endphp
                 @foreach ($barangKeluar->items as $item)
+                @php
+                    $total += $item->total_harga; // Menambahkan harga item ke total
+                @endphp
                 <tr>
                     <td>{{ $item->no_ref }}</td>
                     <td><strong>{{ $barangMasuks[$item->barang_masuk_id]->nomer_container }}</strong></td>
@@ -175,7 +181,14 @@
                 </tr>
                 @endforeach
             </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="6" style="text-align: right; font-weight: bold;">Total:</td>
+                    <td>Rp. {{ number_format($total, 0, ',', '.') }}</td>
+                </tr>
+            </tfoot>
         </table>
+
 
         <div class="wire-transfer">
             <strong class="header">W I R E T R A N S F E R</strong>

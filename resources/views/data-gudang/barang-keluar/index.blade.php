@@ -117,11 +117,12 @@
                                                     <tr>
                                                         <td>{{ $index + 1 }}</td>
                                                         <td>{{ $barangKeluar->tanggal_keluar }}</td>
-                                                        <td>{{ $barangKeluar->nomer_invoice }}</td>
-                                                        <td><a href="{{ route('data-gudang.barang-keluar.show', $barangKeluar->id) }}">
-                                                            {{ $item->no_ref }}
-                                                        </a>
-                                                            </td>
+                                                        <td>
+                                                            <a href="{{ route('data-gudang.barang-keluar.show', $barangKeluar->id) }}">
+                                                                {{ $barangKeluar->nomer_invoice }}
+                                                            </a>
+                                                        </td>
+                                                        <td>{{ $item->no_ref }}</td>
                                                         <td>{{ $item->barang->nama_barang }}</td>
                                                         <td>{{ $barangKeluar->gudang->name }}</td>
                                                         <td>{{ $barangKeluar->customer->name }}</td>

@@ -195,7 +195,13 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
+                                                    @php
+                                                        $total_before_tax = 0; // Inisialisasi variabel untuk menyimpan total harga sebelum pajak
+                                                    @endphp
                                                     @foreach ($barangKeluar->items as $item)
+                                                        @php
+                                                            $total_before_tax += $item->total_harga; // Menambahkan total harga item ke total sebelum pajak
+                                                        @endphp
                                                         <tr>
                                                             <td>{{ $item->no_ref }}</td>
                                                             <td>{{ $item->barang->nama_barang }}</td>
@@ -206,9 +212,36 @@
                                                         </tr>
                                                     @endforeach
                                                 </tbody>
+                                                <tfoot>
+                                                    @php
+                                                        $ppn_rate = 0.011; // Tarif PPN 1.1%
+                                                        $pph_rate = 0.02;  // Tarif PPH 23 (2%)
+
+                                                        $ppn = $total_before_tax * $ppn_rate;
+                                                        $pph = $total_before_tax * $pph_rate;
+                                                        $total_after_tax = $total_before_tax + $ppn + $pph;
+                                                    @endphp
+                                                    <tr style="background-color: #f2f2f2; border-top: 2px solid #ddd;">
+                                                        <td colspan="5" style="text-align: right; font-weight: bold; padding: 10px;">Total Harga Sebelum Pajak:</td>
+                                                        <td style="font-weight: bold; padding: 10px;">Rp. {{ number_format($total_before_tax, 0, ',', '.') }}</td>
+                                                    </tr>
+                                                    <tr style="background-color: #e9ecef;">
+                                                        <td colspan="5" style="text-align: right; font-weight: bold; padding: 10px;">PPN 1.1%:</td>
+                                                        <td style="font-weight: bold; padding: 10px;">Rp. {{ number_format($ppn, 0, ',', '.') }}</td>
+                                                    </tr>
+                                                    <tr style="background-color: #f9f9f9;">
+                                                        <td colspan="5" style="text-align: right; font-weight: bold; padding: 10px;">PPH 23 (2%):</td>
+                                                        <td style="font-weight: bold; padding: 10px;">Rp. {{ number_format($pph, 0, ',', '.') }}</td>
+                                                    </tr>
+                                                    <tr style="background-color: #94ca19; color: white;">
+                                                        <td colspan="5" style="text-align: right; font-weight: bold; padding: 10px;">Total Invoice Setelah Kena Pajak:</td>
+                                                        <td style="font-weight: bold; padding: 10px;">Rp. {{ number_format($total_after_tax, 0, ',', '.') }}</td>
+                                                    </tr>
+                                                </tfoot>
+
                                             </table>
-    
                                         </div>
+
                                         <br><br>
                                         <div class="card-footer">
                                             <a href="{{ route('data-gudang.barang-keluar.index') }}"
