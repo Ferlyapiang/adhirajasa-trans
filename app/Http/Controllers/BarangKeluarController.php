@@ -44,86 +44,131 @@ class BarangKeluarController extends Controller
         $barangs = Barang::all();
         return view('data-gudang.barang-keluar.create', compact('warehouses', 'customers', 'bankTransfers', 'barangs'));
     }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        $request->merge(['items' => json_decode($request->input('items'), true)]);
-
-        $validated = $request->validate([
-            'tanggal_keluar' => 'required|date',
-            'gudang_id' => 'required|exists:warehouses,id',
-            'customer_id' => 'required|exists:customers,id',
-            'nomer_invoice' => 'nullable|string|max:191',
-            'nomer_polisi' => 'nullable|string|max:191',
-            'bank_transfer_id' => 'nullable|exists:bank_datas,id',
-            'items' => 'required|array',
-            'items.*.barang_id' => 'required|exists:barangs,id',
-            'items.*.no_ref' => 'nullable|string|max:191',
-            'items.*.qty' => 'required|integer|min:1',
-            'items.*.unit' => 'required|string|max:50',
-            'items.*.harga' => 'nullable|numeric|min:0',
-            'items.*.total_harga' => 'nullable|numeric|min:0',
-            'items.*.barang_masuk_id' => 'required|exists:barang_masuks,id',
-        ]);
-
-        $barangKeluarData = [
-            'tanggal_keluar' => $validated['tanggal_keluar'],
-            'gudang_id' => $validated['gudang_id'],
-            'customer_id' => $validated['customer_id'],
-            'nomer_invoice' => $validated['nomer_invoice'],
-            'nomer_polisi' => $validated['nomer_polisi'],
-            'bank_transfer_id' => $validated['bank_transfer_id'],
-        ];
-
-        $items = $validated['items'];
-
-        try {
-            DB::transaction(function () use ($barangKeluarData, $items) {
-
-                $barangKeluar = BarangKeluar::create($barangKeluarData);
-
-                foreach ($items as $item) {
-                    Log::info('Processing Item:', [
-                        'barang_id' => (int) $item['barang_id'],
-                        'barang_masuk_id' => (int) $item['barang_masuk_id'],
-                    ]);
-
-                    BarangKeluarItem::create([
-                        'barang_id' => (int) $item['barang_id'],
-                        'no_ref' => $item['no_ref'],
-                        'qty' => $item['qty'],
-                        'unit' => $item['unit'],
-                        'harga' => $item['harga'],
-                        'total_harga' => $item['total_harga'],
-                        'barang_masuk_id' => (int) $item['barang_masuk_id'],
-                        'barang_keluar_id' => $barangKeluar->id,
-                    ]);
-                }
-
-                LogData::create([
-                    'user_id' => Auth::check() ? Auth::id() : null,
-                    'name' => Auth::check() ? Auth::user()->name : 'unknown',
-                    'action' => 'insert',
-                    'details' => 'Created Barang Keluar ID: ' . $barangKeluar->id . ' with data: ' . json_encode($barangKeluarData)
-                ]);
-            });
-
-            return redirect()->route('data-gudang.barang-keluar.index')->with('success', 'Barang Keluar created successfully.');
-        } catch (\Exception $e) {
-            Log::error('Exception caught:', [
-                'user_id' => Auth::check() ? Auth::id() : 'unknown',
-                'user_name' => Auth::check() ? Auth::user()->name : 'unknown',
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            return redirect()->back()->with('error', 'An error occurred: ' . $e->getMessage());
+    
+        function generateWarehouseCode($name)
+        {
+            // Remove non-alphanumeric characters
+            $cleanName = preg_replace('/[^a-zA-Z0-9\s]/', '', $name);
+    
+            // Split the name into words
+            $words = explode(' ', $cleanName);
+    
+            // Take the first letter of each word
+            $abbreviation = '';
+            foreach ($words as $word) {
+                $abbreviation .= strtoupper(substr($word, 0, 1));
+            }
+    
+            // Return the first 3 characters, or the whole abbreviation if it's shorter
+            return substr($abbreviation, 0, 3);
         }
-    }
 
+    
+        public function store(Request $request)
+        {
+            $request->merge(['items' => json_decode($request->input('items'), true)]);
+        
+            $validated = $request->validate([
+                'tanggal_keluar' => 'required|date',
+                'gudang_id' => 'required|exists:warehouses,id',
+                'customer_id' => 'required|exists:customers,id',
+                'nomer_invoice' => 'nullable|string|max:191',
+                'nomer_polisi' => 'nullable|string|max:191',
+                'bank_transfer_id' => 'nullable|exists:bank_datas,id',
+                'items' => 'required|array',
+                'items.*.barang_id' => 'required|exists:barangs,id',
+                'items.*.no_ref' => 'nullable|string|max:191',
+                'items.*.qty' => 'required|integer|min:1',
+                'items.*.unit' => 'required|string|max:50',
+                'items.*.harga' => 'nullable|numeric|min:0',
+                'items.*.total_harga' => 'nullable|numeric|min:0',
+                'items.*.barang_masuk_id' => 'required|exists:barang_masuks,id',
+            ]);
+        
+            // Fetch the selected warehouse
+            $warehouse = Warehouse::find($validated['gudang_id']);
+            if (!$warehouse) {
+                return redirect()->back()->with('error', 'Warehouse not found.');
+            }
+            $warehouseCode = $this->generateWarehouseCode($warehouse->name);
+        
+            // Generate the invoice number
+            $year = date('Y');
+            
+            // Find the highest invoice number for the current year and warehouse
+            $lastInvoice = BarangKeluar::whereYear('created_at', $year)
+                ->where('gudang_id', $validated['gudang_id'])
+                ->latest('id')
+                ->first();
+            
+            // Generate the next number for the invoice
+            if ($lastInvoice) {
+                $lastInvoiceNumber = $lastInvoice->nomer_invoice;
+                $lastNumber = (int) substr($lastInvoiceNumber, -3);
+                $nextNumber = $lastNumber + 1;
+            } else {
+                $nextNumber = 1;
+            }
+        
+            // Format the number to be three digits with leading zeros
+            $formattedNumber = sprintf('%03d', $nextNumber);
+            $nomer_invoice = "ATS/INV/{$year}/{$warehouseCode}/{$formattedNumber}";
+        
+            $barangKeluarData = [
+                'tanggal_keluar' => $validated['tanggal_keluar'],
+                'gudang_id' => $validated['gudang_id'],
+                'customer_id' => $validated['customer_id'],
+                'nomer_invoice' => $nomer_invoice,
+                'nomer_polisi' => $validated['nomer_polisi'],
+                'bank_transfer_id' => $validated['bank_transfer_id'],
+            ];
+        
+            $items = $validated['items'];
+        
+            try {
+                DB::transaction(function () use ($barangKeluarData, $items) {
+                    $barangKeluar = BarangKeluar::create($barangKeluarData);
+        
+                    foreach ($items as $item) {
+                        Log::info('Processing Item:', [
+                            'barang_id' => (int) $item['barang_id'],
+                            'barang_masuk_id' => (int) $item['barang_masuk_id'],
+                        ]);
+        
+                        BarangKeluarItem::create([
+                            'barang_id' => (int) $item['barang_id'],
+                            'no_ref' => $item['no_ref'],
+                            'qty' => $item['qty'],
+                            'unit' => $item['unit'],
+                            'harga' => $item['harga'],
+                            'total_harga' => $item['total_harga'],
+                            'barang_masuk_id' => (int) $item['barang_masuk_id'],
+                            'barang_keluar_id' => $barangKeluar->id,
+                        ]);
+                    }
+        
+                    LogData::create([
+                        'user_id' => Auth::check() ? Auth::id() : null,
+                        'name' => Auth::check() ? Auth::user()->name : 'unknown',
+                        'action' => 'insert',
+                        'details' => 'Created Barang Keluar ID: ' . $barangKeluar->id . ' with data: ' . json_encode($barangKeluarData)
+                    ]);
+                });
+        
+                return redirect()->route('data-gudang.barang-keluar.index')->with('success', 'Barang Keluar created successfully.');
+            } catch (\Exception $e) {
+                Log::error('Exception caught:', [
+                    'user_id' => Auth::check() ? Auth::id() : 'unknown',
+                    'user_name' => Auth::check() ? Auth::user()->name : 'unknown',
+                    'message' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+        
+                return redirect()->back()->with('error', 'An error occurred: ' . $e->getMessage());
+            }
+        }
+        
+    
     /**
      * Display the specified resource.
      */

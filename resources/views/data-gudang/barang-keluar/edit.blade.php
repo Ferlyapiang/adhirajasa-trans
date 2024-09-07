@@ -88,7 +88,7 @@
                                             <label for="nomer_invoice">Nomor Invoice</label>
                                             <input type="text" name="nomer_invoice" id="nomer_invoice"
                                                 class="form-control @error('nomer_invoice') is-invalid @enderror"
-                                                value="{{ old('nomer_invoice', $barangKeluar->nomer_invoice) }}">
+                                                value="{{ old('nomer_invoice', $barangKeluar->nomer_invoice) }}" readonly>
                                             @error('nomer_invoice')
                                                 <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
