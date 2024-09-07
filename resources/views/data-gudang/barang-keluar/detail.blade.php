@@ -98,7 +98,7 @@
                                                 value="{{ old('nomer_invoice', $barangKeluar->nomer_invoice) }}"
                                                 readonly>
                                             @error('nomer_invoice')
-                                                <span class="invalid-feedback">{{ $message }}</span>
+                                            <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
                                         </div>
 
@@ -109,7 +109,7 @@
                                                 value="{{ old('tanggal_keluar', $barangKeluar->tanggal_keluar) }}"
                                                 readonly>
                                             @error('tanggal_keluar')
-                                                <span class="invalid-feedback">{{ $message }}</span>
+                                            <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
                                         </div>
 
@@ -119,14 +119,14 @@
                                                 class="form-control @error('gudang_id') is-invalid @enderror" disabled>
                                                 <option value="">Select Gudang</option>
                                                 @foreach ($warehouses as $warehouse)
-                                                    <option value="{{ $warehouse->id }}"
-                                                        {{ old('gudang_id', $barangKeluar->gudang_id) == $warehouse->id ? 'selected' : '' }}>
-                                                        {{ $warehouse->name }}
-                                                    </option>
+                                                <option value="{{ $warehouse->id }}"
+                                                    {{ old('gudang_id', $barangKeluar->gudang_id) == $warehouse->id ? 'selected' : '' }}>
+                                                    {{ $warehouse->name }}
+                                                </option>
                                                 @endforeach
                                             </select>
                                             @error('gudang_id')
-                                                <span class="invalid-feedback">{{ $message }}</span>
+                                            <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
                                         </div>
 
@@ -136,14 +136,14 @@
                                                 class="form-control @error('customer_id') is-invalid @enderror" disabled>
                                                 <option value="">Select Customer</option>
                                                 @foreach ($customers as $customer)
-                                                    <option value="{{ $customer->id }}"
-                                                        {{ old('customer_id', $barangKeluar->customer_id) == $customer->id ? 'selected' : '' }}>
-                                                        {{ $customer->name }}
-                                                    </option>
+                                                <option value="{{ $customer->id }}"
+                                                    {{ old('customer_id', $barangKeluar->customer_id) == $customer->id ? 'selected' : '' }}>
+                                                    {{ $customer->name }}
+                                                </option>
                                                 @endforeach
                                             </select>
                                             @error('customer_id')
-                                                <span class="invalid-feedback">{{ $message }}</span>
+                                            <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
                                         </div>
 
@@ -154,7 +154,7 @@
                                                 value="{{ old('nomer_polisi', $barangKeluar->nomer_polisi) }}"
                                                 readonly>
                                             @error('nomer_polisi')
-                                                <span class="invalid-feedback">{{ $message }}</span>
+                                            <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
                                         </div>
 
@@ -165,15 +165,15 @@
                                                 disabled>
                                                 <option value="">-- None --</option>
                                                 @foreach ($bankTransfers as $bankTransfer)
-                                                    <option value="{{ $bankTransfer->id }}"
-                                                        {{ old('bank_transfer_id', $barangKeluar->bank_transfer_id) == $bankTransfer->id ? 'selected' : '' }}>
-                                                        {{ $bankTransfer->bank_name }} -
-                                                        {{ $bankTransfer->account_number }}
-                                                    </option>
+                                                <option value="{{ $bankTransfer->id }}"
+                                                    {{ old('bank_transfer_id', $barangKeluar->bank_transfer_id) == $bankTransfer->id ? 'selected' : '' }}>
+                                                    {{ $bankTransfer->bank_name }} -
+                                                    {{ $bankTransfer->account_number }}
+                                                </option>
                                                 @endforeach
                                             </select>
                                             @error('bank_transfer_id')
-                                                <span class="invalid-feedback">{{ $message }}</span>
+                                            <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
                                         </div>
 
@@ -196,30 +196,38 @@
                                                 </thead>
                                                 <tbody>
                                                     @php
-                                                        $total_before_tax = 0; // Inisialisasi variabel untuk menyimpan total harga sebelum pajak
+                                                    $total_before_tax = 0; // Inisialisasi variabel untuk menyimpan total harga sebelum pajak
                                                     @endphp
                                                     @foreach ($barangKeluar->items as $item)
-                                                        @php
-                                                            $total_before_tax += $item->total_harga; // Menambahkan total harga item ke total sebelum pajak
-                                                        @endphp
-                                                        <tr>
-                                                            <td>{{ $item->no_ref }}</td>
-                                                            <td>{{ $item->barang->nama_barang }}</td>
-                                                            <td>{{ $item->qty }}</td>
-                                                            <td>{{ $item->unit }}</td>
-                                                            <td>Rp. {{ number_format($item->harga, 0, ',', '.') }}</td>
-                                                            <td>Rp. {{ number_format($item->total_harga, 0, ',', '.') }}</td>
-                                                        </tr>
+                                                    @php
+                                                    $total_before_tax += $item->total_harga; // Menambahkan total harga item ke total sebelum pajak
+                                                    @endphp
+                                                    <tr>
+                                                        <td>{{ $item->no_ref }}</td>
+                                                        <td>{{ $item->barang->nama_barang }}</td>
+                                                        <td>{{ $item->qty }}</td>
+                                                        <td>{{ $item->unit }}</td>
+                                                        <td>Rp. {{ number_format($item->harga, 0, ',', '.') }}</td>
+                                                        <td>Rp. {{ number_format($item->total_harga, 0, ',', '.') }}</td>
+                                                    </tr>
                                                     @endforeach
                                                 </tbody>
                                                 <tfoot>
                                                     @php
-                                                        $ppn_rate = 0.011; // Tarif PPN 1.1%
-                                                        $pph_rate = 0.02;  // Tarif PPH 23 (2%)
+                                                    $ppn_rate = 0.011; // Tarif PPN 1.1%
+                                                    $pph_rate = 0.02; // Tarif PPH 23 (2%)
 
-                                                        $ppn = $total_before_tax * $ppn_rate;
-                                                        $pph = $total_before_tax * $pph_rate;
-                                                        $total_after_tax = $total_before_tax + $ppn + $pph;
+                                                    $ppn = $total_before_tax * $ppn_rate;
+                                                    $pph = $total_before_tax * $pph_rate;
+                                                    $total_after_tax = $total_before_tax + $ppn + $pph;
+
+                                                    // Include NumberToWords helper
+                                                    use App\Helpers\NumberToWords;
+
+                                                    $total_before_tax_words = NumberToWords::convert($total_before_tax);
+                                                    $ppn_words = NumberToWords::convert($ppn);
+                                                    $pph_words = NumberToWords::convert($pph);
+                                                    $total_after_tax_words = NumberToWords::convert($total_after_tax);
                                                     @endphp
                                                     <tr style="background-color: #f2f2f2; border-top: 2px solid #ddd;">
                                                         <td colspan="5" style="text-align: right; font-weight: bold; padding: 10px;">Total Harga Sebelum Pajak:</td>
@@ -237,7 +245,13 @@
                                                         <td colspan="5" style="text-align: right; font-weight: bold; padding: 10px;">Total Invoice Setelah Kena Pajak:</td>
                                                         <td style="font-weight: bold; padding: 10px;">Rp. {{ number_format($total_after_tax, 0, ',', '.') }}</td>
                                                     </tr>
+                                                    <tr style="background-color: #f2f2f2;">
+                                                        <td colspan="6" style="text-align: right; font-weight: bold; padding: 10px;">
+                                                            Terbilang: {{ $total_after_tax_words }}
+                                                        </td>
+                                                    </tr>
                                                 </tfoot>
+
 
                                             </table>
                                         </div>

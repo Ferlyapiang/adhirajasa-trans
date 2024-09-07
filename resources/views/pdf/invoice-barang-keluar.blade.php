@@ -32,7 +32,8 @@
         }
 
         .header img {
-            max-width: 140px; /* Small size for the logo */
+            max-width: 140px;
+            /* Small size for the logo */
             height: auto;
         }
 
@@ -163,11 +164,11 @@
             </thead>
             <tbody>
                 @php
-                    $total = 0; // Inisialisasi variabel untuk menyimpan total harga
+                $total = 0; // Inisialisasi variabel untuk menyimpan total harga
                 @endphp
                 @foreach ($barangKeluar->items as $item)
                 @php
-                    $total += $item->total_harga; // Menambahkan harga item ke total
+                $total += $item->total_harga; // Menambahkan harga item ke total
                 @endphp
                 <tr>
                     <td>{{ $item->no_ref }}</td>
@@ -182,12 +183,21 @@
                 @endforeach
             </tbody>
             <tfoot>
-                <tr>
+                @php
+                use App\Helpers\NumberToWords;
+                $terbilang = NumberToWords::convert($total);
+                @endphp
+                <tr style="background-color: #94ca19; color: white;">
                     <td colspan="6" style="text-align: right; font-weight: bold;">Total:</td>
                     <td>Rp. {{ number_format($total, 0, ',', '.') }}</td>
                 </tr>
+                <tr style="background-color: #f2f2f2;">
+                    <td colspan="1" style="text-align: right; font-weight: bold;">Terbilang:</td>
+                    <td colspan="6" style="font-weight: bold;">{{ strtoupper($terbilang) }}</td>
+                </tr>
             </tfoot>
         </table>
+
 
 
         <div class="wire-transfer">
@@ -196,19 +206,19 @@
             <div class="row" style="margin-top: 10px;">
                 <span class="label">Bank Transfer</span>
                 <span class="colon" margin-left="10px">:</span>
-                <span class="value">{{ $bankTransfers->find($barangKeluar->bank_transfer_id)->bank_name ?? 'N/A' }}</span>
+                <span class="value" style="font-weight: bold">{{ $bankTransfers->find($barangKeluar->bank_transfer_id)->bank_name ?? 'N/A' }}</span>
             </div>
 
             <div class="row">
                 <span class="label">A/C Number</span>
                 <span class="colon" style="margin-left: 15px;">:</span>
-                <span class="value">{{ $bankTransfers->find($barangKeluar->bank_transfer_id)->account_number ?? 'N/A' }}</span>
+                <span class="value" style="font-weight: bold">{{ $bankTransfers->find($barangKeluar->bank_transfer_id)->account_number ?? 'N/A' }}</span>
             </div>
 
             <div class="row">
                 <span class="label">A/C Name</span>
                 <span class="colon" style="margin-left: 30px;">:</span>
-                <span class="value">{{ $bankTransfers->find($barangKeluar->bank_transfer_id)->account_name ?? 'N/A' }}</span>
+                <span class="value" style="font-weight: bold">{{ $bankTransfers->find($barangKeluar->bank_transfer_id)->account_name ?? 'N/A' }}</span>
             </div>
         </div>
     </div>
