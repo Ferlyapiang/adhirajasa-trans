@@ -37,16 +37,6 @@
             height: auto;
         }
 
-        .header-info {
-            text-align: right;
-            font-size: 14px;
-        }
-
-        .header-info strong {
-            display: block;
-            margin-bottom: 5px;
-        }
-
         table {
             width: 100%;
             border-collapse: separate;
@@ -80,6 +70,7 @@
             background-color: #4472C4;
             color: white;
         }
+
 
         .description {
             font-size: 16px;
@@ -120,19 +111,87 @@
         .wire-transfer .value {
             flex: 1;
         }
+
+        .footer {
+            width: 100%;
+            border-radius: 10px;
+            /* Adjust the radius for curvature */
+            overflow: hidden;
+            /* Ensure contents stay within the rounded corners */
+            margin-top: 20px;
+            padding: 10px;
+        }
+
+        .footer-row {
+            display: flex;
+            justify-content: flex-end;
+            /* Aligns the content to the right */
+            align-items: center;
+            padding: 10px;
+        }
+
+        .footer-cell {
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 5px;
+            /* Adjust the radius for individual cell curvature */
+        }
+
+        .footer-row:nth-child(odd) {
+            background-color: #f2f2f2;
+        }
+
+        .footer-row:nth-child(even) {
+            background-color: #e9ecef;
+        }
+
+        .footer-row.total {
+            background-color: #94ca19;
+            color: white;
+        }
+
+        .highlight {
+            background-color: #ff5722;
+            /* A bold color for emphasis */
+            color: white;
+            font-size: 16px;
+            padding: 5px;
+            border-radius: 4px;
+            /* Rounded corners for the highlighted span */
+        }
+
+        .highlight-total {
+            background-color: #2196f3;
+            /* A strong color for totals */
+            color: white;
+            font-size: 16px;
+            padding: 5px;
+            border-radius: 4px;
+        }
     </style>
 </head>
 
 <body>
     <div class="container">
         <div class="header">
-            <img src="{{ public_path('ATSLogo.jpg') }}" alt="ATS Logo">
-            <div class="header-info">
-                <strong>Kantor Pusat:</strong> {{ $warehouses->find($barangKeluar->gudang_id)->address }}<br>
-                <strong>Kantor Cabang:</strong> Jl. Ancol Barat 6 No.3 Pademangan Jakarta Utara<br>
-                <strong>Telp:</strong> {{ $warehouses->find($barangKeluar->gudang_id)->phone_number }}<br>
-                <strong>Email:</strong> {{ $warehouses->find($barangKeluar->gudang_id)->email }}<br>
-            </div>
+            <img src="{{ public_path('ATSLogo.jpg') }}" alt="ATS Logo"> <br> <br>
+
+            @php
+            // Get all warehouses
+            $warehouses = $warehouses->sortBy('id');
+            @endphp
+
+            <!-- Display addresses -->
+            <strong>Kantor Pusat :</strong>
+            {{ $warehouses->first()->address }}<br>
+
+            @foreach($warehouses->slice(1) as $index => $warehouse)
+            <strong>Kantor Cabang {{ $index + 1 }} :</strong>
+            {{ $warehouse->address }}<br>
+            @endforeach
+            <strong>Kirim Dari :</strong> {{ $warehouses->find($barangKeluar->gudang_id)->address }}<br>
+            <strong>Telp : </strong> {{ $warehouses->find($barangKeluar->gudang_id)->phone_number }}<br>
+            <strong>Email : </strong> {{ $warehouses->find($barangKeluar->gudang_id)->email }}<br>
         </div>
 
         <div>
@@ -159,6 +218,7 @@
             {{ $customers->find($barangKeluar->customer_id)->address ?? 'N/A' }}<br>
             {{ $customers->find($barangKeluar->customer_id)->no_hp ?? 'N/A' }}<br>
         </div>
+
         <table>
             <thead>
                 <tr>
@@ -189,21 +249,35 @@
                 </tr>
                 @endforeach
             </tbody>
-            <tfoot>
-                @php
-                use App\Helpers\NumberToWords;
-                $terbilang = NumberToWords::convert($total);
-                @endphp
-                <tr style="background-color: #94ca19; color: white;">
-                    <td colspan="6" style="text-align: right; font-weight: bold;">Total:</td>
-                    <td>Rp. {{ number_format($total, 0, ',', '.') }}</td>
-                </tr>
-                <tr style="background-color: #f2f2f2;">
-                    <td colspan="7" style="text-align: right; font-weight: bold;">Terbilang: {{ strtoupper($terbilang) }}</td>
-                </tr>
-            </tfoot>
         </table>
+        <div class="footer">
+            @php
+            use App\Helpers\NumberToWords as NumToWords;
 
+            $ppn_rate = 0.011; // Tarif PPN 1.1%
+            $pph_rate = 0.02; // Tarif PPH 23 (2%)
+
+            $ppn = $total * $ppn_rate;
+            $pph = $total * $pph_rate;
+            $total_after_tax = $total + $ppn + $pph;
+
+            $total_before_tax_words = NumToWords::convert($total);
+            $ppn_words = NumToWords::convert($ppn);
+            $pph_words = NumToWords::convert($pph);
+            $total_after_tax_words = NumToWords::convert($total_after_tax);
+            @endphp
+
+            <div class="footer-row total">
+                <div class="footer-cell" style="text-align: right;">
+                    Total Harga : <span class="highlight-total">Rp. {{ number_format($total, 0, ',', '.') }}</span>
+                </div>
+            </div>
+            <div class="footer-row">
+                <div class="footer-cell" style="text-align: right;">
+                    Terbilang: {{ strtoupper($total_after_tax_words) }}
+                </div>
+            </div>
+        </div>
 
 
         <div class="wire-transfer">
