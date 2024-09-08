@@ -53,8 +53,9 @@
                     </div>
                     <div class="mb-3">
                         <label for="address" class="form-label">Alamat Gudang:</label>
-                        <input type="text" id="address" name="address" class="form-control" value="{{ old('address', $warehouse->address) }}" required>
+                        <textarea id="address" name="address" class="form-control" rows="4" required>{{ old('address', $warehouse->address) }}</textarea>
                     </div>
+
                     <div class="mb-3">
                         <label for="phone_number" class="form-label">Nomer Telpon:</label>
                         <input type="text" id="phone_number" name="phone_number" class="form-control" value="{{ old('phone_number', $warehouse->phone_number) }}">

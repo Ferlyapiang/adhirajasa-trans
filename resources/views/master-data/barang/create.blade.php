@@ -11,6 +11,20 @@
 
     <!-- Theme style -->
     <link rel="stylesheet" href="{{ asset('lte/dist/css/adminlte.min.css') }}">
+
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <style>
+        .select2-selection__rendered {
+            line-height: 2.5 !important;
+        }
+        .select2-container .select2-selection--single {
+            height: 50px !important;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 50px !important;
+        }
+    </style>
 </head>
 <body class="hold-transition sidebar-mini">
     <div class="wrapper">
@@ -47,7 +61,8 @@
                     </div>
                     <div class="form-group">
                         <label for="jenis">Jenis</label>
-                        <select name="jenis" class="form-control" id="jenis" required>
+                        <select name="jenis" class="form-control select2" id="jenis" required>
+                            <option value="" disabled selected>Pilih Jenis Barang</option>
                             @foreach($itemTypes as $itemType)
                                 <option value="{{ $itemType->name }}">{{ $itemType->name }}</option>
                             @endforeach
@@ -59,7 +74,8 @@
                     </div>
                     <div class="form-group">
                         <label for="pemilik">Pemilik</label>
-                        <select name="pemilik" class="form-control" id="pemilik" required>
+                        <select name="pemilik" class="form-control select2" id="pemilik" required>
+                            <option value="" disabled selected>Pilih Pemilik Barang</option>
                             @foreach($customers as $customer)
                                 <option value="{{ $customer->id }}">{{ $customer->name }}</option>
                             @endforeach
@@ -67,7 +83,7 @@
                     </div>
                     <div class="form-group">
                         <label for="status">Status</label>
-                        <select name="status" class="form-control" id="status" required>
+                        <select name="status" class="form-control select2" id="status" required>
                             <option value="active">Active</option>
                             <option value="inactive">Inactive</option>
                         </select>
@@ -84,8 +100,26 @@
         <!-- /.footer -->
     </div>
 
+    <!-- jQuery -->
     <script src="{{ asset('lte/plugins/jquery/jquery.min.js') }}"></script>
+    <!-- Bootstrap 4 -->
     <script src="{{ asset('lte/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <!-- AdminLTE -->
     <script src="{{ asset('lte/dist/js/adminlte.min.js') }}"></script>
+
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            // Initialize Select2 on select elements with placeholders
+            $('#jenis, #pemilik').select2({
+                placeholder: function(){
+                    return $(this).data('placeholder');
+                },
+                allowClear: true
+            });
+        });
+    </script>
 </body>
 </html>

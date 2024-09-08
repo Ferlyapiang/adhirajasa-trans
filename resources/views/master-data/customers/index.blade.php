@@ -158,8 +158,9 @@
                                         {{ ucfirst($customer->status) }}
                                     </td>
                                     <!-- <td>{{ $customer->status }}</td> -->
-                                    <td>{{ $customer->created_at->format('Y-m-d H:i:s') }}</td>
-                                    <td>{{ $customer->updated_at->format('Y-m-d H:i:s') }}</td>
+                                    <td>{{ $customer->created_at ? $customer->created_at->format('d-m-Y H:i:s') : '-' }}</td>
+                                    <td>{{ $customer->updated_at ? $customer->updated_at->format('d-m-Y H:i:s') : '-' }}</td>
+
                                     <td>
                                         <a href="{{ route('master-data.customers.edit', $customer) }}" class="btn btn-warning btn-sm">Edit</a>
                                         <form action="{{ route('master-data.customers.destroy', $customer) }}" method="POST" style="display:inline;">

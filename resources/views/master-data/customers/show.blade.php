@@ -81,10 +81,10 @@
                             <dd class="col-sm-9">{{ $customer->status }}</dd>
 
                             <dt class="col-sm-3">Created At:</dt>
-                            <dd class="col-sm-9">{{ $customer->created_at->format('Y-m-d H:i:s') }}</dd>
+                            <dd class="col-sm-9">{{ $customer->created_at ? $customer->created_at->format('d-m-Y H:i:s') : '-' }}</dd>
 
                             <dt class="col-sm-3">Updated At:</dt>
-                            <dd class="col-sm-9">{{ $customer->updated_at->format('Y-m-d H:i:s') }}</dd>
+                            <dd class="col-sm-9">{{ $customer->updated_at ? $customer->updated_at->format('d-m-Y H:i:s') : '-' }}</dd>
                         </dl>
                         <a href="{{ route('master-data.customers.edit', $customer) }}" class="btn btn-warning">Edit</a>
                         <button type="button" class="btn btn-danger" id="delete-button">Delete</button>
