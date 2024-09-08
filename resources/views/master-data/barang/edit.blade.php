@@ -57,10 +57,6 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="nomer_rak">Nomer Rak</label>
-                        <input type="text" name="nomer_rak" class="form-control" id="nomer_rak" value="{{ $barang->nomer_rak }}" required>
-                    </div>
-                    <div class="form-group">
                         <label for="sku">SKU</label>
                         <input type="text" name="sku" class="form-control" id="sku" value="{{ $barang->sku }}" required>
                     </div>

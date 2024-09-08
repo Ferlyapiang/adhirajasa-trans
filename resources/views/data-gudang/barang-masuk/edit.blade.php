@@ -141,6 +141,7 @@
                                 <th>Nama Barang</th>
                                 <th>Quantity</th>
                                 <th>Unit</th>
+                                <th>Notes</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -150,6 +151,7 @@
                                     <td>{{ $item->barang->nama_barang ?? 'Unknown' }}</td>
                                     <td>{{ $item->qty }}</td>
                                     <td>{{ $item->unit }}</td>
+                                    <td>{{ $item->notes }}</td>
                                     <td style="display: none">{{ $item->barang_id }}</td>
                                     <td>
                                         <button type="button" class="btn btn-warning btn-sm edit-item">Edit</button>
@@ -210,6 +212,10 @@
                         <label for="item_unit">Unit</label>
                         <input type="text" id="item_unit" class="form-control" readonly required>
                     </div>
+                    <div class="form-group">
+                        <label for="item_notes">Notes</label>
+                        <input type="text" id="item_notes" class="form-control" required>
+                    </div>
 
                 </div>
                 <div class="modal-footer">
@@ -245,6 +251,10 @@
                     <div class="form-group">
                         <label for="edit_item_unit">Unit</label>
                         <input type="text" id="edit_item_unit" class="form-control" readonly required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_item_notes">Notes</label>
+                        <input type="text" id="edit_item_notes" class="form-control" required>
                     </div>
 
                 </div>
@@ -318,6 +328,7 @@
                 const name = $('#item_name option:selected').data('nama');
                 const qty = $('#item_qty').val();
                 const unit = $('#item_unit').val();
+                const notes = $('#item_notes').val();
                 const barangId = $('#item_name option:selected').val(); // Assume this is barang_id
 
                 // Check for duplicate item in the table
@@ -326,12 +337,13 @@
                     return; // Stop the function here if duplicate is found
                 }
 
-                if (id && qty && unit) {
+                if (id && qty && unit && notes) {
                     const newItem = {
                         id: id,
                         nama_barang: name,
                         quantity: qty,
-                        unit: unit
+                        unit: unit,
+                        notes: notes
                     };
 
                     $('#items-table tbody').append(`
@@ -339,6 +351,7 @@
                                 <td>${newItem.nama_barang}</td>
                                 <td>${newItem.quantity}</td>
                                 <td>${newItem.unit}</td>
+                                <td>${newItem.notes}</td>
                                 <td style="display: none">${barangId}</td>
                                 <td>
                                     <button type="button" class="btn btn-warning btn-sm edit-item">Edit</button>
@@ -356,6 +369,7 @@
                     $('#item_name').val('');
                     $('#item_qty').val('');
                     $('#item_unit').val('');
+                    $('#item_notes').val('');
                 } else {
                     alert('Please fill in all the fields.');
                 }
@@ -378,6 +392,7 @@
                 $('#edit_item_name').val(editRow.find('td').eq(0).text());
                 $('#edit_item_qty').val(editRow.find('td').eq(1).text());
                 $('#edit_item_unit').val(editRow.find('td').eq(2).text());
+                $('#edit_item_notes').val(editRow.find('td').eq(3).text());
                 $('#update-item').data('id', editRow.data('id'));
                 $('#editItemModal').modal('show');
             });
@@ -390,6 +405,7 @@
                 row.find('td').eq(0).text($('#edit_item_name').val());
                 row.find('td').eq(1).text($('#edit_item_qty').val());
                 row.find('td').eq(2).text($('#edit_item_unit').val());
+                row.find('td').eq(3).text($('#edit_item_notes').val());
 
                 updateItemsInput(); // Update hidden input field
                 $('#editItemModal').modal('hide'); // Close the modal
@@ -402,14 +418,16 @@
                     var name = $(this).find('td').eq(0).text();
                     var qty = $(this).find('td').eq(1).text();
                     var unit = $(this).find('td').eq(2).text();
-                    var barang_id = $(this).find('td').eq(3).text(); // Get the hidden barang_id
+                    var notes = $(this).find('td').eq(3).text();
+                    var barang_id = $(this).find('td').eq(4).text(); // Get the hidden barang_id
 
                     items.push({
                         id: id,
                         // barang_id: barang_id, // Store barang_id
                         nama_barang: barang_id,
                         quantity: qty,
-                        unit: unit
+                        unit: unit,
+                        notes: notes
                     });
                 });
                 $('#items-input').val(JSON.stringify(items));

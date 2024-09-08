@@ -29,6 +29,7 @@ return new class extends Migration
             $table->foreignId('barang_id')->constrained('barangs')->onDelete('cascade');
             $table->integer('qty');
             $table->string('unit');
+            $table->string('notes')->nullable();
             $table->timestamps();
         });
     }

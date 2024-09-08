@@ -126,7 +126,6 @@
                         <tr>
                             <th>Nama Barang</th>
                             <th>Jenis</th>
-                            <th>Nomer Rak</th>
                             <th>SKU</th>
                             <th>Pemilik</th>
                             <th>Status</th>
@@ -138,7 +137,6 @@
                         <tr>
                             <td>{{ $barang->nama_barang }}</td>
                             <td>{{ $barang->jenis }}</td>
-                            <td>{{ $barang->nomer_rak }}</td>
                             <td>{{ $barang->sku }}</td>
                             <td>{{ $barang->customer ? $barang->customer->name : 'N/A' }}</td> <!-- Display customer name -->
                             <td class="{{ $barang->status == 'active' ? 'status-active' : 'status-inactive' }} text-center">

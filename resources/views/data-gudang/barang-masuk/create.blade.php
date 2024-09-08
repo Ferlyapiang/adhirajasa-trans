@@ -131,6 +131,7 @@
                                 <th>Nama Barang</th>
                                 <th>Quantity</th>
                                 <th>Unit</th>
+                                <th>Notes</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -190,6 +191,11 @@
                         <input type="text" id="item_unit" class="form-control" readonly required>
                     </div>
 
+                    <div class="form-group">
+                        <label for="item_notes">Notes</label>
+                        <input type="text" id="item_notes" class="form-control" required>
+                    </div>
+
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" id="add-item-to-list">Add Item</button>
@@ -223,6 +229,10 @@
                     <div class="form-group">
                         <label for="edit_item_unit">Unit</label>
                         <input type="text" id="edit_item_unit" class="form-control" readonly required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_item_notes">Notes</label>
+                        <input type="text" id="edit_item_notes" class="form-control" required>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -289,6 +299,7 @@
                 const itemId = $('#item_name').val(); // Get the selected item's id
                 const itemQty = $('#item_qty').val();
                 const itemUnit = $('#item_unit').val();
+                const itemNotes = $('#item_notes').val();
 
                 if (itemName && itemQty && itemUnit) {
                     // Check if the item is already in the table
@@ -298,6 +309,7 @@
                         <td>${itemName}</td>
                         <td>${itemQty}</td>
                         <td>${itemUnit}</td>
+                        <td>${itemNotes}</td>
                         <td>
                             <button type="button" class="btn btn-warning btn-sm edit-item">Edit</button>
                             <button type="button" class="btn btn-danger btn-sm remove-item">Remove</button>
@@ -312,6 +324,7 @@
                         $('#item_name').val('');
                         $('#item_qty').val('');
                         $('#item_unit').val('');
+                        $('#item_notes').val('');
 
                         $('#itemModal').modal('hide');
                         updateItemsInput(); // Update hidden input when item is added
@@ -342,10 +355,11 @@
                 const itemName = editRow.find('td:eq(0)').text(); // Get the item name
                 const itemQty = editRow.find('td:eq(1)').text();
                 const itemUnit = editRow.find('td:eq(2)').text();
-
+                const itemNotes = editRow.find('td:eq(3)').text();
                 $('#edit_item_name').val(itemName); // Set item name in readonly field
                 $('#edit_item_qty').val(itemQty);
                 $('#edit_item_unit').val(itemUnit);
+                $('#edit_item_notes').val(itemNotes);
 
                 $('#editItemModal').modal('show');
             });
@@ -354,10 +368,12 @@
             $('#update-item').click(function() {
                 const updatedQty = $('#edit_item_qty').val();
                 const updatedUnit = $('#edit_item_unit').val();
+                const updatedNotes = $('#edit_item_notes').val();
 
                 if (updatedQty) {
                     editRow.find('td:eq(1)').text(updatedQty);
                     editRow.find('td:eq(2)').text(updatedUnit);
+                    editRow.find('td:eq(3)').text(updatedNotes);
                     $('#editItemModal').modal('hide');
                     updateItemsInput(); // Update hidden input when item is edited
                 } else {
@@ -373,11 +389,13 @@
                     const itemId = $(this).data('id');
                     const itemQty = $(this).find('td:eq(1)').text();
                     const itemUnit = $(this).find('td:eq(2)').text();
+                    const itemNotes = $(this).find('td:eq(3)').text();
 
                     items.push({
                         id: itemId,
                         quantity: itemQty,
-                        unit: itemUnit
+                        unit: itemUnit,
+                        notes: itemNotes
                     });
                 });
 

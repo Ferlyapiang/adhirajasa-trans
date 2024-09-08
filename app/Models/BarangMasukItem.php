@@ -11,6 +11,7 @@ class BarangMasukItem extends Model
         'barang_id',
         'qty',
         'unit',
+        'notes',
     ];
 
     public function barang()

@@ -54,17 +54,17 @@
             border-bottom: 1px solid #dee2e6;
         }
 
-        #barangMasukTable td:nth-child(10) {
+        #barangMasukTable td:nth-child(11) {
             background-color: #d1e7dd;
             /* Light green for FIFO IN */
         }
 
-        #barangMasukTable td:nth-child(11) {
+        #barangMasukTable td:nth-child(12) {
             background-color: #f8d7da;
             /* Light red for FIFO OUT */
         }
 
-        #barangMasukTable td:nth-child(12) {
+        #barangMasukTable td:nth-child(13) {
             background-color: #fff3cd;
             /* Light yellow for FIFO Sisa */
         }
@@ -133,6 +133,7 @@
                                                     <th rowspan="2">Jenis Mobil</th>
                                                     <th rowspan="2">Nomer Polisi</th>
                                                     <th rowspan="2">Nomer Container</th>
+                                                    <th rowspan="2">Notes</th>
                                                     <th colspan="3">FIFO</th>
                                                     <th rowspan="2">Detail</th>
                                                 </tr>
@@ -160,6 +161,7 @@
                                                     <td>{{ $barangMasuk->jenis_mobil }}</td>
                                                     <td>{{ $barangMasuk->nomer_polisi }}</td>
                                                     <td>{{ $barangMasuk->nomer_container }}</td>
+                                                    <td>{{ $item->notes }}</td>
                                                     <td>{{ $barangMasuk->fifo_in }}</td>
                                                     <td>{{ $barangMasuk->fifo_out }}</td>
                                                     <td style="font-weight: bold">{{ $barangMasuk->fifo_sisa }}</td>

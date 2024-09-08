@@ -89,6 +89,7 @@ class BarangMasukController extends Controller
                 'items.*.barang_id' => 'required|exists:barangs,id',
                 'items.*.qty' => 'required|numeric',
                 'items.*.unit' => 'required|string',
+                'items.*.notes' => 'required|string',
             ]);
 
             // Generate JOC Number
@@ -127,6 +128,7 @@ class BarangMasukController extends Controller
                             'barang_id' => $item['id'],
                             'qty' => $item['quantity'],
                             'unit' => $item['unit'],
+                            'notes' => $item['notes'],
                             'barang_masuk_id' => $barangMasuk->id,
                         ]);
                     }
@@ -174,7 +176,10 @@ class BarangMasukController extends Controller
                 'items.*.barang_id' => 'required|exists:barangs,id',
                 'items.*.qty' => 'required|numeric',
                 'items.*.unit' => 'required|string',
+                'items.*.notes' => 'required|string',
             ]);
+
+            // dd($request->all());
 
             // Find BarangMasuk record
             $barangMasuk = BarangMasuk::findOrFail($id);
@@ -204,6 +209,7 @@ class BarangMasukController extends Controller
                         'barang_id' => $item['nama_barang'],
                         'qty' => $item['quantity'],
                         'unit' => $item['unit'],
+                        'notes' => $item['notes'],
                         'barang_masuk_id' => $barangMasuk->id,
                     ]);
                 }
