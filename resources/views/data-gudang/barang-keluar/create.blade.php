@@ -217,7 +217,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label for="item_joc_number">JOC Number</label>
+                        <label for="item_joc_number">Job Order</label>
                         <input type="text" id="item_joc_number" class="form-control" placeholder="Auto-generated"
                             readonly>
                     </div>
@@ -287,7 +287,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label for="edit_item_joc_number">JOC Number</label>
+                        <label for="edit_item_joc_number">Job Order</label>
                         <input type="text" id="edit_item_joc_number" class="form-control" readonly>
                     </div>
                     <div class="form-group">

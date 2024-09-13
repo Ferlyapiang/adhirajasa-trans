@@ -193,8 +193,9 @@
 
                     <div class="form-group">
                         <label for="item_notes">Notes</label>
-                        <input type="text" id="item_notes" class="form-control" required>
+                        <textarea id="item_notes" class="form-control" rows="4" required></textarea>
                     </div>
+                    
 
                 </div>
                 <div class="modal-footer">

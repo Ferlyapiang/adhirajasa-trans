@@ -94,7 +94,7 @@ class BarangMasukController extends Controller
 
             // Generate JOC Number
             $datePrefix = now()->format('Ymd');
-            $latestJoc = BarangMasuk::where('joc_number', 'like', 'JOC-' . $datePrefix . '%')
+            $latestJoc = BarangMasuk::where('joc_number', 'like', 'ATS-' . $datePrefix . '%')
                 ->orderBy('joc_number', 'desc')
                 ->first();
 
@@ -105,7 +105,7 @@ class BarangMasukController extends Controller
                 $newNumber = '0001';
             }
 
-            $jocNumber = 'JOC-' . $datePrefix . $newNumber;
+            $jocNumber = 'ATS-' . $datePrefix . $newNumber;
 
             // Create BarangMasuk record
             $barangMasuk = BarangMasuk::create([

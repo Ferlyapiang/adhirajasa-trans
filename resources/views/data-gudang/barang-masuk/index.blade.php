@@ -126,7 +126,7 @@
                                                 <tr>
                                                     <th rowspan="2">No</th>
                                                     <th rowspan="2">Tanggal Masuk</th>
-                                                    <th rowspan="2">No Ref (JOC)</th>
+                                                    <th rowspan="2">Job Order</th>
                                                     <th rowspan="2">Nama Barang</th>
                                                     <th rowspan="2">Nama Pemilik</th>
                                                     <th rowspan="2">Gudang</th>
@@ -134,7 +134,7 @@
                                                     <th rowspan="2">Nomer Polisi</th>
                                                     <th rowspan="2">Nomer Container</th>
                                                     <th rowspan="2">Notes</th>
-                                                    <th colspan="3">FIFO</th>
+                                                    <th colspan="3" class="text-center">FIFO</th>
                                                     <th rowspan="2">Detail</th>
                                                 </tr>
                                                 <tr>

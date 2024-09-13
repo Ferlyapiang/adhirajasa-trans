@@ -97,7 +97,7 @@
           </ul>
         </li>
         <li class="nav-item">
-          <a class="nav-link {{ request()->is('log/*') ? 'active' : '' }}">
+          <a class="nav-link {{ request()->is('data-gudang/*') ? 'active' : '' }}">
             <i class="nav-icon fa fa-chart-pie"></i>
             <p>Data Gudang<i class="right fas fa-angle-left"></i></p>
           </a>

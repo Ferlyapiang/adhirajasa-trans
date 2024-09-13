@@ -94,6 +94,27 @@ class BarangKeluarController extends Controller
         
             // Generate the invoice number
             $year = date('Y');
+
+            $mounth = intval(date('m'));
+
+            
+
+            function intToRoman($number) {
+                $map = array('M' => 1000, 'CM' => 900, 'D' => 500, 'CD' => 400, 'C' => 100, 'XC' => 90, 'L' => 50, 'XL' => 40, 'X' => 10, 'IX' => 9, 'V' => 5, 'IV' => 4, 'I' => 1);
+                $returnValue = '';
+                while ($number > 0) {
+                    foreach ($map as $roman => $int) {
+                        if($number >= $int) {
+                            $number -= $int;
+                            $returnValue .= $roman;
+                            break;
+                        }
+                    }
+                }
+                return $returnValue;
+            }
+
+            $romanMonth = intToRoman($mounth);
             
             // Find the highest invoice number for the current year and warehouse
             $lastInvoice = BarangKeluar::whereYear('created_at', $year)
@@ -112,7 +133,7 @@ class BarangKeluarController extends Controller
         
             // Format the number to be three digits with leading zeros
             $formattedNumber = sprintf('%03d', $nextNumber);
-            $nomer_invoice = "ATS/INV/{$year}/{$warehouseCode}/{$formattedNumber}";
+            $nomer_invoice = "ATS/INV/{$year}/{$romanMonth}/{$warehouseCode}/{$formattedNumber}";
         
             $barangKeluarData = [
                 'tanggal_keluar' => $validated['tanggal_keluar'],
