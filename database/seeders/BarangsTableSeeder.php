@@ -11,7 +11,7 @@ class BarangsTableSeeder extends Seeder
     {
         $barangs = [
             [
-                'nama_barang' => 'JELLY 1 DUA 3',
+                'nama_barang' => 'JELLY DUS',
                 'jenis' => 'DUS',
                 'sku' => 'KAKAKA',
                 'pemilik' => '2',
@@ -20,7 +20,7 @@ class BarangsTableSeeder extends Seeder
                 'updated_at' => now()
             ],
             [
-                'nama_barang' => 'ITEM A',
+                'nama_barang' => 'Permata Hijau PCS',
                 'jenis' => 'PCS',
                 'sku' => 'ITEMA123',
                 'pemilik' => '3',
@@ -29,7 +29,7 @@ class BarangsTableSeeder extends Seeder
                 'updated_at' => now()
             ],
             [
-                'nama_barang' => 'ITEM B',
+                'nama_barang' => 'Jelly CON',
                 'jenis' => 'CON',
                 'sku' => 'ITEMB234',
                 'pemilik' => '4',
@@ -38,7 +38,7 @@ class BarangsTableSeeder extends Seeder
                 'updated_at' => now()
             ],
             [
-                'nama_barang' => 'ITEM C',
+                'nama_barang' => 'Indomie DUS',
                 'jenis' => 'DUS',
                 'sku' => 'ITEMC345',
                 'pemilik' => '2',
@@ -47,7 +47,7 @@ class BarangsTableSeeder extends Seeder
                 'updated_at' => now()
             ],
             [
-                'nama_barang' => 'ITEM D',
+                'nama_barang' => 'Bizsco PCS',
                 'jenis' => 'PCS',
                 'sku' => 'ITEMD456',
                 'pemilik' => '2',

@@ -14,30 +14,30 @@ class BankDatasTableSeeder extends Seeder
         
         $bankDatas = [
             [
-                'bank_name' => 'Bank A',
+                'bank_name' => 'Bank BCA',
                 'account_number' => '1234567890',
-                'account_name' => 'Account A',
+                'account_name' => 'Sherlyn',
                 'warehouse_id' => $warehouses[array_rand($warehouses)], // Pick a random warehouse ID
                 'status' => 'active'
             ],
             [
-                'bank_name' => 'Bank B',
+                'bank_name' => 'Bank BNI',
                 'account_number' => '0987654321',
-                'account_name' => 'Account B',
+                'account_name' => 'John Doe',
                 'warehouse_id' => $warehouses[array_rand($warehouses)], // Pick a random warehouse ID
                 'status' => 'active'
             ],
             [
-                'bank_name' => 'Bank C',
+                'bank_name' => 'Bank Mandiri',
                 'account_number' => '1122334455',
-                'account_name' => 'Account C',
+                'account_name' => 'Richo',
                 'warehouse_id' => $warehouses[array_rand($warehouses)], // Pick a random warehouse ID
                 'status' => 'inactive'
             ],
             [
-                'bank_name' => 'Bank D',
+                'bank_name' => 'Bank BRI',
                 'account_number' => '5566778899',
-                'account_name' => 'Account D',
+                'account_name' => 'Edward',
                 'warehouse_id' => $warehouses[array_rand($warehouses)], // Pick a random warehouse ID
                 'status' => 'active'
             ],
