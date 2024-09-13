@@ -176,7 +176,7 @@ class BarangMasukController extends Controller
                 'items.*.barang_id' => 'required|exists:barangs,id',
                 'items.*.qty' => 'required|numeric',
                 'items.*.unit' => 'required|string',
-                'items.*.notes' => 'required|string',
+                'items.*.notes' => 'nullable|string',
             ]);
 
             // dd($request->all());
