@@ -45,23 +45,31 @@ class BarangKeluarController extends Controller
         return view('data-gudang.barang-keluar.create', compact('warehouses', 'customers', 'bankTransfers', 'barangs'));
     }
     
-        function generateWarehouseCode($name)
-        {
-            // Remove non-alphanumeric characters
-            $cleanName = preg_replace('/[^a-zA-Z0-9\s]/', '', $name);
-    
-            // Split the name into words
-            $words = explode(' ', $cleanName);
-    
+    function generateWarehouseCode($name)
+    {
+        // Remove non-alphanumeric characters
+        $cleanName = preg_replace('/[^a-zA-Z0-9\s]/', '', $name);
+
+        // Split the name into words
+        $words = explode(' ', $cleanName);
+
+        // If it's a single word, take the first three letters
+        if (count($words) == 1) {
+            $abbreviation = strtoupper(substr($cleanName, 0, 3));
+        } else {
             // Take the first letter of each word
             $abbreviation = '';
             foreach ($words as $word) {
                 $abbreviation .= strtoupper(substr($word, 0, 1));
             }
-    
             // Return the first 3 characters, or the whole abbreviation if it's shorter
-            return substr($abbreviation, 0, 3);
+            $abbreviation = substr($abbreviation, 0, 3);
         }
+
+        return $abbreviation;
+    }
+
+    
 
     
         public function store(Request $request)
