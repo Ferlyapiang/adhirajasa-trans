@@ -144,40 +144,39 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                @php $counter = 1; @endphp
                                                 @foreach ($barangMasuks as $barangMasuk)
-                                                @foreach ($barangMasuk->items as $item)
-                                                <tr>
-                                                    <td>{{ $counter++ }}</td>
-                                                    <td>{{ $barangMasuk->tanggal_masuk }}</td>
-                                                    <td>
-                                                        <a href="{{ route('data-gudang.barang-masuk.detail', $barangMasuk->id) }}">
-                                                            {{ $barangMasuk->joc_number }}
-                                                        </a>
-                                                    </td>
-                                                    <td>{{ $item->barang->nama_barang }}</td>
-                                                    <td>{{ $barangMasuk->customer->name }}</td>
-                                                    <td>{{ $barangMasuk->gudang->name }}</td>
-                                                    <td>{{ $barangMasuk->jenis_mobil }}</td>
-                                                    <td>{{ $barangMasuk->nomer_polisi }}</td>
-                                                    <td>{{ $barangMasuk->nomer_container }}</td>
-                                                    <td>{{ $item->notes }}</td>
-                                                    <td>{{ $barangMasuk->fifo_in }}</td>
-                                                    <td>{{ $barangMasuk->fifo_out }}</td>
-                                                    <td style="font-weight: bold">{{ $barangMasuk->fifo_sisa }}</td>
-                                                    <td>
-                                                        <a href="{{ route('data-gudang.barang-masuk.edit', $barangMasuk->id) }}" class="btn btn-warning btn-sm">Edit</a>
-                                                        <form action="{{ route('data-gudang.barang-masuk.destroy', $barangMasuk->id) }}" method="POST" style="display:inline;">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</button>
-                                                        </form>
-                                                    </td>
-                                                </tr>
-                                                @endforeach
+                                                    @foreach ($barangMasuk->items as $index => $item)
+                                                        <tr>
+                                                            <td>{{ $loop->parent->index * $loop->parent->count + $loop->index + 1 }}</td>
+                                                            <td>{{ $barangMasuk->tanggal_masuk }}</td>
+                                                            <td>
+                                                                <a href="{{ route('data-gudang.barang-masuk.detail', $barangMasuk->id) }}">
+                                                                    {{ $barangMasuk->joc_number }}
+                                                                </a>
+                                                            </td>
+                                                            <td>{{ $item->barang->nama_barang }}</td>
+                                                            <td>{{ $barangMasuk->customer->name }}</td>
+                                                            <td>{{ $barangMasuk->gudang->name }}</td>
+                                                            <td>{{ $barangMasuk->jenis_mobil }}</td>
+                                                            <td>{{ $barangMasuk->nomer_polisi }}</td>
+                                                            <td>{{ $barangMasuk->nomer_container }}</td>
+                                                            <td>{{ $item->notes }}</td>
+                                                            <td>{{ $barangMasuk->fifo_in }}</td>
+                                                            <td>{{ $barangMasuk->fifo_out }}</td>
+                                                            <td style="font-weight: bold">{{ $barangMasuk->fifo_sisa }}</td>
+                                                            <td>
+                                                                <a href="{{ route('data-gudang.barang-masuk.edit', $barangMasuk->id) }}" class="btn btn-warning btn-sm">Edit</a>
+                                                                <form action="{{ route('data-gudang.barang-masuk.destroy', $barangMasuk->id) }}" method="POST" style="display:inline;">
+                                                                    @csrf
+                                                                    @method('DELETE')
+                                                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</button>
+                                                                </form>
+                                                            </td>
+                                                        </tr>
+                                                    @endforeach
                                                 @endforeach
                                             </tbody>
-                                        </table>
+                                            
                                     </div>
                                 </div>
 

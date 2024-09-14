@@ -27,7 +27,7 @@ class BarangKeluarController extends Controller
     public function index()
     {
         $barangKeluars = BarangKeluar::with(['gudang', 'customer', 'bankTransfer', 'items.barang'])
-            ->orderBy('tanggal_keluar', 'desc')
+            ->orderBy('created_at', 'desc')
             ->get();
 
         return view('data-gudang.barang-keluar.index', compact('barangKeluars'));

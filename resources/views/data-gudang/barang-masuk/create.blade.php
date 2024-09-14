@@ -12,6 +12,9 @@
 
     <!-- Theme style -->
     <link rel="stylesheet" href="{{ asset('lte/dist/css/adminlte.min.css') }}">
+
+     <!-- Select2 CSS -->
+     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
         table {
             width: 100%;
@@ -39,6 +42,16 @@
             color: #fff;
             background-color: #dc3545;
             border-color: #dc3545;
+        }
+
+        .select2-selection__rendered {
+            line-height: 2.5 !important;
+        }
+        .select2-container .select2-selection--single {
+            height: 50px !important;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 50px !important;
         }
     </style>
 </head>
@@ -176,6 +189,7 @@
                 <div class="modal-body">
                     <div class="form-group">
                         <label for="item_name">Nama Barang</label>
+                        <br>
                         <select id="item_name" class="form-control" required>
                             <!-- Options will be populated based on selected owner -->
                         </select>
@@ -245,9 +259,18 @@
     </div>
 
 
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
         $(document).ready(function() {
+
+            $('#gudang, #nama_pemilik, #item_name').select2({
+                placeholder: function(){
+                    return $(this).data('placeholder');
+                },
+                allowClear: true
+            });
             let editRow; // Store the row to be edited
             let itemsInTable = []; // Array to keep track of items added to the table
 
@@ -270,7 +293,7 @@
                         $.each(data, function(key, item) {
                             if (!itemsInTable.includes(item.id)) {
                                 options +=
-                                    `<option value="${item.id}" data-jenis="${item.jenis}">${item.nama_barang}</option>`;
+                                   `<option value="${item.id}" data-jenis="${item.jenis}">${item.nama_barang}</option>`;
                             }
                         });
                         $('#item_name').html(options);

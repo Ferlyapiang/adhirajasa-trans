@@ -89,7 +89,7 @@
 
                     <div class="form-group">
                         <label for="gudang">Gudang</label>
-                        <select name="gudang_id" id="gudang" class="form-control" required>
+                        <select name="gudang_id" id="gudang" class="form-control" disabled required>
                             <option value="" disabled selected>Pilih Nama Gudang Penyimpanan</option>
                             @foreach ($gudangs as $gudang)
                                 <option value="{{ $gudang->id }}"
@@ -101,7 +101,7 @@
 
                     <div class="form-group">
                         <label for="nama_pemilik">Nama Pemilik</label>
-                        <select name="customer_id" id="nama_pemilik" class="form-control" required>
+                        <select name="customer_id" id="nama_pemilik" class="form-control" disabled required>
                             <option value="" disabled selected>Pilih Nama Pemilik Barang</option>
                             @foreach ($pemilik as $owner)
                                 <option value="{{ $owner->id }}"
