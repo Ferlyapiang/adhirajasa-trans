@@ -49,6 +49,10 @@ Route::resource('management-user/users', UserController::class)->names([
 Route::post('/check-email', [UserController::class, 'checkEmail'])->name('check-email');
 
 
+Route::get('/management-user/users/{user}/change-password', [UserController::class, 'showChangePasswordForm'])->name('management-user.users.change-password');
+Route::post('/management-user/users/{user}/update-password', [UserController::class, 'updatePassword'])->name('management-user.users.update-password');
+
+
 // Report Log
 Route::get('/log/reports-log', [ReportLogController::class, 'index'])->name('reports.index');
 Route::get('logs', [ReportLogController::class, 'index'])->name('logs.index');

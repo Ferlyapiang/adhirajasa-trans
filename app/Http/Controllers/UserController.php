@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Group;
 use App\Models\Warehouse;
 use App\Models\LogData;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
@@ -117,5 +118,25 @@ class UserController extends Controller
         
         return response()->json(['exists' => $exists]);
     }
+
+    public function showChangePasswordForm(User $user)
+    {
+        return view('admin.management-user.users.change-password', compact('user'));
+    }
+
+    public function updatePassword(Request $request, User $user)
+    {
+        $request->validate([
+            'new_password' => 'required|string|min:8|confirmed',
+        ]);
+
+        // Update the user's password
+        $user->password = Hash::make($request->new_password);
+        $user->save();
+
+        return redirect()->route('management-user.users.index')->with('success', 'Password updated successfully.');
+    }
+
+
 
 }

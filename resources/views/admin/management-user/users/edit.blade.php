@@ -78,10 +78,22 @@
                     <div class="form-group">
                         <label for="group_id">Group</label>
                         <select id="group_id" name="group_id" class="form-control">
-                            <option value="">None</option>
+                            <!-- <option value="">None</option> -->
                             @foreach($groups as $group)
                                 <option value="{{ $group->id }}" {{ $group->id == $user->group_id ? 'selected' : '' }}>
                                     {{ $group->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="warehouse_id">Warehouse</label>
+                        <select id="warehouse_id" name="warehouse_id" class="form-control">
+                            <option value="" hidden>Super Admin</option>
+                            @foreach($warehouses as $warehouse)
+                                <option value="{{ $warehouse->id }}" {{ $warehouse->id == $user->warehouse_id ? 'selected' : '' }}>
+                                    {{ $warehouse->name }}
                                 </option>
                             @endforeach
                         </select>

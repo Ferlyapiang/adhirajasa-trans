@@ -106,6 +106,7 @@
                                     <td>{{ $user->warehouse->name ?? 'Super Admin' }}</td>
                                     <td>
                                         <a href="{{ route('management-user.users.edit', $user) }}" class="btn btn-warning btn-sm">Edit</a>
+                                        <a href="{{ route('management-user.users.change-password', $user) }}" class="btn btn-info btn-sm">Change Password</a>
                                         <form action="{{ route('management-user.users.destroy', $user) }}" method="POST" style="display:inline;">
                                             @csrf
                                             @method('DELETE')
