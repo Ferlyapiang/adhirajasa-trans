@@ -87,10 +87,21 @@
                     
                     <div class="form-group">
                         <label for="group_id">Group</label>
-                        <select id="group_id" name="group_id" class="form-control">
+                        <select id="group_id" name="group_id" class="form-control" required>
+                            <option value="" disabled selected hidden>Select Group</option>
                             <!-- Assuming you have groups table -->
                             @foreach(App\Models\Group::all() as $group)
                                 <option value="{{ $group->id }}">{{ $group->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="warehouse_id">Warehouse</label>
+                        <select id="warehouse_id" name="warehouse_id" class="form-control" required>
+                            <option value="" disabled selected hidden>Select Warehouse</option>
+                            @foreach(App\Models\Warehouse::all() as $warehouse)
+                                <option value="{{ $warehouse->id }}">{{ $warehouse->name }}</option>
                             @endforeach
                         </select>
                     </div>

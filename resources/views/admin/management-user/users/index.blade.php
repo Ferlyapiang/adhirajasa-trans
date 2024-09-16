@@ -92,6 +92,7 @@
                                 <th>Email</th>
                                 <th>Status</th>
                                 <th>Group</th>
+                                <th>Warehouse</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -102,6 +103,7 @@
                                     <td>{{ $user->email }}</td>
                                     <td>{{ $user->status }}</td>
                                     <td>{{ $user->group->name ?? 'No Group' }}</td>
+                                    <td>{{ $user->warehouse->name ?? 'Super Admin' }}</td>
                                     <td>
                                         <a href="{{ route('management-user.users.edit', $user) }}" class="btn btn-warning btn-sm">Edit</a>
                                         <form action="{{ route('management-user.users.destroy', $user) }}" method="POST" style="display:inline;">

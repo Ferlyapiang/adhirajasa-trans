@@ -22,6 +22,7 @@ class User extends Authenticatable
         'password',
         'status',
         'group_id',
+        'warehouse_id',
     ];
 
     /**
@@ -49,6 +50,10 @@ class User extends Authenticatable
     public function group()
     {
         return $this->belongsTo(Group::class);
+    }
+    public function warehouse()
+    {
+        return $this->belongsTo(Warehouse::class);
     }
 
     public function softDelete()

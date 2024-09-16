@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\Group;
+use App\Models\Warehouse;
 use App\Models\LogData;
 use Illuminate\Support\Facades\Auth;
 
@@ -12,7 +13,7 @@ class UserController extends Controller
 {
     public function index()
     {
-        $users = User::with('group')->get();
+        $users = User::with('group', 'warehouse')->get();
         return view('admin.management-user.users.index', compact('users'));
     }
 
@@ -24,7 +25,8 @@ class UserController extends Controller
     public function edit(User $user)
     {
         $groups = Group::all();
-        return view('admin.management-user.users.edit', compact('user', 'groups'));
+        $warehouses = Warehouse::all();
+        return view('admin.management-user.users.edit', compact('user', 'groups', 'warehouses'));
     }
 
     public function update(Request $request, User $user)
@@ -33,14 +35,15 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:191',
             'status' => 'required|in:active,inactive',
-            'group_id' => 'nullable|exists:groups,id'
+            'group_id' => 'nullable|exists:groups,id',
+            'warehouse_id' => 'nullable|exists:warehouses,id'
         ]);
 
         if ($user->status === 'inactive' && $request->status === 'active') {
             $user->status = 'active';
         }
 
-        $user->update($request->only('name', 'email', 'status', 'group_id'));
+        $user->update($request->only('name', 'email', 'status', 'group_id', 'warehouse_id'));
 
         // Log the update action
         LogData::create([
@@ -56,6 +59,7 @@ class UserController extends Controller
     public function create()
     {
         $groups = Group::all();
+        $warehouses = Warehouse::all();
         return view('admin.management-user.users.create', compact('groups'));
     }
 
@@ -66,7 +70,8 @@ class UserController extends Controller
             'email' => 'required|string|email|max:191|unique:users',
             'password' => 'required|string|min:8|confirmed',
             'status' => 'required|in:active,inactive',
-            'group_id' => 'nullable|exists:groups,id'
+            'group_id' => 'nullable|exists:groups,id',
+            'warehouse_id' => 'nullable|exists:warehouses,id'
         ]);
 
         $user = User::create([
@@ -75,6 +80,7 @@ class UserController extends Controller
             'password' => bcrypt($request->password),
             'status' => $request->status,
             'group_id' => $request->group_id,
+            'warehouse_id' => $request->warehouse_id
         ]);
 
         // Log the insert action
