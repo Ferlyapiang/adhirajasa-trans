@@ -25,7 +25,7 @@ class MenuSeeder extends Seeder
             'name' => 'Management Menu',
             'url' => null,
             'router' => null,
-            'icon' => 'fa fa-users',
+            'icon' => 'fa fa-book',
             'is_active' => 1,
             'priority' => 2, // Priority
             'created_at' => now(),
@@ -70,7 +70,7 @@ class MenuSeeder extends Seeder
             'name' => 'Data Gudang',
             'url' => null,
             'router' => null,
-            'icon' => 'fa fa-chart-pie',
+            'icon' => 'fa fa-cubes',
             'is_active' => 1,
             'priority' => 5, // Priority
             'created_at' => now(),
