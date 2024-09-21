@@ -1,11 +1,3 @@
-<?php
-
-use App\Models\Menu;
-
-// Fetch the menus in your controller or directly in your Blade view
-$menus = Menu::with('children')->whereNull('parent_id')->get();
-?>
-
 <aside class="main-sidebar custom-sidebar elevation-4">
   <!-- Brand Logo -->
   <a href="{{ url('/dashboard') }}" class="brand-link mb-3">
@@ -31,31 +23,113 @@ $menus = Menu::with('children')->whereNull('parent_id')->get();
 
     <!-- Sidebar Menu -->
     <nav class="mt-2 sidebar-scroll">
-    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-        @foreach ($menus as $menu)
+      <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+        <li class="nav-item">
+          <a href="/dashboard" class="nav-link {{ request()->is('dashboard') ? 'active' : '' }}">
+            <i class="nav-icon fa fa-home"></i>
+            <p>Home</p>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {{ request()->is('management-menu/*') ? 'active' : '' }}">
+            <i class="nav-icon fa fa-users"></i>
+            <p>Management Menu<i class="right fas fa-angle-left"></i></p>
+          </a>
+          <ul class="nav nav-treeview">
             <li class="nav-item">
-                <a href="{{ $menu->url }}" class="nav-link {{ request()->is($menu->url) ? 'active' : '' }}">
-                    <i class="nav-icon {{ $menu->icon }}"></i>
-                    <p>{{ $menu->name }}<i class="right fas fa-angle-left"></i></p>
-                </a>
-                @if ($menu->children->isNotEmpty())
-                    <ul class="nav nav-treeview">
-                        @foreach ($menu->children as $child)
-                            <li class="nav-item">
-                                <a href="{{ $child->url }}" class="nav-link {{ request()->is($child->url) ? 'active' : '' }}">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>{{ $child->name }}</p>
-                                </a>
-                            </li>
-                        @endforeach
-                    </ul>
-                @endif
+              <a href="{{ route('management-menu.menus.index') }}" class="nav-link {{ request()->routeIs('management-menu.menus.index') ? 'active' : '' }}">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Menu</p>
+              </a>
             </li>
-        @endforeach
-    </ul>
-</nav>
-
-
+          </ul>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {{ request()->is('management-user/*') ? 'active' : '' }}">
+            <i class="nav-icon fa fa-users"></i>
+            <p>Management User<i class="right fas fa-angle-left"></i></p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              <a href="{{ route('management-user.users.index') }}" class="nav-link {{ request()->routeIs('management-user.users.index') ? 'active' : '' }}">
+                <i class="far fa-circle nav-icon"></i>
+                <p>User</p>
+              </a>
+            </li>
+          </ul>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {{ request()->is('log/*') ? 'active' : '' }}">
+            <i class="nav-icon fa fa-chart-pie"></i>
+            <p>Log<i class="right fas fa-angle-left"></i></p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              <a href="{{ route('reports.index') }}" class="nav-link {{ request()->routeIs('reports.index') ? 'active' : '' }}">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Data Logs</p>
+              </a>
+            </li>
+          </ul>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {{ request()->is('master-data/*') ? 'active' : '' }}">
+            <i class="nav-icon fa fa-list-alt"></i>
+            <p>Master Data<i class="right fas fa-angle-left"></i></p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              <a href="{{ route('master-data.customers.index') }}" class="nav-link {{ request()->routeIs('master-data.customers.index') ? 'active' : '' }}">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Data Customer</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{{ route('master-data.item-types.index') }}" class="nav-link {{ request()->routeIs('master-data.item-types.index') ? 'active' : '' }}">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Tipe Barang</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{{ route('master-data.bank-data.index') }}" class="nav-link {{ request()->routeIs('master-data.bank-data.index') ? 'active' : '' }}">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Data Bank</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{{ route('master-data.warehouses.index') }}" class="nav-link {{ request()->routeIs('master-data.warehouses.index') ? 'active' : '' }}">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Data Gudang</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{{ route('master-data.barang.index') }}" class="nav-link {{ request()->routeIs('master-data.barang.index') ? 'active' : '' }}">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Data Barang</p>
+              </a>
+            </li>
+          </ul>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {{ request()->is('data-gudang/*') ? 'active' : '' }}">
+            <i class="nav-icon fa fa-chart-pie"></i>
+            <p>Data Gudang<i class="right fas fa-angle-left"></i></p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              <a href="{{ route('data-gudang.barang-masuk.index') }}" class="nav-link {{ request()->routeIs('data-gudang.barang-masuk.index') ? 'active' : '' }}">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Barang Masuk</p>
+              </a>
+              <a href="{{ route('data-gudang.barang-keluar.index') }}" class="nav-link {{ request()->routeIs('data-gudang.barang-keluar.index') ? 'active' : '' }}">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Barang Keluar</p>
+              </a>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </nav>
     <!-- /.sidebar-menu -->
 
     <div class="sidebar-footer">

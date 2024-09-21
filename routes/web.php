@@ -14,7 +14,7 @@ use App\Http\Controllers\BarangController;
 use App\Http\Controllers\BarangMasukController;
 use App\Http\Controllers\BarangKeluarController;
 use App\Http\Controllers\PDFController;
-
+use App\Http\Controllers\MenuController;
 
 // Login and Logout
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login.form');
@@ -136,3 +136,13 @@ Route::get('/api/customers/{warehouseId}', [BarangKeluarController::class, 'getC
 
 Route::get('/download-pdf/{id}', [PDFController::class, 'BarangKeluar_download_pdf'])->name('pdf.invoice-barang-keluar');
 Route::get('/download-pdf/pajak/{id}', [PDFController::class, 'BarangKeluar_pajak_download_pdf'])->name('pdf.invoice-barang-keluar-pajak');
+
+Route::resource('management-menu/menus', MenuController::class)->names([
+    'index' => 'management-menu.menus.index',
+    'create' => 'management-menu.menus.create',
+    'store' => 'management-menu.menus.store',
+    'show' => 'management-menu.menus.show',
+    'edit' => 'management-menu.menus.edit',
+    'update' => 'management-menu.menus.update',
+    'destroy' => 'management-menu.menus.destroy',
+]);
