@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Password Change Confirmation</title>
+    <title>User Details</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -62,15 +62,18 @@
     <div class="content">
         <div class="header">
             <img src="{{ public_path('ATSLogo.jpg') }}" alt="ATS Logo">
-            <h1>Password Change Confirmation</h1>
+            <h1>User Details</h1>
         </div>
         <div class="details">
-            <p>Hello <strong>{{ $user->name }}</strong>,</p>
-            <p>Your new password is: <strong>{{ $plainPassword }}</strong></p>
-            <p>Your password has been successfully changed.</p>
+            <p><strong class="highlight">Name:</strong> {{ $user->name }}</p>
+            <p><strong class="highlight">Email:</strong> {{ $user->email }}</p>
+            <p><strong class="highlight">Status:</strong> {{ ucfirst($user->status) }}</p>
+            @if(isset($plainPassword))
+            <p><strong class="highlight">Plain Password:</strong> {{ $plainPassword }}</p>
+            @endif
         </div>
+        <p>This document contains the details of the newly created user. Please keep this information secure.</p>
         <p>From: <strong>{{ date('d F Y') }}</strong></p>
-        <p>Thank you for your prompt action!</p>
     </div>
     <div class="footer">
         <p>&copy; {{ date('Y') }} Adhirajasa Trans Sejahtera. All rights reserved.</p>

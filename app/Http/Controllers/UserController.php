@@ -74,33 +74,77 @@ class UserController extends Controller
         return view('admin.management-user.users.create', compact('groups'));
     }
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:191|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-            'status' => 'required|in:active,inactive',
-            'group_id' => 'nullable|exists:groups,id',
-            'warehouse_id' => 'nullable|exists:warehouses,id'
-        ]);
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => bcrypt($request->password),
-            'status' => $request->status,
-            'group_id' => $request->group_id,
-            'warehouse_id' => $request->warehouse_id
-        ]);
+    // public function store(Request $request)
+    // {
+    //     $request->validate([
+    //         'name' => 'required|string|max:255',
+    //         'email' => 'required|string|email|max:191|unique:users',
+    //         'password' => 'required|string|min:8|confirmed',
+    //         'status' => 'required|in:active,inactive',
+    //         'group_id' => 'nullable|exists:groups,id',
+    //         'warehouse_id' => 'nullable|exists:warehouses,id'
+    //     ]);
+    //     $user = User::create([
+    //         'name' => $request->name,
+    //         'email' => $request->email,
+    //         'password' => bcrypt($request->password),
+    //         'status' => $request->status,
+    //         'group_id' => $request->group_id,
+    //         'warehouse_id' => $request->warehouse_id
+    //     ]);
 
-        LogData::create([
-            'user_id' => Auth::id(),
-            'name' => Auth::user()->name,
-            'action' => 'insert',
-            'details' => 'Created user ID: ' . $user->id . ' with data: ' . json_encode($request->only('name', 'email', 'password', 'status', 'group_id'))
-        ]);
-        return redirect()->route('management-user.users.index')->with('success', 'User added successfully.');
-    }
+    //     LogData::create([
+    //         'user_id' => Auth::id(),
+    //         'name' => Auth::user()->name,
+    //         'action' => 'insert',
+    //         'details' => 'Created user ID: ' . $user->id . ' with data: ' . json_encode($request->only('name', 'email', 'password', 'status', 'group_id'))
+    //     ]);
+    //     return redirect()->route('management-user.users.index')->with('success', 'User added successfully.');
+    // }
+    public function store(Request $request)
+{
+    // Validate the request data
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|string|email|max:191|unique:users',
+        'password' => 'required|string|min:8|confirmed',
+        'status' => 'required|in:active,inactive',
+        'group_id' => 'nullable|exists:groups,id',
+        'warehouse_id' => 'nullable|exists:warehouses,id'
+    ]);
+
+    // Create the new user
+    $user = User::create([
+        'name' => $request->name,
+        'email' => $request->email,
+        'password' => bcrypt($request->password),
+        'status' => $request->status,
+        'group_id' => $request->group_id,
+        'warehouse_id' => $request->warehouse_id
+    ]);
+
+    // Log the creation of the new user
+    LogData::create([
+        'user_id' => Auth::id(),
+        'name' => Auth::user()->name,
+        'action' => 'insert',
+        'details' => 'Created user ID: ' . $user->id . ' with data: ' . json_encode($request->only('name', 'email', 'password', 'status', 'group_id'))
+    ]);
+
+    // Generate a PDF containing user details
+    $pdf = PDF::loadView('pdf.user-details', [
+        'user' => $user,
+        'plainPassword' => $request->password, // Optional, include if needed
+    ]);
+
+    // Create a dynamic filename using the user's name
+    $filename = strtolower(str_replace(' ', '_', $user->name)) . '_Create_User.pdf';
+
+    // Return the generated PDF for download
+    return $pdf->download($filename);
+}
+
+
 
     public function destroy(User $user)
     {
@@ -130,24 +174,28 @@ class UserController extends Controller
     }
 
     public function updatePassword(Request $request, User $user)
-    {
-        $request->validate([
-            'new_password' => 'required|string|min:8|confirmed',
-        ]);
-    
-        // Hash dan simpan password
-        $user->password = Hash::make($request->new_password);
-        $user->save();
-    
-        // Buat PDF
-        $pdf = PDF::loadView('pdf.change-password', [
-            'user' => $user,
-            'plainPassword' => $request->new_password, // Kirim password plaintext ke view
-        ]);
-    
-        // Kembalikan PDF untuk diunduh
-        return $pdf->download('password_change_confirmation.pdf');
-    }
+{
+    $request->validate([
+        'new_password' => 'required|string|min:8|confirmed',
+    ]);
+
+    // Hash dan simpan password
+    $user->password = Hash::make($request->new_password);
+    $user->save();
+
+    // Buat PDF
+    $pdf = PDF::loadView('pdf.change-password', [
+        'user' => $user,
+        'plainPassword' => $request->new_password, // Kirim password plaintext ke view
+    ]);
+
+    // Ubah nama file menggunakan nama user
+    $filename = strtolower(str_replace(' ', '_', $user->name)) . '_password_change_confirmation.pdf';
+
+    // Kembalikan PDF untuk diunduh
+    return $pdf->download($filename);
+}
+
     
 
 }
