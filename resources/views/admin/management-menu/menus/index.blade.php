@@ -83,9 +83,10 @@
             <!-- /.content-header -->
 
             <!-- Main content -->
-            <a href="{{ route('management-menu.menus.create') }}" class="btn btn-primary mb-3">Add menus</a>
             <div class="container-fluid pl-4 table-responsive">
+                 
                 <h1>Menu Table</h1>
+                <a href="{{ route('management-menu.menus.create') }}" class="btn btn-primary mb-3">Add menus</a>
 
                 <!-- Log Data Table -->
                 <table id="menuTable" class="table table-bordered">

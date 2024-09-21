@@ -14,10 +14,13 @@ class GroupMenuTableSeeder extends Seeder
         $warehouseGroupId = DB::table('groups')->where('name', 'Warehouse')->value('id');
         $operationGroupId = DB::table('groups')->where('name', 'Operation')->value('id');
 
-        // Fetch all menu IDs
-        $menuIds = DB::table('menus')->pluck('id')->toArray();
+        // Fetch only menu IDs where parent_id is null
+        $menuIds = DB::table('menus')
+            ->whereNull('parent_id') // Filter menus where parent_id is null
+            ->pluck('id')
+            ->toArray();
 
-        // Link admin group with all menus
+        // Link admin group with all menus where parent_id is null
         foreach ($menuIds as $menuId) {
             DB::table('group_menu')->insert([
                 'group_id' => $adminGroupId,
@@ -25,17 +28,17 @@ class GroupMenuTableSeeder extends Seeder
             ]);
         }
 
-        // Link warehouse group with specific menus (e.g., Dashboard only)
+        // Link warehouse group with specific menus where parent_id is null
         DB::table('group_menu')->insert([
-            ['group_id' => $warehouseGroupId, 'menu_id' => 1], // Dashboard
-            ['group_id' => $warehouseGroupId, 'menu_id' => 2], // Reports
-            // Add more menus as needed for this group
+            ['group_id' => $warehouseGroupId, 'menu_id' => 1], // Example: Dashboard
+            ['group_id' => $warehouseGroupId, 'menu_id' => 2], // Example: Reports
+            // Add more specific menus as needed for this group
         ]);
 
-        // Link operation group with specific menus
+        // Link operation group with specific menus where parent_id is null
         DB::table('group_menu')->insert([
-            ['group_id' => $operationGroupId, 'menu_id' => 1], // Dashboard
-            // Add more menus as needed for this group
+            ['group_id' => $operationGroupId, 'menu_id' => 1], // Example: Dashboard
+            // Add more specific menus as needed for this group
         ]);
 
         // Add more groups and their menu links as needed

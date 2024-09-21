@@ -90,6 +90,19 @@ class MenuSeeder extends Seeder
                 'updated_at' => now(),
             ],
         ]);
+        DB::table('menus')->insert([
+            [
+                'name' => 'Group Menu',
+                'url' => '/management-menu/group_menu',
+                'router' => 'management-user.users.index',
+                'icon' => 'far fa-circle',
+                'is_active' => 1,
+                'priority' => 2, // Priority untuk submenu
+                'parent_id' => $managementMenuId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
 
         // Menambahkan sub-menu untuk Management User
         DB::table('menus')->insert([

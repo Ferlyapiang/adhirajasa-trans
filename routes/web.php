@@ -15,6 +15,7 @@ use App\Http\Controllers\BarangMasukController;
 use App\Http\Controllers\BarangKeluarController;
 use App\Http\Controllers\PDFController;
 use App\Http\Controllers\MenuController;
+use App\Http\Controllers\GroupMenuController;
 
 // Login and Logout
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login.form');
@@ -145,4 +146,14 @@ Route::resource('management-menu/menus', MenuController::class)->names([
     'edit' => 'management-menu.menus.edit',
     'update' => 'management-menu.menus.update',
     'destroy' => 'management-menu.menus.destroy',
+]);
+
+Route::resource('management-menu/group_menu', GroupMenuController::class);
+
+
+Route::resource('management-menu/group_menu', GroupMenuController::class)->names([
+    'index' => 'management-menu.group_menu.index',
+    'create' => 'management-menu.group_menu.create',
+    'store' => 'management-menu.group_menu.store',
+    'destroy' => 'management-menu.group_menu.destroy',
 ]);
