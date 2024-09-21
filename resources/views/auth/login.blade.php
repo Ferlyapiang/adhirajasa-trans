@@ -114,12 +114,12 @@
                             <button type="submit" class="btn btn-primary mt-4">Masuk</button>
 
                             <!-- Registration Link -->
-                            <div class="text-center mt-3">
+                            <!-- <div class="text-center mt-3">
                                 <a href="{{ route('register') }}" class="btn btn-secondary">Belum punya akun? Daftar</a>
                             </div>
                             <div class="form-group">
                                 <a href="{{ route('forgot.password.form') }}">Forgot Your Password?</a>
-                            </div>
+                            </div> -->
                             
 
                             <!-- Loader -->

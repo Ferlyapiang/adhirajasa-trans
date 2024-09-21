@@ -14,9 +14,19 @@ class UserController extends Controller
 {
     public function index()
     {
-        $users = User::with('group', 'warehouse')->get();
+        $loggedInUser = Auth::user();
+
+        if ($loggedInUser && $loggedInUser->warehouse_id) {
+            $users = User::with('group', 'warehouse')
+                        ->where('warehouse_id', $loggedInUser->warehouse_id)
+                        ->get();
+        } else {
+            $users = User::with('group', 'warehouse')->get();
+        }
+
         return view('admin.management-user.users.index', compact('users'));
     }
+
 
     public function show(User $user)
     {
@@ -46,7 +56,6 @@ class UserController extends Controller
 
         $user->update($request->only('name', 'email', 'status', 'group_id', 'warehouse_id'));
 
-        // Log the update action
         LogData::create([
             'user_id' => Auth::id(),
             'name' => Auth::user()->name,
@@ -74,7 +83,6 @@ class UserController extends Controller
             'group_id' => 'nullable|exists:groups,id',
             'warehouse_id' => 'nullable|exists:warehouses,id'
         ]);
-
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -84,23 +92,19 @@ class UserController extends Controller
             'warehouse_id' => $request->warehouse_id
         ]);
 
-        // Log the insert action
         LogData::create([
             'user_id' => Auth::id(),
             'name' => Auth::user()->name,
             'action' => 'insert',
             'details' => 'Created user ID: ' . $user->id . ' with data: ' . json_encode($request->only('name', 'email', 'password', 'status', 'group_id'))
         ]);
-
         return redirect()->route('management-user.users.index')->with('success', 'User added successfully.');
     }
 
     public function destroy(User $user)
     {
-        // Soft delete, assuming you have soft deletes enabled
         $user->delete();
 
-        // Log the delete action
         LogData::create([
             'user_id' => Auth::id(),
             'name' => Auth::user()->name,
@@ -130,7 +134,6 @@ class UserController extends Controller
             'new_password' => 'required|string|min:8|confirmed',
         ]);
 
-        // Update the user's password
         $user->password = Hash::make($request->new_password);
         $user->save();
 

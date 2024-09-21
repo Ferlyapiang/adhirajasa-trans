@@ -89,7 +89,7 @@
 
                     <div class="form-group">
                         <label for="warehouse_id">Warehouse</label>
-                        <select id="warehouse_id" name="warehouse_id" class="form-control">
+                        <select id="warehouse_id" name="warehouse_id" class="form-control" disabled>
                             <option value="" hidden>Super Admin</option>
                             @foreach($warehouses as $warehouse)
                                 <option value="{{ $warehouse->id }}" {{ $warehouse->id == $user->warehouse_id ? 'selected' : '' }}>
