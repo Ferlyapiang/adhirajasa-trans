@@ -17,6 +17,18 @@
     <script src="{{ asset('lte/plugins/jquery/jquery.min.js') }}"></script>
     <script src="{{ asset('lte/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('lte/dist/js/adminlte.min.js') }}"></script>
+    <style>
+        .success-message {
+            color: green;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        #homeButton {
+            font-size: 1.2rem; /* Increase button font size */
+            padding: 10px 20px; /* Increase button padding */
+        }
+    </style>
 </head>
 
 <body class="hold-transition sidebar-mini">
@@ -123,7 +135,9 @@
                         @endif
                     </div>
 
-                    <button type="submit" id="submitButton" class="btn btn-primary mb-3" disabled>Save User</button>
+                    <button type="submit" id="submitButton" class="btn btn-primary mb-3">Save User</button>
+                    <a id="homeButton" href="/management-user/users" class="btn btn-success" style="display: none; margin-top: 10px;">Kembali ke Home</a>
+                    <div id="successMessage" class="success-message" style="display: none;">Data Sudah Berhasil disimpan!</div>
                 </form>
             </div>
             <!-- /.main content -->
@@ -150,6 +164,7 @@
                 </div>
                 <div class="modal-body">
                     User added successfully!
+                    <div class="success-message" style="display: block;">Data Sudah Berhasil disimpan!</div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -159,41 +174,53 @@
     </div>
 
     <script>
-        $(document).ready(function() {
-            $('#userForm').on('submit', function(event) {
-                var password = $('#password').val();
-                var passwordConfirmation = $('#password_confirmation').val();
+        $('#userForm').on('submit', function(event) {
+            var password = $('#password').val();
+            var passwordConfirmation = $('#password_confirmation').val();
 
-                if (password !== passwordConfirmation) {
-                    $('#passwordMismatch').show();
-                    event.preventDefault();
-                } else {
-                    $('#passwordMismatch').hide();
-                }
-            });
-
-            if ("{{ session('success') }}") {
-                $('#successModal').modal('show');
+            if (password !== passwordConfirmation) {
+                $('#passwordMismatch').show();
+                event.preventDefault();
+            } else {
+                $('#passwordMismatch').hide();
+                // Hide the submit button and show the home button after form submission
+                $('#submitButton').hide();
+                $('#homeButton').show();
+                $('#successMessage').show(); // Show success message
+                
+                // Make all inputs readonly
+                $('#userForm input, #userForm select').prop('readonly', true);
             }
+        });
 
-            $('#email').on('blur', function() {
-                var email = $(this).val();
+        if ("{{ session('success') }}") {
+            $('#successModal').modal('show');
+            // Ensure the buttons are correctly set on success
+            $('#submitButton').hide();
+            $('#homeButton').show();
+            $('#successMessage').show(); // Show success message
+            
+            // Make all inputs readonly
+            $('#userForm input, #userForm select').prop('readonly', true);
+        }
 
-                $.ajax({
-                    url: "{{ route('check-email') }}",
-                    method: 'POST',
-                    data: {
-                        email: email,
-                        _token: "{{ csrf_token() }}"
-                    },
-                    success: function(response) {
-                        if (response.exists) {
-                            $('#emailError').show();
-                        } else {
-                            $('#emailError').hide();
-                        }
+        $('#email').on('blur', function() {
+            var email = $(this).val();
+
+            $.ajax({
+                url: "{{ route('check-email') }}",
+                method: 'POST',
+                data: {
+                    email: email,
+                    _token: "{{ csrf_token() }}"
+                },
+                success: function(response) {
+                    if (response.exists) {
+                        $('#emailError').show();
+                    } else {
+                        $('#emailError').hide();
                     }
-                });
+                }
             });
         });
 
@@ -209,48 +236,6 @@
             }
         });
 
-        document.getElementById('password_confirmation').addEventListener('input', function() {
-            const password = document.getElementById('password').value;
-            const passwordConfirmation = this.value;
-            const passwordMismatch = document.getElementById('passwordMismatch');
-
-            if (password !== passwordConfirmation) {
-                passwordMismatch.style.display = 'block';
-            } else {
-                passwordMismatch.style.display = 'none';
-            }
-        });
-
-        function validatePassword() {
-            const password = document.getElementById('password').value;
-            const passwordConfirmation = document.getElementById('password_confirmation').value;
-            const passwordRequirements = document.getElementById('passwordRequirements');
-            const passwordMismatch = document.getElementById('passwordMismatch');
-            const submitButton = document.getElementById('submitButton');
-
-            const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])/;
-
-            let isValid = true;
-
-            if (!passwordRegex.test(password)) {
-                passwordRequirements.style.display = 'block';
-                isValid = false;
-            } else {
-                passwordRequirements.style.display = 'none';
-            }
-
-            if (password !== passwordConfirmation) {
-                passwordMismatch.style.display = 'block';
-                isValid = false;
-            } else {
-                passwordMismatch.style.display = 'none';
-            }
-
-            submitButton.disabled = !isValid;
-        }
-
-        document.getElementById('password').addEventListener('input', validatePassword);
-        document.getElementById('password_confirmation').addEventListener('input', validatePassword);
     </script>
 </body>
 
