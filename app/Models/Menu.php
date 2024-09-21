@@ -34,8 +34,13 @@ class Menu extends Model
     public function children()
     {
         return $this->hasMany(Menu::class, 'parent_id')
-                    ->where('is_active', 1) // Only include active children
+                    ->where('is_active', 1)
                     ->orderBy('priority');
+    }
+
+    public function groups()
+    {
+        return $this->belongsToMany(Group::class, 'group_menu')->withTimestamps();
     }
     /**
      * Define the relationship to get the parent menu.
