@@ -111,7 +111,7 @@ class MenuSeeder extends Seeder
         DB::table('menus')->insert([
             [
                 'name' => 'Data Logs',
-                'url' => '/log/data',
+                'url' => '/log/reports-log',
                 'router' => 'reports.index',
                 'icon' => 'far fa-circle',
                 'is_active' => 1,

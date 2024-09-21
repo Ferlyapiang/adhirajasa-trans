@@ -27,7 +27,7 @@
         <!-- /.navbar -->
 
         <!-- Main Sidebar Container -->
-        @include('admin.sidebar')
+        <x-sidebar />
         <!-- /.sidebar -->
 
         <!-- Content Wrapper. Contains page content -->
@@ -98,7 +98,7 @@
                         </select>
                         <span id="groupError" style="color: red; display: none;">Please select a group.</span>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="warehouse_id">Warehouse</label>
 

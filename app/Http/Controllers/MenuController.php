@@ -13,8 +13,6 @@ class MenuController extends Controller
     public function index()
 {
     $menus = Menu::with('children')
-        ->whereNull('parent_id')
-        ->orderBy('priority')
         ->get();
     
     return view('admin.management-menu.menus.index', compact('menus'));
@@ -86,17 +84,4 @@ class MenuController extends Controller
         $menu->delete();
         return redirect()->route('management-menu.menus.index')->with('success', 'Menu deleted successfully.');
     }
-
-    /**
-     * Optionally retrieve sidebar menus for a view.
-     */
-    public function getSidebarMenus()
-{
-    $menus = Menu::with('children')
-        ->whereNull('parent_id')
-        ->orderBy('priority')
-        ->get();
-    
-    return $menus;
-}
 }

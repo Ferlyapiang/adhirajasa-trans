@@ -33,7 +33,7 @@
         <!-- /.navbar -->
 
         <!-- Main Sidebar Container -->
-        @include('admin.sidebar')
+        <x-sidebar />
         <!-- /.sidebar -->
 
         <!-- Content Wrapper. Contains page content -->

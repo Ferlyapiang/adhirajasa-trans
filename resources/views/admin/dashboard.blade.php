@@ -23,7 +23,7 @@
         <!-- Navbar -->
         @include('admin/header')
         <!-- Main Sidebar Container -->
-        @include('admin/sidebar')
+        <x-sidebar />
 
         <!-- Content Wrapper. Contains page content -->
         <div class="content-wrapper">

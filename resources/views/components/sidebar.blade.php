@@ -1,18 +1,9 @@
-<?php
-
-use App\Models\Menu;
-
-// Fetch the menus in your controller or directly in your Blade view
-$menus = Menu::with('children')->whereNull('parent_id')->get();
-?>
-
 <aside class="main-sidebar custom-sidebar elevation-4">
   <!-- Brand Logo -->
   <a href="{{ url('/dashboard') }}" class="brand-link mb-3">
     <img src="{{ asset('ats/ATSLogo.png') }}" alt="ATS Logo" class="brand-image">
     <span class="brand-text">ATS Digital</span>
   </a>
-
 
   <!-- Sidebar -->
   <div class="sidebar mt-1">
@@ -31,32 +22,29 @@ $menus = Menu::with('children')->whereNull('parent_id')->get();
 
     <!-- Sidebar Menu -->
     <nav class="mt-2 sidebar-scroll">
-    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+      <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
         @foreach ($menus as $menu)
-            <li class="nav-item">
-                <a href="{{ $menu->url }}" class="nav-link {{ request()->is($menu->url) ? 'active' : '' }}">
-                    <i class="nav-icon {{ $menu->icon }}"></i>
-                    <p>{{ $menu->name }}<i class="right fas fa-angle-left"></i></p>
-                </a>
-                @if ($menu->children->isNotEmpty())
-                    <ul class="nav nav-treeview">
-                        @foreach ($menu->children as $child)
-                            <li class="nav-item">
-                                <a href="{{ $child->url }}" class="nav-link {{ request()->is($child->url) ? 'active' : '' }}">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>{{ $child->name }}</p>
-                                </a>
-                            </li>
-                        @endforeach
-                    </ul>
-                @endif
-            </li>
+          <li class="nav-item">
+            <a href="{{ $menu->url }}" class="nav-link {{ request()->is($menu->url) ? 'active' : '' }}">
+              <i class="nav-icon {{ $menu->icon }}"></i>
+              <p>{{ $menu->name }}<i class="right fas fa-angle-left"></i></p>
+            </a>
+            @if ($menu->children->isNotEmpty())
+              <ul class="nav nav-treeview">
+                @foreach ($menu->children as $child)
+                  <li class="nav-item">
+                    <a href="{{ $child->url }}" class="nav-link {{ request()->is($child->url) ? 'active' : '' }}">
+                      <i class="far fa-circle nav-icon"></i>
+                      <p>{{ $child->name }}</p>
+                    </a>
+                  </li>
+                @endforeach
+              </ul>
+            @endif
+          </li>
         @endforeach
-    </ul>
-</nav>
-
-
-    <!-- /.sidebar-menu -->
+      </ul>
+    </nav>
 
     <div class="sidebar-footer">
       <form action="{{ route('logout') }}" method="POST" class="logout-form">
@@ -69,6 +57,41 @@ $menus = Menu::with('children')->whereNull('parent_id')->get();
   </div>
   <!-- /.sidebar -->
 </aside>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const searchInput = document.getElementById('sidebarSearch');
+  const navLinks = document.querySelectorAll('.nav-sidebar .nav-link');
+  const noResults = document.getElementById('noResults');
+
+  searchInput.addEventListener('input', function() {
+    const searchTerm = searchInput.value.toLowerCase();
+    let hasVisibleItems = false;
+
+    if (searchTerm === '') {
+      navLinks.forEach(link => {
+        link.style.display = ''; // Show all items
+        link.classList.remove('highlight'); // Remove highlight
+      });
+      noResults.classList.add('d-none'); // Hide 'No elements found' message
+    } else {
+      navLinks.forEach(link => {
+        const text = link.textContent.toLowerCase();
+        if (text.includes(searchTerm)) {
+          link.style.display = ''; // Show matching items
+          link.classList.add('highlight'); // Add highlight
+          hasVisibleItems = true; // Indicate that there are visible items
+        } else {
+          link.style.display = 'none'; // Hide non-matching items
+          link.classList.remove('highlight'); // Remove highlight
+        }
+      });
+      noResults.classList.toggle('d-none', hasVisibleItems); // Show or hide 'No elements found' message
+    }
+  });
+});
+</script>
+
 
 
 
@@ -191,41 +214,3 @@ $menus = Menu::with('children')->whereNull('parent_id')->get();
 }
 
 </style>
-
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const searchInput = document.getElementById('sidebarSearch');
-  const navLinks = document.querySelectorAll('.nav-sidebar .nav-link');
-  const noResults = document.getElementById('noResults');
-
-  searchInput.addEventListener('input', function() {
-    const searchTerm = searchInput.value.toLowerCase();
-    let hasVisibleItems = false;
-
-    if (searchTerm === '') {
-      navLinks.forEach(link => {
-        link.style.display = ''; // Show all items
-        link.classList.remove('highlight'); // Remove highlight
-      });
-      noResults.classList.add('d-none'); // Hide 'No elements found' message
-    } else {
-      navLinks.forEach(link => {
-        const text = link.textContent.toLowerCase();
-        if (text.includes(searchTerm)) {
-          link.style.display = ''; // Show matching items
-          link.classList.add('highlight'); // Add highlight
-          hasVisibleItems = true; // Indicate that there are visible items
-        } else {
-          link.style.display = 'none'; // Hide non-matching items
-          link.classList.remove('highlight'); // Remove highlight
-        }
-      });
-      noResults.classList.toggle('d-none', hasVisibleItems); // Show or hide 'No elements found' message
-    }
-  });
-});
-
-</script>
-
-
