@@ -23,7 +23,7 @@ class MenuSeeder extends Seeder
 
         $managementMenuId = DB::table('menus')->insertGetId([
             'name' => 'Management Menu',
-            'url' => null,
+            'url' => '/management-menu/*',
             'router' => null,
             'icon' => 'fa fa-book',
             'is_active' => 1,
@@ -35,7 +35,7 @@ class MenuSeeder extends Seeder
 
         $managementUserId = DB::table('menus')->insertGetId([
             'name' => 'Management User',
-            'url' => null,
+            'url' => '/management-user/*',
             'router' => null,
             'icon' => 'fa fa-users',
             'is_active' => 1,
@@ -46,7 +46,7 @@ class MenuSeeder extends Seeder
 
         $logId = DB::table('menus')->insertGetId([
             'name' => 'Log',
-            'url' => null,
+            'url' => '/log/*',
             'router' => null,
             'icon' => 'fa fa-chart-pie',
             'is_active' => 1,
@@ -57,7 +57,7 @@ class MenuSeeder extends Seeder
 
         $masterDataId = DB::table('menus')->insertGetId([
             'name' => 'Master Data',
-            'url' => null,
+            'url' => '/master-data/*',
             'router' => null,
             'icon' => 'fa fa-list-alt',
             'is_active' => 1,
@@ -68,7 +68,7 @@ class MenuSeeder extends Seeder
 
         $dataGudangId = DB::table('menus')->insertGetId([
             'name' => 'Data Gudang',
-            'url' => null,
+            'url' => '/data-gudang/*',
             'router' => null,
             'icon' => 'fa fa-cubes',
             'is_active' => 1,

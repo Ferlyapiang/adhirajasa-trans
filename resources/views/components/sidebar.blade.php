@@ -25,7 +25,8 @@
       <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
         @foreach ($menus as $menu)
           <li class="nav-item">
-            <a href="{{ $menu->url }}" class="nav-link {{ request()->is($menu->url) ? 'active' : '' }}">
+            <a href="{{ $menu->url }}" 
+               class="nav-link {{ request()->is(trim($menu->url, '/')) ? 'active-menu' : '' }}">
               <i class="nav-icon {{ $menu->icon }}"></i>
               <p>{{ $menu->name }}<i class="right fas fa-angle-left"></i></p>
             </a>
@@ -33,7 +34,8 @@
               <ul class="nav nav-treeview">
                 @foreach ($menu->children as $child)
                   <li class="nav-item">
-                    <a href="{{ $child->url }}" class="nav-link {{ request()->is($child->url) ? 'active' : '' }}">
+                    <a href="{{ $child->url }}" 
+                       class="nav-link {{ request()->is(trim($child->url, '/')) ? 'active-menu' : '' }}">
                       <i class="far fa-circle nav-icon"></i>
                       <p>{{ $child->name }}</p>
                     </a>
@@ -57,6 +59,8 @@
   </div>
   <!-- /.sidebar -->
 </aside>
+
+
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -96,6 +100,31 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 <style>
+
+.nav-link.active-menu {
+    background: linear-gradient(to right, #3D6FFB, #7FCF90); /* Adjusted gradient for smoother transition */
+    color: #fff !important; /* White text for better contrast */
+  }
+
+  /* Icon color for the active parent menu */
+  .nav-link.active-menu .nav-icon {
+    color: #fff !important; /* White icon color */
+  }
+
+  /* Submenu item styling */
+  .nav-treeview .nav-link.active-menu {
+    background: linear-gradient(to right, #6AA3E6, #A6DDB0); /* Softer gradient for submenu */
+    color: #fff !important; /* White text for contrast */
+  }
+
+  /* Icon color for active submenu */
+  .nav-treeview .nav-link.active-menu .nav-icon {
+    color: #fff !important; /* White icon for submenu as well */
+  }
+
+  /* Customize further if needed */
+
+
 /* Sidebar styling */
 .sidebar-scroll {
   height: auto; /* Atur tinggi sesuai kebutuhan */
