@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 /* Sidebar styling */
 .sidebar-scroll {
-  height: auto; /* Atur tinggi sesuai kebutuhan */
+  height: 140vh; /* Atur tinggi sesuai kebutuhan */
   overflow-y: auto; /* Tambahkan scroll vertikal jika konten melebihi tinggi */
 }
 
