@@ -9,6 +9,7 @@ use App\Models\Warehouse;
 use App\Models\LogData;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class UserController extends Controller
 {
@@ -133,13 +134,20 @@ class UserController extends Controller
         $request->validate([
             'new_password' => 'required|string|min:8|confirmed',
         ]);
-
+    
+        // Hash dan simpan password
         $user->password = Hash::make($request->new_password);
         $user->save();
-
-        return redirect()->route('management-user.users.index')->with('success', 'Password updated successfully.');
+    
+        // Buat PDF
+        $pdf = PDF::loadView('pdf.change-password', [
+            'user' => $user,
+            'plainPassword' => $request->new_password, // Kirim password plaintext ke view
+        ]);
+    
+        // Kembalikan PDF untuk diunduh
+        return $pdf->download('password_change_confirmation.pdf');
     }
-
-
+    
 
 }
