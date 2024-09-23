@@ -12,9 +12,13 @@ class CreateCustomersTable extends Migration
         Schema::create('customers', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('no_npwp_ktp', 191)->unique();
+            $table->string('name_pt');
+            $table->string('no_npwp', 191)->nullable()->unique();
+            $table->string('no_ktp', 191)->nullable()->unique();
             $table->string('no_hp');
-            $table->string('email', 191)->nullable()->unique(); // Make email nullable
+            $table->string('type_payment_customer');
+            $table->string('warehouse_id');
+            $table->string('email', 191)->nullable(); // Make email nullable
             $table->text('address');
             $table->enum('status', ['active', 'inactive']);
             $table->timestamps(); // This will add 'created_at' and 'updated_at'
