@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use App\Models\Warehouse;
 use App\Models\LogData;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -12,6 +13,7 @@ class CustomerController extends Controller
     public function index()
     {
         $customers = Customer::all();
+        $warehouse = Warehouse::all();
         return view('master-data.customers.index', compact('customers'));
     }
 
@@ -24,8 +26,12 @@ class CustomerController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'no_npwp_ktp' => 'required|string|unique:customers',
+            'name_pt' => 'required|string|max:255',
+            'no_npwp' => 'nullable|string',
+            'no_ktp' => 'nullable|string',
             'no_hp' => 'required|string',
+            'type_payment_customer' => 'required|string',
+            'warehouse_id' => 'required|string',
             'email' => 'required|string|email|unique:customers',
             'address' => 'required|string',
             'status' => 'required|in:active,inactive',
@@ -58,25 +64,33 @@ class CustomerController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'no_npwp_ktp' => 'required|string|unique:customers,no_npwp_ktp,' . $customer->id,
+            'name_pt' => 'required|string|max:255',
+            'no_npwp' => 'nullable|string',
+            'no_ktp' => 'nullable|string',
             'no_hp' => 'required|string',
+            'type_payment_customer' => 'required|string',
+            'warehouse_id' => 'required|string',
             'email' => 'required|string|email|unique:customers,email,' . $customer->id,
             'address' => 'required|string',
             'status' => 'required|in:active,inactive',
         ]);
 
-        $customer->update($request->all());
+        $customer->update($request->only([
+            'name',
+            'name_pt',
+            'no_npwp',
+            'no_ktp',
+            'no_hp',
+            'type_payment_customer',
+            'warehouse_id',
+            'email',
+            'address',
+            'status'
+        ]));
 
-        // Log the update action
-        LogData::create([
-            'user_id' => Auth::id(),
-            'name' => Auth::user()->name,
-            'action' => 'update',
-            'details' => 'Updated customer ID: ' . $customer->id . ' with data: ' . json_encode($request->all())
-        ]);
-
-        return redirect()->route('master-data.customers.index')->with('success', 'Customer updated successfully.');
+        return redirect()->route('master-data.customers.index')->with('success', 'Customer updated successfully!');
     }
+
 
     public function destroy(Customer $customer)
     {

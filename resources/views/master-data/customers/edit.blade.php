@@ -1,4 +1,3 @@
-<!-- resources/views/customers/edit.blade.php -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,28 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Edit Customer</title>
 
-    <!-- Font Awesome Icons -->
     <link rel="icon" type="image/svg+xml" href="{{ asset('ats/ATSLogo.png') }}" />
     <link rel="stylesheet" href="{{ asset('lte/plugins/fontawesome-free/css/all.min.css') }}">
-
-    <!-- Theme style -->
     <link rel="stylesheet" href="{{ asset('lte/dist/css/adminlte.min.css') }}">
 </head>
 <body class="hold-transition sidebar-mini">
     <div class="wrapper">
-
-        <!-- Navbar -->
         @include('admin.header')
-        <!-- /.navbar -->
-
-        <!-- Main Sidebar Container -->
         <x-sidebar />
-        <!-- /.sidebar -->
 
-        <!-- Content Wrapper. Contains page content -->
         <div class="content-wrapper">
-
-            <!-- Content Header (Page header) -->
             <div class="content-header">
                 <div class="container-fluid pl-4">
                     <div class="row mb-1">
@@ -37,13 +24,20 @@
                     </div>
                 </div>
             </div>
-            <!-- /.content-header -->
 
-            <!-- Main content -->
             <div class="container-fluid pl-4">
                 <h1>Edit Customer</h1>
                 <div class="card">
                     <div class="card-body">
+                        @if ($errors->any())
+                            <div class="alert alert-danger">
+                                <ul>
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
                         <form action="{{ route('master-data.customers.update', $customer) }}" method="POST">
                             @csrf
                             @method('PUT')
@@ -52,9 +46,24 @@
                                 <input type="text" id="name" name="name" class="form-control" value="{{ $customer->name }}" required>
                             </div>
                             <div class="mb-3">
-                                <label for="no_npwp_ktp" class="form-label">No NPWP/KTP:</label>
-                                <input type="text" id="no_npwp_ktp" name="no_npwp_ktp" class="form-control" value="{{ $customer->no_npwp_ktp }}" required>
+                                <label for="name_pt" class="form-label">Name PT:</label>
+                                <input type="text" id="name_pt" name="name_pt" class="form-control" value="{{ $customer->name_pt }}" required>
                             </div>
+
+                            @if(!empty($customer->no_ktp))
+                                <div class="mb-3">
+                                    <label for="no_ktp" class="form-label">No KTP:</label>
+                                    <input type="text" id="no_ktp" name="no_ktp" class="form-control" value="{{ $customer->no_ktp }}">
+                                </div>
+                            @endif
+
+                            @if(!empty($customer->no_npwp))
+                                <div class="mb-3">
+                                    <label for="no_npwp" class="form-label">No NPWP:</label>
+                                    <input type="text" id="no_npwp" name="no_npwp" class="form-control" value="{{ $customer->no_npwp }}">
+                                </div>
+                            @endif
+                            
                             <div class="mb-3">
                                 <label for="no_hp" class="form-label">No HP:</label>
                                 <input type="text" id="no_hp" name="no_hp" class="form-control" value="{{ $customer->no_hp }}" required>
@@ -66,6 +75,36 @@
                             <div class="mb-3">
                                 <label for="address" class="form-label">Address:</label>
                                 <textarea id="address" name="address" class="form-control" rows="4" required>{{ $customer->address }}</textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="type_payment_customer" class="form-label">Tipe Pembayaran Customer:</label>
+                                <select id="type_payment_customer" name="type_payment_customer" class="form-control" required>
+                                    <option value="" disabled selected hidden>Pilih Pembayaran</option>
+                                    <option value="Akhir Bulan" {{ $customer->type_payment_customer == 'Akhir Bulan' ? 'selected' : '' }}>Akhir Bulan</option>
+                                    <option value="Pertanggal Masuk" {{ $customer->type_payment_customer == 'Pertanggal Masuk' ? 'selected' : '' }}>Pertanggal Masuk</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="warehouse_id">Warehouse</label>
+                                @php
+                                $loggedInUser = Auth::user();
+                                $userWarehouseId = $loggedInUser->warehouse_id;
+                                @endphp
+
+                                @if ($userWarehouseId)
+                                <select id="warehouse_id" name="warehouse_id" class="form-control" readonly>
+                                    <option value="{{ $userWarehouseId }}" selected>
+                                        {{ App\Models\Warehouse::find($userWarehouseId)->name }}
+                                    </option>
+                                </select>
+                                @else
+                                <select id="warehouse_id" name="warehouse_id" class="form-control" required>
+                                    <option value="" disabled selected hidden>Select Warehouse</option>
+                                    @foreach(App\Models\Warehouse::all() as $warehouse)
+                                    <option value="{{ $warehouse->id }}" {{ $customer->warehouse_id == $warehouse->id ? 'selected' : '' }}>{{ $warehouse->name }}</option>
+                                    @endforeach
+                                </select>
+                                @endif
                             </div>
                             <div class="mb-3">
                                 <label for="status" class="form-label">Status:</label>
@@ -80,17 +119,10 @@
                     </div>
                 </div>
             </div>
-            <!-- /.main content -->
-
         </div>
-        <!-- /.content-wrapper -->
 
-        <!-- Main Footer -->
         @include('admin.footer')
-        <!-- /.footer -->
-
     </div>
-    <!-- ./wrapper -->
 
     <script src="{{ asset('lte/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('lte/dist/js/adminlte.min.js') }}"></script>

@@ -54,9 +54,28 @@
                                 <input type="text" id="name" name="name" class="form-control" required>
                             </div>
                             <div class="mb-3">
-                                <label for="no_npwp_ktp" class="form-label">No NPWP/KTP:</label>
-                                <input type="text" id="no_npwp_ktp" name="no_npwp_ktp" class="form-control" required>
+                                <label for="name_pt" class="form-label">Name PT:</label>
+                                <input type="text" id="name_pt" name="name_pt" class="form-control" required>
                             </div>
+                            <div class="mb-3">
+                                <label for="selection" class="form-label">Choose Identification Type:</label>
+                                <select id="id_selection" class="form-select" onchange="toggleFields()">
+                                    <option value="">-- Select --</option>
+                                    <option value="npwp">NPWP</option>
+                                    <option value="ktp">KTP</option>
+                                </select>
+                            </div>
+
+                            <div id="npwp_field" class="mb-3" style="display:none;">
+                                <label for="no_npwp" class="form-label">No NPWP:</label>
+                                <input type="text" id="no_npwp" name="no_npwp" class="form-control">
+                            </div>
+
+                            <div id="ktp_field" class="mb-3" style="display:none;">
+                                <label for="no_ktp" class="form-label">No KTP:</label>
+                                <input type="text" id="no_ktp" name="no_ktp" class="form-control">
+                            </div>
+
                             <div class="mb-3">
                                 <label for="no_hp" class="form-label">No HP:</label>
                                 <input type="text" id="no_hp" name="no_hp" class="form-control" required>
@@ -68,6 +87,37 @@
                             <div class="mb-3">
                                 <label for="address" class="form-label">Address:</label>
                                 <textarea id="address" name="address" class="form-control" rows="4" required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="type_payment_customer" class="form-label">Tipe Pembayaran Customer:</label>
+                                <select id="type_payment_customer" name="type_payment_customer" class="form-control" required>
+                                    <option value="" disabled selected hidden>Pilih Pembayaran</option>
+                                    <option value="Akhir Bulan">Akhir Bulan</option>
+                                    <option value="Pertanggal Masuk">Pertanggal Masuk</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="warehouse_id">Warehouse</label>
+
+                                @php
+                                $loggedInUser = Auth::user();
+                                $userWarehouseId = $loggedInUser->warehouse_id;
+                                @endphp
+
+                                @if ($userWarehouseId)
+                                <select id="warehouse_id" name="warehouse_id" class="form-control" readonly>
+                                    <option value="{{ $userWarehouseId }}" selected>
+                                        {{ App\Models\Warehouse::find($userWarehouseId)->name }}
+                                    </option>
+                                </select>
+                                @else
+                                <select id="warehouse_id" name="warehouse_id" class="form-control" required>
+                                    <option value="" disabled selected hidden>Select Warehouse</option>
+                                    @foreach(App\Models\Warehouse::all() as $warehouse)
+                                    <option value="{{ $warehouse->id }}">{{ $warehouse->name }}</option>
+                                    @endforeach
+                                </select>
+                                @endif
                             </div>
                             <div class="mb-3">
                                 <label for="status" class="form-label">Status:</label>
@@ -102,3 +152,20 @@
     <script src="{{ asset('lte/dist/js/adminlte.min.js') }}"></script>
 </body>
 </html>
+<script>
+    function toggleFields() {
+        var selection = document.getElementById('id_selection').value;
+        
+        // Hide both fields initially
+        document.getElementById('npwp_field').style.display = 'none';
+        document.getElementById('ktp_field').style.display = 'none';
+        
+        // Show the corresponding field based on the selection
+        if (selection === 'npwp') {
+            document.getElementById('npwp_field').style.display = 'block';
+        } else if (selection === 'ktp') {
+            document.getElementById('ktp_field').style.display = 'block';
+        }
+    }
+</script>
+

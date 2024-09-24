@@ -11,10 +11,19 @@ class Customer extends Model
 
     protected $fillable = [
         'name',
-        'no_npwp_ktp',
+        'name_pt',
+        'no_npwp',
+        'no_ktp',
         'no_hp',
         'email',
+        'type_payment_customer',
+        'warehouse_id',
         'address',
         'status',
     ];
+
+    public function warehouse()
+    {
+        return $this->belongsTo(Warehouse::class);
+    }
 }

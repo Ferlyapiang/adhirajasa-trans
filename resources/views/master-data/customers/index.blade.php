@@ -136,9 +136,13 @@
                         <thead>
                             <tr>
                                 <th>Name</th>
-                                <th>No NPWP/KTP</th>
+                                <th>Name PT</th>
+                                <th>No NPWP</th>
+                                <th>No KTP</th>
                                 <th>No HP</th>
                                 <th>Email</th>
+                                <th>Tipe Pembayaran</th>
+                                <th>Warehouse</th>
                                 <th>Address</th>
                                 <th>Status</th>
                                 <th>Created At</th>
@@ -150,14 +154,17 @@
                             @foreach($customers as $customer)
                                 <tr>
                                     <td>{{ $customer->name }}</td>
-                                    <td>{{ $customer->no_npwp_ktp }}</td>
+                                    <td>{{ $customer->name_pt }}</td>
+                                    <td>{{ $customer->no_npwp }}</td>
+                                    <td>{{ $customer->no_ktp }}</td>
                                     <td>{{ $customer->no_hp }}</td>
                                     <td>{{ $customer->email }}</td>
+                                    <td>{{ $customer->type_payment_customer }}</td>
+                                    <td>{{ $customer->warehouse ? $customer->warehouse->name : 'No Warehouse Found' }}</td>
                                     <td>{{ $customer->address }}</td>
                                     <td class="{{ $customer->status == 'active' ? 'status-active' : 'status-inactive' }} text-center">
                                         {{ ucfirst($customer->status) }}
                                     </td>
-                                    <!-- <td>{{ $customer->status }}</td> -->
                                     <td>{{ $customer->created_at ? $customer->created_at->format('d-m-Y H:i:s') : '-' }}</td>
                                     <td>{{ $customer->updated_at ? $customer->updated_at->format('d-m-Y H:i:s') : '-' }}</td>
 
