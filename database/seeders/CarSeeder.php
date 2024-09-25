@@ -13,28 +13,28 @@ class CarSeeder extends Seeder
             [
                 'type' => 'Tronton',
                 'rental_price' => 1500000.00,
-                'status' => 'available',
+                'status' => 'Active',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
                 'type' => '20Ft',
                 'rental_price' => 1200000.00,
-                'status' => 'available',
+                'status' => 'Active',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
                 'type' => '40Ft',
                 'rental_price' => 1800000.00,
-                'status' => 'available',
+                'status' => 'Active',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
                 'type' => '45Ft',
                 'rental_price' => 2000000.00,
-                'status' => 'available',
+                'status' => 'Active',
                 'created_at' => now(),
                 'updated_at' => now(),
             ]
