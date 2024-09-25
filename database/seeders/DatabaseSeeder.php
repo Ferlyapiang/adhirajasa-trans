@@ -2,8 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\Group;
-use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -16,6 +14,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(UsersTableSeeder::class);
         $this->call(GroupsTableSeeder::class);
+        $this->call(CarSeeder::class);
         $this->call(WarehousesTableSeeder::class);
         $this->call(ItemTypesTableSeeder::class);
         $this->call(CustomersTableSeeder::class);
