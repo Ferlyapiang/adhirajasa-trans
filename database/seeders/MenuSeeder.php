@@ -192,6 +192,17 @@ class MenuSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
+            [
+                'name' => 'Data Jenis Mobil',
+                'url' => '/master-data/jenis-mobil',
+                'router' => 'master-data.jenis-mobil.index',
+                'icon' => 'far fa-circle',
+                'is_active' => 1,
+                'priority' => 6,
+                'parent_id' => $masterDataId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
         ]);
 
         // Menambahkan sub-menu untuk Data Gudang
