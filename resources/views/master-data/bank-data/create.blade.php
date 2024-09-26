@@ -61,9 +61,19 @@
     </div>
     <div class="form-group mt-2">
         <label for="warehouse_name">Nama Gudang</label>
-        <select id="warehouse_name" name="warehouse_name" class="form-control" required>
+        
+        <input type="hidden" name="warehouse_id" value="{{ $user->warehouse_id }}">
+    
+        <select id="warehouse_name" name="warehouse_id" class="form-control" required 
+            {{ $user->warehouse_id ? 'disabled' : '' }}>
+            
+            @if (!$user->warehouse_id)
+                <option value="" disabled selected>Pilih Gudang Penyimpanan</option>
+            @endif
+    
             @foreach($warehouses as $warehouse)
-                <option value="{{ $warehouse->name }}" {{ old('warehouse_name') == $warehouse->name ? 'selected' : '' }}>
+                <option value="{{ $warehouse->id }}" 
+                    {{ old('warehouse_id') == $warehouse->id || ($user->warehouse_id == $warehouse->id) ? 'selected' : '' }}>
                     {{ $warehouse->name }}
                 </option>
             @endforeach

@@ -61,15 +61,16 @@
                         <input type="text" id="account_name" name="account_name" class="form-control" value="{{ $bankData->account_name }}" required>
                     </div>
                     <div class="form-group mt-2">
-                        <label for="warehouse_name">Nama Gudang</label>
-                        <select id="warehouse_name" name="warehouse_name" class="form-control" required>
+                        <label for="warehouse_id">Nama Gudang</label>
+                        <select id="warehouse_id" name="warehouse_id" class="form-control" @readonly(true) required>
                             @foreach($warehouses as $warehouse)
-                                <option value="{{ $warehouse->name }}" {{ $bankData->warehouse_name == $warehouse->name ? 'selected' : '' }}>
+                                <option value="{{ $warehouse->id }}" {{ $bankData->warehouse_id == $warehouse->id ? 'selected' : '' }}>
                                     {{ $warehouse->name }}
                                 </option>
                             @endforeach
                         </select>
                     </div>
+                    
                     <div class="form-group mt-2">
                         <label for="status">Status</label>
                         <select id="status" name="status" class="form-control" required>
