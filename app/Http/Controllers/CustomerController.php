@@ -10,11 +10,21 @@ use Illuminate\Support\Facades\Auth;
 
 class CustomerController extends Controller
 {
-    public function index()
+        public function index()
     {
-        $customers = Customer::all();
-        $warehouse = Warehouse::all();
-        return view('master-data.customers.index', compact('customers'));
+        $user = Auth::user();
+
+        if ($user->warehouse_id) {
+
+            $customers = Customer::where('warehouse_id', $user->warehouse_id)->get();
+        } else {
+            
+            $customers = Customer::all();
+        }
+
+        $warehouses = Warehouse::all();
+
+        return view('master-data.customers.index', compact('customers', 'warehouses'));
     }
 
     public function create()

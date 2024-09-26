@@ -13,48 +13,65 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use App\Models\LogData;
 use Illuminate\Support\Facades\DB;
+use App\Models\User;
 
 class BarangMasukController extends Controller
 {
 
     public function index()
-    {
+{
+    $user = Auth::user(); // Get the authenticated user
+
+    // If user has a warehouse_id, filter data by warehouse_id; else retrieve all data
+    if ($user->warehouse_id) {
+        // Filter data based on user's warehouse_id
+        $barangMasuks = BarangMasuk::with(['items', 'customer'])
+            ->where('gudang_id', $user->warehouse_id)
+            ->orderBy('tanggal_masuk', 'desc')
+            ->get();
+    } else {
+        // Retrieve all data if user doesn't have a warehouse_id
         $barangMasuks = BarangMasuk::with(['items', 'customer'])
             ->orderBy('tanggal_masuk', 'desc')
             ->get();
+    }
 
-        $barangKeluars = BarangKeluar::with('items')->get();
-        $fifoData = [];
+    // Get all BarangKeluar records to calculate FIFO
+    $barangKeluars = BarangKeluar::with('items')->get();
+    $fifoData = [];
 
-        foreach ($barangMasuks as $barangMasuk) {
-            $fifo_in = $barangMasuk->items->sum('qty');
-            $fifo_out = 0;
+    foreach ($barangMasuks as $barangMasuk) {
+        $fifo_in = $barangMasuk->items->sum('qty');
+        $fifo_out = 0;
 
-            foreach ($barangKeluars as $barangKeluar) {
-                foreach ($barangKeluar->items as $item) {
-                    if ($item->barang_masuk_id === $barangMasuk->id) {
-                        $fifo_out += $item->qty;
-                    }
+        foreach ($barangKeluars as $barangKeluar) {
+            foreach ($barangKeluar->items as $item) {
+                // Calculate FIFO out based on barang_masuk_id matching
+                if ($item->barang_masuk_id === $barangMasuk->id) {
+                    $fifo_out += $item->qty;
                 }
             }
-
-            $fifoData[$barangMasuk->id] = [
-                'fifo_in' => $fifo_in,
-                'fifo_out' => $fifo_out,
-                'fifo_sisa' => $fifo_in - $fifo_out,
-            ];
         }
 
-        foreach ($barangMasuks as $barangMasuk) {
-            if (isset($fifoData[$barangMasuk->id])) {
-                $barangMasuk->fifo_in = $fifoData[$barangMasuk->id]['fifo_in'];
-                $barangMasuk->fifo_out = $fifoData[$barangMasuk->id]['fifo_out'];
-                $barangMasuk->fifo_sisa = $fifoData[$barangMasuk->id]['fifo_sisa'];
-            }
-        }
-
-        return view('data-gudang.barang-masuk.index', compact('barangMasuks'));
+        $fifoData[$barangMasuk->id] = [
+            'fifo_in' => $fifo_in,
+            'fifo_out' => $fifo_out,
+            'fifo_sisa' => $fifo_in - $fifo_out,
+        ];
     }
+
+    // Attach FIFO data to each BarangMasuk
+    foreach ($barangMasuks as $barangMasuk) {
+        if (isset($fifoData[$barangMasuk->id])) {
+            $barangMasuk->fifo_in = $fifoData[$barangMasuk->id]['fifo_in'];
+            $barangMasuk->fifo_out = $fifoData[$barangMasuk->id]['fifo_out'];
+            $barangMasuk->fifo_sisa = $fifoData[$barangMasuk->id]['fifo_sisa'];
+        }
+    }
+
+    // Return the view with filtered or all data
+    return view('data-gudang.barang-masuk.index', compact('barangMasuks'));
+}
 
     public function showDetail($id)
     {
@@ -73,13 +90,25 @@ class BarangMasukController extends Controller
         $barangs = Barang::all();
         $pemilik = Customer::all();
         $gudangs = Warehouse::all();
+        $user = Auth::user();
 
-        return view('data-gudang.barang-masuk.create', compact('barangs', 'pemilik', 'gudangs'));
+        return view('data-gudang.barang-masuk.create', compact('barangs', 'pemilik', 'gudangs', 'user'));
     }
 
     public function store(Request $request)
     {
         try {
+            $user = Auth::user();
+
+            if (is_null($user->warehouse_id)) {
+                $request->validate([
+                    'gudang_id' => 'required|exists:warehouses,id',
+                ]);
+            } else {
+                $request['gudang_id'] = $user->warehouse_id;
+            }
+    
+    
             // Validation
             $request->validate([
                 'tanggal_masuk' => 'required|date',

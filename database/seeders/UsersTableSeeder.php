@@ -16,13 +16,26 @@ class UsersTableSeeder extends Seeder
     public function run()
     {
         DB::table('users')->insert([
-            'name' => 'Admin',
-            'email' => 'admin@ats.com',
-            'password' => Hash::make('admin123'),
-            'status' => 'active',
-            'group_id' => 1,
-            'created_at' => now(),
-            'updated_at' => now(),
+            [
+                'name' => 'Admin',
+                'email' => 'admin@ats.com',
+                'password' => Hash::make('admin123'),
+                'status' => 'active',
+                'group_id' => 1,
+                'warehouse_id' => null,  // Add this line to match the column count
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'admin kapuk',
+                'email' => 'adminkapuk@ats.com',
+                'password' => Hash::make('admin123'),
+                'status' => 'active',
+                'group_id' => 1,
+                'warehouse_id' => 2,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
         ]);
     }
 }

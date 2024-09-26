@@ -100,13 +100,22 @@
 
                     <div class="form-group">
                         <label for="gudang">Gudang</label>
-                        <select name="gudang_id" id="gudang" class="form-control" required>
-                            <option value="" disabled selected>Pilih Gudang Penyimpanan</option>
+                        <select name="gudang_id" id="gudang" class="form-control" 
+                            {{ $user->warehouse_id ? 'disabled' : '' }} required>
+                            @if (is_null($user->warehouse_id))
+                                <option value="" disabled selected>Pilih Gudang Penyimpanan</option>
+                            @endif
                             @foreach ($gudangs as $gudang)
-                                <option value="{{ $gudang->id }}">{{ $gudang->name }}</option>
+                                <option value="{{ $gudang->id }}" 
+                                    {{ $user->warehouse_id == $gudang->id ? 'selected' : '' }}>
+                                    {{ $gudang->name }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
+                    
+                    
+                    
 
                     <div class="form-group">
                         <label for="nama_pemilik">Nama Pemilik</label>
