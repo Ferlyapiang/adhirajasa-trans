@@ -101,7 +101,10 @@
             <!-- Main content -->
             <div class="container-fluid pl-4">
                 <h1 class="mb-4">Data Gudang</h1>
+                @if (is_null(Auth::user()->warehouse_id))
                 <a href="{{ route('master-data.warehouses.create') }}" class="btn btn-primary mb-3">Tambah Gudang</a>
+                @endif
+            
 
                 <!-- Table responsive wrapper -->
                 <div class="table-responsive">
@@ -126,11 +129,13 @@
                                     <td>{{ $warehouse->email }}</td>
                                     <td>
                                         <a href="{{ route('master-data.warehouses.edit', $warehouse->id) }}" class="btn btn-warning btn-sm">Edit</a>
+                                        @if (is_null(Auth::user()->warehouse_id))
                                         <form action="{{ route('master-data.warehouses.destroy', $warehouse->id) }}" method="POST" style="display:inline;">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                                         </form>
+                                        @endif
                                     </td>
                                 </tr>
                             @endforeach

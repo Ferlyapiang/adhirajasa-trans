@@ -11,9 +11,18 @@ class WarehouseController extends Controller
 {
     public function index()
     {
-        $warehouses = Warehouse::all();
+        $user = Auth::user();
+
+        if ($user->warehouse_id) {
+            $warehouses = Warehouse::where('id', $user->warehouse_id)->get();
+        } else {
+            $warehouses = Warehouse::all();
+        }
+
         return view('master-data.warehouses.index', compact('warehouses'));
     }
+
+    
 
     public function create()
     {
