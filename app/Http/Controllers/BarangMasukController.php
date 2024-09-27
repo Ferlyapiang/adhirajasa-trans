@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use App\Models\LogData;
 use Illuminate\Support\Facades\DB;
-use App\Models\User;
 
 class BarangMasukController extends Controller
 {

@@ -78,13 +78,21 @@
                     <div class="form-group">
                         <label for="pemilik">Pemilik</label>
                         <select name="pemilik" class="form-control" id="pemilik" required>
+                            <option value="" disabled selected>Pilih Pemilik Barang</option>
+                    
                             @foreach($customers as $customer)
-                                <option value="{{ $customer->id }}" {{ $barang->pemilik == $customer->id ? 'selected' : '' }}>
-                                    {{ $customer->name }}
-                                </option>
+                                @if(Auth::user()->warehouse_id === null)
+                                    <option value="{{ $customer->id }}" {{ $barang->pemilik == $customer->id ? 'selected' : '' }}>
+                                        {{ $customer->name }} | {{ optional($customer->warehouse)->name }}
+                                    </option>
+                                @else
+                                    <option value="{{ $customer->id }}" {{ $barang->pemilik == $customer->id ? 'selected' : '' }}>
+                                        {{ $customer->name }}
+                                    </option>
+                                @endif
                             @endforeach
                         </select>
-                    </div>
+                    </div>                    
                     <div class="form-group">
                         <label for="status">Status</label>
                         <select name="status" class="form-control" id="status" required>
