@@ -157,7 +157,7 @@
                                                             <td>{{ $item->barang->nama_barang }}</td>
                                                             <td>{{ $barangMasuk->customer->name }}</td>
                                                             <td>{{ $barangMasuk->gudang->name }}</td>
-                                                            <td>{{ $barangMasuk->jenis_mobil }}</td>
+                                                            <td>{{ $barangMasuk->typeMobil->type ?? 'N/A' }}</td>
                                                             <td>{{ $barangMasuk->nomer_polisi }}</td>
                                                             <td>{{ $barangMasuk->nomer_container }}</td>
                                                             <td>{{ $item->notes }}</td>

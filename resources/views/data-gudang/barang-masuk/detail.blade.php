@@ -113,14 +113,20 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="jenis_mobil">Jenis Mobil</label>
-                        <input type="text" name="jenis_mobil" id="jenis_mobil" class="form-control"
-                            value="{{ $barangMasuk->jenis_mobil }}" readonly>
+                        <label for="type_mobil_id">Jenis Mobil</label>
+                        <select name="type_mobil_id" id="type_mobil_id" class="form-control" disabled>
+                            <option value="" hidden>Pilih Jenis Mobil</option>
+                            @foreach ($typeMobilOptions as $typeMobil) 
+                                <option value="{{ $typeMobil->id }}" {{ $barangMasuk->type_mobil_id == $typeMobil->id ? 'selected' : '' }}>
+                                    {{ $typeMobil->type }}
+                                </option> 
+                            @endforeach
+                        </select>
                     </div>
 
                     <div class="mb-3">
                         <label for="selection" class="form-label">Choose Identification Type:</label>
-                        <select id="id_selection" class="form-select" onchange="toggleFields()" required>
+                        <select id="id_selection" class="form-select" onchange="toggleFields()" required disabled>
                             <option value="">-- Select --</option>
                             <option value="nomer_polisi" {{ $barangMasuk->nomer_polisi ? 'selected' : '' }}>Nomer Polisi</option>
                             <option value="nomer_container" {{ $barangMasuk->nomer_container ? 'selected' : '' }}>Nomer Container</option>
@@ -130,13 +136,13 @@
                     <div id="nomer_polisi_field" class="mb-3" style="display: {{ $barangMasuk->nomer_polisi ? 'block' : 'none' }};">
                         <label for="nomer_polisi">Nomer Polisi</label>
                         <input type="text" name="nomer_polisi" id="nomer_polisi" class="form-control" 
-                               value="{{ $barangMasuk->nomer_polisi }}">
+                               value="{{ $barangMasuk->nomer_polisi }}" disabled>
                     </div>
                     
                     <div id="nomer_container_field" class="mb-3" style="display: {{ $barangMasuk->nomer_container ? 'block' : 'none' }};">
                         <label for="nomer_container">Nomer Container</label>
                         <input type="text" name="nomer_container" id="nomer_container" class="form-control" 
-                               value="{{ $barangMasuk->nomer_container }}" readonly>
+                               value="{{ $barangMasuk->nomer_container }}" disabled>
                     </div>
 
                     <h2>Items</h2>

@@ -11,7 +11,7 @@ class BarangMasuk extends Model
         'tanggal_masuk',
         'gudang_id',
         'customer_id',
-        'jenis_mobil',
+        'type_mobil_id',
         'nomer_polisi',
         'nomer_container',
     ];
@@ -42,6 +42,11 @@ class BarangMasuk extends Model
     public function bankTransfer()
     {
         return $this->belongsTo(BankData::class);
+    }
+
+    public function typeMobil()
+    {
+        return $this->belongsTo(JenisMobil::class, 'type_mobil_id'); // Adjust 'jenis_mobil_id' if necessary
     }
 
 }

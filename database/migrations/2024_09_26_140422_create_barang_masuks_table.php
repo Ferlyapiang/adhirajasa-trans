@@ -1,3 +1,4 @@
+@ -1,45 +0,0 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
@@ -17,7 +18,7 @@ return new class extends Migration
             $table->date('tanggal_masuk');
             $table->foreignId('gudang_id')->constrained('warehouses')->onDelete('cascade');
             $table->foreignId('customer_id')->constrained('customers')->onDelete('cascade');
-            $table->string('jenis_mobil')->nullable();
+            $table->foreignId('type_mobil_id')->constrained('type_mobil')->onDelete('cascade');
             $table->string('nomer_polisi')->nullable();
             $table->string('nomer_container');
             $table->timestamps();

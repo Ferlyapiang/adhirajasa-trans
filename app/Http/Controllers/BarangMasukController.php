@@ -13,30 +13,29 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use App\Models\LogData;
 use Illuminate\Support\Facades\DB;
+use App\Models\JenisMobil;
 
 class BarangMasukController extends Controller
 {
 
     public function index()
 {
-    $user = Auth::user(); // Get the authenticated user
+    $user = Auth::user();
 
-    // If user has a warehouse_id, filter data by warehouse_id; else retrieve all data
     if ($user->warehouse_id) {
-        // Filter data based on user's warehouse_id
         $barangMasuks = BarangMasuk::with(['items', 'customer'])
             ->where('gudang_id', $user->warehouse_id)
             ->orderBy('tanggal_masuk', 'desc')
             ->get();
     } else {
-        // Retrieve all data if user doesn't have a warehouse_id
         $barangMasuks = BarangMasuk::with(['items', 'customer'])
             ->orderBy('tanggal_masuk', 'desc')
             ->get();
     }
 
-    // Get all BarangKeluar records to calculate FIFO
     $barangKeluars = BarangKeluar::with('items')->get();
+    
+    $typeMobilOptions = JenisMobil::all();
     $fifoData = [];
 
     foreach ($barangMasuks as $barangMasuk) {
@@ -59,7 +58,6 @@ class BarangMasukController extends Controller
         ];
     }
 
-    // Attach FIFO data to each BarangMasuk
     foreach ($barangMasuks as $barangMasuk) {
         if (isset($fifoData[$barangMasuk->id])) {
             $barangMasuk->fifo_in = $fifoData[$barangMasuk->id]['fifo_in'];
@@ -68,7 +66,6 @@ class BarangMasukController extends Controller
         }
     }
 
-    // Return the view with filtered or all data
     return view('data-gudang.barang-masuk.index', compact('barangMasuks'));
 }
 
@@ -79,8 +76,10 @@ class BarangMasukController extends Controller
         $pemilik = Customer::all();
         $gudangs = Warehouse::all();
         $items = $barangMasuk->items;
+        
+        $typeMobilOptions = JenisMobil::all();
 
-        return view('data-gudang.barang-masuk.detail', compact('barangMasuk', 'barangs', 'pemilik', 'gudangs', 'items'));
+        return view('data-gudang.barang-masuk.detail', compact('barangMasuk', 'barangs', 'pemilik', 'gudangs', 'items', 'typeMobilOptions'));
     }
 
     public function create()
@@ -96,8 +95,9 @@ class BarangMasukController extends Controller
         }
     
         $barangs = Barang::all();
+        $typeMobilOptions = JenisMobil::all();
     
-        return view('data-gudang.barang-masuk.create', compact('barangs', 'pemilik', 'gudangs', 'user'));
+        return view('data-gudang.barang-masuk.create', compact('barangs', 'pemilik', 'gudangs', 'user', 'typeMobilOptions'));
     }
 
     public function store(Request $request)
@@ -113,12 +113,11 @@ class BarangMasukController extends Controller
                 $request['gudang_id'] = $user->warehouse_id;
             }
     
-    
-            // Validation
             $request->validate([
                 'tanggal_masuk' => 'required|date',
                 'gudang_id' => 'required|exists:warehouses,id',
                 'customer_id' => 'required|exists:customers,id',
+                'type_mobil_id' => 'required|exists:type_mobil,id',
                 'nomer_polisi' => 'nullable|string',
                 'nomer_container' => 'nullable|string',
                 'items.*.barang_id' => 'required|exists:barangs,id',
@@ -127,7 +126,6 @@ class BarangMasukController extends Controller
                 'items.*.notes' => 'required|string',
             ]);
 
-            // Generate JOC Number
             $datePrefix = now()->format('Ymd');
             $latestJoc = BarangMasuk::where('joc_number', 'like', 'ATS-' . $datePrefix . '%')
                 ->orderBy('joc_number', 'desc')
@@ -142,16 +140,16 @@ class BarangMasukController extends Controller
 
             $jocNumber = 'ATS-' . $datePrefix . $newNumber;
 
-            // Create BarangMasuk record
             $barangMasuk = BarangMasuk::create([
                 'joc_number' => $jocNumber,
                 'tanggal_masuk' => $request->tanggal_masuk,
                 'gudang_id' => $request->gudang_id,
                 'customer_id' => $request->customer_id,
-                'jenis_mobil' => $request->jenis_mobil ?? null, 
-                'nomer_polisi' => $request->nomer_polisi ?? null,
-                'nomer_container' => $request->nomer_container ?? null,     
+                'type_mobil_id' => $request->type_mobil_id, 
+                'nomer_polisi' => $request->nomer_polisi ?? "",
+                'nomer_container' => $request->nomer_container ?? "",     
             ]);
+
             $items = json_decode($request->items, true);
             Log::info('Decoded Items:', ['items' => $items]);
 
@@ -170,7 +168,6 @@ class BarangMasukController extends Controller
                 });
             }
 
-            // Log the success
             LogData::create([
                 'user_id' => Auth::id(),
                 'name' => Auth::user()->name,
@@ -193,7 +190,6 @@ class BarangMasukController extends Controller
         $user = Auth::user();
         $barangMasuk = BarangMasuk::findOrFail($id);
         $barangs = Barang::all();
-        // $pemilik = Customer::all();
         if ($user->warehouse_id) {
             $pemilik = Customer::where('status', 'active')
                                 ->where('warehouse_id', $user->warehouse_id)
@@ -203,18 +199,19 @@ class BarangMasukController extends Controller
         }
         $gudangs = Warehouse::all();
         $items = $barangMasuk->items;
+        $typeMobilOptions = JenisMobil::all();
 
-        return view('data-gudang.barang-masuk.edit', compact('barangMasuk', 'barangs', 'pemilik', 'gudangs', 'items'));
+        return view('data-gudang.barang-masuk.edit', compact('barangMasuk', 'barangs', 'pemilik', 'gudangs', 'items', 'typeMobilOptions'));
     }
 
     public function update(Request $request, $id)
     {
         try {
-            // Validation
             $request->validate([
                 'tanggal_masuk' => 'required|date',
                 'gudang_id' => 'required|exists:warehouses,id',
                 'customer_id' => 'required|exists:customers,id',
+                'type_mobil_id' => 'required|exists:type_mobil,id', 
                 'nomer_polisi' => 'nullable|string',
                 'nomer_container' => 'nullable|string',
                 'items.*.barang_id' => 'required|exists:barangs,id',
@@ -223,16 +220,15 @@ class BarangMasukController extends Controller
                 'items.*.notes' => 'nullable|string',
             ]);
 
-            // dd($request->all());
             $barangMasuk = BarangMasuk::findOrFail($id);
 
             $barangMasuk->update([
                 'tanggal_masuk' => $request->tanggal_masuk,
                 'gudang_id' => $request->gudang_id,
                 'customer_id' => $request->customer_id,
-                'jenis_mobil' => $request->jenis_mobil ?? null,  // Handle nullable fields
-                'nomer_polisi' => $request->nomer_polisi ?? null,  // Handle nullable fields
-                'nomer_container' => $request->nomer_container,
+                'type_mobil_id' => $request->type_mobil_id,
+                'nomer_polisi' => $request->nomer_polisi ?? "", 
+                'nomer_container' => $request->nomer_container ?? "", 
             ]);
 
             $items = json_decode($request->items, true);

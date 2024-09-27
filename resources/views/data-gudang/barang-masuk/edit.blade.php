@@ -117,10 +117,18 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="jenis_mobil">Jenis Mobil</label>
-                        <input type="text" name="jenis_mobil" id="jenis_mobil" class="form-control"
-                            value="{{ $barangMasuk->jenis_mobil }}">
+                        <label for="type_mobil_id">Jenis Mobil</label>
+                        <select name="type_mobil_id" id="type_mobil_id" class="form-control">
+                            <option value="" hidden>Pilih Jenis Mobil</option>
+                            @foreach ($typeMobilOptions as $typeMobil) 
+                                <option value="{{ $typeMobil->id }}" {{ $barangMasuk->type_mobil_id == $typeMobil->id ? 'selected' : '' }}>
+                                    {{ $typeMobil->type }}
+                                </option> 
+                            @endforeach
+                        </select>
                     </div>
+                    
+                    
 
                     <div class="mb-3">
                         <label for="selection" class="form-label">Choose Identification Type:</label>
