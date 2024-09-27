@@ -9,6 +9,7 @@ use App\Models\BankData;
 use App\Models\BarangMasukItem;
 use App\Models\Barang;
 use App\Models\BarangMasuk;
+use App\Models\JenisMobil;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class PDFController extends Controller
@@ -89,5 +90,29 @@ class PDFController extends Controller
 
         // Return the generated PDF for download, using the customer name in the filename
         return $pdf->download('invoice_pajak_' . str_replace(' ', '_', $customerName) . '.pdf');
+    }
+
+    public function downloadSuratJalanPDF($id)
+    {
+        $barangKeluar = BarangKeluar::with('items')->findOrFail($id);
+        $warehouses = Warehouse::all();
+        $customers = Customer::all();
+        $bankTransfers = BankData::all();
+        $typeMobilOptions = JenisMobil::all();
+
+        // Prepare data to pass to the view
+        $data = [
+            'barangKeluar' => $barangKeluar,
+            'warehouses' => $warehouses,
+            'customers' => $customers,
+            'bankTransfers' => $bankTransfers,
+            'typeMobilOptions' => $typeMobilOptions
+        ];
+
+        // Load the view and pass the data
+        $pdf = Pdf::loadView('data-gudang.barang-keluar.pdfSuratJalan', $data);
+
+        // Download the PDF file
+        return $pdf->download('SuratJalan_'.$barangKeluar->nomer_surat_jalan.'.pdf');
     }
 }

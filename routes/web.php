@@ -131,6 +131,7 @@ Route::get('data-gudang/barang-keluar/{barangKeluar}', [BarangKeluarController::
 Route::get('data-gudang/barang-keluar/{barangKeluar}/edit', [BarangKeluarController::class, 'edit'])->name('data-gudang.barang-keluar.edit');
 Route::put('data-gudang/barang-keluar/{barangKeluar}', [BarangKeluarController::class, 'update'])->name('data-gudang.barang-keluar.update');
 Route::delete('data-gudang/barang-keluar/{barangKeluar}', [BarangKeluarController::class, 'destroy'])->name('data-gudang.barang-keluar.destroy');
+Route::get('data-gudang/barang-keluar/showSuratJalan/{barangKeluar}', [BarangKeluarController::class, 'showSuratJalan'])->name('data-gudang.barang-keluar.showSuratJalan');
 
 
 Route::get('/api/items/{customerId}/{warehouseId}', [BarangKeluarController::class, 'getItemsByCustomer']);
@@ -138,6 +139,8 @@ Route::get('/api/customers/{warehouseId}', [BarangKeluarController::class, 'getC
 
 Route::get('/download-pdf/{id}', [PDFController::class, 'BarangKeluar_download_pdf'])->name('pdf.invoice-barang-keluar');
 Route::get('/download-pdf/pajak/{id}', [PDFController::class, 'BarangKeluar_pajak_download_pdf'])->name('pdf.invoice-barang-keluar-pajak');
+Route::get('/surat-jalan/download/{id}', [PDFController::class, 'downloadSuratJalanPDF'])->name('surat-jalan.download');
+
 
 Route::resource('management-menu/menus', MenuController::class)->names([
     'index' => 'management-menu.menus.index',

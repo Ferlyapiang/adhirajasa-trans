@@ -214,6 +214,7 @@ class BarangKeluarController extends Controller
      */
     public function show($id)
     {
+        $user = Auth::user();
         $barangKeluar = BarangKeluar::with('items')->findOrFail($id);
 
         $warehouses = Warehouse::all();
@@ -227,7 +228,7 @@ class BarangKeluarController extends Controller
         $barangIds = $barangMasukItems->pluck('barang_id')->unique();
         $filteredBarangs = Barang::whereIn('id', $barangIds)->get();
         $barangMasuks = BarangMasuk::whereIn('id', $barangMasukIds)->get()->keyBy('id');
-
+        $typeMobilOptions = JenisMobil::all();
         return view('data-gudang.barang-keluar.detail', [
             'barangKeluar' => $barangKeluar,
             'warehouses' => $warehouses,
@@ -236,6 +237,38 @@ class BarangKeluarController extends Controller
             'barangs' => $filteredBarangs,
             'groupedBarangMasukItems' => $groupedBarangMasukItems,
             'barangMasuks' => $barangMasuks,
+            'typeMobilOptions' => $typeMobilOptions,
+            'user' => $user
+        ]);
+    }
+
+    public function showSuratJalan($id)
+    {
+        $barangKeluar = BarangKeluar::with('items')->findOrFail($id);
+
+        $warehouses = Warehouse::all();
+        $customers = Customer::all();
+        $bankTransfers = BankData::all();
+
+        $barangKeluarItems = $barangKeluar->items;
+        $barangMasukIds = $barangKeluarItems->pluck('barang_masuk_id')->unique();
+        $barangMasukItems = BarangMasukItem::whereIn('barang_masuk_id', $barangMasukIds)->get();
+        $groupedBarangMasukItems = $barangMasukItems->groupBy('barang_masuk_id');
+        $barangIds = $barangMasukItems->pluck('barang_id')->unique();
+        $filteredBarangs = Barang::whereIn('id', $barangIds)->get();
+        $barangMasuks = BarangMasuk::whereIn('id', $barangMasukIds)->get()->keyBy('id');
+       
+        $typeMobilOptions = JenisMobil::all();
+        return view('data-gudang.barang-keluar.detailSuratJalan', [
+            'barangKeluar' => $barangKeluar,
+            'warehouses' => $warehouses,
+            'customers' => $customers,
+            'bankTransfers' => $bankTransfers,
+            'barangs' => $filteredBarangs,
+            'groupedBarangMasukItems' => $groupedBarangMasukItems,
+            'barangMasuks' => $barangMasuks,
+            'typeMobilOptions' => $typeMobilOptions
+            
         ]);
     }
 
