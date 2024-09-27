@@ -72,15 +72,6 @@
                         <label for="sku">SKU</label>
                         <input type="text" name="sku" class="form-control" id="sku" required>
                     </div>
-                    {{-- <div class="form-group">
-                        <label for="pemilik">Pemilik</label>
-                        <select name="pemilik" class="form-control select2" id="pemilik" required>
-                            <option value="" disabled selected>Pilih Pemilik Barang</option>
-                            @foreach($customers as $customer)
-                                <option value="{{ $customer->id }}">{{ $customer->name }}</option>
-                            @endforeach
-                        </select>
-                    </div> --}}
                     <div class="form-group">
                         <label for="pemilik">Pemilik</label>
                         <select name="pemilik" class="form-control select2" id="pemilik" required>

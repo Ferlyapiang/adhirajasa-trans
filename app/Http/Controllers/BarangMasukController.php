@@ -83,14 +83,20 @@ class BarangMasukController extends Controller
         return view('data-gudang.barang-masuk.detail', compact('barangMasuk', 'barangs', 'pemilik', 'gudangs', 'items'));
     }
 
-
     public function create()
     {
-        $barangs = Barang::all();
-        $pemilik = Customer::all();
-        $gudangs = Warehouse::all();
         $user = Auth::user();
-
+        $gudangs = Warehouse::all();
+        if ($user->warehouse_id) {
+            $pemilik = Customer::where('status', 'active')
+                                ->where('warehouse_id', $user->warehouse_id)
+                                ->get();
+        } else {
+            $pemilik = Customer::where('status', 'active')->get();
+        }
+    
+        $barangs = Barang::all();
+    
         return view('data-gudang.barang-masuk.create', compact('barangs', 'pemilik', 'gudangs', 'user'));
     }
 

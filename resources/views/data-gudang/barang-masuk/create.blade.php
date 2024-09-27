@@ -113,16 +113,17 @@
                             @endforeach
                         </select>
                     </div>
-                    
-                    
-                    
 
                     <div class="form-group">
                         <label for="nama_pemilik">Nama Pemilik</label>
                         <select name="customer_id" id="nama_pemilik" class="form-control" required>
                             <option value="" disabled selected>Pilih Nama Pemilik Barang</option>
-                            @foreach ($pemilik as $owner)
-                                <option value="{{ $owner->id }}">{{ $owner->name }}</option>
+                            @foreach($pemilik as $owner)
+                                @if(Auth::user()->warehouse_id === null)
+                                    <option value="{{ $owner->id }}">{{ $owner->name }} | {{ optional($owner->warehouse)->name }}</option>
+                                @else
+                                    <option value="{{ $owner->id }}">{{ $owner->name }}</option>
+                                @endif
                             @endforeach
                         </select>
                     </div>
