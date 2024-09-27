@@ -11,15 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Creating the barang_keluars table
         Schema::create('barang_keluars', function (Blueprint $table) {
             $table->id();
-            $table->date('tanggal_keluar'); // Tanggal Keluar
-            $table->foreignId('gudang_id')->constrained('warehouses')->onDelete('cascade'); // Gudang ID
-            $table->foreignId('customer_id')->constrained('customers')->onDelete('cascade'); // Pemilik Barang (Customer ID)
-            $table->string('nomer_invoice')->nullable(); // Nomor Container (Opsional)
-            $table->string('nomer_polisi')->nullable(); // Nomor Polisi (Opsional)
-            $table->foreignId('bank_transfer_id')->constrained('bank_datas')->onDelete('cascade'); // Transfer (ID Bank)
+            $table->date('tanggal_keluar');
+            $table->foreignId('gudang_id')->constrained('warehouses')->onDelete('cascade'); 
+            $table->foreignId('customer_id')->constrained('customers')->onDelete('cascade');
+            $table->foreignId('type_mobil_id')->nullable()->constrained('type_mobil')->onDelete('cascade');
+            $table->string('nomer_surat_jalan')->nullable();
+            $table->string('nomer_invoice')->nullable();
+            $table->string('nomer_polisi')->nullable();
+            $table->string('nomer_container')->nullable();
+            $table->decimal('harga_kirim_barang', 15, 2)->nullable();
+            $table->foreignId('bank_transfer_id')->constrained('bank_datas')->onDelete('cascade');
             $table->timestamps();
         });
 

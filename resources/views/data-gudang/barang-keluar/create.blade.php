@@ -90,63 +90,94 @@
                                                 class="form-control @error('tanggal_keluar') is-invalid @enderror"
                                                 value="{{ old('tanggal_keluar') }}" required>
                                             @error('tanggal_keluar')
-                                                <span class="invalid-feedback">{{ $message }}</span>
+                                            <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
                                         </div>
                                         <div class="form-group">
                                             <label for="gudang_id">Gudang</label>
                                             <select name="gudang_id" id="gudang_id"
-                                                class="form-control @error('gudang_id') is-invalid @enderror" required>
+                                                class="form-control @error('gudang_id') is-invalid @enderror"
+                                                {{ !is_null($user->warehouse_id) ? 'readonly' : '' }} required>
                                                 <option value="">Select Gudang</option>
                                                 @foreach ($warehouses as $warehouse)
-                                                    <option value="{{ $warehouse->id }}"
-                                                        {{ old('gudang_id') == $warehouse->id ? 'selected' : '' }}>
-                                                        {{ $warehouse->name }}
-                                                    </option>
+                                                <option value="{{ $warehouse->id }}"
+                                                    {{ $user->warehouse_id == $warehouse->id ? 'selected' : '' }}>
+                                                    {{ $warehouse->name }}
+                                                </option>
                                                 @endforeach
                                             </select>
                                             @error('gudang_id')
-                                                <span class="invalid-feedback">{{ $message }}</span>
+                                            <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
                                         </div>
 
                                         <div class="form-group">
                                             <label for="customer_id">Pemilik Barang</label>
                                             <select name="customer_id" id="customer_id"
-                                                class="form-control @error('customer_id') is-invalid @enderror"
-                                                required>
+                                                class="form-control @error('customer_id') is-invalid @enderror" required>
                                                 <option value="">Select Pemilik Barang</option>
-                                                <!-- Options akan diisi melalui JavaScript -->
                                             </select>
                                             @error('customer_id')
-                                                <span class="invalid-feedback">{{ $message }}</span>
+                                            <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
                                         </div>
+
                                         <div class="form-group">
+                                            <label for="shipping_option">Pilih Opsi Pengiriman</label>
+                                            <select name="shipping_option" id="shipping_option" class="form-control" onchange="toggleFieldsKirim()">
+                                                <option value="">Pilih Opsi Pengiriman</option>
+                                                <option value="kirim">Kirim</option>
+                                                <option value="drop">Drop</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="form-group" id="mobilField" style="display: none;">
+                                            <label for="type_mobil_id">Jenis Mobil</label>
+                                            <select name="type_mobil_id" id="type_mobil_id" class="form-control">
+                                                <option value="">Pilih Jenis Mobil</option>
+                                                @foreach ($typeMobilOptions as $typeMobil)
+                                                <option value="{{ $typeMobil->id }}">{{ $typeMobil->type }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+
+                                        <div class="form-group" id="hargaKirimField" style="display: none;">
+                                            <label for="harga_kirim_barang">Harga Kirim Barang</label>
+                                            <input type="text" name="harga_kirim_barang" id="harga_kirim_barang"
+                                                class="form-control @error('harga_kirim_barang') is-invalid @enderror"
+                                                value="{{ old('harga_kirim_barang') ? number_format(old('harga_kirim_barang'), 2) : '' }}">
+                                            @error('harga_kirim_barang')
+                                            <span class="invalid-feedback">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="select_type">Pilih Tipe</label>
+                                            <select name="select_type" id="select_type" class="form-control" required>
+                                                <option value="">-- Pilih Tipe --</option>
+                                                <option value="nomer_polisi">Nomer Polisi</option>
+                                                <option value="nomer_container">Nomer Container</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="form-group" id="nomer_polisi_field" style="display:none;">
                                             <label for="nomer_polisi">Nomer Polisi</label>
                                             <input type="text" name="nomer_polisi" id="nomer_polisi"
                                                 class="form-control @error('nomer_polisi') is-invalid @enderror"
                                                 value="{{ old('nomer_polisi') }}">
                                             @error('nomer_polisi')
-                                                <span class="invalid-feedback">{{ $message }}</span>
+                                            <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
                                         </div>
 
-                                        <div class="form-group">
-                                            <label for="bank_transfer_id">Bank Transfer</label>
-                                            <select name="bank_transfer_id" id="bank_transfer_id"
-                                                class="form-control @error('bank_transfer_id') is-invalid @enderror">
-                                                <option value="">Select Bank Transfer</option>
-                                                @foreach ($bankTransfers as $bankTransfer)
-                                                    <option value="{{ $bankTransfer->id }}"
-                                                        {{ old('bank_transfer_id') == $bankTransfer->id ? 'selected' : '' }}>
-                                                        {{ $bankTransfer->bank_name }} -
-                                                        {{ $bankTransfer->account_number }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                            @error('bank_transfer_id')
-                                                <span class="invalid-feedback">{{ $message }}</span>
+                                        <!-- Nomer Container field -->
+                                        <div class="form-group" id="nomer_container_field" style="display:none;">
+                                            <label for="nomer_container">Nomer Container</label>
+                                            <input type="text" name="nomer_container" id="nomer_container"
+                                                class="form-control @error('nomer_container') is-invalid @enderror"
+                                                value="{{ old('nomer_container') }}">
+                                            @error('nomer_container')
+                                            <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
                                         </div>
 
@@ -225,13 +256,13 @@
                         <label for="item_name">Nama Barang</label>
                         <select id="item_name" class="form-control" required>
                             <option value="" disabled selected>Pilih Nama Barang</option>
-                            <!-- Options will be populated based on selected customer -->
+                           
                         </select>
                     </div>
 
                     <div class="form-group">
                         <div class="row">
-                            <!-- Quantity and Unit Fields (Left Side) -->
+
                             <div class="col-md-6">
                                 <label for="item_qty">Quantity</label>
                                 <input type="number" id="item_qty" class="form-control" required>
@@ -239,7 +270,6 @@
                                     Quantity lebih besar dari Sisa Barang.</span>
                             </div>
 
-                            <!-- Unit and Sisa Barang Fields (Right Side) -->
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="item_unit">Unit</label>
@@ -294,12 +324,12 @@
                         <label for="edit_item_name">Nama Barang</label>
                         <select id="edit_item_name" class="form-control" required disabled>
                             <option value="" disabled selected>Pilih Nama Barang</option>
-                            <!-- Options will be populated based on selected customer -->
+                           
                         </select>
                     </div>
                     <div class="form-group">
                         <div class="row">
-                            <!-- Quantity and Unit Fields (Left Side) -->
+
                             <div class="col-md-6">
                                 <label for="edit_item_qty">Quantity</label>
                                 <input type="number" id="edit_item_qty" class="form-control" required>
@@ -307,7 +337,6 @@
                                     Quantity lebih besar dari Sisa Barang.</span>
                             </div>
 
-                            <!-- Unit and Sisa Barang Fields (Right Side) -->
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="edit_item_unit">Unit</label>
@@ -347,7 +376,7 @@
     <script>
         $(document).ready(function() {
             let items = [];
-            let nextJocNumber = 1; // Initialize with the starting number
+            let nextJocNumber = 1; 
 
             function validateQuantity() {
                 let qty = parseFloat($('#item_qty').val()) || 0;
@@ -360,12 +389,10 @@
                 }
             }
 
-            // Validate quantity on input change
             $('#item_qty, #item_sisa_barang').on('input', function() {
                 validateQuantity();
             });
 
-            // Initialize validation
             validateQuantity();
 
             function formatCurrency(amount) {
@@ -432,7 +459,6 @@
                     return;
                 }
 
-                // Get the selected item's name
                 const itemName = $('#item_name option:selected').text();
 
                 const itemExists = items.some(item =>
@@ -445,7 +471,6 @@
                     return;
                 }
 
-                // Add the new item to the items array
                 items.push({
                     barang_id: parseInt(itemId, 10),
                     no_ref: itemJocNumber,
@@ -458,16 +483,12 @@
                     sisa_barang: itemSisaBarang
                 });
 
-                // Increment the Joc number (if needed)
                 nextJocNumber++;
 
-                // Update the items table
                 updateItemsTable();
 
-                // Hide the modal
                 $('#itemModal').modal('hide');
 
-                // Reset form fields
                 $('#item_name').val('');
                 $('#item_qty').val('');
                 $('#item_unit').val('');
@@ -513,7 +534,7 @@
                         method: 'GET',
                         success: function(response) {
                             const itemsDropdown = $(
-                                '#item_name, #edit_item_name'); // Populate both dropdowns
+                                '#item_name, #edit_item_name');
                             itemsDropdown.empty();
                             itemsDropdown.append(
                                 '<option value="" disabled selected>Pilih Nama Barang</option>'
@@ -524,7 +545,6 @@
                                 );
                             });
 
-                            // Reset fields after repopulating dropdown
                             $('#item_unit').val('').prop('readonly', true);
                             $('#item_joc_number').val('Auto-generated');
                             $('#item_barang_masuk_id').val('');
@@ -543,7 +563,7 @@
                 const sisaBarang = selectedOption.data('sisa-barang');
 
                 $('#item_unit').val(unit).prop('readonly', true);
-                $('#item_joc_number').val(jocNumber); // Set JOC Number correctly
+                $('#item_joc_number').val(jocNumber);
                 $('#item_barang_masuk_id').val(barangMasukId);
                 $('#item_sisa_barang').val(sisaBarang);
             });
@@ -562,17 +582,13 @@
                 $('#edit_item_sisa_barang').val(item.sisa_barang);
                 $('#edit_item_barang_masuk_id').val(item.barang_masuk_id);
 
-                // Set the selected item name in the dropdown
                 $('#edit_item_name').val(item.barang_id).trigger('change');
 
-                // Store the index in a hidden field or data attribute
                 $('#save-edit-item-btn').data('index', index);
 
-                // Show the modal
                 $('#editItemModal').modal('show');
             };
 
-            // Save changes made in the edit modal
             $('#save-edit-item-btn').click(function() {
                 const index = $(this).data('index');
                 const itemQty = parseFloat($('#edit_item_qty').val()) || 0;
@@ -588,7 +604,6 @@
                 $('#editItemModal').modal('hide');
             });
 
-            // Validate quantity on input change in the edit modal
             $('#edit_item_qty, #edit_item_sisa_barang').on('input', function() {
                 validateEditQuantity();
             });
@@ -604,6 +619,91 @@
                 }
             }
         });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var warehouseId = "{{ $user->warehouse_id }}";
+
+            function loadCustomers(warehouseId) {
+                if (warehouseId) {
+                    fetch(`/api/customers/${warehouseId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            let customerSelect = document.getElementById('customer_id');
+                            customerSelect.innerHTML = '<option value="">Select Pemilik Barang</option>'; // Reset options
+                            data.forEach(function(customer) {
+                                customerSelect.innerHTML += `<option value="${customer.id}">${customer.name}</option>`;
+                            });
+                        })
+                        .catch(error => console.error('Error fetching customers:', error));
+                }
+            }
+
+            if (warehouseId) {
+                loadCustomers(warehouseId);
+            }
+
+            document.getElementById('gudang_id').addEventListener('change', function() {
+                var selectedWarehouse = this.value;
+                loadCustomers(selectedWarehouse);
+            });
+        });
+
+        document.getElementById('harga_kirim_barang').addEventListener('input', function(event) {
+            let value = this.value;
+
+            value = value.replace(/[^0-9.]/g, '');
+
+            if ((value.match(/\./g) || []).length > 1) {
+                value = value.replace(/\.(?=.*\.)/, '');
+            }
+
+            if (value.indexOf('.') > -1) {
+                value = value.substring(0, value.indexOf('.') + 3);
+            }
+
+            this.value = value;
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var selectType = document.getElementById('select_type');
+            var nomerPolisiField = document.getElementById('nomer_polisi_field');
+            var nomerContainerField = document.getElementById('nomer_container_field');
+
+            
+            function toggleFields() {
+                var selectedValue = selectType.value;
+
+                if (selectedValue === 'nomer_polisi') {
+                    nomerPolisiField.style.display = 'block';
+                    nomerContainerField.style.display = 'none';
+                } else if (selectedValue === 'nomer_container') {
+                    nomerPolisiField.style.display = 'none';
+                    nomerContainerField.style.display = 'block';
+                } else {
+                    nomerPolisiField.style.display = 'none';
+                    nomerContainerField.style.display = 'none';
+                }
+            }
+
+            toggleFields();
+
+            selectType.addEventListener('change', toggleFields);
+        });
+
+
+        function toggleFieldsKirim() {
+            const shippingOption = document.getElementById('shipping_option').value;
+            const mobilField = document.getElementById('mobilField');
+            const hargaKirimField = document.getElementById('hargaKirimField');
+
+            if (shippingOption === 'kirim') {
+                mobilField.style.display = 'block';
+                hargaKirimField.style.display = 'block';
+            } else {
+                mobilField.style.display = 'none';
+                hargaKirimField.style.display = 'none';
+            }
+        }
     </script>
 
 

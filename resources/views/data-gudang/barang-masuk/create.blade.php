@@ -140,9 +140,9 @@
                     
                     
 
-                    <div class="mb-3">
+                    <div class="form-group">
                         <label for="selection" class="form-label">Choose Identification Type:</label>
-                        <select id="id_selection" class="form-select" onchange="toggleFields()" required>
+                        <select id="id_selection" class="form-control" onchange="toggleFields()" required>
                             <option value="">-- Select --</option>
                             <option value="nomer_polisi">Nomer Polisi</option>
                             <option value="nomer_container">Nomer Container</option>

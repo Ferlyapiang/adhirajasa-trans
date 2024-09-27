@@ -15,8 +15,12 @@ class BarangKeluar extends Model
         'tanggal_keluar',
         'gudang_id',
         'customer_id',
+        'type_mobil_id',
+        'nomer_surat_jalan',
         'nomer_invoice',
         'nomer_polisi',
+        'nomer_container',
+        'harga_kirim_barang',
         'bank_transfer_id',
     ];
 
@@ -48,5 +52,10 @@ class BarangKeluar extends Model
     public function bankTransfer()
     {
         return $this->belongsTo(BankData::class, 'bank_transfer_id');
+    }
+
+    public function jenisMobil()
+    {
+        return $this->belongsTo(JenisMobil::class, 'type_mobil_id');
     }
 }

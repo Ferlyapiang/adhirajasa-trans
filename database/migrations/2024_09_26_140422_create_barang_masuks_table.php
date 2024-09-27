@@ -20,7 +20,7 @@ return new class extends Migration
             $table->foreignId('customer_id')->constrained('customers')->onDelete('cascade');
             $table->foreignId('type_mobil_id')->constrained('type_mobil')->onDelete('cascade');
             $table->string('nomer_polisi')->nullable();
-            $table->string('nomer_container');
+            $table->string('nomer_container')->nullable();
             $table->timestamps();
         });
 

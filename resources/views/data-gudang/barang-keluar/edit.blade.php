@@ -84,12 +84,22 @@
                                         @csrf
                                         @method('PUT')
 
-                                        <div class="form-group">
+                                        <div class="form-group" hidden>
                                             <label for="nomer_invoice">Nomor Invoice</label>
                                             <input type="text" name="nomer_invoice" id="nomer_invoice"
                                                 class="form-control @error('nomer_invoice') is-invalid @enderror"
                                                 value="{{ old('nomer_invoice', $barangKeluar->nomer_invoice) }}" readonly>
                                             @error('nomer_invoice')
+                                                <span class="invalid-feedback">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="nomer_surat_jalan">Nomor Surat Jalan</label>
+                                            <input type="text" name="nomer_surat_jalan" id="nomer_invoice"
+                                                class="form-control @error('nomer_surat_jalan') is-invalid @enderror"
+                                                value="{{ old('nomer_surat_jalan', $barangKeluar->nomer_surat_jalan) }}" readonly>
+                                            @error('nomer_surat_jalan')
                                                 <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
                                         </div>
@@ -124,11 +134,11 @@
                                         </div>
 
                                         <div class="form-group">
-                                            <label for="customer_id">Customer</label>
+                                            <label for="customer_id">Pemilik Barang</label>
                                             <select name="customer_id" id="customer_id"
                                                 class="form-control @error('customer_id') is-invalid @enderror"
                                                 style="pointer-events: none; background-color: #e9ecef;" required>
-                                                <option value="">Select Customer</option>
+                                                <option value="">Select Pemilik Barang</option>
                                                 @foreach ($customers as $customer)
                                                     <option value="{{ $customer->id }}"
                                                         {{ old('customer_id', $barangKeluar->customer_id) == $customer->id ? 'selected' : '' }}>
@@ -141,16 +151,43 @@
                                             @enderror
                                         </div>
 
+
+                                        <div class="form-group">
+                                            <label for="type_mobil_id">Tipe Mobil</label>
+                                            <select name="type_mobil_id" id="type_mobil_id" class="form-control @error('type_mobil_id') is-invalid @enderror">
+                                                <option value="">Pilih Tipe Mobil</option>
+                                                @foreach ($typeMobilOptions as $typeMobil)
+                                                    <option value="{{ $typeMobil->id }}" {{ (old('type_mobil_id', $barangKeluar->type_mobil_id) == $typeMobil->id) ? 'selected' : '' }}>
+                                                        {{ $typeMobil->type }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            @error('type_mobil_id')
+                                                <span class="invalid-feedback">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="harga_kirim_barang">Harga Kirim Barang</label>
+                                            <input type="text" name="harga_kirim_barang" id="harga_kirim_barang"
+                                                class="form-control @error('harga_kirim_barang') is-invalid @enderror"
+                                                value="{{ old('harga_kirim_barang', $barangKeluar->harga_kirim_barang) }}">
+                                        </div>
+
                                         <div class="form-group">
                                             <label for="nomer_polisi">Nomor Polisi</label>
                                             <input type="text" name="nomer_polisi" id="nomer_polisi"
                                                 class="form-control @error('nomer_polisi') is-invalid @enderror"
                                                 value="{{ old('nomer_polisi', $barangKeluar->nomer_polisi) }}">
-                                            @error('nomer_polisi')
-                                                <span class="invalid-feedback">{{ $message }}</span>
-                                            @enderror
                                         </div>
 
+                                        <div class="form-group">
+                                            <label for="nomer_container">Nomor Container</label>
+                                            <input type="text" name="nomer_container" id="nomer_container"
+                                                class="form-control @error('nomer_container') is-invalid @enderror"
+                                                value="{{ old('nomer_container', $barangKeluar->nomer_container) }}">
+                                        </div>
+                                        
                                         <div class="form-group">
                                             <label for="bank_transfer_id">Bank Transfer</label>
                                             <select name="bank_transfer_id" id="bank_transfer_id"

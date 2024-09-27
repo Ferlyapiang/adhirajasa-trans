@@ -14,9 +14,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\LogData;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-
 use Illuminate\Support\Facades\Log;
-
+use App\Models\JenisMobil;
 
 
 class BarangKeluarController extends Controller
@@ -30,6 +29,7 @@ class BarangKeluarController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
+        $typeMobilOptions = JenisMobil::all();
         return view('data-gudang.barang-keluar.index', compact('barangKeluars'));
     }
 
@@ -38,11 +38,19 @@ class BarangKeluarController extends Controller
      */
     public function create()
     {
+        $user = Auth::user();
         $warehouses = Warehouse::all();
-        $customers = Customer::all();
+        if ($user->warehouse_id) {
+            $customers = Customer::where('status', 'active')
+                                ->where('warehouse_id', $user->warehouse_id)
+                                ->get();
+        } else {
+            $customers = Customer::where('status', 'active')->get();
+        }
         $bankTransfers = BankData::all();
         $barangs = Barang::all();
-        return view('data-gudang.barang-keluar.create', compact('warehouses', 'customers', 'bankTransfers', 'barangs'));
+        $typeMobilOptions = JenisMobil::all();
+        return view('data-gudang.barang-keluar.create', compact('warehouses', 'customers', 'bankTransfers', 'barangs', 'typeMobilOptions', 'user'));
     }
     
     function generateWarehouseCode($name)
@@ -68,10 +76,6 @@ class BarangKeluarController extends Controller
 
         return $abbreviation;
     }
-
-    
-
-    
         public function store(Request $request)
         {
             $request->merge(['items' => json_decode($request->input('items'), true)]);
@@ -80,9 +84,10 @@ class BarangKeluarController extends Controller
                 'tanggal_keluar' => 'required|date',
                 'gudang_id' => 'required|exists:warehouses,id',
                 'customer_id' => 'required|exists:customers,id',
-                'nomer_invoice' => 'nullable|string|max:191',
+                'type_mobil_id' => 'nullable|exists:type_mobil,id',
                 'nomer_polisi' => 'nullable|string|max:191',
-                'bank_transfer_id' => 'nullable|exists:bank_datas,id',
+                'nomer_container' => 'nullable|string|max:191',
+                'harga_kirim_barang' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
                 'items' => 'required|array',
                 'items.*.barang_id' => 'required|exists:barangs,id',
                 'items.*.no_ref' => 'nullable|string|max:191',
@@ -92,15 +97,17 @@ class BarangKeluarController extends Controller
                 'items.*.total_harga' => 'nullable|numeric|min:0',
                 'items.*.barang_masuk_id' => 'required|exists:barang_masuks,id',
             ]);
-        
-            // Fetch the selected warehouse
+
             $warehouse = Warehouse::find($validated['gudang_id']);
             if (!$warehouse) {
                 return redirect()->back()->with('error', 'Warehouse not found.');
             }
             $warehouseCode = $this->generateWarehouseCode($warehouse->name);
+
+            $bankTransfer = BankData::where('warehouse_id', $validated['gudang_id'])->first();
+
+            $bank_transfer_id = $bankTransfer ? $bankTransfer->id : null;
         
-            // Generate the invoice number
             $year = date('Y');
 
             $mounth = intval(date('m'));
@@ -139,17 +146,21 @@ class BarangKeluarController extends Controller
                 $nextNumber = 1;
             }
         
-            // Format the number to be three digits with leading zeros
             $formattedNumber = sprintf('%03d', $nextNumber);
             $nomer_invoice = "ATS/INV/{$year}/{$romanMonth}/{$warehouseCode}/{$formattedNumber}";
+            $nomer_surat_jalan = "SURAT JALAN No. {$formattedNumber}";
         
             $barangKeluarData = [
                 'tanggal_keluar' => $validated['tanggal_keluar'],
                 'gudang_id' => $validated['gudang_id'],
                 'customer_id' => $validated['customer_id'],
+                'type_mobil_id' => $validated['type_mobil_id'],
+                'nomer_surat_jalan' => $nomer_surat_jalan,
                 'nomer_invoice' => $nomer_invoice,
                 'nomer_polisi' => $validated['nomer_polisi'],
-                'bank_transfer_id' => $validated['bank_transfer_id'],
+                'nomer_container' => $validated['nomer_container'],
+                'harga_kirim_barang' => $validated['harga_kirim_barang'],
+                'bank_transfer_id' => $bank_transfer_id,
             ];
         
             $items = $validated['items'];
@@ -231,10 +242,17 @@ class BarangKeluarController extends Controller
 
     public function edit($id)
     {
+        $user = Auth::user();
         $barangKeluar = BarangKeluar::with('items')->findOrFail($id);
 
         $warehouses = Warehouse::all();
-        $customers = Customer::all();
+        if ($user->warehouse_id) {
+            $customers = Customer::where('status', 'active')
+                                ->where('warehouse_id', $user->warehouse_id)
+                                ->get();
+        } else {
+            $customers = Customer::where('status', 'active')->get();
+        }
         $bankTransfers = BankData::all();
 
         $barangKeluarItems = $barangKeluar->items;
@@ -252,6 +270,8 @@ class BarangKeluarController extends Controller
 
         $barangMasuks = BarangMasuk::whereIn('id', $barangMasukIds)->get()->keyBy('id');
 
+        $typeMobilOptions = JenisMobil::all();
+    
         return view('data-gudang.barang-keluar.edit', [
             'barangKeluar' => $barangKeluar,
             'warehouses' => $warehouses,
@@ -260,6 +280,8 @@ class BarangKeluarController extends Controller
             'barangs' => $filteredBarangs,
             'groupedBarangMasukItems' => $groupedBarangMasukItems,
             'barangMasuks' => $barangMasuks,
+            'typeMobilOptions' => $typeMobilOptions,
+            'user' => $user
         ]);
     }
 
@@ -271,9 +293,13 @@ class BarangKeluarController extends Controller
             'tanggal_keluar' => 'required|date',
             'gudang_id' => 'required|exists:warehouses,id',
             'customer_id' => 'required|exists:customers,id',
+            'type_mobil_id' => 'nullable|exists:type_mobil,id',
+            'nomer_surat_jalan' => 'nullable|string|max:191',
             'nomer_invoice' => 'nullable|string|max:191',
             'nomer_polisi' => 'nullable|string|max:191',
+            'nomer_container' => 'nullable|string|max:191',
             'bank_transfer_id' => 'nullable|exists:bank_datas,id',
+            'harga_kirim_barang' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
             'items' => 'required|array',
             'items.*.barang_id' => 'required|exists:barangs,id',
             'items.*.no_ref' => 'nullable|string|max:191',
@@ -288,9 +314,13 @@ class BarangKeluarController extends Controller
             'tanggal_keluar' => $validated['tanggal_keluar'],
             'gudang_id' => $validated['gudang_id'],
             'customer_id' => $validated['customer_id'],
+            'type_mobil_id' => $validated['type_mobil_id'],
+            'nomer_surat_jalan' => $validated['nomer_surat_jalan'],
             'nomer_invoice' => $validated['nomer_invoice'],
-            'nomer_polisi' => $validated['nomer_polisi'],
+            'nomer_polisi' => $validated['nomer_polisi'] ?? null,
+            'nomer_container' => $validated['nomer_container'] ?? null,
             'bank_transfer_id' => $validated['bank_transfer_id'],
+            'harga_kirim_barang' => $validated['harga_kirim_barang'],
         ];
 
         $items = $validated['items'];
@@ -395,15 +425,9 @@ class BarangKeluarController extends Controller
 
 
 
-    public function getCustomersByWarehouse($warehouseId)
+    public function getCustomersByWarehouse($warehouse_id)
     {
-        $customers = BarangMasuk::where('gudang_id', $warehouseId)
-            ->distinct('customer_id')
-            ->pluck('customer_id')
-            ->map(function ($customerId) {
-                return Customer::find($customerId);
-            });
-
-        return response()->json(['customers' => $customers]);
+        $customers = Customer::where('warehouse_id', $warehouse_id)->get();
+        return response()->json($customers);
     }
 }
