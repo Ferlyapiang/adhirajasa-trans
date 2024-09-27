@@ -65,15 +65,24 @@
                             <dt class="col-sm-3">Name:</dt>
                             <dd class="col-sm-9">{{ $customer->name }}</dd>
 
-                            <dt class="col-sm-3">No NPWP/KTP:</dt>
-                            <dd class="col-sm-9">{{ $customer->no_npwp_ktp }}</dd>
+                            <dt class="col-sm-3">No NPWP:</dt>
+                            <dd class="col-sm-9">{{ $customer->no_npwp }}</dd>
+
+                            <dt class="col-sm-3">No KTP:</dt>
+                            <dd class="col-sm-9">{{ $customer->no_ktp }}</dd>
 
                             <dt class="col-sm-3">No HP:</dt>
                             <dd class="col-sm-9">{{ $customer->no_hp }}</dd>
 
                             <dt class="col-sm-3">Email:</dt>
                             <dd class="col-sm-9">{{ $customer->email }}</dd>
+                            
+                            <dt class="col-sm-3">Tipe Pembayaran:</dt>
+                            <dd class="col-sm-9">{{ $customer->type_payment_customer }}</dd>
 
+                            <dt class="col-sm-3">Gudang:</dt>
+                            <dd class="col-sm-9">{{ $customer->warehouse ? $customer->warehouse->name : 'Tidak ada gudang' }}</dd>
+                            
                             <dt class="col-sm-3">Address:</dt>
                             <dd class="col-sm-9">{{ $customer->address }}</dd>
 

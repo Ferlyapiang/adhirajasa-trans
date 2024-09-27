@@ -62,8 +62,11 @@ class CustomerController extends Controller
 
     public function show(Customer $customer)
     {
+        $customer->load('warehouse');
+    
         return view('master-data.customers.show', compact('customer'));
     }
+    
 
     public function edit(Customer $customer)
     {
