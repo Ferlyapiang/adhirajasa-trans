@@ -113,21 +113,30 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="jenis_mobil">Jenis Mobil (Optional)</label>
+                        <label for="jenis_mobil">Jenis Mobil</label>
                         <input type="text" name="jenis_mobil" id="jenis_mobil" class="form-control"
                             value="{{ $barangMasuk->jenis_mobil }}" readonly>
                     </div>
 
-                    <div class="form-group">
-                        <label for="nomer_polisi">Nomer Polisi (Optional)</label>
-                        <input type="text" name="nomer_polisi" id="nomer_polisi" class="form-control"
-                            value="{{ $barangMasuk->nomer_polisi }}" readonly>
+                    <div class="mb-3">
+                        <label for="selection" class="form-label">Choose Identification Type:</label>
+                        <select id="id_selection" class="form-select" onchange="toggleFields()" required>
+                            <option value="">-- Select --</option>
+                            <option value="nomer_polisi" {{ $barangMasuk->nomer_polisi ? 'selected' : '' }}>Nomer Polisi</option>
+                            <option value="nomer_container" {{ $barangMasuk->nomer_container ? 'selected' : '' }}>Nomer Container</option>
+                        </select>
                     </div>
-
-                    <div class="form-group">
+                    
+                    <div id="nomer_polisi_field" class="mb-3" style="display: {{ $barangMasuk->nomer_polisi ? 'block' : 'none' }};">
+                        <label for="nomer_polisi">Nomer Polisi</label>
+                        <input type="text" name="nomer_polisi" id="nomer_polisi" class="form-control" 
+                               value="{{ $barangMasuk->nomer_polisi }}">
+                    </div>
+                    
+                    <div id="nomer_container_field" class="mb-3" style="display: {{ $barangMasuk->nomer_container ? 'block' : 'none' }};">
                         <label for="nomer_container">Nomer Container</label>
-                        <input type="text" name="nomer_container" id="nomer_container" class="form-control"
-                            value="{{ $barangMasuk->nomer_container }}" readonly>
+                        <input type="text" name="nomer_container" id="nomer_container" class="form-control" 
+                               value="{{ $barangMasuk->nomer_container }}" readonly>
                     </div>
 
                     <h2>Items</h2>
@@ -308,6 +317,19 @@
                 $(this).closest('tr').remove();
             });
         });
+
+        function toggleFields() {
+            var selection = document.getElementById('id_selection').value;
+
+            document.getElementById('nomer_polisi_field').style.display = 'none';
+            document.getElementById('nomer_container_field').style.display = 'none';
+
+            if (selection === 'nomer_polisi') {
+                document.getElementById('nomer_polisi_field').style.display = 'block';
+            } else if (selection === 'nomer_container') {
+                document.getElementById('nomer_container_field').style.display = 'block';
+            }
+        }
     </script>
 </body>
 

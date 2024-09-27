@@ -40,6 +40,11 @@
             background-color: #dc3545;
             border-color: #dc3545;
         }
+        .readonly-select {
+            pointer-events: none;
+            background-color: #e9ecef;
+            color: #6c757d;
+        }
     </style>
 </head>
 
@@ -89,8 +94,8 @@
 
                     <div class="form-group">
                         <label for="gudang">Gudang</label>
-                        <select name="gudang_id" id="gudang" class="form-control" disabled required>
-                            <option value="" disabled selected>Pilih Nama Gudang Penyimpanan</option>
+                        <select name="gudang_id" id="gudang" class="form-control readonly-select" required>
+                            <option value="" selected>Pilih Nama Gudang Penyimpanan</option>
                             @foreach ($gudangs as $gudang)
                                 <option value="{{ $gudang->id }}"
                                     {{ $gudang->id == $barangMasuk->gudang_id ? 'selected' : '' }}>{{ $gudang->name }}
@@ -101,8 +106,8 @@
 
                     <div class="form-group">
                         <label for="nama_pemilik">Nama Pemilik</label>
-                        <select name="customer_id" id="nama_pemilik" class="form-control" disabled required>
-                            <option value="" disabled selected>Pilih Nama Pemilik Barang</option>
+                        <select name="customer_id" id="nama_pemilik" class="form-control readonly-select" required>
+                            <option value="" selected>Pilih Nama Pemilik Barang</option>
                             @foreach ($pemilik as $owner)
                                 <option value="{{ $owner->id }}"
                                     {{ $owner->id == $barangMasuk->customer_id ? 'selected' : '' }}>{{ $owner->name }}
@@ -112,21 +117,30 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="jenis_mobil">Jenis Mobil (Optional)</label>
+                        <label for="jenis_mobil">Jenis Mobil</label>
                         <input type="text" name="jenis_mobil" id="jenis_mobil" class="form-control"
                             value="{{ $barangMasuk->jenis_mobil }}">
                     </div>
 
-                    <div class="form-group">
-                        <label for="nomer_polisi">Nomer Polisi (Optional)</label>
-                        <input type="text" name="nomer_polisi" id="nomer_polisi" class="form-control"
-                            value="{{ $barangMasuk->nomer_polisi }}">
+                    <div class="mb-3">
+                        <label for="selection" class="form-label">Choose Identification Type:</label>
+                        <select id="id_selection" class="form-select" onchange="toggleFields()" required>
+                            <option value="">-- Select --</option>
+                            <option value="nomer_polisi" {{ $barangMasuk->nomer_polisi ? 'selected' : '' }}>Nomer Polisi</option>
+                            <option value="nomer_container" {{ $barangMasuk->nomer_container ? 'selected' : '' }}>Nomer Container</option>
+                        </select>
                     </div>
-
-                    <div class="form-group">
+                    
+                    <div id="nomer_polisi_field" class="mb-3" style="display: {{ $barangMasuk->nomer_polisi ? 'block' : 'none' }};">
+                        <label for="nomer_polisi">Nomer Polisi</label>
+                        <input type="text" name="nomer_polisi" id="nomer_polisi" class="form-control" 
+                               value="{{ $barangMasuk->nomer_polisi }}">
+                    </div>
+                    
+                    <div id="nomer_container_field" class="mb-3" style="display: {{ $barangMasuk->nomer_container ? 'block' : 'none' }};">
                         <label for="nomer_container">Nomer Container</label>
-                        <input type="text" name="nomer_container" id="nomer_container" class="form-control"
-                            value="{{ $barangMasuk->nomer_container }}" required>
+                        <input type="text" name="nomer_container" id="nomer_container" class="form-control" 
+                               value="{{ $barangMasuk->nomer_container }}">
                     </div>
 
                     <h2>Items</h2>
@@ -267,14 +281,13 @@
     </div>
     <script>
         $(document).ready(function() {
-            let editRow; // Store the row to be edited
-            let itemsInTable = []; // Array to keep track of items added to the table
-            let barangIdsInTable = []; // Array to keep track of barang_id from the table
+            let editRow;
+            let itemsInTable = [];
+            let barangIdsInTable = [];
 
-            // Initialize itemsInTable and barangIdsInTable with existing items from the table
             $('#items-table tbody tr').each(function() {
                 const itemId = parseInt($(this).data('id'));
-                const barangId = $(this).find('td').eq(3).text().trim(); // Get the hidden barang_id
+                const barangId = $(this).find('td').eq(3).text().trim();
                 if (!isNaN(itemId)) {
                     itemsInTable.push(itemId);
                 }
@@ -329,12 +342,11 @@
                 const qty = $('#item_qty').val();
                 const unit = $('#item_unit').val();
                 const notes = $('#item_notes').val();
-                const barangId = $('#item_name option:selected').val(); // Assume this is barang_id
+                const barangId = $('#item_name option:selected').val();
 
-                // Check for duplicate item in the table
                 if (barangIdsInTable.includes(barangId)) {
                     alert('This item is already in the table.');
-                    return; // Stop the function here if duplicate is found
+                    return;
                 }
 
                 if (id && qty && unit && notes) {
@@ -360,12 +372,11 @@
                             </tr>
                         `);
 
-                    itemsInTable.push(newItem.id); // Add the new item id to the list
-                    barangIdsInTable.push(barangId); // Add the new barang_id to the list
-                    updateItemsInput(); // Update hidden input field
-                    $('#itemModal').modal('hide'); // Close the modal
+                    itemsInTable.push(newItem.id);
+                    barangIdsInTable.push(barangId);
+                    updateItemsInput(); 
+                    $('#itemModal').modal('hide');
 
-                    // Clear the input fields
                     $('#item_name').val('');
                     $('#item_qty').val('');
                     $('#item_unit').val('');
@@ -378,13 +389,13 @@
             $(document).on('click', '.remove-item', function() {
                 const row = $(this).closest('tr');
                 const itemId = parseInt(row.data('id'));
-                const barangId = row.find('td').eq(3).text().trim(); // Get the hidden barang_id
+                const barangId = row.find('td').eq(3).text().trim();
 
-                itemsInTable = itemsInTable.filter(id => id !== itemId); // Remove the item id from the list
+                itemsInTable = itemsInTable.filter(id => id !== itemId);
                 barangIdsInTable = barangIdsInTable.filter(id => id !==
-                barangId); // Remove the barang_id from the list
-                row.remove(); // Remove the row from the table
-                updateItemsInput(); // Update hidden input field
+                barangId);
+                row.remove();
+                updateItemsInput();
             });
 
             $(document).on('click', '.edit-item', function() {
@@ -395,6 +406,7 @@
                 $('#edit_item_notes').val(editRow.find('td').eq(3).text());
                 $('#update-item').data('id', editRow.data('id'));
                 $('#editItemModal').modal('show');
+                
             });
 
             $('#update-item').click(function() {
@@ -433,6 +445,22 @@
                 $('#items-input').val(JSON.stringify(items));
             }
         });
+        function toggleFields() {
+            var selection = document.getElementById('id_selection').value;
+
+            document.getElementById('nomer_polisi_field').style.display = 'none';
+            document.getElementById('nomer_container_field').style.display = 'none';
+
+            document.getElementById('nomer_polisi').value = '';
+            document.getElementById('nomer_container').value = '';
+
+            if (selection === 'nomer_polisi') {
+                document.getElementById('nomer_polisi_field').style.display = 'block';
+            } else if (selection === 'nomer_container') {
+                document.getElementById('nomer_container_field').style.display = 'block';
+            }
+        }
+
     </script>
 
 </body>

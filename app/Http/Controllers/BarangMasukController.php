@@ -119,7 +119,8 @@ class BarangMasukController extends Controller
                 'tanggal_masuk' => 'required|date',
                 'gudang_id' => 'required|exists:warehouses,id',
                 'customer_id' => 'required|exists:customers,id',
-                'nomer_container' => 'required|string',
+                'nomer_polisi' => 'nullable|string',
+                'nomer_container' => 'nullable|string',
                 'items.*.barang_id' => 'required|exists:barangs,id',
                 'items.*.qty' => 'required|numeric',
                 'items.*.unit' => 'required|string',
@@ -147,9 +148,9 @@ class BarangMasukController extends Controller
                 'tanggal_masuk' => $request->tanggal_masuk,
                 'gudang_id' => $request->gudang_id,
                 'customer_id' => $request->customer_id,
-                'jenis_mobil' => $request->jenis_mobil ?? null,  // Handle nullable fields
-                'nomer_polisi' => $request->nomer_polisi ?? null,  // Handle nullable fields
-                'nomer_container' => $request->nomer_container,
+                'jenis_mobil' => $request->jenis_mobil ?? null, 
+                'nomer_polisi' => $request->nomer_polisi ?? null,
+                'nomer_container' => $request->nomer_container ?? null,     
             ]);
             $items = json_decode($request->items, true);
             Log::info('Decoded Items:', ['items' => $items]);
@@ -189,9 +190,17 @@ class BarangMasukController extends Controller
 
     public function edit($id)
     {
+        $user = Auth::user();
         $barangMasuk = BarangMasuk::findOrFail($id);
         $barangs = Barang::all();
-        $pemilik = Customer::all();
+        // $pemilik = Customer::all();
+        if ($user->warehouse_id) {
+            $pemilik = Customer::where('status', 'active')
+                                ->where('warehouse_id', $user->warehouse_id)
+                                ->get();
+        } else {
+            $pemilik = Customer::where('status', 'active')->get();
+        }
         $gudangs = Warehouse::all();
         $items = $barangMasuk->items;
 
@@ -206,7 +215,8 @@ class BarangMasukController extends Controller
                 'tanggal_masuk' => 'required|date',
                 'gudang_id' => 'required|exists:warehouses,id',
                 'customer_id' => 'required|exists:customers,id',
-                'nomer_container' => 'required|string',
+                'nomer_polisi' => 'nullable|string',
+                'nomer_container' => 'nullable|string',
                 'items.*.barang_id' => 'required|exists:barangs,id',
                 'items.*.qty' => 'required|numeric',
                 'items.*.unit' => 'required|string',
@@ -214,11 +224,8 @@ class BarangMasukController extends Controller
             ]);
 
             // dd($request->all());
-
-            // Find BarangMasuk record
             $barangMasuk = BarangMasuk::findOrFail($id);
 
-            // Update BarangMasuk record
             $barangMasuk->update([
                 'tanggal_masuk' => $request->tanggal_masuk,
                 'gudang_id' => $request->gudang_id,
@@ -228,15 +235,12 @@ class BarangMasukController extends Controller
                 'nomer_container' => $request->nomer_container,
             ]);
 
-            // Decode and update items
             $items = json_decode($request->items, true);
             Log::info('Decoded Items:', ['items' => $items]);
 
             DB::transaction(function () use ($barangMasuk, $items) {
-                // Delete existing items
                 BarangMasukItem::where('barang_masuk_id', $barangMasuk->id)->delete();
 
-                // Insert or update items
                 foreach ($items as $item) {
                     Log::info('Saving Item:', ['item' => $item]);
                     BarangMasukItem::create([
@@ -249,7 +253,6 @@ class BarangMasukController extends Controller
                 }
             });
 
-            // Log the success
             LogData::create([
                 'user_id' => Auth::id(),
                 'name' => Auth::user()->name,
@@ -257,10 +260,8 @@ class BarangMasukController extends Controller
                 'details' => 'Updated barang masuk ID: ' . $barangMasuk->id . ' with data: ' . json_encode($request->all())
             ]);
 
-            // Return redirect with success message
             return redirect()->route('data-gudang.barang-masuk.index')->with('success', 'Barang Masuk berhasil diperbarui.');
         } catch (\Exception $e) {
-            // Log error and return redirect with error message
             Log::error('Error in updating Barang Masuk:', ['error' => $e->getMessage()]);
             return redirect()->route('data-gudang.barang-masuk.index')->with('error', 'Terjadi kesalahan saat memperbarui data.');
         }
