@@ -108,6 +108,7 @@ Route::post('master-data/barang', [BarangController::class, 'store'])->name('mas
 Route::get('master-data/barang/{barang}/edit', [BarangController::class, 'edit'])->name('master-data.barang.edit');
 Route::put('master-data/barang/{barang}', [BarangController::class, 'update'])->name('master-data.barang.update');
 Route::delete('master-data/barang/{barang}', [BarangController::class, 'destroy'])->name('master-data.barang.destroy');
+Route::get('/check-barang-exists', [BarangController::class, 'checkBarangExists'])->name('check-barang-exists');
 
 // Barang Masuk
 Route::get('data-gudang/barang-masuk', [BarangMasukController::class, 'index'])->name('data-gudang.barang-masuk.index');

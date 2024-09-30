@@ -7,6 +7,7 @@ use App\Models\ItemType;
 use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class BarangController extends Controller
 {
@@ -105,4 +106,17 @@ class BarangController extends Controller
 
         return redirect()->route('master-data.barang.index')->with('success', 'Barang berhasil dihapus.');
     }
+
+    public function checkBarangExists(Request $request)
+{
+    $exists = DB::table('barangs')
+                ->where('nama_barang', $request->nama_barang)
+                ->where('pemilik', $request->pemilik_id)
+                ->where('jenis', $request->jenis)
+                ->exists();
+
+    return response()->json(['exists' => $exists]);
+}
+
+
 }

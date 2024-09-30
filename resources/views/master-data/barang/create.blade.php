@@ -53,30 +53,13 @@
             <!-- Main content -->
             <div class="container-fluid pl-4">
                 <h1>Create Barang</h1>
-                <form action="{{ route('master-data.barang.store') }}" method="POST">
+                <form action="{{ route('master-data.barang.store') }}" method="POST" id="barangForm">
                     @csrf
-                    <div class="form-group">
-                        <label for="nama_barang">Nama Barang</label>
-                        <input type="text" name="nama_barang" class="form-control" id="nama_barang" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="jenis">Jenis</label>
-                        <select name="jenis" class="form-control select2" id="jenis" required>
-                            <option value="" disabled selected>Pilih Jenis Barang</option>
-                            @foreach($itemTypes as $itemType)
-                                <option value="{{ $itemType->name }}">{{ $itemType->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="sku">SKU</label>
-                        <input type="text" name="sku" class="form-control" id="sku" required>
-                    </div>
+                
                     <div class="form-group">
                         <label for="pemilik">Pemilik</label>
                         <select name="pemilik" class="form-control select2" id="pemilik" required>
                             <option value="" disabled selected>Pilih Pemilik Barang</option>
-                    
                             @foreach($customers as $customer)
                                 @if(Auth::user()->warehouse_id === null)
                                     <option value="{{ $customer->id }}">{{ $customer->name }} | {{ optional($customer->warehouse)->name }}</option>
@@ -85,18 +68,55 @@
                                 @endif
                             @endforeach
                         </select>
+                        @error('pemilik')
+                            <span class="text-danger">{{ $message }}</span>
+                        @enderror
                     </div>
-                    
-                    
+
+                    <div class="form-group">
+                        <label for="jenis">Jenis</label>
+                        <select name="jenis" class="form-control select2" id="jenis" required>
+                            <option value="" disabled selected>Pilih Jenis Barang</option>
+                            @foreach($itemTypes as $itemType)
+                                <option value="{{ $itemType->name }}">{{ $itemType->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('jenis')
+                            <span class="text-danger">{{ $message }}</span>
+                        @enderror
+                    </div>
+                
+                    <div class="form-group">
+                        <label for="nama_barang">Nama Barang</label>
+                        <input type="text" name="nama_barang" class="form-control" id="nama_barang" required>
+                        <span id="nama_barang_error" class="text-danger"></span>
+                        @error('nama_barang')
+                            <span class="text-danger">{{ $message }}</span>
+                        @enderror
+                    </div>
+                
+                    <div class="form-group">
+                        <label for="sku">SKU</label>
+                        <input type="text" name="sku" class="form-control" id="sku" required>
+                        @error('sku')
+                            <span class="text-danger">{{ $message }}</span>
+                        @enderror
+                    </div>
+                
                     <div class="form-group">
                         <label for="status">Status</label>
                         <select name="status" class="form-control select2" id="status" required>
                             <option value="active">Active</option>
                             <option value="inactive">Inactive</option>
                         </select>
+                        @error('status')
+                            <span class="text-danger">{{ $message }}</span>
+                        @enderror
                     </div>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
+                
+                    <button type="submit" class="btn btn-primary" id="submitBtn">Simpan</button>
                 </form>
+                
             </div>
             <!-- /.container-fluid -->
         </div>
@@ -119,14 +139,40 @@
 
     <script>
         $(document).ready(function() {
-            // Initialize Select2 on select elements with placeholders
-            $('#jenis, #pemilik').select2({
-                placeholder: function(){
-                    return $(this).data('placeholder');
-                },
-                allowClear: true
-            });
+            $('#nama_barang, #jenis').on('input change', function() {
+    var pemilik_id = $('#pemilik').val();
+    var nama_barang = $('#nama_barang').val();
+    var jenis = $('#jenis').val();
+
+    // Only proceed if pemilik, jenis, and nama_barang are not empty
+    if (pemilik_id && nama_barang && jenis) {
+        // AJAX request to check if barang exists
+        $.ajax({
+            url: '{{ route("check-barang-exists") }}', // Ensure this route is correctly set
+            type: 'GET',
+            data: {
+                pemilik_id: pemilik_id,
+                nama_barang: nama_barang,
+                jenis: jenis
+            },
+            success: function(response) {
+                if (response.exists) {
+                    $('#nama_barang_error').text('Nama barang dengan jenis yang sama sudah ada untuk pemilik yang dipilih.');
+                    $('#submitBtn').attr('disabled', true); // Disable submit button
+                } else {
+                    $('#nama_barang_error').text(''); // Clear any error
+                    $('#submitBtn').attr('disabled', false); // Enable submit button
+                }
+            },
+            error: function() {
+                $('#nama_barang_error').text('Terjadi kesalahan saat memeriksa nama barang.');
+            }
+        });
+    }
+});
+
         });
     </script>
+    
 </body>
 </html>
