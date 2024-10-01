@@ -18,57 +18,42 @@ use App\Models\JenisMobil;
 class BarangMasukController extends Controller
 {
 
-    public function index()
-{
-    $user = Auth::user();
-
-    if ($user->warehouse_id) {
-        $barangMasuks = BarangMasuk::with(['items', 'customer'])
-            ->where('gudang_id', $user->warehouse_id)
-            ->orderBy('tanggal_masuk', 'desc')
-            ->get();
-    } else {
-        $barangMasuks = BarangMasuk::with(['items', 'customer'])
-            ->orderBy('tanggal_masuk', 'desc')
-            ->get();
-    }
-
-    $barangKeluars = BarangKeluar::with('items')->get();
+    public function index() {
+        $user = Auth::user();
     
-    $typeMobilOptions = JenisMobil::all();
-    $fifoData = [];
+        $barangMasuks = BarangMasuk::select(
+            'barang_masuks.id AS barang_masuk_id',
+            'barang_masuks.tanggal_masuk',
+            'barang_masuks.joc_number',
+            'barangs.nama_barang AS nama_barang',
+            'customers.name AS nama_customer',
+            'warehouses.name AS nama_gudang',
+            'type_mobil.type AS nama_type_mobil',
+            'barang_masuks.nomer_polisi',
+            'barang_masuks.nomer_container',
+            'barang_masuk_items.notes',
+            'barang_masuk_items.qty as fifo_in',
+            DB::raw('IFNULL(barang_keluar_items.qty, 0) AS fifo_out'),
+            'barang_masuk_items.unit',
+            DB::raw('(barang_masuk_items.qty - IFNULL(barang_keluar_items.qty, 0)) AS fifo_sisa') 
+            
+        )
+        ->join('barang_masuk_items', 'barang_masuks.id', '=', 'barang_masuk_items.barang_masuk_id')
+        ->join('barangs', 'barang_masuk_items.barang_id', '=', 'barangs.id') 
+        ->join('customers', 'barang_masuks.customer_id', '=', 'customers.id')
+        ->join('warehouses', 'barang_masuks.gudang_id', '=', 'warehouses.id')
+        ->join('type_mobil', 'barang_masuks.type_mobil_id', '=', 'type_mobil.id')
+        ->join('barang_keluar_items', 'barang_masuk_items.id', '=', 'barang_keluar_items.id');
 
-    foreach ($barangMasuks as $barangMasuk) {
-        $fifo_in = $barangMasuk->items->sum('qty');
-        $fifo_out = 0;
-
-        foreach ($barangKeluars as $barangKeluar) {
-            foreach ($barangKeluar->items as $item) {
-                // Calculate FIFO out based on barang_masuk_id matching
-                if ($item->barang_masuk_id === $barangMasuk->id) {
-                    $fifo_out += $item->qty;
-                }
-            }
+        if ($user->warehouse_id) {
+            $barangMasuks = $barangMasuks->where('barang_masuks.gudang_id', $user->warehouse_id);
         }
-
-        $fifoData[$barangMasuk->id] = [
-            'fifo_in' => $fifo_in,
-            'fifo_out' => $fifo_out,
-            'fifo_sisa' => $fifo_in - $fifo_out,
-        ];
+    
+        $barangMasuks = $barangMasuks->orderBy('barang_masuks.tanggal_masuk', 'desc')->get();
+    
+        return view('data-gudang.barang-masuk.index', compact('barangMasuks'));
     }
-
-    foreach ($barangMasuks as $barangMasuk) {
-        if (isset($fifoData[$barangMasuk->id])) {
-            $barangMasuk->fifo_in = $fifoData[$barangMasuk->id]['fifo_in'];
-            $barangMasuk->fifo_out = $fifoData[$barangMasuk->id]['fifo_out'];
-            $barangMasuk->fifo_sisa = $fifoData[$barangMasuk->id]['fifo_sisa'];
-        }
-    }
-
-    return view('data-gudang.barang-masuk.index', compact('barangMasuks'));
-}
-
+    
     public function showDetail($id)
     {
         $barangMasuk = BarangMasuk::findOrFail($id);
