@@ -174,8 +174,17 @@
                                                     </tr>
                                                 @endforeach
                                             </tbody>
-                                            
+                                            <tfoot>
+                                                <tr>
+                                                    <th colspan="10" style="text-align: right;">Total:</th>
+                                                    <th id="totalFifoIn"></th>
+                                                    <th id="totalFifoOut"></th>
+                                                    <th id="totalFifoSisa"></th>
+                                                    <th></th>
+                                                </tr>
+                                            </tfoot>
                                         </table>
+                                        
                                     </div>
                                 </div>
 
@@ -209,9 +218,32 @@
     <!-- Page-specific script -->
     <script>
         $(document).ready(function() {
-            $('#barangMasukTable').DataTable();
+            var table = $('#barangMasukTable').DataTable();
+            
+            function updateTotals() {
+                let totalFifoIn = 0;
+                let totalFifoOut = 0;
+                let totalFifoSisa = 0;
+    
+                table.rows({ filter: 'applied' }).every(function() {
+                    var data = this.data();
+                    totalFifoIn += parseFloat(data[10]) || 0; 
+                    totalFifoOut += parseFloat(data[11]) || 0; 
+                    totalFifoSisa += parseFloat(data[12]) || 0;
+                });
+
+                $('#totalFifoIn').text(totalFifoIn);
+                $('#totalFifoOut').text(totalFifoOut);
+                $('#totalFifoSisa').text(totalFifoSisa);
+            }
+
+            updateTotals();
+            table.on('search.dt', function() {
+                updateTotals();
+            });
         });
     </script>
+    
 </body>
 
 </html>
