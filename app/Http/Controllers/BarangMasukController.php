@@ -35,20 +35,20 @@ class BarangMasukController extends Controller
             'barang_masuk_items.qty as fifo_in',
             DB::raw('IFNULL(barang_keluar_items.qty, 0) AS fifo_out'),
             'barang_masuk_items.unit',
-            DB::raw('(barang_masuk_items.qty - IFNULL(barang_keluar_items.qty, 0)) AS fifo_sisa') 
-            
+            DB::raw('(barang_masuk_items.qty - IFNULL(barang_keluar_items.qty, 0)) AS fifo_sisa')
         )
         ->join('barang_masuk_items', 'barang_masuks.id', '=', 'barang_masuk_items.barang_masuk_id')
-        ->join('barangs', 'barang_masuk_items.barang_id', '=', 'barangs.id') 
+        ->join('barangs', 'barang_masuk_items.barang_id', '=', 'barangs.id')
         ->join('customers', 'barang_masuks.customer_id', '=', 'customers.id')
         ->join('warehouses', 'barang_masuks.gudang_id', '=', 'warehouses.id')
         ->join('type_mobil', 'barang_masuks.type_mobil_id', '=', 'type_mobil.id')
-        ->join('barang_keluar_items', 'barang_masuk_items.id', '=', 'barang_keluar_items.id');
-
+        ->leftjoin('barang_keluar_items', 'barang_masuk_items.id', '=', 'barang_keluar_items.id');
+    
         if ($user->warehouse_id) {
             $barangMasuks = $barangMasuks->where('barang_masuks.gudang_id', $user->warehouse_id);
         }
     
+        // Order by tanggal_masuk and get the results
         $barangMasuks = $barangMasuks->orderBy('barang_masuks.tanggal_masuk', 'desc')->get();
     
         return view('data-gudang.barang-masuk.index', compact('barangMasuks'));
