@@ -415,8 +415,12 @@
                 }
 
                 function parseCurrency(value) {
+                    if (typeof value !== 'string') return 0;
+
+                    // Perform the currency parsing
                     return parseFloat(value.replace(/[^0-9,]/g, '').replace(',', '.')) || 0;
                 }
+
 
                 function toRawNumber(value) {
                     return parseFloat(value.replace(/[^0-9]/g, '')) || 0;

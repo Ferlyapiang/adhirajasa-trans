@@ -115,7 +115,6 @@ class BarangKeluarController extends Controller
                 'harga_lembur' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
                 'items' => 'required|array',
                 'items.*.barang_id' => 'required|exists:barangs,id',
-                'items.*.barang_masuk_item_id' => 'required|exists:barang_masuk_items,id',
                 'items.*.no_ref' => 'nullable|string|max:191',
                 'items.*.qty' => 'required|integer|min:1',
                 'items.*.unit' => 'required|string|max:50',
@@ -198,7 +197,6 @@ class BarangKeluarController extends Controller
                     foreach ($items as $item) {
                         Log::info('Processing Item:', [
                             'barang_id' => (int) $item['barang_id'],
-                            'barang_masuk_item_id' => (int) $item['barang_masuk_item_id'],
                             'barang_masuk_id' => (int) $item['barang_masuk_id'],
                         ]);
         
@@ -209,7 +207,6 @@ class BarangKeluarController extends Controller
                             'unit' => $item['unit'],
                             'barang_masuk_id' => (int) $item['barang_masuk_id'],
                             'barang_keluar_id' => $barangKeluar->id,
-                            'barang_masuk_item_id' => (int) $item['barang_masuk_item_id'],
                         ]);
                     }
         
@@ -437,52 +434,53 @@ class BarangKeluarController extends Controller
         return redirect()->route('data-gudang.barang-keluar.index')->with('success', 'Barang Keluar deleted successfully.');
     }
     public function getItemsByCustomer($customerId, $warehouseId)
-    {
+{
+    // Fetch Barang Masuk records for the specified customer and warehouse
+    $barangMasuk = BarangMasuk::where('customer_id', $customerId)
+        ->where('gudang_id', $warehouseId)
+        ->with('items.barang')
+        ->orderBy('joc_number', 'asc')
+        ->get();
 
-        $barangMasuk = BarangMasuk::where('customer_id', $customerId)
-            ->where('gudang_id', $warehouseId)
-            ->with('items.barang')
-            ->orderBy('joc_number', 'asc')
-            ->get();
-
-
-        $barangKeluarSummary = BarangKeluarItem::select('barang_id', 'no_ref', DB::raw('SUM(qty) as total_qty_keluar'))
-            ->join('barang_keluars', 'barang_keluar_items.barang_keluar_id', '=', 'barang_keluars.id')
-            ->whereIn('barang_keluars.customer_id', [$customerId])
-            ->whereIn('barang_keluars.gudang_id', [$warehouseId])
-            ->groupBy('barang_id', 'no_ref')
-            ->get()
-            ->keyBy(function ($item) {
-                return $item->barang_id . '-' . $item->no_ref;
-            });
-
-        $items = $barangMasuk->flatMap(function ($barangMasuk) use ($barangKeluarSummary) {
-            return $barangMasuk->items->map(function ($item) use ($barangMasuk, $barangKeluarSummary) {
-                $key = $item->barang_id . '-' . $barangMasuk->joc_number;
-                $totalQtyKeluar = $barangKeluarSummary->get($key, (object) ['total_qty_keluar' => 0])->total_qty_keluar;
-                $qtyMasuk = $item->qty;
-
-
-                if ($qtyMasuk > $totalQtyKeluar || $qtyMasuk - $totalQtyKeluar < 0) {
-                    return [
-                        'id' => $item->id,
-                        'barang_masuk_id' => $item->barang_masuk_id,
-                        'barang_id' => $item->barang_id,
-                        'barang_name' => $item->barang->nama_barang,
-                        'qty' => $item->qty,
-                        'unit' => $item->unit,
-                        'joc_number' => $barangMasuk->joc_number,
-                        'created_at' => $item->created_at,
-                        'updated_at' => $item->updated_at,
-                    ];
-                }
-
-                return null;
-            })->filter();
+    // Summarize Barang Keluar to get total quantities keluar by barang_id and no_ref
+    $barangKeluarSummary = BarangKeluarItem::select('barang_id', 'no_ref', DB::raw('SUM(qty) as total_qty_keluar'))
+        ->join('barang_keluars', 'barang_keluar_items.barang_keluar_id', '=', 'barang_keluars.id')
+        ->where('barang_keluars.customer_id', $customerId)
+        ->where('barang_keluars.gudang_id', $warehouseId)
+        ->groupBy('barang_id', 'no_ref')
+        ->get()
+        ->keyBy(function ($item) {
+            return $item->barang_id . '-' . $item->no_ref;
         });
 
-        return response()->json(['items' => $items]);
-    }
+    $items = $barangMasuk->flatMap(function ($barangMasuk) use ($barangKeluarSummary) {
+        return $barangMasuk->items->map(function ($item) use ($barangMasuk, $barangKeluarSummary) {
+            $key = $item->barang_id . '-' . $barangMasuk->joc_number;
+            $totalQtyKeluar = $barangKeluarSummary->get($key, (object) ['total_qty_keluar' => 0])->total_qty_keluar;
+            $qtyMasuk = $item->qty;
+
+            $remainingStock = $qtyMasuk - $totalQtyKeluar;
+
+            if ($remainingStock > 0) {
+                return [
+                    'id' => $item->id,
+                    'barang_masuk_id' => $item->barang_masuk_id,
+                    'barang_id' => $item->barang_id,
+                    'barang_name' => $item->barang->nama_barang,
+                    'qty' => $remainingStock,
+                    'unit' => $item->unit,
+                    'joc_number' => $barangMasuk->joc_number,
+                    'created_at' => $item->created_at,
+                    'updated_at' => $item->updated_at,
+                ];
+            }
+
+            return null;
+        })->filter();
+    });
+
+    return response()->json(['items' => $items]);
+}
 
 
 

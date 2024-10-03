@@ -152,8 +152,8 @@
 
                                         <div class="form-group" id="hargaKirimField" style="display: none;">
                                             <label for="harga_kirim_barang">Harga Kirim Barang</label>
-                                                <input type="text" id="display_harga_kirim_barang " class="form-control @error('harga_kirim_barang') is-invalid @enderror" oninput="formatRupiah(this, 'harga_kirim_barang')">
-                                                <input type="hidden" name="harga_kirim_barang" id="harga_kirim_barang">
+                                            <input type="text" id="display_harga_kirim_barang " class="form-control @error('harga_kirim_barang') is-invalid @enderror" oninput="formatRupiah(this, 'harga_kirim_barang')">
+                                            <input type="hidden" name="harga_kirim_barang" id="harga_kirim_barang">
                                             @error('harga_kirim_barang')
                                             <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
@@ -167,7 +167,7 @@
                                                 <option value="nomer_container">Nomer Container</option>
                                             </select>
                                         </div>
-                                        
+
                                         <div class="form-group" id="nomer_polisi_field" style="display:none;">
                                             <label for="nomer_polisi">Nomer Polisi</label>
                                             <input type="text" name="nomer_polisi" id="nomer_polisi"
@@ -257,111 +257,111 @@
 
     <!-- Modal -->
     <div class="modal fade" id="itemModal" tabindex="-1" role="dialog" aria-labelledby="itemModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="itemModalLabel">Add Item</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="item_joc_number">Job Order</label>
-                    <input type="text" id="item_joc_number" class="form-control" placeholder="Auto-generated" readonly>
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="itemModalLabel">Add Item</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
-                <div class="form-group">
-                    <label for="item_name">Nama Barang</label>
-                    <select id="item_name" class="form-control" required>
-                        <option value="" disabled selected>Pilih Nama Barang</option>
-                        <!-- Option barang akan ditambahkan di sini -->
-                    </select>
-                </div>
-                <div class="form-group">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <label for="item_qty">Quantity</label>
-                            <input type="number" id="item_qty" class="form-control" required>
-                            <span id="quantity-warning" class="text-danger" style="display: none;">Hati-hati Quantity lebih besar dari Sisa Barang.</span>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="item_unit">Unit</label>
-                                <input type="text" id="item_unit" class="form-control" readonly>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="item_joc_number">Job Order</label>
+                        <input type="text" id="item_joc_number" class="form-control" placeholder="Auto-generated" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="item_name">Nama Barang</label>
+                        <select id="item_name" class="form-control" required>
+                            <option value="" disabled selected>Pilih Nama Barang</option>
+                            <!-- Option barang akan ditambahkan di sini -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="item_qty">Quantity</label>
+                                <input type="number" id="item_qty" class="form-control" required>
+                                <span id="quantity-warning" class="text-danger" style="display: none;">Hati-hati Quantity lebih besar dari Sisa Barang.</span>
                             </div>
-                            <div class="form-group">
-                                <label for="item_sisa_barang">Sisa Barang</label>
-                                <input type="number" id="item_sisa_barang" class="form-control" readonly>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="item_unit">Unit</label>
+                                    <input type="text" id="item_unit" class="form-control" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label for="item_sisa_barang">Sisa Barang</label>
+                                    <input type="number" id="item_sisa_barang" class="form-control" readonly>
+                                </div>
                             </div>
                         </div>
                     </div>
+                    <div class="form-group" style="display: none;">
+                        <label for="item_barang_masuk_id">Barang Masuk ID</label>
+                        <input type="text" id="item_barang_masuk_id" class="form-control" readonly>
+                    </div>
                 </div>
-                <div class="form-group" style="display: none;">
-                    <label for="item_barang_masuk_id">Barang Masuk ID</label>
-                    <input type="text" id="item_barang_masuk_id" class="form-control" readonly>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="add-item-btn" disabled>Add Item</button>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="add-item-btn" disabled>Add Item</button>
             </div>
         </div>
     </div>
-</div>
 
     <!-- Modal Edit -->
     <div class="modal fade" id="editItemModal" tabindex="-1" role="dialog" aria-labelledby="editItemModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editItemModalLabel">Edit Item</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="edit_item_joc_number">Job Order</label>
-                    <input type="text" id="edit_item_joc_number" class="form-control" readonly>
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editItemModalLabel">Edit Item</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
-                <div class="form-group">
-                    <label for="edit_item_name">Nama Barang</label>
-                    <select id="edit_item_name" class="form-control" required disabled>
-                        <option value="" disabled selected>Pilih Nama Barang</option>
-                        <!-- Option barang akan ditambahkan di sini -->
-                    </select>
-                </div>
-                <div class="form-group">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <label for="edit_item_qty">Quantity</label>
-                            <input type="number" id="edit_item_qty" class="form-control" required>
-                            <span id="edit_quantity-warning" class="text-danger" style="display: none;">Hati-hati Quantity lebih besar dari Sisa Barang.</span>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="edit_item_unit">Unit</label>
-                                <input type="text" id="edit_item_unit" class="form-control" readonly>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="edit_item_joc_number">Job Order</label>
+                        <input type="text" id="edit_item_joc_number" class="form-control" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_item_name">Nama Barang</label>
+                        <select id="edit_item_name" class="form-control" required disabled>
+                            <option value="" disabled selected>Pilih Nama Barang</option>
+                            <!-- Option barang akan ditambahkan di sini -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="edit_item_qty">Quantity</label>
+                                <input type="number" id="edit_item_qty" class="form-control" required>
+                                <span id="edit_quantity-warning" class="text-danger" style="display: none;">Hati-hati Quantity lebih besar dari Sisa Barang.</span>
                             </div>
-                            <div class="form-group">
-                                <label for="edit_item_sisa_barang">Sisa Barang</label>
-                                <input type="number" id="edit_item_sisa_barang" class="form-control" readonly>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="edit_item_unit">Unit</label>
+                                    <input type="text" id="edit_item_unit" class="form-control" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit_item_sisa_barang">Sisa Barang</label>
+                                    <input type="number" id="edit_item_sisa_barang" class="form-control" readonly>
+                                </div>
                             </div>
                         </div>
                     </div>
+                    <div class="form-group" style="display: none;">
+                        <label for="edit_item_barang_masuk_id">Barang Masuk ID</label>
+                        <input type="text" id="edit_item_barang_masuk_id" class="form-control" readonly>
+                    </div>
                 </div>
-                <div class="form-group" style="display: none;">
-                    <label for="edit_item_barang_masuk_id">Barang Masuk ID</label>
-                    <input type="text" id="edit_item_barang_masuk_id" class="form-control" readonly>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="save-edit-item-btn" disabled>Save Changes</button>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="save-edit-item-btn" disabled>Save Changes</button>
             </div>
         </div>
     </div>
-</div>
 
 
 
@@ -372,7 +372,7 @@
     <script>
         $(document).ready(function() {
             let items = [];
-            let nextJocNumber = 1; 
+            let nextJocNumber = 1;
 
             function validateQuantity() {
                 let qty = parseFloat($('#item_qty').val()) || 0;
@@ -421,56 +421,56 @@
             };
 
             $('#add-item-btn').click(function() {
-    const itemId = $('#item_name').val();
-    const itemQty = parseFloat($('#item_qty').val()) || 0;
-    const itemUnit = $('#item_unit').val();
-    const itemJocNumber = $('#item_joc_number').val();
-    const itemSisaBarang = $('#item_sisa_barang').val();
-    const itemBarangMasukID = $('#item_barang_masuk_id').val();
+                const itemId = $('#item_name').val();
+                const itemQty = parseFloat($('#item_qty').val()) || 0;
+                const itemUnit = $('#item_unit').val();
+                const itemJocNumber = $('#item_joc_number').val();
+                const itemSisaBarang = $('#item_sisa_barang').val();
+                const itemBarangMasukID = $('#item_barang_masuk_id').val();
 
-    if (!itemId) {
-        alert('Please select a valid item.');
-        return;
-    }
+                if (!itemId) {
+                    alert('Please select a valid item.');
+                    return;
+                }
 
-    const itemName = $('#item_name option:selected').text();
+                const itemName = $('#item_name option:selected').text();
 
-    const itemExists = items.some(item =>
-        item.barang_id === parseInt(itemId, 10) &&
-        item.name === itemName &&
-        item.no_ref === itemJocNumber
-    );
+                const itemExists = items.some(item =>
+                    item.barang_id === parseInt(itemId, 10) &&
+                    item.name === itemName &&
+                    item.no_ref === itemJocNumber
+                );
 
-    if (itemExists) {
-        alert('Barang telah ada dalam daftar!');
-        return;
-    }
+                if (itemExists) {
+                    alert('Barang telah ada dalam daftar!');
+                    return;
+                }
 
-    items.push({
-        barang_id: parseInt(itemId, 10),
-        no_ref: itemJocNumber,
-        qty: itemQty,
-        unit: itemUnit,
-        barang_masuk_id: parseInt(itemBarangMasukID, 10),
-        name: itemName,
-        sisa_barang: itemSisaBarang
-    });
+                items.push({
+                    barang_id: parseInt(itemId, 10),
+                    no_ref: itemJocNumber,
+                    qty: itemQty,
+                    unit: itemUnit,
+                    barang_masuk_id: parseInt(itemBarangMasukID, 10),
+                    name: itemName,
+                    sisa_barang: itemSisaBarang
+                });
 
-    $('#item_name option:selected').remove();
+                $('#item_name option:selected').remove();
 
-    nextJocNumber++;
+                nextJocNumber++;
 
-    updateItemsTable();
+                updateItemsTable();
 
-    $('#itemModal').modal('hide');
+                $('#itemModal').modal('hide');
 
-    // Reset input fields
-    $('#item_name').val('');
-    $('#item_qty').val('');
-    $('#item_unit').val('');
-    $('#item_joc_number').val('');
-    $('#item_sisa_barang').val('');
-});
+                // Reset input fields
+                $('#item_name').val('');
+                $('#item_qty').val('');
+                $('#item_unit').val('');
+                $('#item_joc_number').val('');
+                $('#item_sisa_barang').val('');
+            });
 
 
 
@@ -486,19 +486,25 @@
                         url: `/api/customers/${warehouseId}`,
                         method: 'GET',
                         success: function(response) {
-                            response.customers.forEach(customer => {
-                                $('#customer_id').append(
-                                    `<option value="${customer.id}">${customer.name}</option>`
-                                );
-                            });
+                            console.log(response);
+                            if (response.customers && Array.isArray(response.customers)) {
+                                response.customers.forEach(customer => {
+                                    $('#customer_id').append(
+                                        `<option value="${customer.id}">${customer.name}</option>`
+                                    );
+                                });
+                            } else {
+                                $('#customer_id').append('<option value="">No customers found</option>');
+                            }
                         },
-                        error: function() {
-                            $('#customer_id').append(
-                                '<option value="">No customers found</option>');
+                        error: function(jqXHR, textStatus, errorThrown) {
+                            console.error('Error fetching customers:', textStatus, errorThrown);
+                            $('#customer_id').append('<option value="">Failed to load customers</option>');
                         }
                     });
                 }
             });
+
 
             $('#customer_id').change(function() {
                 const customerId = $(this).val();
@@ -640,7 +646,7 @@
             var nomerPolisiField = document.getElementById('nomer_polisi_field');
             var nomerContainerField = document.getElementById('nomer_container_field');
 
-            
+
             function toggleFields() {
                 var selectedValue = selectType.value;
 
@@ -688,7 +694,11 @@
 
         function formatRupiah(displayInput, hiddenInputId) {
             let angka = displayInput.value.replace(/[^,\d]/g, ''); // Hanya angka
-            let formatted = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
+            let formatted = new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }).format(angka);
             displayInput.value = formatted.replace('IDR', 'Rp.');
 
             document.getElementById(hiddenInputId).value = angka;
@@ -739,9 +749,8 @@
             }
 
             editItemQtyInput.addEventListener('input', checkEditQuantity);
-            editItemSisaBarangInput.addEventListener('input', checkEditQuantity); 
+            editItemSisaBarangInput.addEventListener('input', checkEditQuantity);
         });
-
     </script>
 
 
