@@ -11,7 +11,7 @@
 
     <!-- Theme style -->
     <link rel="stylesheet" href="{{ asset('lte/dist/css/adminlte.min.css') }}">
-
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
     <!-- Custom CSS -->
     <style>
         .form-group {
@@ -44,6 +44,18 @@
             color: #fff;
             background-color: #dc3545;
             border-color: #dc3545;
+        }
+
+        .select2-selection__rendered {
+            line-height: 2.5 !important;
+        }
+
+        .select2-container .select2-selection--single {
+            height: 50px !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 50px !important;
         }
     </style>
 </head>
@@ -123,13 +135,15 @@
                                         <div class="form-group">
                                             <label for="customer_id">Pemilik Barang</label>
                                             <select name="customer_id" id="customer_id"
-                                                class="form-control @error('customer_id') is-invalid @enderror" required>
-                                                <option value="">Select Pemilik Barang</option>
+                                                class="form-control select2 @error('customer_id') is-invalid @enderror" required>
+                                                <option value="" disabled selected>Select Pemilik Barang</option>
+                                                <!-- Options will be dynamically populated here -->
                                             </select>
                                             @error('customer_id')
                                             <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
                                         </div>
+
 
                                         <div class="form-group">
                                             <label for="shipping_option">Pilih Opsi Pengiriman</label>
@@ -366,11 +380,24 @@
 
 
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Select2 JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <!-- Accounting.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/accounting.js/0.4.1/accounting.min.js"></script>
-
 
     <script>
         $(document).ready(function() {
+            $('#item_name, #edit_item_name').select2({
+                placeholder: 'Pilih Nama Barang',
+                allowClear: true
+            });
+            $('#customer_id').select2({
+                placeholder: 'Select Pemilik Barang', // Placeholder text
+                allowClear: true // Allow clearing of the selection
+            });
             let items = [];
             let nextJocNumber = 1;
 
@@ -462,9 +489,6 @@
 
                 updateItemsTable();
 
-                $('#itemModal').modal('hide');
-
-                // Reset input fields
                 $('#item_name').val('');
                 $('#item_qty').val('');
                 $('#item_unit').val('');
@@ -493,8 +517,6 @@
                                         `<option value="${customer.id}">${customer.name}</option>`
                                     );
                                 });
-                            } else {
-                                $('#customer_id').append('<option value="">No customers found</option>');
                             }
                         },
                         error: function(jqXHR, textStatus, errorThrown) {
@@ -515,18 +537,20 @@
                         url: `/api/items/${customerId}/${warehouseId}`,
                         method: 'GET',
                         success: function(response) {
-                            const itemsDropdown = $(
-                                '#item_name, #edit_item_name');
-                            itemsDropdown.empty();
-                            itemsDropdown.append(
-                                '<option value="" disabled selected>Pilih Nama Barang</option>'
-                            );
+                            const itemsDropdown = $('#item_name, #edit_item_name');
+                            itemsDropdown.empty(); // Clear existing options
+                            itemsDropdown.append('<option value="" disabled selected>Pilih Nama Barang</option>');
+
                             response.items.forEach(item => {
                                 itemsDropdown.append(
                                     `<option value="${item.barang_id}" data-unit="${item.unit}" data-joc-number="${item.joc_number}" data-barang-masuk-id="${item.barang_masuk_id}" data-sisa-barang="${item.qty}">${item.barang_name}</option>`
                                 );
                             });
 
+                            // Refresh the Select2 dropdown to reflect new options
+                            itemsDropdown.trigger('change');
+
+                            // Reset other input fields
                             $('#item_unit').val('').prop('readonly', true);
                             $('#item_joc_number').val('Auto-generated');
                             $('#item_barang_masuk_id').val('');

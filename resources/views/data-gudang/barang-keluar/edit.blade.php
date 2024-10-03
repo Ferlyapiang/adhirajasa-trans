@@ -97,8 +97,8 @@
                                         <div class="form-group">
                                             <label for="nomer_surat_jalan">Nomor Surat Jalan</label>
                                             <input type="text" name="nomer_surat_jalan" id="nomer_invoice"
-                                                class="form-control @error('nomer_surat_jalan') is-invalid @enderror"
-                                                value="{{ old('nomer_surat_jalan', $barangKeluar->nomer_surat_jalan) }}" readonly>
+                                                class="form-control @error('nomer_surat_jalan') is-invalid @enderror" placeholder="Nomor Surat Jalan"
+                                                value="{{ old('nomer_surat_jalan', $barangKeluar->nomer_surat_jalan) }}">
                                             @error('nomer_surat_jalan')
                                             <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
