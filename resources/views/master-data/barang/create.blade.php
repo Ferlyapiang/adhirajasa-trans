@@ -88,16 +88,17 @@
                 
                     <div class="form-group">
                         <label for="nama_barang">Nama Barang</label>
-                        <input type="text" name="nama_barang" class="form-control" id="nama_barang" required>
+                        <input type="text" name="nama_barang" class="form-control" id="nama_barang" oninput="this.value = this.value.toUpperCase();" required>
                         <span id="nama_barang_error" class="text-danger"></span>
                         @error('nama_barang')
                             <span class="text-danger">{{ $message }}</span>
                         @enderror
                     </div>
+
                 
                     <div class="form-group">
                         <label for="sku">SKU</label>
-                        <input type="text" name="sku" class="form-control" id="sku" required>
+                        <input type="text" name="sku" class="form-control" id="sku" oninput="this.value = this.value.toUpperCase();" required>
                         @error('sku')
                             <span class="text-danger">{{ $message }}</span>
                         @enderror

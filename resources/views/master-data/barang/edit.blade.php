@@ -55,27 +55,7 @@
             <div class="container-fluid pl-4">
                 <h1>Edit Barang</h1>
                 <form action="{{ route('master-data.barang.update', $barang) }}" method="POST">
-                    @csrf
-                    @method('PUT')
-                    <div class="form-group">
-                        <label for="nama_barang">Nama Barang</label>
-                        <input type="text" name="nama_barang" class="form-control" id="nama_barang" value="{{ $barang->nama_barang }}" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="jenis">Jenis</label>
-                        <select name="jenis" class="form-control" id="jenis" required>
-                            @foreach($itemTypes as $itemType)
-                                <option value="{{ $itemType->name }}" {{ $barang->jenis == $itemType->name ? 'selected' : '' }}>
-                                    {{ $itemType->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="sku">SKU</label>
-                        <input type="text" name="sku" class="form-control" id="sku" value="{{ $barang->sku }}" required>
-                    </div>
-                    <div class="form-group">
+                <div class="form-group">
                         <label for="pemilik">Pemilik</label>
                         <select name="pemilik" class="form-control" id="pemilik" required>
                             <option value="" disabled selected>Pilih Pemilik Barang</option>
@@ -92,7 +72,27 @@
                                 @endif
                             @endforeach
                         </select>
-                    </div>                    
+                    </div>            
+                    <div class="form-group">
+                        <label for="jenis">Jenis</label>
+                        <select name="jenis" class="form-control" id="jenis" required>
+                            @foreach($itemTypes as $itemType)
+                                <option value="{{ $itemType->name }}" {{ $barang->jenis == $itemType->name ? 'selected' : '' }}>
+                                    {{ $itemType->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    @csrf
+                    @method('PUT')
+                    <div class="form-group">
+                        <label for="nama_barang">Nama Barang</label>
+                        <input type="text" name="nama_barang" class="form-control" id="nama_barang" oninput="this.value = this.value.toUpperCase();" value="{{ $barang->nama_barang }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sku">SKU</label>
+                        <input type="text" name="sku" class="form-control" id="sku" oninput="this.value = this.value.toUpperCase();" value="{{ $barang->sku }}" required>
+                    </div> 
                     <div class="form-group">
                         <label for="status">Status</label>
                         <select name="status" class="form-control" id="status" required>
@@ -121,13 +121,19 @@
 
     <script>
         $(document).ready(function() {
-            // Initialize Select2 on select elements with placeholders
             $('#jenis, #pemilik').select2({
                 placeholder: function(){
                     return $(this).data('placeholder');
                 },
                 allowClear: true
             });
+        });
+        document.addEventListener("DOMContentLoaded", function() {
+            var namaBarangInput = document.getElementById('nama_barang');
+            var skuInput = document.getElementById('sku');
+            
+            namaBarangInput.value = namaBarangInput.value.toUpperCase();
+            skuInput.value = skuInput.value.toUpperCase();
         });
     </script>
 </body>
