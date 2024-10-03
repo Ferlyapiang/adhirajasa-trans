@@ -356,6 +356,7 @@ class BarangKeluarController extends Controller
             'nomer_container' => 'nullable|string|max:191',
             'bank_transfer_id' => 'nullable|exists:bank_datas,id',
             'harga_kirim_barang' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
+            'harga_lembur' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
             'items' => 'required|array',
             'items.*.barang_id' => 'required|exists:barangs,id',
             'items.*.no_ref' => 'nullable|string|max:191',
@@ -381,6 +382,7 @@ class BarangKeluarController extends Controller
             'nomer_container' => $validated['nomer_container'] ?? null,
             'bank_transfer_id' => $bank_transfer_id,
             'harga_kirim_barang' => $validated['harga_kirim_barang'],
+            'harga_lembur' => $validated['harga_lembur'],
         ];
 
         $items = $validated['items'];

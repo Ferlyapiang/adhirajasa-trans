@@ -93,12 +93,23 @@
                                         @method('PUT')
 
                                         <div class="form-group">
-                                            <label for="nomer_invoice">Nomor Container</label>
+                                            <label for="nomer_invoice">Nomor Ref</label>
                                             <input type="text" name="nomer_invoice" id="nomer_invoice"
                                                 class="form-control @error('nomer_invoice') is-invalid @enderror"
                                                 value="{{ old('nomer_invoice', $barangKeluar->nomer_invoice) }}"
                                                 readonly>
                                             @error('nomer_invoice')
+                                            <span class="invalid-feedback">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="nomer_surat_jalan">Nomer Surat Jalan</label>
+                                            <input type="text" name="nomer_surat_jalan" id="nomer_surat_jalan"
+                                                class="form-control @error('nomer_surat_jalan') is-invalid @enderror"
+                                                value="{{ old('nomer_surat_jalan', $barangKeluar->nomer_surat_jalan) }}"
+                                                readonly>
+                                            @error('nomer_surat_jalan')
                                             <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
                                         </div>
@@ -148,7 +159,7 @@
                                             @enderror
                                         </div>
 
-                                        <div class="form-group">
+                                        <!-- <div class="form-group">
                                             <label for="nomer_polisi">Nomor Polisi</label>
                                             <input type="text" name="nomer_polisi" id="nomer_polisi"
                                                 class="form-control @error('nomer_polisi') is-invalid @enderror"
@@ -157,9 +168,29 @@
                                             @error('nomer_polisi')
                                             <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
+                                        </div> -->
+                                        <div class="mb-3">
+                                            <label for="id_selection" class="form-label">Choose Identification Type:</label>
+                                            <select id="id_selection" class="form-control" onchange="toggleFields()" disabled required>
+                                                <option value="">-- Select --</option>
+                                                <option value="nomer_polisi" {{ $barangKeluar->nomer_polisi ? 'selected' : '' }}>Nomer Polisi</option>
+                                                <option value="nomer_container" {{ $barangKeluar->nomer_container ? 'selected' : '' }}>Nomer Container</option>
+                                            </select>
                                         </div>
 
-                                        <div class="form-group">
+                                        <div id="nomer_polisi_field" class="mb-3" style="display: none;">
+                                            <label for="nomer_polisi">Nomer Polisi</label>
+                                            <input type="text" name="nomer_polisi" id="nomer_polisi" class="form-control" disabled
+                                                value="{{ $barangKeluar->nomer_polisi }}">
+                                        </div>
+
+                                        <div id="nomer_container_field" class="mb-3" style="display: none;">
+                                            <label for="nomer_container">Nomer Container</label>
+                                            <input type="text" name="nomer_container" id="nomer_container" class="form-control" disabled
+                                                value="{{ $barangKeluar->nomer_container }}">
+                                        </div>
+
+                                        <div class="form-group" hidden>
                                             <label for="bank_transfer_id">Bank Transfer</label>
                                             <select name="bank_transfer_id" id="bank_transfer_id"
                                                 class="form-control @error('bank_transfer_id') is-invalid @enderror"
@@ -279,5 +310,40 @@
         @include('admin.footer')
         <!-- ./wrapper -->
 </body>
+<script>
+     document.addEventListener("DOMContentLoaded", function() {
+                var nomerPolisi = "{{ $barangKeluar->nomer_polisi }}";
+                var nomerContainer = "{{ $barangKeluar->nomer_container }}";
+                var idSelection = document.getElementById('id_selection');
+
+                if (nomerPolisi) {
+                    idSelection.value = 'nomer_polisi';
+                    document.getElementById('nomer_polisi_field').style.display = 'block';
+                    document.getElementById('nomer_container_field').style.display = 'none'; // Sembunyikan field lainnya
+                } else if (nomerContainer) {
+                    idSelection.value = 'nomer_container';
+                    document.getElementById('nomer_container_field').style.display = 'block';
+                    document.getElementById('nomer_polisi_field').style.display = 'none'; // Sembunyikan field lainnya
+                } else {
+                    idSelection.value = '';
+                }
+            });
+
+            function toggleFields() {
+                var selection = document.getElementById('id_selection').value;
+
+                document.getElementById('nomer_polisi_field').style.display = 'none';
+                document.getElementById('nomer_container_field').style.display = 'none';
+
+                document.getElementById('nomer_polisi').value = '';
+                document.getElementById('nomer_container').value = '';
+
+                if (selection === 'nomer_polisi') {
+                    document.getElementById('nomer_polisi_field').style.display = 'block';
+                } else if (selection === 'nomer_container') {
+                    document.getElementById('nomer_container_field').style.display = 'block';
+                }
+            }
+</script>
 
 </html>

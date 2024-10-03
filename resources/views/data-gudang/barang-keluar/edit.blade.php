@@ -195,6 +195,19 @@
                                                 value="{{ $barangKeluar->nomer_container }}">
                                         </div>
 
+
+                                        <div class="form-group">
+                                            <label for="harga_lembur">Harga Lembur</label>
+                                            <input type="text" id="display_harga_lembur" class="form-control"
+                                                value="{{ number_format($barangKeluar->harga_lembur, 0, ',', '.') }}"
+                                                oninput="formatRupiah(this, 'harga_lembur')">
+                                            <input type="hidden" name="harga_lembur" id="harga_lembur"
+                                                value="{{ $barangKeluar->harga_lembur }}">
+                                        </div>
+
+
+
+
                                         <h2>Items</h2>
                                         <!-- Button trigger modal -->
                                         <button type="button" class="btn btn-primary" data-toggle="modal"
@@ -599,6 +612,28 @@
                 } else if (selection === 'nomer_container') {
                     document.getElementById('nomer_container_field').style.display = 'block';
                 }
+            }
+
+            function toggleLembur() {
+                let select = document.getElementById('ada_lembur');
+                let lemburSection = document.getElementById('lembur_section');
+                if (select.value === 'ya') {
+                    lemburSection.style.display = 'block'; // Tampilkan field harga lembur
+                } else {
+                    lemburSection.style.display = 'none'; // Sembunyikan field harga lembur
+                }
+            }
+
+            // Function to format currency
+            function formatRupiah(displayInput, hiddenInputId) {
+                let angka = displayInput.value.replace(/[^,\d]/g, '');
+                let formatted = new Intl.NumberFormat('id-ID', {
+                    style: 'currency',
+                    currency: 'IDR',
+                    minimumFractionDigits: 0
+                }).format(angka);
+                displayInput.value = formatted.replace('IDR', '').trim();
+                document.getElementById(hiddenInputId).value = angka;
             }
         </script>
 
