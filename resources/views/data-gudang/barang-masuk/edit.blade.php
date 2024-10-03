@@ -148,6 +148,24 @@
                                value="{{ $barangMasuk->nomer_container }}">
                     </div>
 
+                    <div class="form-group">
+                        <label for="harga_simpan_barang">Harga Simpan Barang</label>
+                        <input type="text" id="display_harga_simpan_barang" class="form-control" 
+                            value="{{ number_format($barangMasuk->harga_simpan_barang, 0, ',', '.') }}" 
+                            oninput="formatRupiah(this, 'harga_simpan_barang')">
+                        <input type="hidden" name="harga_simpan_barang" id="harga_simpan_barang" 
+                            value="{{ $barangMasuk->harga_simpan_barang }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="harga_lembur">Harga Lembur</label>
+                        <input type="text" id="display_harga_lembur" class="form-control" 
+                            value="{{ number_format($barangMasuk->harga_lembur, 0, ',', '.') }}" 
+                            oninput="formatRupiah(this, 'harga_lembur')">
+                        <input type="hidden" name="harga_lembur" id="harga_lembur" 
+                            value="{{ $barangMasuk->harga_lembur }}">
+                    </div>
+
                     <h2>Items</h2>
                     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#itemModal">Add
                         Item</button>
@@ -466,6 +484,25 @@
             }
         }
 
+        function toggleLembur() {
+    let select = document.getElementById('ada_lembur');
+    let lemburSection = document.getElementById('lembur_section');
+    if (select.value === 'ya') {
+        lemburSection.style.display = 'block'; // Tampilkan field harga lembur
+    } else {
+        lemburSection.style.display = 'none'; // Sembunyikan field harga lembur
+    }
+}
+
+// Fungsi untuk memformat input sebagai Rupiah
+function formatRupiah(displayInput, hiddenInputId) {
+    let angka = displayInput.value.replace(/[^,\d]/g, ''); // Hanya angka
+    let formatted = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
+    displayInput.value = formatted.replace('IDR', 'Rp.');
+
+    // Simpan nilai numerik asli ke elemen tersembunyi
+    document.getElementById(hiddenInputId).value = angka;
+}
     </script>
 
 </body>

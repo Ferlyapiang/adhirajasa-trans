@@ -145,6 +145,24 @@
                                value="{{ $barangMasuk->nomer_container }}" disabled>
                     </div>
 
+                    <div class="form-group">
+                        <label for="harga_simpan_barang">Harga Simpan Barang</label>
+                        <input type="text" id="display_harga_simpan_barang" class="form-control" 
+                            value="{{ number_format($barangMasuk->harga_simpan_barang, 0, ',', '.') }}" 
+                            oninput="formatRupiah(this, 'harga_simpan_barang')" disabled>
+                        <input type="hidden" name="harga_simpan_barang" id="harga_simpan_barang" 
+                            value="{{ $barangMasuk->harga_simpan_barang }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="harga_lembur">Harga Lembur</label>
+                        <input type="text" id="display_harga_lembur" class="form-control" 
+                            value="{{ number_format($barangMasuk->harga_lembur, 0, ',', '.') }}" 
+                            oninput="formatRupiah(this, 'harga_lembur')" disabled>
+                        <input type="hidden" name="harga_lembur" id="harga_lembur" 
+                            value="{{ $barangMasuk->harga_lembur }}">
+                    </div>
+
                     <h2>Items</h2>
                 
                     <!-- Items Table -->

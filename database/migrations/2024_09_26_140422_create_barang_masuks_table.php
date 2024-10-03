@@ -21,6 +21,9 @@ return new class extends Migration
             $table->foreignId('type_mobil_id')->constrained('type_mobil')->onDelete('cascade');
             $table->string('nomer_polisi')->nullable();
             $table->string('nomer_container')->nullable();
+            $table->decimal('harga_simpan_barang', 15, 2)->nullable();
+            $table->decimal('harga_lembur', 15, 2)->nullable();
+            $table->string('status_invoice')->nullable();
             $table->timestamps();
         });
 

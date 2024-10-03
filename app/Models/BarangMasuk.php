@@ -14,6 +14,9 @@ class BarangMasuk extends Model
         'type_mobil_id',
         'nomer_polisi',
         'nomer_container',
+        'harga_simpan_barang',
+        'harga_lembur',
+        'status_invoice',
     ];
 
     public function items()

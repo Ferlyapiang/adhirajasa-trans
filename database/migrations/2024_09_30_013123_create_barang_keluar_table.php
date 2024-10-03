@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('nomer_container')->nullable();
             $table->decimal('harga_kirim_barang', 15, 2)->nullable();
             $table->foreignId('bank_transfer_id')->constrained('bank_datas')->onDelete('cascade');
+            $table->decimal('harga_lembur', 15, 2)->nullable();
             $table->timestamps();
         });
 

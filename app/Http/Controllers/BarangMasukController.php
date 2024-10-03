@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Barang;
 use App\Models\BarangMasuk;
 use App\Models\BarangMasukItem;
-use App\Models\BarangKeluar;
 use App\Models\Customer;
 use App\Models\Warehouse;
 use Illuminate\Http\Request;
@@ -42,13 +41,13 @@ class BarangMasukController extends Controller
         ->join('customers', 'barang_masuks.customer_id', '=', 'customers.id')
         ->join('warehouses', 'barang_masuks.gudang_id', '=', 'warehouses.id')
         ->join('type_mobil', 'barang_masuks.type_mobil_id', '=', 'type_mobil.id')
-        ->leftjoin('barang_keluar_items', 'barang_masuk_items.id', '=', 'barang_keluar_items.id');
+        ->leftjoin('barang_keluar_items', 'barang_masuk_items.id', '=', 'barang_keluar_items.id')
+        ->where('barang_masuks.status_invoice', 'Barang Masuk');
     
         if ($user->warehouse_id) {
             $barangMasuks = $barangMasuks->where('barang_masuks.gudang_id', $user->warehouse_id);
         }
     
-        // Order by tanggal_masuk and get the results
         $barangMasuks = $barangMasuks->orderBy('barang_masuks.tanggal_masuk', 'desc')->get();
     
         return view('data-gudang.barang-masuk.index', compact('barangMasuks'));
@@ -105,6 +104,8 @@ class BarangMasukController extends Controller
                 'type_mobil_id' => 'required|exists:type_mobil,id',
                 'nomer_polisi' => 'nullable|string',
                 'nomer_container' => 'nullable|string',
+                'harga_simpan_barang' => 'nullable|numeric',
+                'harga_lembur' => 'nullable|numeric',
                 'items.*.barang_id' => 'required|exists:barangs,id',
                 'items.*.qty' => 'required|numeric',
                 'items.*.unit' => 'required|string',
@@ -132,7 +133,10 @@ class BarangMasukController extends Controller
                 'customer_id' => $request->customer_id,
                 'type_mobil_id' => $request->type_mobil_id, 
                 'nomer_polisi' => $request->nomer_polisi ?? "",
-                'nomer_container' => $request->nomer_container ?? "",     
+                'nomer_container' => $request->nomer_container ?? "", 
+                'status_invoice' => "Barang Masuk",
+                'harga_simpan_barang' => $request->harga_simpan_barang ?? 0,
+                'harga_lembur' => $request->harga_lembur ?? 0    
             ]);
 
             $items = json_decode($request->items, true);
@@ -160,10 +164,8 @@ class BarangMasukController extends Controller
                 'details' => 'Created barang masuk ID: ' . $barangMasuk->id . ' with data: ' . json_encode($request->all())
             ]);
 
-            // Return redirect with success message
             return redirect()->route('data-gudang.barang-masuk.index')->with('success', 'Barang Masuk berhasil disimpan.');
         } catch (\Exception $e) {
-            // Log error and return redirect with error message
             Log::error('Error in storing Barang Masuk:', ['error' => $e->getMessage()]);
             return redirect()->route('data-gudang.barang-masuk.index')->with('error', 'Terjadi kesalahan saat menyimpan data.');
         }
@@ -199,6 +201,8 @@ class BarangMasukController extends Controller
                 'type_mobil_id' => 'required|exists:type_mobil,id', 
                 'nomer_polisi' => 'nullable|string',
                 'nomer_container' => 'nullable|string',
+                'harga_simpan_barang' => 'nullable|numeric',
+                'harga_lembur' => 'nullable|numeric',
                 'items.*.barang_id' => 'required|exists:barangs,id',
                 'items.*.qty' => 'required|numeric',
                 'items.*.unit' => 'required|string',
@@ -213,7 +217,10 @@ class BarangMasukController extends Controller
                 'customer_id' => $request->customer_id,
                 'type_mobil_id' => $request->type_mobil_id,
                 'nomer_polisi' => $request->nomer_polisi ?? "", 
-                'nomer_container' => $request->nomer_container ?? "", 
+                'nomer_container' => $request->nomer_container ?? "",
+                'status_invoice' => "Barang Masuk",
+                'harga_simpan_barang' => $request->harga_simpan_barang ?? 0,
+                'harga_lembur' => $request->harga_lembur ?? 0
             ]);
 
             $items = json_decode($request->items, true);
