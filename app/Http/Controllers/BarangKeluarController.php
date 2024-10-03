@@ -81,6 +81,7 @@ class BarangKeluarController extends Controller
             $request->merge(['items' => json_decode($request->input('items'), true)]);
         
             $validated = $request->validate([
+                'nomor_surat_jalan' => 'nullable|string|max:191',
                 'tanggal_keluar' => 'required|date',
                 'gudang_id' => 'required|exists:warehouses,id',
                 'customer_id' => 'required|exists:customers,id',
@@ -88,15 +89,15 @@ class BarangKeluarController extends Controller
                 'nomer_polisi' => 'nullable|string|max:191',
                 'nomer_container' => 'nullable|string|max:191',
                 'harga_kirim_barang' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
+                'harga_lembur' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
                 'items' => 'required|array',
                 'items.*.barang_id' => 'required|exists:barangs,id',
                 'items.*.no_ref' => 'nullable|string|max:191',
                 'items.*.qty' => 'required|integer|min:1',
                 'items.*.unit' => 'required|string|max:50',
-                'items.*.harga' => 'nullable|numeric|min:0',
-                'items.*.total_harga' => 'nullable|numeric|min:0',
                 'items.*.barang_masuk_id' => 'required|exists:barang_masuks,id',
             ]);
+            // dd($validated);
 
             $warehouse = Warehouse::find($validated['gudang_id']);
             if (!$warehouse) {
@@ -148,19 +149,20 @@ class BarangKeluarController extends Controller
         
             $formattedNumber = sprintf('%03d', $nextNumber);
             $nomer_invoice = "ATS/INV/{$year}/{$romanMonth}/{$warehouseCode}/{$formattedNumber}";
-            $nomer_surat_jalan = "SURAT JALAN No. {$formattedNumber}";
         
             $barangKeluarData = [
+                'nomer_surat_jalan' => $validated['nomor_surat_jalan'],
                 'tanggal_keluar' => $validated['tanggal_keluar'],
                 'gudang_id' => $validated['gudang_id'],
                 'customer_id' => $validated['customer_id'],
                 'type_mobil_id' => $validated['type_mobil_id'],
-                'nomer_surat_jalan' => $nomer_surat_jalan,
                 'nomer_invoice' => $nomer_invoice,
                 'nomer_polisi' => $validated['nomer_polisi'],
                 'nomer_container' => $validated['nomer_container'],
                 'harga_kirim_barang' => $validated['harga_kirim_barang'],
                 'bank_transfer_id' => $bank_transfer_id,
+                'harga_lembur' => $validated['harga_lembur'],
+                'status_invoice' => 'Barang Keluar',
             ];
         
             $items = $validated['items'];
@@ -180,8 +182,6 @@ class BarangKeluarController extends Controller
                             'no_ref' => $item['no_ref'],
                             'qty' => $item['qty'],
                             'unit' => $item['unit'],
-                            'harga' => $item['harga'],
-                            'total_harga' => $item['total_harga'],
                             'barang_masuk_id' => (int) $item['barang_masuk_id'],
                             'barang_keluar_id' => $barangKeluar->id,
                         ]);
@@ -338,10 +338,14 @@ class BarangKeluarController extends Controller
             'items.*.no_ref' => 'nullable|string|max:191',
             'items.*.qty' => 'required|integer|min:1',
             'items.*.unit' => 'required|string|max:50',
-            'items.*.harga' => 'nullable|numeric|min:0',
-            'items.*.total_harga' => 'nullable|numeric|min:0',
             'items.*.barang_masuk_id' => 'required|exists:barang_masuks,id',
         ]);
+
+        // dd($validated);
+
+        $bankTransfer = BankData::where('warehouse_id', $validated['gudang_id'])->first();
+
+        $bank_transfer_id = $bankTransfer ? $bankTransfer->id : null;
 
         $barangKeluarData = [
             'tanggal_keluar' => $validated['tanggal_keluar'],
@@ -352,7 +356,7 @@ class BarangKeluarController extends Controller
             'nomer_invoice' => $validated['nomer_invoice'],
             'nomer_polisi' => $validated['nomer_polisi'] ?? null,
             'nomer_container' => $validated['nomer_container'] ?? null,
-            'bank_transfer_id' => $validated['bank_transfer_id'],
+            'bank_transfer_id' => $bank_transfer_id,
             'harga_kirim_barang' => $validated['harga_kirim_barang'],
         ];
 
@@ -371,8 +375,6 @@ class BarangKeluarController extends Controller
                         'no_ref' => $item['no_ref'],
                         'qty' => $item['qty'],
                         'unit' => $item['unit'],
-                        'harga' => $item['harga'],
-                        'total_harga' => $item['total_harga'],
                         'barang_masuk_id' => (int) $item['barang_masuk_id'],
                         'barang_keluar_id' => $barangKeluar->id,
                     ]);

@@ -90,7 +90,7 @@
                                                 class="form-control @error('nomer_invoice') is-invalid @enderror"
                                                 value="{{ old('nomer_invoice', $barangKeluar->nomer_invoice) }}" readonly>
                                             @error('nomer_invoice')
-                                                <span class="invalid-feedback">{{ $message }}</span>
+                                            <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
                                         </div>
 
@@ -100,7 +100,7 @@
                                                 class="form-control @error('nomer_surat_jalan') is-invalid @enderror"
                                                 value="{{ old('nomer_surat_jalan', $barangKeluar->nomer_surat_jalan) }}" readonly>
                                             @error('nomer_surat_jalan')
-                                                <span class="invalid-feedback">{{ $message }}</span>
+                                            <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
                                         </div>
 
@@ -111,7 +111,7 @@
                                                 value="{{ old('tanggal_keluar', $barangKeluar->tanggal_keluar) }}"
                                                 required>
                                             @error('tanggal_keluar')
-                                                <span class="invalid-feedback">{{ $message }}</span>
+                                            <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
                                         </div>
 
@@ -122,14 +122,14 @@
                                                 style="pointer-events: none; background-color: #e9ecef;" required>
                                                 <option value="">Select Gudang</option>
                                                 @foreach ($warehouses as $warehouse)
-                                                    <option value="{{ $warehouse->id }}"
-                                                        {{ old('gudang_id', $barangKeluar->gudang_id) == $warehouse->id ? 'selected' : '' }}>
-                                                        {{ $warehouse->name }}
-                                                    </option>
+                                                <option value="{{ $warehouse->id }}"
+                                                    {{ old('gudang_id', $barangKeluar->gudang_id) == $warehouse->id ? 'selected' : '' }}>
+                                                    {{ $warehouse->name }}
+                                                </option>
                                                 @endforeach
                                             </select>
                                             @error('gudang_id')
-                                                <span class="invalid-feedback">{{ $message }}</span>
+                                            <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
                                         </div>
 
@@ -140,14 +140,14 @@
                                                 style="pointer-events: none; background-color: #e9ecef;" required>
                                                 <option value="">Select Pemilik Barang</option>
                                                 @foreach ($customers as $customer)
-                                                    <option value="{{ $customer->id }}"
-                                                        {{ old('customer_id', $barangKeluar->customer_id) == $customer->id ? 'selected' : '' }}>
-                                                        {{ $customer->name }}
-                                                    </option>
+                                                <option value="{{ $customer->id }}"
+                                                    {{ old('customer_id', $barangKeluar->customer_id) == $customer->id ? 'selected' : '' }}>
+                                                    {{ $customer->name }}
+                                                </option>
                                                 @endforeach
                                             </select>
                                             @error('customer_id')
-                                                <span class="invalid-feedback">{{ $message }}</span>
+                                            <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
                                         </div>
 
@@ -157,13 +157,13 @@
                                             <select name="type_mobil_id" id="type_mobil_id" class="form-control @error('type_mobil_id') is-invalid @enderror">
                                                 <option value="">Pilih Tipe Mobil</option>
                                                 @foreach ($typeMobilOptions as $typeMobil)
-                                                    <option value="{{ $typeMobil->id }}" {{ (old('type_mobil_id', $barangKeluar->type_mobil_id) == $typeMobil->id) ? 'selected' : '' }}>
-                                                        {{ $typeMobil->type }}
-                                                    </option>
+                                                <option value="{{ $typeMobil->id }}" {{ (old('type_mobil_id', $barangKeluar->type_mobil_id) == $typeMobil->id) ? 'selected' : '' }}>
+                                                    {{ $typeMobil->type }}
+                                                </option>
                                                 @endforeach
                                             </select>
                                             @error('type_mobil_id')
-                                                <span class="invalid-feedback">{{ $message }}</span>
+                                            <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
                                         </div>
 
@@ -174,36 +174,25 @@
                                                 value="{{ old('harga_kirim_barang', $barangKeluar->harga_kirim_barang) }}">
                                         </div>
 
-                                        <div class="form-group">
-                                            <label for="nomer_polisi">Nomor Polisi</label>
-                                            <input type="text" name="nomer_polisi" id="nomer_polisi"
-                                                class="form-control @error('nomer_polisi') is-invalid @enderror"
-                                                value="{{ old('nomer_polisi', $barangKeluar->nomer_polisi) }}">
+                                        <div class="mb-3">
+                                            <label for="id_selection" class="form-label">Choose Identification Type:</label>
+                                            <select id="id_selection" class="form-control" onchange="toggleFields()" required>
+                                                <option value="">-- Select --</option>
+                                                <option value="nomer_polisi" {{ $barangKeluar->nomer_polisi ? 'selected' : '' }}>Nomer Polisi</option>
+                                                <option value="nomer_container" {{ $barangKeluar->nomer_container ? 'selected' : '' }}>Nomer Container</option>
+                                            </select>
                                         </div>
 
-                                        <div class="form-group">
-                                            <label for="nomer_container">Nomor Container</label>
-                                            <input type="text" name="nomer_container" id="nomer_container"
-                                                class="form-control @error('nomer_container') is-invalid @enderror"
-                                                value="{{ old('nomer_container', $barangKeluar->nomer_container) }}">
+                                        <div id="nomer_polisi_field" class="mb-3" style="display: none;">
+                                            <label for="nomer_polisi">Nomer Polisi</label>
+                                            <input type="text" name="nomer_polisi" id="nomer_polisi" class="form-control"
+                                                value="{{ $barangKeluar->nomer_polisi }}">
                                         </div>
-                                        
-                                        <div class="form-group">
-                                            <label for="bank_transfer_id">Bank Transfer</label>
-                                            <select name="bank_transfer_id" id="bank_transfer_id"
-                                                class="form-control @error('bank_transfer_id') is-invalid @enderror">
-                                                <option value="">-- None --</option>
-                                                @foreach ($bankTransfers as $bankTransfer)
-                                                    <option value="{{ $bankTransfer->id }}"
-                                                        {{ old('bank_transfer_id', $barangKeluar->bank_transfer_id) == $bankTransfer->id ? 'selected' : '' }}>
-                                                        {{ $bankTransfer->bank_name }} -
-                                                        {{ $bankTransfer->account_number }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                            @error('bank_transfer_id')
-                                                <span class="invalid-feedback">{{ $message }}</span>
-                                            @enderror
+
+                                        <div id="nomer_container_field" class="mb-3" style="display: none;">
+                                            <label for="nomer_container">Nomer Container</label>
+                                            <input type="text" name="nomer_container" id="nomer_container" class="form-control"
+                                                value="{{ $barangKeluar->nomer_container }}">
                                         </div>
 
                                         <h2>Items</h2>
@@ -223,38 +212,36 @@
                                                         <th>Nama Barang</th>
                                                         <th>Quantity</th>
                                                         <th>Unit</th>
-                                                        <th>Harga</th>
-                                                        <th>Total</th>
                                                         <th>Actions</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     @foreach ($barangKeluar->items as $item)
-                                                        <tr>
-                                                            <td>{{ $item->no_ref }}</td>
-                                                            <td>{{ $item->barang->nama_barang }}</td>
-                                                            <td>{{ $item->qty }}</td>
-                                                            <td>{{ $item->unit }}</td>
-                                                            <td>Rp. {{ number_format($item->harga, 0, ',', '.') }}</td>
-                                                            <td>Rp. {{ number_format($item->total_harga, 0, ',', '.') }}
-                                                            </td>
-                                                            {{-- <td>{{ $item->barang_id }}</td> --}}
-                                                            <td style="display: none"
-                                                                data-barang-id="{{ $item->barang_masuk_id }}">
-                                                                {{ $item->barang_masuk_id }}</td>
-                                                            <td style="display: none"
-                                                                data-barang-id="{{ $item->barang_id }}">
-                                                                {{ $item->barang_id }}</td>
-                                                            <td>
-                                                                <button type="button"
-                                                                    class="btn btn-warning edit-item">Edit</button>
-                                                                <button type="button"
-                                                                    class="btn btn-danger remove-item">Remove</button>
-                                                            </td>
-                                                        </tr>
+                                                    <tr>
+                                                        <td>{{ $item->no_ref }}</td>
+                                                        <td>{{ $item->barang->nama_barang }}</td>
+                                                        <td>{{ $item->qty }}</td>
+                                                        <td>{{ $item->unit }}</td>
+                                                        </td>
+                                                        {{-- <td>{{ $item->barang_id }}</td> --}}
+                                                        <td style="display: none"
+                                                            data-barang-id="{{ $item->barang_masuk_id }}">
+                                                            {{ $item->barang_masuk_id }}
+                                                        </td>
+                                                        <td style="display: none"
+                                                            data-barang-id="{{ $item->barang_id }}">
+                                                            {{ $item->barang_id }}
+                                                        </td>
+                                                        <td>
+                                                            <button type="button"
+                                                                class="btn btn-warning edit-item">Edit</button>
+                                                            <button type="button"
+                                                                class="btn btn-danger remove-item">Remove</button>
+                                                        </td>
+                                                    </tr>
                                                     @endforeach
                                                 </tbody>
-                                            </table>    
+                                            </table>
                                         </div>
 
                                         <!-- Items Table -->
@@ -309,17 +296,17 @@
                                 <option value="" data-jenis="" data-barang-masuk-id="">-- Pilih Barang --
                                 </option>
                                 @foreach ($barangs as $barang)
-                                    @foreach ($groupedBarangMasukItems as $barangMasukId => $items)
-                                        @foreach ($items as $item)
-                                            @if ($barang->id === $item->barang_id)
-                                                <option value="{{ $barang->id }}"
-                                                    data-jenis="{{ $barang->jenis }}"
-                                                    data-barang-masuk-id="{{ $item->barang_masuk_id }}">
-                                                    {{ $barang->nama_barang }}
-                                                </option>
-                                            @endif
-                                        @endforeach
-                                    @endforeach
+                                @foreach ($groupedBarangMasukItems as $barangMasukId => $items)
+                                @foreach ($items as $item)
+                                @if ($barang->id === $item->barang_id)
+                                <option value="{{ $barang->id }}"
+                                    data-jenis="{{ $barang->jenis }}"
+                                    data-barang-masuk-id="{{ $item->barang_masuk_id }}">
+                                    {{ $barang->nama_barang }}
+                                </option>
+                                @endif
+                                @endforeach
+                                @endforeach
                                 @endforeach
                             </select>
                         </div>
@@ -331,10 +318,6 @@
                             <label for="modal_unit" class="form-label">Unit</label>
                             <input type="text" class="form-control" id="modal_unit" readonly>
                             <!-- Make it readonly -->
-                        </div>
-                        <div class="form-group">
-                            <label for="modal_harga" class="form-label">Harga</label>
-                            <input type="text" class="form-control" id="modal_harga"> <!-- Change to text -->
                         </div>
                         <input type="hidden" id="modal_barang_masuk_id">
                     </div>
@@ -369,17 +352,17 @@
                                 <option value="" data-jenis="" data-barang-masuk-id="">-- Pilih Barang --
                                 </option>
                                 @foreach ($barangs as $barang)
-                                    @foreach ($groupedBarangMasukItems as $barangMasukId => $items)
-                                        @foreach ($items as $item)
-                                            @if ($barang->id === $item->barang_id)
-                                                <option value="{{ $barang->id }}"
-                                                    data-jenis="{{ $barang->jenis }}"
-                                                    data-barang-masuk-id="{{ $item->barang_masuk_id }}">
-                                                    {{ $barang->nama_barang }}
-                                                </option>
-                                            @endif
-                                        @endforeach
-                                    @endforeach
+                                @foreach ($groupedBarangMasukItems as $barangMasukId => $items)
+                                @foreach ($items as $item)
+                                @if ($barang->id === $item->barang_id)
+                                <option value="{{ $barang->id }}"
+                                    data-jenis="{{ $barang->jenis }}"
+                                    data-barang-masuk-id="{{ $item->barang_masuk_id }}">
+                                    {{ $barang->nama_barang }}
+                                </option>
+                                @endif
+                                @endforeach
+                                @endforeach
                                 @endforeach
                             </select>
                         </div>
@@ -391,10 +374,6 @@
                         <div class="form-group">
                             <label for="edit_modal_unit" class="form-label">Unit</label>
                             <input type="text" class="form-control" id="edit_modal_unit" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label for="edit_modal_harga" class="form-label">Harga</label>
-                            <input type="text" class="form-control" id="edit_modal_harga">
                         </div>
                         <input type="hidden" id="edit_modal_barang_masuk_id">
                     </div>
@@ -409,99 +388,95 @@
 
 
         <script>
-$(document).ready(function() {
-    const barangSelect = $('#modal_barang_id');
-    const noRefInput = $('#modal_no_ref');
-    const barangMasukData = <?= json_encode($barangMasuks) ?>;
+            $(document).ready(function() {
+                const barangSelect = $('#modal_barang_id');
+                const noRefInput = $('#modal_no_ref');
+                const barangMasukData = <?= json_encode($barangMasuks) ?>;
 
-    barangSelect.on('change', function() {
-        const selectedOption = this.options[this.selectedIndex];
-        const barangMasukId = $(selectedOption).data('barang-masuk-id');
+                barangSelect.on('change', function() {
+                    const selectedOption = this.options[this.selectedIndex];
+                    const barangMasukId = $(selectedOption).data('barang-masuk-id');
 
-        if (barangMasukId && barangMasukData[barangMasukId]) {
-            noRefInput.val(barangMasukData[barangMasukId].joc_number);
-        } else {
-            noRefInput.val('');
-        }
+                    if (barangMasukId && barangMasukData[barangMasukId]) {
+                        noRefInput.val(barangMasukData[barangMasukId].joc_number);
+                    } else {
+                        noRefInput.val('');
+                    }
 
-        const jenis = $(selectedOption).data('jenis');
-        $('#modal_unit').val(jenis ? jenis : '');
-        $('#modal_barang_masuk_id').val(barangMasukId ? barangMasukId : '');
-    });
+                    const jenis = $(selectedOption).data('jenis');
+                    $('#modal_unit').val(jenis ? jenis : '');
+                    $('#modal_barang_masuk_id').val(barangMasukId ? barangMasukId : '');
+                });
 
-    function formatCurrency(amount) {
-        let number = parseFloat(amount);
-        if (isNaN(number)) return 'Rp. 0';
-        return `Rp. ${number.toLocaleString('id-ID', { minimumFractionDigits: 0 })}`;
-    }
+                function formatCurrency(amount) {
+                    let number = parseFloat(amount);
+                    if (isNaN(number)) return 'Rp. 0';
+                    return `Rp. ${number.toLocaleString('id-ID', { minimumFractionDigits: 0 })}`;
+                }
 
-    function parseCurrency(value) {
-        return parseFloat(value.replace(/[^0-9,]/g, '').replace(',', '.')) || 0;
-    }
+                function parseCurrency(value) {
+                    return parseFloat(value.replace(/[^0-9,]/g, '').replace(',', '.')) || 0;
+                }
 
-    function toRawNumber(value) {
-        return parseFloat(value.replace(/[^0-9]/g, '')) || 0;
-    }
+                function toRawNumber(value) {
+                    return parseFloat(value.replace(/[^0-9]/g, '')) || 0;
+                }
 
-    function toInteger(value) {
-        return parseInt(value, 10) || 0;
-    }
+                function toInteger(value) {
+                    return parseInt(value, 10) || 0;
+                }
 
-    function updateItemsInput() {
-        let items = [];
-        $('#items-table tbody tr').each(function() {
-            let row = $(this);
-            let item = {
-                barang_id: toInteger(row.find('td:eq(7)').text()),
-                no_ref: row.find('td:eq(0)').text(),
-                qty: toInteger(row.find('td:eq(2)').text()),
-                unit: row.find('td:eq(3)').text(),
-                harga: toRawNumber(row.find('td:eq(4)').text()),
-                total_harga: toRawNumber(row.find('td:eq(5)').text()),
-                barang_masuk_id: toInteger(row.find('td:eq(6)').text())
-            };
-            items.push(item);
-        });
-        $('#items-input').val(JSON.stringify(items));
-    }
+                function updateItemsInput() {
+                    let items = [];
+                    $('#items-table tbody tr').each(function() {
+                        let row = $(this);
+                        let item = {
+                            barang_id: toInteger(row.find('td:eq(5)').text()),
+                            no_ref: row.find('td:eq(0)').text(),
+                            qty: toInteger(row.find('td:eq(2)').text()),
+                            unit: row.find('td:eq(3)').text(),
+                            barang_masuk_id: toInteger(row.find('td:eq(4)').text())
+                        };
+                        items.push(item);
+                    });
+                    $('#items-input').val(JSON.stringify(items));
+                }
 
-    updateItemsInput();
+                updateItemsInput();
 
-    $('#addItemButton').on('click', function() {
-        let barangId = barangSelect.val();
-        let barangName = barangSelect.find('option:selected').text();
-        let noRef = $('#modal_no_ref').val();
-        let qty = toInteger($('#modal_qty').val());
-        let unit = $('#modal_unit').val();
-        let harga = parseCurrency($('#modal_harga').val());
-        let total = (qty * harga).toFixed(2);
-        let barangMasukId = $('#modal_barang_masuk_id').val();
+                $('#addItemButton').on('click', function() {
+                    let barangId = barangSelect.val();
+                    let barangName = barangSelect.find('option:selected').text();
+                    let noRef = $('#modal_no_ref').val();
+                    let qty = toInteger($('#modal_qty').val());
+                    let unit = $('#modal_unit').val();
+                    let harga = parseCurrency($('#modal_harga').val());
+                    let total = (qty * harga).toFixed(2);
+                    let barangMasukId = $('#modal_barang_masuk_id').val();
 
-        let formattedHarga = formatCurrency(harga);
-        let formattedTotal = formatCurrency(total);
+                    let formattedHarga = formatCurrency(harga);
+                    let formattedTotal = formatCurrency(total);
 
-        let itemExists = false;
-        $('#items-table tbody tr').each(function() {
-            let jocNumber = $(this).find('td:eq(0)').text();
-            let rowBarangId = $(this).find('td:eq(7)').text(); 
-            if (toInteger(rowBarangId) === toInteger(barangId) && jocNumber === noRef) {
-                itemExists = true;
-                return false;
-            }
-        });
+                    let itemExists = false;
+                    $('#items-table tbody tr').each(function() {
+                        let jocNumber = $(this).find('td:eq(0)').text();
+                        let rowBarangId = $(this).find('td:eq(5)').text();
+                        if (toInteger(rowBarangId) === toInteger(barangId) && jocNumber === noRef) {
+                            itemExists = true;
+                            return false;
+                        }
+                    });
 
-        if (itemExists) {
-            alert('Barang tersebut sudah ada di tabel.');
-            return;
-        }
+                    if (itemExists) {
+                        alert('Barang tersebut sudah ada di tabel.');
+                        return;
+                    }
 
-        let row = `<tr>
+                    let row = `<tr>
             <td>${noRef}</td>
             <td data-barang-id="${barangId}">${barangName}</td>
             <td>${qty}</td>
             <td>${unit}</td>
-            <td>${formattedHarga}</td>
-            <td>${formattedTotal}</td>
             <td style="display: none">${barangMasukId}</td>
             <td style="display: none">${barangId}</td>
             <td>
@@ -510,90 +485,118 @@ $(document).ready(function() {
             </td>
         </tr>`;
 
-        $('#items-table tbody').append(row);
-        updateItemsInput();
+                    $('#items-table tbody').append(row);
+                    updateItemsInput();
 
-        // Reset modal fields after adding item
-        barangSelect.val('');
-        noRefInput.val('');
-        $('#modal_qty').val('');
-        $('#modal_unit').val('');
-        $('#modal_harga').val('');
-        $('#modal_barang_masuk_id').val('');
+                    // Reset modal fields after adding item
+                    barangSelect.val('');
+                    noRefInput.val('');
+                    $('#modal_qty').val('');
+                    $('#modal_unit').val('');
+                    $('#modal_harga').val('');
+                    $('#modal_barang_masuk_id').val('');
 
-        $('#itemModal').modal('hide');
-    });
+                    $('#itemModal').modal('hide');
+                });
 
-    // Remove item from table
-    $('#items-table').on('click', '.remove-item', function() {
-        $(this).closest('tr').remove();
-        updateItemsInput();
-    });
+                // Remove item from table
+                $('#items-table').on('click', '.remove-item', function() {
+                    $(this).closest('tr').remove();
+                    updateItemsInput();
+                });
 
-    // Format harga input in modal
-    $('#modal_harga').on('input', function() {
-        let value = $(this).val();
-        let parsedValue = parseCurrency(value);
-        $(this).val(formatCurrency(parsedValue));
-    });
+                // Format harga input in modal
+                $('#modal_harga').on('input', function() {
+                    let value = $(this).val();
+                    let parsedValue = parseCurrency(value);
+                    $(this).val(formatCurrency(parsedValue));
+                });
 
-    let currentEditingRow;
+                let currentEditingRow;
 
-    // Edit item in table
-    $('#items-table').on('click', '.edit-item', function() {
-        currentEditingRow = $(this).closest('tr');
+                // Edit item in table
+                $('#items-table').on('click', '.edit-item', function() {
+                    currentEditingRow = $(this).closest('tr');
 
-        let barangId = currentEditingRow.find('td:eq(7)').text().trim();
-        let barangName = currentEditingRow.find('td:eq(1)').text().trim();
-        let noRef = currentEditingRow.find('td:eq(0)').text().trim();
-        let qty = currentEditingRow.find('td:eq(2)').text().trim();
-        let unit = currentEditingRow.find('td:eq(3)').text().trim();
-        let harga = currentEditingRow.find('td:eq(4)').text().trim();
-        let barangMasukId = currentEditingRow.find('td:eq(6)').text().trim();
+                    let barangId = currentEditingRow.find('td:eq(5)').text().trim();
+                    let barangName = currentEditingRow.find('td:eq(1)').text().trim();
+                    let noRef = currentEditingRow.find('td:eq(0)').text().trim();
+                    let qty = currentEditingRow.find('td:eq(2)').text().trim();
+                    let unit = currentEditingRow.find('td:eq(3)').text().trim();
+                    let barangMasukId = currentEditingRow.find('td:eq(4)').text().trim();
 
-        $('#edit_modal_barang_id').val(barangId).change();
-        $('#edit_modal_no_ref').val(noRef);
-        $('#edit_modal_qty').val(qty);
-        $('#edit_modal_unit').val(unit);
-        $('#edit_modal_harga').val(harga);
-        $('#edit_modal_barang_masuk_id').val(barangMasukId);
+                    $('#edit_modal_barang_id').val(barangId).change();
+                    $('#edit_modal_no_ref').val(noRef);
+                    $('#edit_modal_qty').val(qty);
+                    $('#edit_modal_unit').val(unit);
+                    $('#edit_modal_barang_masuk_id').val(barangMasukId);
 
-        $('#editItemModal').modal('show');
-    });
+                    $('#editItemModal').modal('show');
+                });
 
-    $('#saveEditItemButton').on('click', function() {
-        let barangId = $('#edit_modal_barang_id').val();
-        let barangName = $('#edit_modal_barang_id option:selected').text();
-        let noRef = $('#edit_modal_no_ref').val();
-        let qty = parseInt($('#edit_modal_qty').val());
-        let unit = $('#edit_modal_unit').val();
-        let harga = parseCurrency($('#edit_modal_harga').val());
-        let total = (qty * harga).toFixed(2);
-        let barangMasukId = $('#edit_modal_barang_masuk_id').val();
+                $('#saveEditItemButton').on('click', function() {
+                    let barangId = $('#edit_modal_barang_id').val();
+                    let barangName = $('#edit_modal_barang_id option:selected').text();
+                    let noRef = $('#edit_modal_no_ref').val();
+                    let qty = parseInt($('#edit_modal_qty').val());
+                    let unit = $('#edit_modal_unit').val();
+                    let barangMasukId = $('#edit_modal_barang_masuk_id').val();
 
-        let formattedHarga = formatCurrency(harga);
-        let formattedTotal = formatCurrency(total);
+                    let formattedHarga = formatCurrency(harga);
+                    let formattedTotal = formatCurrency(total);
 
-        currentEditingRow.find('td:eq(0)').text(noRef);
-        currentEditingRow.find('td:eq(1)').text(barangName);
-        currentEditingRow.find('td:eq(2)').text(qty);
-        currentEditingRow.find('td:eq(3)').text(unit);
-        currentEditingRow.find('td:eq(4)').text(formattedHarga);
-        currentEditingRow.find('td:eq(5)').text(formattedTotal);
-        currentEditingRow.find('td:eq(6)').text(barangMasukId);
-        currentEditingRow.find('td:eq(7)').text(barangId);
+                    currentEditingRow.find('td:eq(0)').text(noRef);
+                    currentEditingRow.find('td:eq(1)').text(barangName);
+                    currentEditingRow.find('td:eq(2)').text(qty);
+                    currentEditingRow.find('td:eq(3)').text(unit);
+                    currentEditingRow.find('td:eq(4)').text(barangMasukId);
+                    currentEditingRow.find('td:eq(5)').text(barangId);
 
-        $('#editItemModal').modal('hide');
-        updateItemsInput();
-    });
+                    $('#editItemModal').modal('hide');
+                    updateItemsInput();
+                });
 
-    $('#edit_modal_harga').on('input', function() {
-        let value = $(this).val();
-        let parsedValue = parseCurrency(value);
-        $(this).val(formatCurrency(parsedValue));
-    });
-});
-</script>
+                $('#edit_modal_harga').on('input', function() {
+                    let value = $(this).val();
+                    let parsedValue = parseCurrency(value);
+                    $(this).val(formatCurrency(parsedValue));
+                });
+            });
+
+            document.addEventListener("DOMContentLoaded", function() {
+                var nomerPolisi = "{{ $barangKeluar->nomer_polisi }}";
+                var nomerContainer = "{{ $barangKeluar->nomer_container }}";
+                var idSelection = document.getElementById('id_selection');
+
+                if (nomerPolisi) {
+                    idSelection.value = 'nomer_polisi';
+                    document.getElementById('nomer_polisi_field').style.display = 'block';
+                    document.getElementById('nomer_container_field').style.display = 'none'; // Sembunyikan field lainnya
+                } else if (nomerContainer) {
+                    idSelection.value = 'nomer_container';
+                    document.getElementById('nomer_container_field').style.display = 'block';
+                    document.getElementById('nomer_polisi_field').style.display = 'none'; // Sembunyikan field lainnya
+                } else {
+                    idSelection.value = '';
+                }
+            });
+
+            function toggleFields() {
+                var selection = document.getElementById('id_selection').value;
+
+                document.getElementById('nomer_polisi_field').style.display = 'none';
+                document.getElementById('nomer_container_field').style.display = 'none';
+
+                document.getElementById('nomer_polisi').value = '';
+                document.getElementById('nomer_container').value = '';
+
+                if (selection === 'nomer_polisi') {
+                    document.getElementById('nomer_polisi_field').style.display = 'block';
+                } else if (selection === 'nomer_container') {
+                    document.getElementById('nomer_container_field').style.display = 'block';
+                }
+            }
+        </script>
 
 
 </body>

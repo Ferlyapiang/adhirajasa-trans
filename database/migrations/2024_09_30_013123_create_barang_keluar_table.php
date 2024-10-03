@@ -24,6 +24,7 @@ return new class extends Migration
             $table->decimal('harga_kirim_barang', 15, 2)->nullable();
             $table->foreignId('bank_transfer_id')->constrained('bank_datas')->onDelete('cascade');
             $table->decimal('harga_lembur', 15, 2)->nullable();
+            $table->string('status_invoice')->nullable();
             $table->timestamps();
         });
 
@@ -36,8 +37,6 @@ return new class extends Migration
             $table->string('no_ref')->nullable(); // Nomor Referensi (Opsional)
             $table->integer('qty'); // Jumlah Barang Keluar
             $table->string('unit'); // Satuan Barang Keluar
-            $table->decimal('harga', 15, 2)->nullable(); // Harga Barang (Opsional)
-            $table->decimal('total_harga', 15, 2)->nullable(); // Total Harga (Opsional)
             $table->timestamps();
         });
     }
