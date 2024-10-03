@@ -25,13 +25,36 @@ class BarangKeluarController extends Controller
      */
     public function index()
     {
-        $barangKeluars = BarangKeluar::with(['gudang', 'customer', 'bankTransfer', 'items.barang'])
-            ->orderBy('created_at', 'desc')
+        $barangKeluars = DB::table('barang_keluars')
+            ->select(
+                'barang_keluars.id AS barang_keluar_id',
+                'barang_keluars.tanggal_keluar',
+                'barang_keluars.nomer_surat_jalan',
+                'barang_keluars.nomer_invoice',
+                'barang_keluar_items.no_ref',
+                'barangs.nama_barang AS nama_barang',
+                'warehouses.name AS nama_gudang',
+                'customers.name AS nama_customer',
+                'barang_keluar_items.qty',
+                'type_mobil.type AS jenis_mobil_type',
+                'barang_keluars.nomer_polisi',
+                'barang_keluars.nomer_container'
+            )
+            ->join('barang_keluar_items', 'barang_keluars.id', '=', 'barang_keluar_items.barang_keluar_id')
+            ->join('barangs', 'barang_keluar_items.barang_id', '=', 'barangs.id')
+            ->join('warehouses', 'barang_keluars.gudang_id', '=', 'warehouses.id')
+            ->join('customers', 'barang_keluars.customer_id', '=', 'customers.id')
+            ->leftJoin('type_mobil', 'barang_keluars.type_mobil_id', '=', 'type_mobil.id')
+            ->where('barang_keluars.status_invoice', 'Barang Keluar')
+            ->orderBy('barang_keluars.nomer_invoice', 'desc')
             ->get();
 
         $typeMobilOptions = JenisMobil::all();
-        return view('data-gudang.barang-keluar.index', compact('barangKeluars'));
+
+        return view('data-gudang.barang-keluar.index', compact('barangKeluars', 'typeMobilOptions'));
     }
+
+
 
     /**
      * Show the form for creating a new resource.
@@ -92,6 +115,7 @@ class BarangKeluarController extends Controller
                 'harga_lembur' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
                 'items' => 'required|array',
                 'items.*.barang_id' => 'required|exists:barangs,id',
+                'items.*.barang_masuk_item_id' => 'required|exists:barang_masuk_items,id',
                 'items.*.no_ref' => 'nullable|string|max:191',
                 'items.*.qty' => 'required|integer|min:1',
                 'items.*.unit' => 'required|string|max:50',
@@ -174,6 +198,7 @@ class BarangKeluarController extends Controller
                     foreach ($items as $item) {
                         Log::info('Processing Item:', [
                             'barang_id' => (int) $item['barang_id'],
+                            'barang_masuk_item_id' => (int) $item['barang_masuk_item_id'],
                             'barang_masuk_id' => (int) $item['barang_masuk_id'],
                         ]);
         
@@ -184,6 +209,7 @@ class BarangKeluarController extends Controller
                             'unit' => $item['unit'],
                             'barang_masuk_id' => (int) $item['barang_masuk_id'],
                             'barang_keluar_id' => $barangKeluar->id,
+                            'barang_masuk_item_id' => (int) $item['barang_masuk_item_id'],
                         ]);
                     }
         
