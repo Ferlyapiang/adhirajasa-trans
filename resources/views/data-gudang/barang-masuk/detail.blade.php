@@ -126,24 +126,25 @@
 
                     <div class="mb-3">
                         <label for="selection" class="form-label">Choose Identification Type:</label>
-                        <select id="id_selection" class="form-select" onchange="toggleFields()" required disabled>
+                        <select id="id_selection" class="form-select" onchange="toggleFields()" required>
                             <option value="">-- Select --</option>
                             <option value="nomer_polisi" {{ $barangMasuk->nomer_polisi ? 'selected' : '' }}>Nomer Polisi</option>
                             <option value="nomer_container" {{ $barangMasuk->nomer_container ? 'selected' : '' }}>Nomer Container</option>
                         </select>
                     </div>
-                    
-                    <div id="nomer_polisi_field" class="mb-3" style="display: {{ $barangMasuk->nomer_polisi ? 'block' : 'none' }};">
+
+                    <div id="nomer_polisi_field" class="mb-3">
                         <label for="nomer_polisi">Nomer Polisi</label>
                         <input type="text" name="nomer_polisi" id="nomer_polisi" class="form-control" 
-                               value="{{ $barangMasuk->nomer_polisi }}" disabled>
+                            value="{{ $barangMasuk->nomer_polisi }}" disabled>
                     </div>
-                    
-                    <div id="nomer_container_field" class="mb-3" style="display: {{ $barangMasuk->nomer_container ? 'block' : 'none' }};">
+
+                    <div id="nomer_container_field" class="mb-3">
                         <label for="nomer_container">Nomer Container</label>
                         <input type="text" name="nomer_container" id="nomer_container" class="form-control" 
-                               value="{{ $barangMasuk->nomer_container }}" disabled>
+                            value="{{ $barangMasuk->nomer_container }}" disabled>
                     </div>
+
 
                     <div class="form-group">
                         <label for="harga_simpan_barang">Harga Simpan Barang</label>
@@ -354,6 +355,28 @@
                 document.getElementById('nomer_container_field').style.display = 'block';
             }
         }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            var nomerPolisi = "{{ $barangMasuk->nomer_polisi }}";
+            var nomerContainer = "{{ $barangMasuk->nomer_container }}";
+            var idSelection = document.getElementById('id_selection');
+
+            idSelection.value = '';
+            if (nomerPolisi) {
+                idSelection.value = 'nomer_polisi';
+                document.getElementById('nomer_polisi_field').style.display = 'block';
+                document.getElementById('nomer_container_field').style.display = 'none';
+            } else if (nomerContainer) {
+                idSelection.value = 'nomer_container';
+                document.getElementById('nomer_container_field').style.display = 'block';
+                document.getElementById('nomer_polisi_field').style.display = 'none'; // Pastikan field lainnya disembunyikan
+            } else {
+                document.getElementById('nomer_polisi_field').style.display = 'none';
+                document.getElementById('nomer_container_field').style.display = 'none';
+            }
+        });
+
+
     </script>
 </body>
 

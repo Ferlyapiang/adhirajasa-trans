@@ -412,7 +412,7 @@
 $(document).ready(function() {
     const barangSelect = $('#modal_barang_id');
     const noRefInput = $('#modal_no_ref');
-    const barangMasukData = @json($barangMasuks);
+    const barangMasukData = <?= json_encode($barangMasuks) ?>;
 
     barangSelect.on('change', function() {
         const selectedOption = this.options[this.selectedIndex];

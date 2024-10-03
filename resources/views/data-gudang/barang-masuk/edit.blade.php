@@ -135,17 +135,17 @@
                             <option value="nomer_container" {{ $barangMasuk->nomer_container ? 'selected' : '' }}>Nomer Container</option>
                         </select>
                     </div>
-                    
-                    <div id="nomer_polisi_field" class="mb-3" style="display: {{ $barangMasuk->nomer_polisi ? 'block' : 'none' }};">
+
+                    <div id="nomer_polisi_field" class="mb-3" style="display: none;">
                         <label for="nomer_polisi">Nomer Polisi</label>
                         <input type="text" name="nomer_polisi" id="nomer_polisi" class="form-control" 
-                               value="{{ $barangMasuk->nomer_polisi }}">
+                            value="{{ $barangMasuk->nomer_polisi }}">
                     </div>
-                    
-                    <div id="nomer_container_field" class="mb-3" style="display: {{ $barangMasuk->nomer_container ? 'block' : 'none' }};">
+
+                    <div id="nomer_container_field" class="mb-3" style="display: none;">
                         <label for="nomer_container">Nomer Container</label>
                         <input type="text" name="nomer_container" id="nomer_container" class="form-control" 
-                               value="{{ $barangMasuk->nomer_container }}">
+                            value="{{ $barangMasuk->nomer_container }}">
                     </div>
 
                     <div class="form-group">
@@ -435,15 +435,15 @@
             $('#update-item').click(function() {
                 const id = $(this).data('id');
                 const row = $('#items-table tbody').find(`tr[data-id="${id}"]`);
-                const barangId = row.find('td').eq(3).text().trim(); // Get the hidden barang_id
+                const barangId = row.find('td').eq(3).text().trim();
 
                 row.find('td').eq(0).text($('#edit_item_name').val());
                 row.find('td').eq(1).text($('#edit_item_qty').val());
                 row.find('td').eq(2).text($('#edit_item_unit').val());
                 row.find('td').eq(3).text($('#edit_item_notes').val());
 
-                updateItemsInput(); // Update hidden input field
-                $('#editItemModal').modal('hide'); // Close the modal
+                updateItemsInput(); 
+                $('#editItemModal').modal('hide');
             });
 
             function updateItemsInput() {
@@ -454,11 +454,10 @@
                     var qty = $(this).find('td').eq(1).text();
                     var unit = $(this).find('td').eq(2).text();
                     var notes = $(this).find('td').eq(3).text();
-                    var barang_id = $(this).find('td').eq(4).text(); // Get the hidden barang_id
+                    var barang_id = $(this).find('td').eq(4).text();
 
                     items.push({
                         id: id,
-                        // barang_id: barang_id, // Store barang_id
                         nama_barang: barang_id,
                         quantity: qty,
                         unit: unit,
@@ -468,41 +467,61 @@
                 $('#items-input').val(JSON.stringify(items));
             }
         });
-        function toggleFields() {
-            var selection = document.getElementById('id_selection').value;
+        document.addEventListener("DOMContentLoaded", function() {
+        var nomerPolisi = "{{ $barangMasuk->nomer_polisi }}";
+        var nomerContainer = "{{ $barangMasuk->nomer_container }}";
+        var idSelection = document.getElementById('id_selection');
 
-            document.getElementById('nomer_polisi_field').style.display = 'none';
-            document.getElementById('nomer_container_field').style.display = 'none';
+        // Reset pilihan
+        idSelection.value = '';
 
-            document.getElementById('nomer_polisi').value = '';
-            document.getElementById('nomer_container').value = '';
-
-            if (selection === 'nomer_polisi') {
-                document.getElementById('nomer_polisi_field').style.display = 'block';
-            } else if (selection === 'nomer_container') {
-                document.getElementById('nomer_container_field').style.display = 'block';
-            }
+        // Menentukan tampilan berdasarkan nilai yang ada
+        if (nomerPolisi) {
+            idSelection.value = 'nomer_polisi';
+            document.getElementById('nomer_polisi_field').style.display = 'block';
+            document.getElementById('nomer_container_field').style.display = 'none'; // Pastikan field lainnya disembunyikan
+        } else if (nomerContainer) {
+            idSelection.value = 'nomer_container';
+            document.getElementById('nomer_container_field').style.display = 'block';
+            document.getElementById('nomer_polisi_field').style.display = 'none'; // Pastikan field lainnya disembunyikan
         }
+    });
 
-        function toggleLembur() {
-    let select = document.getElementById('ada_lembur');
-    let lemburSection = document.getElementById('lembur_section');
-    if (select.value === 'ya') {
-        lemburSection.style.display = 'block'; // Tampilkan field harga lembur
-    } else {
-        lemburSection.style.display = 'none'; // Sembunyikan field harga lembur
+    function toggleFields() {
+        var selection = document.getElementById('id_selection').value;
+
+        document.getElementById('nomer_polisi_field').style.display = 'none';
+        document.getElementById('nomer_container_field').style.display = 'none';
+
+        document.getElementById('nomer_polisi').value = '';
+        document.getElementById('nomer_container').value = '';
+
+        if (selection === 'nomer_polisi') {
+            document.getElementById('nomer_polisi_field').style.display = 'block';
+        } else if (selection === 'nomer_container') {
+            document.getElementById('nomer_container_field').style.display = 'block';
+        }
     }
-}
 
-// Fungsi untuk memformat input sebagai Rupiah
-function formatRupiah(displayInput, hiddenInputId) {
-    let angka = displayInput.value.replace(/[^,\d]/g, ''); // Hanya angka
-    let formatted = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
-    displayInput.value = formatted.replace('IDR', 'Rp.');
 
-    // Simpan nilai numerik asli ke elemen tersembunyi
-    document.getElementById(hiddenInputId).value = angka;
-}
+    function toggleLembur() {
+        let select = document.getElementById('ada_lembur');
+        let lemburSection = document.getElementById('lembur_section');
+        if (select.value === 'ya') {
+            lemburSection.style.display = 'block'; // Tampilkan field harga lembur
+        } else {
+            lemburSection.style.display = 'none'; // Sembunyikan field harga lembur
+        }
+    }
+
+    function formatRupiah(displayInput, hiddenInputId) {
+        let angka = displayInput.value.replace(/[^,\d]/g, ''); // Hanya angka
+        let formatted = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
+        displayInput.value = formatted.replace('IDR', 'Rp.');
+
+        // Simpan nilai numerik asli ke elemen tersembunyi
+        document.getElementById(hiddenInputId).value = angka;
+    }
     </script>
 
 </body>
