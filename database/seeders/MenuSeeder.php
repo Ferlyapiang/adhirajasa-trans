@@ -77,6 +77,17 @@ class MenuSeeder extends Seeder
             'updated_at' => now(),
         ]);
 
+        $dataInvoiceId = DB::table('menus')->insertGetId([
+            'name' => 'Data Invoice',
+            'url' => '/data-invoice/*',
+            'router' => null,
+            'icon' => 'fa fa-university',
+            'is_active' => 1,
+            'priority' => 5, // Priority
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
         DB::table('menus')->insert([
             [
                 'name' => 'Menu',
@@ -226,6 +237,31 @@ class MenuSeeder extends Seeder
                 'is_active' => 1,
                 'priority' => 2, // Priority untuk submenu
                 'parent_id' => $dataGudangId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
+
+        DB::table('menus')->insert([
+            [
+                'name' => 'Invoice Barang Masuk',
+                'url' => '/data-invoice/invoice-masuk',
+                'router' => 'data-invoice.invoice-masuk.index',
+                'icon' => 'far fa-circle',
+                'is_active' => 1,
+                'priority' => 1, // Priority untuk submenu
+                'parent_id' => $dataInvoiceId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Invoice Barang Keluar',
+                'url' => '/data-invoice/barang-keluar',
+                'router' => 'data-invoice.invoice-keluar.index',
+                'icon' => 'far fa-circle',
+                'is_active' => 1,
+                'priority' => 2, // Priority untuk submenu
+                'parent_id' => $dataInvoiceId,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],

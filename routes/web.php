@@ -17,6 +17,7 @@ use App\Http\Controllers\PDFController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\GroupMenuController;
 use App\Http\Controllers\JenisMobilController;
+use App\Http\Controllers\InvoiceController;
 
 // Login and Logout
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login.form');
@@ -172,3 +173,8 @@ Route::resource('master-data/jenis-mobil', JenisMobilController::class)->names([
     'update' => 'master-data.jenis-mobil.update',
     'destroy' => 'master-data.jenis-mobil.destroy',
 ]);
+
+
+Route::get('data-invoice/invoice-masuk', [InvoiceController::class, 'index'])->name('data-invoice.invoice-masuk.index');
+Route::post('/invoice/update-status', [InvoiceController::class, 'updateStatus'])->name('invoice.update.status');
+
