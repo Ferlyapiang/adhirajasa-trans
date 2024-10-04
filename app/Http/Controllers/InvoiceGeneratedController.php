@@ -126,6 +126,8 @@ class InvoiceGeneratedController extends Controller
                 'invoices.nomer_invoice',
                 'invoices.barang_masuks_id',
                 'barang_masuks.joc_number',
+                'barang_masuks.nomer_polisi AS nomer_polisi_masuk',
+                'barang_masuks.nomer_container AS nomer_container_masuk',
                 'barang_masuks.tanggal_masuk as tanggal_masuk_barang',
                 'barang_masuks.gudang_id',
                 'warehouses_masuks.name AS warehouse_masuk_name',
@@ -137,7 +139,7 @@ class InvoiceGeneratedController extends Controller
                 DB::raw('COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0) AS total_sisa'),
                 DB::raw('(COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0)) * barang_masuks.harga_simpan_barang AS total_harga_simpan'),
                 'barang_masuks.harga_lembur AS harga_lembur_masuk',
-
+                'type_mobil.type AS jenis_mobil_type',
 
                 'invoices.barang_keluars_id',
                 'barang_keluars.tanggal_keluar',
@@ -168,6 +170,7 @@ class InvoiceGeneratedController extends Controller
                 '=',
                 'total_keluar.barang_keluar_id'
             )
+            ->leftJoin('type_mobil', 'barang_masuks.type_mobil_id', '=', 'type_mobil.id')
             ->where('invoices.nomer_invoice', $nomer_invoice)
             ->get(); // Fetch all invoices as a collection
 
