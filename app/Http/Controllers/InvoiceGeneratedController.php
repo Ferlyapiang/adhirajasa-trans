@@ -108,6 +108,130 @@ class InvoiceGeneratedController extends Controller
     }
     
     
+    // public function show(Request $request) {
+    //     // Get the nomer_invoice from the request body
+    //     $nomer_invoice = $request->input('nomer_invoice');
+    
+    //     // Fetch invoice details based on the nomer_invoice
+    //     $invoiceDetails = DB::table('invoices')
+    //         ->select(
+    //             'invoices.id',
+    //             'invoices.nomer_invoice', 
+    //             'invoices.barang_masuks_id', 
+    //             'barang_masuks.joc_number',
+    //             'barang_masuks.tanggal_masuk as tanggal_masuk_barang',
+    //             'barang_masuks.gudang_id',
+    //             'warehouses_masuks.name AS warehouse_masuk_name',
+    //             'barang_masuks.customer_id',
+    //             'customers_masuks.name AS customer_masuk_name',
+    //             'customers_masuks.type_payment_customer AS type_payment_customer_masuk',
+    //             DB::raw('COALESCE(total_items.total_qty, 0) AS total_qty_masuk'),
+    //             DB::raw('COALESCE(total_keluar.total_qty, 0) AS total_qty_keluar'),
+    //             DB::raw('COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0) AS total_sisa'),
+    //             DB::raw('(COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0)) * barang_masuks.harga_simpan_barang AS total_harga_simpan'),
+    //             'barang_masuks.harga_lembur AS harga_lembur_masuk',
+    //             'invoices.barang_keluars_id', 
+    //             'barang_keluars.tanggal_keluar',
+    //             'barang_keluars.nomer_surat_jalan',
+    //             'barang_keluars.gudang_id',
+    //             'warehouses_keluars.name AS warehouse_keluar_name',
+    //             'barang_keluars.customer_id',
+    //             'customers_keluars.name AS customer_keluar_name',
+    //             'customers_keluars.type_payment_customer AS type_payment_customer_keluar',
+    //             'barang_keluars.harga_lembur AS harga_lembur_keluar',
+    //             'barang_keluars.harga_kirim_barang'
+    //         )
+    //         ->leftJoin('barang_masuks', 'invoices.barang_masuks_id', '=', 'barang_masuks.id')
+    //         ->leftJoin('barang_keluars', 'invoices.barang_keluars_id', '=', 'barang_keluars.id')
+    //         ->leftJoin('warehouses AS warehouses_masuks', 'barang_masuks.gudang_id', '=', 'warehouses_masuks.id')
+    //         ->leftJoin('customers AS customers_masuks', 'barang_masuks.customer_id', '=', 'customers_masuks.id')
+    //         ->leftJoin('warehouses AS warehouses_keluars', 'barang_keluars.gudang_id', '=', 'warehouses_keluars.id')
+    //         ->leftJoin('customers AS customers_keluars', 'barang_keluars.customer_id', '=', 'customers_keluars.id')
+    //         ->leftJoin(
+    //             DB::raw('(SELECT barang_masuk_id, SUM(qty) AS total_qty FROM barang_masuk_items GROUP BY barang_masuk_id) AS total_items'), 
+    //             'barang_masuks.id', '=', 'total_items.barang_masuk_id'
+    //         )
+    //         ->leftJoin(
+    //             DB::raw('(SELECT barang_keluar_id, SUM(qty) AS total_qty FROM barang_keluar_items GROUP BY barang_keluar_id) AS total_keluar'), 
+    //             'barang_masuks.id', '=', 'total_keluar.barang_keluar_id'
+    //         )
+    //         ->where('invoices.nomer_invoice', $nomer_invoice)
+    //         ->get(); // Changed from first() to get()
+        
+    //     // Check if any invoice was found
+    //     if ($invoiceDetails->isEmpty()) {
+    //         return redirect()->back()->with('error', 'Invoice not found.');
+    //     }
+    
+    //     // Return the view with the invoice details
+    //     return view('data-invoice.invoice-master.show', compact('invoiceDetails'));
+    // }
+    
+    public function show(Request $request)
+{
+    $user = Auth::user();
+    $nomer_invoice = $request->input('nomer_invoice');
+
+    // Fetch the invoice master data
+    $invoiceMaster = DB::table('invoices')
+        ->select(
+            'invoices.id',
+            'invoices.nomer_invoice', 
+            'invoices.barang_masuks_id', 
+            'barang_masuks.joc_number',
+            'barang_masuks.tanggal_masuk as tanggal_masuk_barang',
+            'barang_masuks.gudang_id',
+            'warehouses_masuks.name AS warehouse_masuk_name',
+            'barang_masuks.customer_id',
+            'customers_masuks.name AS customer_masuk_name',
+            'customers_masuks.type_payment_customer AS type_payment_customer_masuk',
+            DB::raw('COALESCE(total_items.total_qty, 0) AS total_qty_masuk'),
+            DB::raw('COALESCE(total_keluar.total_qty, 0) AS total_qty_keluar'),
+            DB::raw('COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0) AS total_sisa'),
+            DB::raw('(COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0)) * barang_masuks.harga_simpan_barang AS total_harga_simpan'),
+            'barang_masuks.harga_lembur AS harga_lembur_masuk',
+
+            
+            'invoices.barang_keluars_id', 
+            'barang_keluars.tanggal_keluar',
+            'barang_keluars.nomer_surat_jalan',
+            'barang_keluars.gudang_id',
+            'warehouses_keluars.name AS warehouse_keluar_name',
+            'barang_keluars.customer_id',
+            'customers_keluars.name AS customer_keluar_name',
+            'customers_keluars.type_payment_customer AS type_payment_customer_keluar',
+            'barang_keluars.harga_lembur AS harga_lembur_keluar',
+            'barang_keluars.harga_kirim_barang'
+        )
+        ->leftJoin('barang_masuks', 'invoices.barang_masuks_id', '=', 'barang_masuks.id')
+        ->leftJoin('barang_keluars', 'invoices.barang_keluars_id', '=', 'barang_keluars.id')
+        ->leftJoin('warehouses AS warehouses_masuks', 'barang_masuks.gudang_id', '=', 'warehouses_masuks.id')
+        ->leftJoin('customers AS customers_masuks', 'barang_masuks.customer_id', '=', 'customers_masuks.id')
+        ->leftJoin('warehouses AS warehouses_keluars', 'barang_keluars.gudang_id', '=', 'warehouses_keluars.id')
+        ->leftJoin('customers AS customers_keluars', 'barang_keluars.customer_id', '=', 'customers_keluars.id')
+        ->leftJoin(
+            DB::raw('(SELECT barang_masuk_id, SUM(qty) AS total_qty FROM barang_masuk_items GROUP BY barang_masuk_id) AS total_items'), 
+            'barang_masuks.id', '=', 'total_items.barang_masuk_id'
+        )
+        ->leftJoin(
+            DB::raw('(SELECT barang_keluar_id, SUM(qty) AS total_qty FROM barang_keluar_items GROUP BY barang_keluar_id) AS total_keluar'), 
+            'barang_masuks.id', '=', 'total_keluar.barang_keluar_id'
+        )
+        ->where('invoices.nomer_invoice', $nomer_invoice)
+        ->get(); // Fetch all invoices as a collection
+
+    // Filter by warehouse ID if it exists
+    if ($user->warehouse_id) {
+        $invoiceMaster = $invoiceMaster->where('barang_keluars.gudang_id', $user->warehouse_id);
+    }
+
+    // Sort the collection by the 'tanggal_keluar' field in descending order
+    $invoiceMaster = $invoiceMaster->sortByDesc('tanggal_keluar'); // or use sortBy depending on your requirement
+
+    return view('data-invoice.invoice-master.show', compact('invoiceMaster'));
+}
+
+    
     
     
 }

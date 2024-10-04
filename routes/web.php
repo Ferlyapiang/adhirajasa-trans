@@ -187,3 +187,6 @@ Route::post('/invoice/barang-keluar/update-status', [InvoiceBarangKeluarControll
 //Invoice Master
 Route::get('/data-invoice/invoice-master', [InvoiceGeneratedController::class, 'index'])->name('data-invoice.invoice-master.index');
 Route::post('/invoices/generate', [InvoiceGeneratedController::class, 'generateInvoice'])->name('invoice.generate');
+Route::post('/invoices', [InvoiceGeneratedController::class, 'show'])->name('invoices.show');
+
+

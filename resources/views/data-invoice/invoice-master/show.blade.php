@@ -232,7 +232,7 @@
                     totalMasuk += parseFloat(data[10]) || 0; // Total QTY Masuk
                     totalKeluar += parseFloat(data[11]) || 0; // Total QTY Keluar
                     totalSisa += parseFloat(data[11]) || 0; // Total QTY Sisa
-                    totalHargaKirimBarang += parseFloat(data[14].replace('.', '').replace(',', '.')) || 0; // Total Harga Kirim Barang
+                    totalHargaKirimBarang += parseFloat(data[13].replace('.', '').replace(',', '.')) || 0; // Total Harga Kirim Barang
                 });
 
                 // Calculate total keseluruhan
