@@ -17,7 +17,8 @@ use App\Http\Controllers\PDFController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\GroupMenuController;
 use App\Http\Controllers\JenisMobilController;
-use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\InvoiceBarangMasukController;
+use App\Http\Controllers\InvoiceBarangKeluarController;
 
 // Login and Logout
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login.form');
@@ -174,7 +175,10 @@ Route::resource('master-data/jenis-mobil', JenisMobilController::class)->names([
     'destroy' => 'master-data.jenis-mobil.destroy',
 ]);
 
+//Invoice Barang Masuk
+Route::get('/data-invoice/invoice-masuk', [InvoiceBarangMasukController::class, 'index'])->name('data-invoice.invoice-masuk.index');
+Route::post('/invoice/barang-masuk/update-status', [InvoiceBarangMasukController::class, 'updateStatus'])->name('invoice.barang.masuk.update.status');
 
-Route::get('data-invoice/invoice-masuk', [InvoiceController::class, 'index'])->name('data-invoice.invoice-masuk.index');
-Route::post('/invoice/update-status', [InvoiceController::class, 'updateStatus'])->name('invoice.update.status');
-
+//Invoice Barang Keluar
+Route::get('/data-invoice/invoice-keluar', [InvoiceBarangKeluarController::class, 'index'])->name('data-invoice.invoice-keluar.index');
+Route::post('/invoice/barang-keluar/update-status', [InvoiceBarangKeluarController::class, 'updateStatus'])->name('invoice.barang.keluar.update.status');

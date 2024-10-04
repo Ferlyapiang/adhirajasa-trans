@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Adhirajasa Trans Sejahtera - Data Invoice Barang Masuk</title>
+    <title>Adhirajasa Trans Sejahtera - Data Invoice Barang Keluar</title>
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="{{ asset('ats/ATSLogo.png') }}" />
@@ -36,7 +36,7 @@
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1 class="m-0">Data Invoice Barang Masuk</h1>
+                            <h1 class="m-0">Data Invoice Barang Keluar</h1>
                         </div>
                     </div>
                 </div>
@@ -50,7 +50,7 @@
                         <div class="col-lg-12">
                             <div class="card">
                                 <div class="card-header">
-                                    <h3 class="card-title">Daftar Invoice Barang Masuk</h3>
+                                    <h3 class="card-title">Daftar Invoice Barang Keluar</h3>
                                     <button id="updateStatusButton" class="btn btn-success float-right">Update Status</button>
                                 </div>
                                 <div class="card-body">
@@ -65,56 +65,43 @@
                                         </div>
                                     </div>
                                     <div class="table-responsive">
-                                        <table id="barangMasukTable" class="table table-bordered table-striped">
+                                        <table id="barangKeluarTable" class="table table-bordered table-striped">
                                             <thead>
                                                 <tr>
                                                     <th><input type="checkbox" id="selectAllCheckbox"></th> <!-- Checkbox for select all -->
                                                     <th>No</th>
-                                                    <th>Tanggal Masuk</th>
-                                                    <th>Job Order</th>
-                                                    <th>Nama Pemilik</th>
+                                                    <th>Tanggal Keluar</th>
+                                                    <th>Nama Customer</th>
                                                     <th>Gudang</th>
                                                     <th>Tipe Pembayaran Customer</th>
-                                                    <th>Harga Simpan Barang</th>
+                                                    <th>Nomor Surat Jalan</th>
+                                                    <th>Harga Kirim Barang</th>
                                                     <th>Harga Lembur</th>
-                                                    <th>Total Masuk</th>
                                                     <th>Total Keluar</th>
-                                                    <th>Total Sisa</th>
-                                                    <th>Total Harga Simpan</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                @foreach ($invoiceMasuk as $index => $item)
+                                                @foreach ($invoiceKeluar as $index => $item)
                                                 <tr>
-                                                    <td><input type="checkbox" class="invoiceCheckbox" value="{{ $item->invoice_id }}"></td> <!-- Individual checkbox -->
+                                                    <td><input type="checkbox" class="invoiceCheckbox" value="{{ $item->barang_keluar_id }}"></td> <!-- Individual checkbox -->
                                                     <td>{{ $index + 1 }}</td>
-                                                    <td>{{ $item->tanggal_masuk }}</td>
-                                                    <td>
-                                                        <a href="{{ route('data-gudang.barang-masuk.detail', $item->invoice_id) }}">
-                                                            {{ $item->joc_number }}
-                                                        </a>
-                                                    </td>
+                                                    <td>{{ $item->tanggal_keluar }}</td>
                                                     <td>{{ $item->nama_customer }}</td>
                                                     <td>{{ $item->nama_gudang }}</td>
                                                     <td>{{ $item->type_payment_customer }}</td>
-                                                    <td>{{ number_format($item->harga_simpan_barang) }}</td>
+                                                    <td>{{ $item->nomer_surat_jalan }}</td>
+                                                    <td>{{ number_format($item->harga_kirim_barang) }}</td>
                                                     <td>{{ number_format($item->harga_lembur) }}</td>
-                                                    <td>{{ $item->total_qty_masuk }}</td>
-                                                    <td>{{ $item->total_qty_keluar }}</td>
-                                                    <td>{{ $item->total_sisa }}</td>
-                                                    <td>{{ number_format($item->total_harga_simpan) }}</td>
+                                                    <td>{{ $item->total_qty }}</td>
                                                 </tr>
                                                 @endforeach
                                             </tbody>
                                             <tfoot>
                                                 <tr>
                                                     <th colspan="7" style="text-align: right;">Total:</th>
-                                                    <th id="totalHargaSimpan"></th>
+                                                    <th id="totalHargaKirim"></th>
                                                     <th id="totalHargaLembur"></th>
-                                                    <th id="totalMasuk"></th>
                                                     <th id="totalKeluar"></th>
-                                                    <th id="totalSisa"></th>
-                                                    <th id="totalHargaSimpanKeseluruhan"></th>
                                                 </tr>
                                             </tfoot>
                                         </table>
@@ -149,12 +136,12 @@
     <!-- Page-specific script -->
     <script>
         $(document).ready(function() {
-            var table = $('#barangMasukTable').DataTable();
+            var table = $('#barangKeluarTable').DataTable();
 
             $('#paymentTypeFilter').on('change', function() {
                 var filterValue = $(this).val();
-                table.column(6).search(filterValue).draw(); 
-                updateTotals(); 
+                table.column(5).search(filterValue).draw();
+                updateTotals();
             });
 
             $('#selectAllCheckbox').on('change', function() {
@@ -170,7 +157,7 @@
 
                 if (selectedIds.length > 0) {
                     $.ajax({
-                        url: '{{ route("invoice.barang.masuk.update.status") }}',
+                        url: '{{ route("invoice.barang.keluar.update.status") }}',
                         method: 'POST',
                         data: {
                             _token: '{{ csrf_token() }}',
@@ -190,7 +177,26 @@
                 }
             });
 
-            // Format Rupiah function
+            function updateTotals() {
+                let totalHargaKirim = 0;
+                let totalHargaLembur = 0;
+                let totalKeluar = 0;
+
+                table.rows({
+                    filter: 'applied'
+                }).every(function() {
+                    var data = this.data();
+                    totalHargaKirim += parseFloat(data[7].replace(/,/g, '')) || 0; // Harga Kirim Barang is at index 8
+                    totalHargaLembur += parseFloat(data[8].replace(/,/g, '')) || 0; // Harga Lembur is at index 9
+                    totalKeluar += parseFloat(data[9]) || 0; // Total Keluar is at index 10
+                });
+
+                $('#totalHargaKirim').text(formatRupiah(totalHargaKirim));
+                $('#totalHargaLembur').text(formatRupiah(totalHargaLembur));
+                $('#totalKeluar').text(totalKeluar);
+            }
+
+
             function formatRupiah(value) {
                 return new Intl.NumberFormat('id-ID', {
                     style: 'currency',
@@ -199,35 +205,6 @@
                     maximumFractionDigits: 0
                 }).format(value);
             }
-
-            // Update totals function
-            function updateTotals() {
-                let totalHargaSimpan = 0;
-                let totalHargaLembur = 0;
-                let totalMasuk = 0;
-                let totalKeluar = 0;
-                let totalSisa = 0;
-                let totalHargaSimpanKeseluruhan = 0;
-
-                table.rows({ filter: 'applied' }).every(function() {
-                    var data = this.data();
-                    totalHargaSimpan += parseFloat(data[7].replace(/,/g, '')) || 0;
-                    totalHargaLembur += parseFloat(data[8].replace(/,/g, '')) || 0;
-                    totalMasuk += parseFloat(data[9]) || 0;
-                    totalKeluar += parseFloat(data[10]) || 0;
-                    totalSisa += parseFloat(data[11]) || 0;
-                    totalHargaSimpanKeseluruhan += parseFloat(data[12].replace(/,/g, '')) || 0;
-                });
-
-                $('#totalHargaSimpan').text(formatRupiah(totalHargaSimpan));
-                $('#totalHargaLembur').text(formatRupiah(totalHargaLembur));
-                $('#totalMasuk').text(totalMasuk);
-                $('#totalKeluar').text(totalKeluar);
-                $('#totalSisa').text(totalSisa);
-                $('#totalHargaSimpanKeseluruhan').text(formatRupiah(totalHargaSimpanKeseluruhan));
-            }
-
-            // Initial totals calculation
             updateTotals();
         });
     </script>

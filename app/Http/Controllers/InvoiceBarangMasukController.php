@@ -8,7 +8,7 @@ use App\Models\BarangMasuk;
 use App\Models\Invoice;
 use Illuminate\Http\Request;
 
-class InvoiceController extends Controller
+class InvoiceBarangMasukController extends Controller
 {
     /**
      * Display a listing of the resource.

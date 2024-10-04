@@ -256,7 +256,7 @@ class MenuSeeder extends Seeder
             ],
             [
                 'name' => 'Invoice Barang Keluar',
-                'url' => '/data-invoice/barang-keluar',
+                'url' => '/data-invoice/invoice-keluar',
                 'router' => 'data-invoice.invoice-keluar.index',
                 'icon' => 'far fa-circle',
                 'is_active' => 1,
