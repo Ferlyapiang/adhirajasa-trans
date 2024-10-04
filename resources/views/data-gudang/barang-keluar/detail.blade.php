@@ -159,16 +159,6 @@
                                             @enderror
                                         </div>
 
-                                        <!-- <div class="form-group">
-                                            <label for="nomer_polisi">Nomor Polisi</label>
-                                            <input type="text" name="nomer_polisi" id="nomer_polisi"
-                                                class="form-control @error('nomer_polisi') is-invalid @enderror"
-                                                value="{{ old('nomer_polisi', $barangKeluar->nomer_polisi) }}"
-                                                readonly>
-                                            @error('nomer_polisi')
-                                            <span class="invalid-feedback">{{ $message }}</span>
-                                            @enderror
-                                        </div> -->
                                         <div class="mb-3">
                                             <label for="id_selection" class="form-label">Choose Identification Type:</label>
                                             <select id="id_selection" class="form-control" onchange="toggleFields()" disabled required>
