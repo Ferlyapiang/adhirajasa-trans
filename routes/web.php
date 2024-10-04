@@ -19,6 +19,7 @@ use App\Http\Controllers\GroupMenuController;
 use App\Http\Controllers\JenisMobilController;
 use App\Http\Controllers\InvoiceBarangMasukController;
 use App\Http\Controllers\InvoiceBarangKeluarController;
+use App\Http\Controllers\InvoiceGeneratedController;
 
 // Login and Logout
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login.form');
@@ -182,3 +183,7 @@ Route::post('/invoice/barang-masuk/update-status', [InvoiceBarangMasukController
 //Invoice Barang Keluar
 Route::get('/data-invoice/invoice-keluar', [InvoiceBarangKeluarController::class, 'index'])->name('data-invoice.invoice-keluar.index');
 Route::post('/invoice/barang-keluar/update-status', [InvoiceBarangKeluarController::class, 'updateStatus'])->name('invoice.barang.keluar.update.status');
+
+//Invoice Master
+Route::get('/data-invoice/invoice-master', [InvoiceGeneratedController::class, 'index'])->name('data-invoice.invoice-master.index');
+Route::post('/invoices/generate', [InvoiceGeneratedController::class, 'generateInvoice'])->name('invoice.generate');

@@ -61,6 +61,7 @@ class InvoiceBarangMasukController extends Controller
         return view('data-invoice.invoice-masuk.index', compact('invoiceMasuk'));
     }
 
+
     public function updateStatus(Request $request) {
         $request->validate([
             'ids' => 'required|array',

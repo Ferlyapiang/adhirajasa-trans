@@ -265,6 +265,17 @@ class MenuSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
+            [
+                'name' => 'Invoice Master',
+                'url' => '/data-invoice/invoice-master',
+                'router' => 'data-invoice.invoice-master.index',
+                'icon' => 'far fa-circle',
+                'is_active' => 1,
+                'priority' => 3, // Priority untuk submenu
+                'parent_id' => $dataInvoiceId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
         ]);
     }
 }

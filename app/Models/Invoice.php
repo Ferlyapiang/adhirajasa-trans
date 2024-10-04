@@ -10,11 +10,11 @@ class Invoice extends Model
     use HasFactory;
 
     protected $fillable = [
+        'invoice_number',
         'barang_masuks_id',
         'barang_keluars_id',
     ];
 
-    // Relationship with barang_masuks
     public function barangMasuks()
     {
         return $this->belongsTo(BarangMasuk::class, 'barang_masuks_id');
