@@ -28,7 +28,13 @@ class InvoiceBarangMasukController extends Controller
             DB::raw('COALESCE(total_items.total_qty, 0) AS total_qty_masuk'),
             DB::raw('COALESCE(total_keluar.total_qty, 0) AS total_qty_keluar'),
             DB::raw('COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0) AS total_sisa'),
-            DB::raw('(COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0)) * barang_masuks.harga_simpan_barang AS total_harga_simpan')
+            DB::raw("
+                CASE
+                    WHEN COALESCE(total_items.total_qty, 0) = (COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0)) 
+                    THEN barang_masuks.harga_simpan_barang + barang_masuks.harga_lembur
+                    ELSE ((COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0)) / COALESCE(total_items.total_qty, 0)) * barang_masuks.harga_simpan_barang + barang_masuks.harga_lembur
+                END AS total_harga_simpan
+            ")
         )
         ->join('customers', 'barang_masuks.customer_id', '=', 'customers.id')
         ->join('warehouses', 'barang_masuks.gudang_id', '=', 'warehouses.id')
@@ -55,12 +61,12 @@ class InvoiceBarangMasukController extends Controller
         if ($user->warehouse_id) {
             $invoiceMasuk = $invoiceMasuk->where('barang_masuks.gudang_id', $user->warehouse_id);
         }
-
+    
         $invoiceMasuk = $invoiceMasuk->orderBy('barang_masuks.tanggal_masuk', 'desc')->get();
     
         return view('data-invoice.invoice-masuk.index', compact('invoiceMasuk'));
     }
-
+    
 
     public function updateStatus(Request $request) {
         $request->validate([
