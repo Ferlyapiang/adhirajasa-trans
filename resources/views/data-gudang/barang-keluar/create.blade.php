@@ -99,7 +99,7 @@
                                             <label for="nomor_surat_jalan">Nomor Surat Jalan</label>
                                             <input type="text" name="nomor_surat_jalan" id="nomor_surat_jalan" placeholder="Nomor Surat Jalan"
                                                 class="form-control @error('nomor_surat_jalan') is-invalid @enderror"
-                                                value="{{ old('nomor_surat_jalan') }}">
+                                                value="{{ old('nomor_surat_jalan') }}" required>
                                             @error('nomor_surat_jalan')
                                             <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
@@ -137,7 +137,6 @@
                                             <select name="customer_id" id="customer_id"
                                                 class="form-control select2 @error('customer_id') is-invalid @enderror" required>
                                                 <option value="" disabled selected>Select Pemilik Barang</option>
-                                                <!-- Options will be dynamically populated here -->
                                             </select>
                                             @error('customer_id')
                                             <span class="invalid-feedback">{{ $message }}</span>
@@ -172,6 +171,18 @@
                                             <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
                                         </div>
+
+                                        <div class="form-group" id="alamatField" style="display: none;">
+                                            <label for="address">Alamat Kirim</label>
+                                            <textarea name="address" id="address" placeholder="Alamat"
+                                                      class="form-control @error('address') is-invalid @enderror"
+                                                      rows="4">{{ old('address') }}</textarea>
+                                        
+                                            @error('address')
+                                            <span class="invalid-feedback">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                        
 
                                         <div class="form-group">
                                             <label for="select_type">Pilih Tipe</label>
@@ -696,13 +707,18 @@
             const shippingOption = document.getElementById('shipping_option').value;
             const mobilField = document.getElementById('mobilField');
             const hargaKirimField = document.getElementById('hargaKirimField');
+            const alamatField = document.getElementById('alamatField');
 
             if (shippingOption === 'kirim') {
                 mobilField.style.display = 'block';
                 hargaKirimField.style.display = 'block';
+                alamatField.style.display = 'block';
+            }else if (shippingOption === 'takeout') {
+                mobilField.style.display = 'block';
             } else {
                 mobilField.style.display = 'none';
                 hargaKirimField.style.display = 'none';
+                alamatField.style.display = 'none';
             }
         }
 

@@ -153,6 +153,16 @@
 
 
                                         <div class="form-group">
+                                            <label for="shipping_option">Pilih Opsi Pengiriman</label>
+                                            <select name="shipping_option" id="shipping_option" class="form-control" onchange="toggleFieldsKirim()">
+                                                <option value="">Pilih Opsi Pengiriman</option>
+                                                <option value="kirim">Kirim</option>
+                                                <option value="takeout">Pick Up</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <!-- Tipe Mobil -->
+                                        <div class="form-group" id="mobilField" style="display: none;">
                                             <label for="type_mobil_id">Tipe Mobil</label>
                                             <select name="type_mobil_id" id="type_mobil_id" class="form-control @error('type_mobil_id') is-invalid @enderror">
                                                 <option value="">Pilih Tipe Mobil</option>
@@ -166,14 +176,31 @@
                                             <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
                                         </div>
-
-                                        <div class="form-group">
+                                        
+                                        <!-- Harga Kirim Barang -->
+                                        <div class="form-group" id="hargaKirimField" style="display: none;">
                                             <label for="harga_kirim_barang">Harga Kirim Barang</label>
                                             <input type="text" name="harga_kirim_barang" id="harga_kirim_barang"
                                                 class="form-control @error('harga_kirim_barang') is-invalid @enderror"
                                                 value="{{ old('harga_kirim_barang', $barangKeluar->harga_kirim_barang) }}">
+                                            @error('harga_kirim_barang')
+                                            <span class="invalid-feedback">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                        
+                                        <!-- Alamat Kirim -->
+                                        <div class="form-group" id="alamatField" style="display: none;">
+                                            <label for="address">Alamat Kirim</label>
+                                            <textarea name="address" id="address" placeholder="Alamat"
+                                                    class="form-control @error('address') is-invalid @enderror"
+                                                    rows="4">{{ old('address', $barangKeluar->address) }}</textarea>
+
+                                            @error('address')
+                                            <span class="invalid-feedback">{{ $message }}</span>
+                                            @enderror
                                         </div>
 
+                                        
                                         <div class="mb-3">
                                             <label for="id_selection" class="form-label">Choose Identification Type:</label>
                                             <select id="id_selection" class="form-control" onchange="toggleFields()" required>
@@ -635,6 +662,28 @@
                 displayInput.value = formatted.replace('IDR', '').trim();
                 document.getElementById(hiddenInputId).value = angka;
             }
+
+            function toggleFieldsKirim() {
+    const shippingOption = document.getElementById('shipping_option').value;
+    const mobilField = document.getElementById('mobilField');
+    const hargaKirimField = document.getElementById('hargaKirimField');
+    const alamatField = document.getElementById('alamatField');
+
+    if (shippingOption === 'kirim') {
+        mobilField.style.display = 'block';
+        hargaKirimField.style.display = 'block';
+        alamatField.style.display = 'block';
+    } else if (shippingOption === 'takeout') {
+        mobilField.style.display = 'block';
+        hargaKirimField.style.display = 'none';
+        alamatField.style.display = 'none';
+    } else {
+        mobilField.style.display = 'none';
+        hargaKirimField.style.display = 'none';
+        alamatField.style.display = 'none';
+    }
+}
+
         </script>
 
 

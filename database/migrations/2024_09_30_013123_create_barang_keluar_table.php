@@ -25,6 +25,7 @@ return new class extends Migration
             $table->foreignId('bank_transfer_id')->constrained('bank_datas')->onDelete('cascade');
             $table->decimal('harga_lembur', 15, 2)->nullable();
             $table->string('status_invoice')->nullable();
+            $table->text('address')->nullable();
             $table->timestamps();
         });
 
