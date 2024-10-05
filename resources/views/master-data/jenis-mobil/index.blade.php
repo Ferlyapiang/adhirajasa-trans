@@ -90,7 +90,7 @@
                         <tr>
                             <th>No</th>
                             <th>Jenis Mobil</th>
-                            <th>Harga Sewa</th>
+                            <th>Harga Bongkar Muat</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>

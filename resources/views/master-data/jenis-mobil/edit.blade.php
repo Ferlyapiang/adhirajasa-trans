@@ -63,7 +63,7 @@
                                     </div>
 
                                     <div class="form-group mt-3">
-                                        <label for="rental_price">Harga Sewa</label>
+                                        <label for="rental_price">Harga Bongkar Muat</label>
                                         <input type="text" id="rental_price" name="rental_price" class="form-control" value="{{ old('rental_price', number_format($jenisMobil->rental_price, 0, ',', '.')) }}" required oninput="formatRupiah(this)">
                                         <input type="hidden" id="rental_price_raw" name="rental_price"> <!-- Hidden input for raw numeric value -->
                                         @error('rental_price')

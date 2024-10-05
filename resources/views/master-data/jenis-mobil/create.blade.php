@@ -60,7 +60,7 @@
                                         @enderror
                                     </div>
                                     <div class="form-group mt-3">
-                                        <label for="rental_price">Harga Sewa</label>
+                                        <label for="rental_price">Harga Bongkar Muat</label>
                                         <input type="text" id="rental_price" name="rental_price" class="form-control" required oninput="formatRupiah(this)">
                                         <input type="hidden" id="rental_price_raw" name="rental_price"> <!-- Hidden input for raw numeric value -->
                                         @error('rental_price')

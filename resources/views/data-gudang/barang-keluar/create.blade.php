@@ -150,7 +150,7 @@
                                             <select name="shipping_option" id="shipping_option" class="form-control" onchange="toggleFieldsKirim()">
                                                 <option value="">Pilih Opsi Pengiriman</option>
                                                 <option value="kirim">Kirim</option>
-                                                <option value="takeout">Take Out</option>
+                                                <option value="takeout">Pick Up</option>
                                             </select>
                                         </div>
 
