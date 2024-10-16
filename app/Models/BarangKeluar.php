@@ -24,7 +24,8 @@ class BarangKeluar extends Model
         'bank_transfer_id',
         'harga_lembur',
         'status_invoice',
-        'address'
+        'address',
+        'tanggal_tagihan_keluar',
     ];
 
     // Define the relationship with BarangKeluarItem

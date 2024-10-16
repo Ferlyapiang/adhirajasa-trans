@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\LogData;
 use Illuminate\Support\Facades\DB;
 use App\Models\JenisMobil;
+use Carbon\Carbon;
 
 class BarangMasukController extends Controller
 {
@@ -111,6 +112,7 @@ class BarangMasukController extends Controller
                 'items.*.unit' => 'required|string',
                 'items.*.notes' => 'required|string',
             ]);
+            // dd($request->all());
 
             $datePrefix = now()->format('Ymd');
             $latestJoc = BarangMasuk::where('joc_number', 'like', 'ATS-' . $datePrefix . '%')
@@ -125,7 +127,18 @@ class BarangMasukController extends Controller
             }
 
             $jocNumber = 'ATS-' . $datePrefix . $newNumber;
+            $customer = Customer::find($request->customer_id);
+            $tanggalMasuk = $request->tanggal_masuk ? Carbon::createFromFormat('Y-m-d', $request->tanggal_masuk) : null;
 
+            
+            if ($customer->type_payment_customer === 'Akhir Bulan') {
+                
+                $tanggalTagihanMasuk = $tanggalMasuk ? $tanggalMasuk->endOfMonth()->format('Y-m-d') : null;
+            } elseif ($customer->type_payment_customer === 'Pertanggal Masuk') {
+                
+                $tanggalTagihanMasuk = $tanggalMasuk ? $tanggalMasuk->copy()->addMonth()->subDay()->format('Y-m-d') : null;
+            }
+            
             $barangMasuk = BarangMasuk::create([
                 'joc_number' => $jocNumber,
                 'tanggal_masuk' => $request->tanggal_masuk,
@@ -136,7 +149,8 @@ class BarangMasukController extends Controller
                 'nomer_container' => $request->nomer_container ?? "", 
                 'status_invoice' => "Barang Masuk",
                 'harga_simpan_barang' => $request->harga_simpan_barang ?? 0,
-                'harga_lembur' => $request->harga_lembur ?? 0    
+                'harga_lembur' => $request->harga_lembur ?? 0,
+                'tanggal_tagihan_masuk' => $tanggalTagihanMasuk,
             ]);
 
             $items = json_decode($request->items, true);

@@ -17,6 +17,7 @@ class BarangMasuk extends Model
         'harga_simpan_barang',
         'harga_lembur',
         'status_invoice',
+        'tanggal_tagihan_masuk',
     ];
 
     public function items()
