@@ -225,6 +225,18 @@ class BarangMasukController extends Controller
 
             $barangMasuk = BarangMasuk::findOrFail($id);
 
+            $customer = Customer::find($request->customer_id);
+            $tanggalMasuk = $request->tanggal_masuk ? Carbon::createFromFormat('Y-m-d', $request->tanggal_masuk) : null;
+
+            
+            if ($customer->type_payment_customer === 'Akhir Bulan') {
+                
+                $tanggalTagihanMasuk = $tanggalMasuk ? $tanggalMasuk->endOfMonth()->format('Y-m-d') : null;
+            } elseif ($customer->type_payment_customer === 'Pertanggal Masuk') {
+                
+                $tanggalTagihanMasuk = $tanggalMasuk ? $tanggalMasuk->copy()->addMonth()->subDay()->format('Y-m-d') : null;
+            }
+
             $barangMasuk->update([
                 'tanggal_masuk' => $request->tanggal_masuk,
                 'gudang_id' => $request->gudang_id,
@@ -234,7 +246,8 @@ class BarangMasukController extends Controller
                 'nomer_container' => $request->nomer_container ?? "",
                 'status_invoice' => "Barang Masuk",
                 'harga_simpan_barang' => $request->harga_simpan_barang ?? 0,
-                'harga_lembur' => $request->harga_lembur ?? 0
+                'harga_lembur' => $request->harga_lembur ?? 0,
+                'tanggal_tagihan_masuk' => $tanggalTagihanMasuk,
             ]);
 
             $items = json_decode($request->items, true);

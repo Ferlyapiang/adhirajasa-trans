@@ -135,18 +135,19 @@
                             <option value="nomer_container" {{ $barangMasuk->nomer_container ? 'selected' : '' }}>Nomer Container</option>
                         </select>
                     </div>
-
+                    
                     <div id="nomer_polisi_field" class="mb-3" style="display: none;">
                         <label for="nomer_polisi">Nomer Polisi</label>
                         <input type="text" name="nomer_polisi" id="nomer_polisi" class="form-control" 
                             value="{{ $barangMasuk->nomer_polisi }}">
                     </div>
-
+                    
                     <div id="nomer_container_field" class="mb-3" style="display: none;">
                         <label for="nomer_container">Nomer Container</label>
                         <input type="text" name="nomer_container" id="nomer_container" class="form-control" 
                             value="{{ $barangMasuk->nomer_container }}">
                     </div>
+                    
 
                     <div class="form-group">
                         <label for="harga_simpan_barang">Harga Simpan Barang</label>
@@ -377,7 +378,7 @@ $(document).ready(function() {
             return;
         }
 
-        if (id && qty && unit && notes) {
+        if (id && qty && unit) {
             const newItem = {
                 id: id,
                 nama_barang: name,
@@ -472,7 +473,6 @@ $(document).ready(function() {
         $('#item_name').append(new Option(itemName, barangId));
     }
 
-    // Update hidden input with the current items in the table
     function updateItemsInput() {
         const items = [];
         $('#items-table tbody tr').each(function() {
@@ -494,24 +494,30 @@ $(document).ready(function() {
         $('#items-input').val(JSON.stringify(items));
     }
 
-    // Function to toggle visibility of fields based on selection
-    function toggleFields() {
+});
+
+function toggleFields() {
         var selection = document.getElementById('id_selection').value;
 
+        // Hide both fields first
         document.getElementById('nomer_polisi_field').style.display = 'none';
         document.getElementById('nomer_container_field').style.display = 'none';
 
-        document.getElementById('nomer_polisi').value = '';
-        document.getElementById('nomer_container').value = '';
-
+        // Clear the values when switching options
         if (selection === 'nomer_polisi') {
-            document.getElementById('nomer_polisi_field').style.display = 'block';
+            document.getElementById('nomer_container').value = ''; // Clear container field
+            document.getElementById('nomer_polisi_field').style.display = 'block'; // Show polisi field
         } else if (selection === 'nomer_container') {
-            document.getElementById('nomer_container_field').style.display = 'block';
+            document.getElementById('nomer_polisi').value = ''; // Clear polisi field
+            document.getElementById('nomer_container_field').style.display = 'block'; // Show container field
         }
     }
 
-    // Function to toggle visibility of overtime fields
+    // Panggil toggleFields saat halaman pertama kali dimuat
+    window.onload = function() {
+        toggleFields();
+    };
+
     function toggleLembur() {
         let select = document.getElementById('ada_lembur');
         let lemburSection = document.getElementById('lembur_section');
@@ -530,11 +536,6 @@ $(document).ready(function() {
         document.getElementById(hiddenInputId).value = angka;
     }
 
-    // // Event listener for formatting currency
-    // $('#item_qty').on('input', function() {
-    //     formatRupiah(this, 'item_qty_hidden');
-    // });
-});
 </script>
 
 
