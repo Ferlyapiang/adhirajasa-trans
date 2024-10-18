@@ -494,12 +494,8 @@
                     let noRef = $('#modal_no_ref').val();
                     let qty = toInteger($('#modal_qty').val());
                     let unit = $('#modal_unit').val();
-                    let harga = parseCurrency($('#modal_harga').val());
-                    let total = (qty * harga).toFixed(2);
                     let barangMasukId = $('#modal_barang_masuk_id').val();
 
-                    let formattedHarga = formatCurrency(harga);
-                    let formattedTotal = formatCurrency(total);
 
                     let itemExists = false;
                     $('#items-table tbody tr').each(function() {
@@ -537,7 +533,6 @@
                     noRefInput.val('');
                     $('#modal_qty').val('');
                     $('#modal_unit').val('');
-                    $('#modal_harga').val('');
                     $('#modal_barang_masuk_id').val('');
 
                     $('#itemModal').modal('hide');
@@ -586,8 +581,7 @@
                     let unit = $('#edit_modal_unit').val();
                     let barangMasukId = $('#edit_modal_barang_masuk_id').val();
 
-                    let formattedHarga = formatCurrency(harga);
-                    let formattedTotal = formatCurrency(total);
+                   
 
                     currentEditingRow.find('td:eq(0)').text(noRef);
                     currentEditingRow.find('td:eq(1)').text(barangName);

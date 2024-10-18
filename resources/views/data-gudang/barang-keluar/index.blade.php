@@ -101,7 +101,7 @@
                                                 <th>No</th>
                                                 <th>Tanggal Keluar</th>
                                                 <th>Surat Jalan</th>
-                                                <th>Nomer Invoice</th>
+                                                {{-- <th>Nomer Invoice</th> --}}
                                                 <th>No Ref</th>
                                                 <th>Nama Barang</th>
                                                 <th>Gudang</th>
@@ -123,11 +123,11 @@
                                                             {{ $barangKeluar->nomer_surat_jalan }}
                                                         </a>
                                                     </td>
-                                                    <td>
+                                                    {{-- <td>
                                                         <a href="{{ route('data-gudang.barang-keluar.show', $barangKeluar->barang_keluar_id) }}">
                                                             {{ $barangKeluar->nomer_invoice }}
                                                         </a>
-                                                    </td>
+                                                    </td> --}}
                                                     <td>{{ $barangKeluar->no_ref }}</td>
                                                     <td>{{ $barangKeluar->nama_barang }}</td>
                                                     <td>{{ $barangKeluar->nama_gudang }}</td>
