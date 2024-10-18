@@ -16,7 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\JenisMobil;
-
+use Carbon\Carbon;
 
 class BarangKeluarController extends Controller
 {
@@ -173,7 +173,19 @@ class BarangKeluarController extends Controller
         
             $formattedNumber = sprintf('%03d', $nextNumber);
             $nomer_invoice = "ATS/INV/{$year}/{$romanMonth}/{$warehouseCode}/{$formattedNumber}";
-        
+            
+            $customer = Customer::find($request->customer_id);
+            $tanggalKeluar = $request->tanggal_keluar ? Carbon::createFromFormat('Y-m-d', $request->tanggal_keluar) : null;
+
+            
+            if ($customer->type_payment_customer === 'Akhir Bulan') {
+                
+                $tanggalTagihanKeluar = $tanggalKeluar ? $tanggalKeluar->endOfMonth()->format('Y-m-d') : null;
+            } elseif ($customer->type_payment_customer === 'Pertanggal Masuk') {
+                
+                $tanggalTagihanKeluar = $tanggalKeluar ? $tanggalKeluar->copy()->addMonth()->subDay()->format('Y-m-d') : null;
+            }
+
             $barangKeluarData = [
                 'nomer_surat_jalan' => $validated['nomor_surat_jalan'],
                 'tanggal_keluar' => $validated['tanggal_keluar'],
@@ -188,6 +200,7 @@ class BarangKeluarController extends Controller
                 'harga_lembur' => $validated['harga_lembur'],
                 'status_invoice' => 'Barang Keluar',
                 'address' => $validated['address'],
+                'tanggal_tagihan_keluar' => $tanggalTagihanKeluar,
             ];
         
             $items = $validated['items'];
@@ -374,6 +387,18 @@ class BarangKeluarController extends Controller
 
         $bank_transfer_id = $bankTransfer ? $bankTransfer->id : null;
 
+        $customer = Customer::find($request->customer_id);
+            $tanggalKeluar = $request->tanggal_keluar ? Carbon::createFromFormat('Y-m-d', $request->tanggal_keluar) : null;
+
+            
+            if ($customer->type_payment_customer === 'Akhir Bulan') {
+                
+                $tanggalTagihanKeluar = $tanggalKeluar ? $tanggalKeluar->endOfMonth()->format('Y-m-d') : null;
+            } elseif ($customer->type_payment_customer === 'Pertanggal Masuk') {
+                
+                $tanggalTagihanKeluar = $tanggalKeluar ? $tanggalKeluar->copy()->addMonth()->subDay()->format('Y-m-d') : null;
+            }
+
         $barangKeluarData = [
             'tanggal_keluar' => $validated['tanggal_keluar'],
             'gudang_id' => $validated['gudang_id'],
@@ -387,6 +412,7 @@ class BarangKeluarController extends Controller
             'harga_kirim_barang' => $validated['harga_kirim_barang'],
             'harga_lembur' => $validated['harga_lembur'],
             'address' => $validated['address'],
+            'tanggal_tagihan_keluar' => $tanggalTagihanKeluar
         ];
 
         $items = $validated['items'];
