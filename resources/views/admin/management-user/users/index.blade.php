@@ -11,12 +11,18 @@
 
     <!-- Theme style -->
     <link rel="stylesheet" href="{{ asset('lte/dist/css/adminlte.min.css') }}">
+
     <!-- DataTables CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.3/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.3.6/css/buttons.dataTables.min.css">
 
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.3/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.6/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.html5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+
     <script src="{{ asset('lte/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('lte/dist/js/adminlte.min.js') }}"></script>
 
@@ -83,7 +89,6 @@
             <div class="container-fluid pl-4">
                 <h1>Users</h1>
                 <a href="{{ route('management-user.users.create') }}" class="btn btn-primary mb-3">Add User</a>
-
                 <div class="table-responsive">
                     <table id="userTable" class="table table-striped table-bordered">
                         <thead>
@@ -156,12 +161,27 @@
 
     <script>
     $(document).ready(function() {
-        var table = $('#userTable').DataTable();
+        var table = $('#userTable').DataTable({
+            dom: 'Bfrtip',
+            buttons: [
+                {
+                    extend: 'excelHtml5',
+                    text: 'Download XLSX',
+                    title: 'User Data',
+                    className: 'btn btn-success mb-3',
+                    autoInit: true,
+                    exportOptions: {
+                        columns: ':not(:last-child)'
+                    }
+                }
+            ]
+        });
 
         $('#searchInput').on('keyup', function() {
             table.search($(this).val()).draw();
         });
 
+        // Untuk tombol hapus
         $('#userTable').on('click', '.btn-danger', function(event) {
             event.preventDefault();
             var form = $(this).closest('form');
@@ -172,16 +192,16 @@
             $('#deleteForm').attr('action', actionUrl);
 
             var modalElement = document.getElementById('confirmDeleteModal');
-            var modal = new bootstrap.Modal(modalElement); // Initialize the modal
-            modal.show(); // Show the modal
+            var modal = new bootstrap.Modal(modalElement);
+            modal.show();
         });
 
         $('#cancelButton').on('click', function() {
-            location.reload(); // Reload the page
+            location.reload();
         });
     });
     </script>
+
 </body>
 
 </html>
-
