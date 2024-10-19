@@ -16,6 +16,9 @@
     <!-- DataTables CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.3/css/jquery.dataTables.min.css">
 
+    <!-- xlxs library for exporting Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.6/xlsx.full.min.js"></script>
+
     <style>
         /* Custom styling for the DataTable */
         #bankDataTable {
@@ -93,6 +96,7 @@
             <!-- Main content -->
             <div class="container-fluid pl-4">
                 <a href="{{ route('master-data.bank-data.create') }}" class="btn btn-primary mb-3">Add Bank Data</a>
+                <button id="exportButton" class="btn btn-success mb-3">Download to Excel</button>
 
                 <div class="table-responsive">
                     <table id="bankDataTable" class="table table-striped">
@@ -109,28 +113,28 @@
                         </thead>
                         <tbody>
                             @foreach ($bankDatas as $index => $bankData)
-                                <tr>
-                                    <td>{{ $index + 1 }}</td>
-                                    <td>{{ $bankData->bank_name }}</td>
-                                    <td>{{ $bankData->account_number }}</td>
-                                    <td>{{ $bankData->account_name }}</td>
-                                    <td>{{ $bankData->warehouse->name ?? 'N/A' }}</td>
-                                    <td
-                                        class="{{ $bankData->status == 'active' ? 'status-active' : 'status-inactive' }} text-center">
-                                        {{ ucfirst($bankData->status) }}
-                                    </td>
-                                    <!-- <td>{{ ucfirst($bankData->status) }}</td> -->
-                                    <td>
-                                        <a href="{{ route('master-data.bank-data.edit', $bankData) }}"
-                                            class="btn btn-warning btn-sm">Edit</a>
-                                        <form action="{{ route('master-data.bank-data.destroy', $bankData) }}"
-                                            method="POST" style="display:inline;">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                                        </form>
-                                    </td>
-                                </tr>
+                            <tr>
+                                <td>{{ $index + 1 }}</td>
+                                <td>{{ $bankData->bank_name }}</td>
+                                <td>{{ $bankData->account_number }}</td>
+                                <td>{{ $bankData->account_name }}</td>
+                                <td>{{ $bankData->warehouse->name ?? 'N/A' }}</td>
+                                <td
+                                    class="{{ $bankData->status == 'active' ? 'status-active' : 'status-inactive' }} text-center">
+                                    {{ ucfirst($bankData->status) }}
+                                </td>
+                                <!-- <td>{{ ucfirst($bankData->status) }}</td> -->
+                                <td>
+                                    <a href="{{ route('master-data.bank-data.edit', $bankData) }}"
+                                        class="btn btn-warning btn-sm">Edit</a>
+                                    <form action="{{ route('master-data.bank-data.destroy', $bankData) }}"
+                                        method="POST" style="display:inline;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
                             @endforeach
                         </tbody>
                     </table>
@@ -158,6 +162,21 @@
         $(document).ready(function() {
             $('#bankDataTable').DataTable();
         });
+        document.getElementById('exportButton').addEventListener('click', function() {
+
+        var table = document.getElementById('bankDataTable');
+
+        var clonedTable = table.cloneNode(true);
+
+        var rows = clonedTable.querySelectorAll('tr');
+        rows.forEach(function(row) {
+            row.removeChild(row.lastElementChild);
+        });
+
+        var workbook = XLSX.utils.table_to_book(clonedTable, { sheet: "Bank Data" });
+
+        XLSX.writeFile(workbook, 'BankData.xlsx');
+    });
     </script>
 </body>
 

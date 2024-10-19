@@ -20,6 +20,9 @@
     <script src="{{ asset('lte/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('lte/dist/js/adminlte.min.js') }}"></script>
 
+    <!-- xlxs library for exporting Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.6/xlsx.full.min.js"></script>
+
     <style>
         /* Custom styling for the DataTable */
         #barangTable {
@@ -121,6 +124,7 @@
             <div class="container-fluid pl-4">
                 <h1>Data Barang</h1>
                 <a href="{{ route('master-data.barang.create') }}" class="btn btn-primary mb-3">Tambah Barang</a>
+                <button id="exportButton" class="btn btn-success mb-3">Download to Excel</button>
                 <table id="barangTable" class="table mt-3">
                     <thead>
                         <tr>
@@ -212,6 +216,22 @@
         $('#cancelButton').on('click', function() {
             location.reload(); // Reload the page
         });
+    });
+
+    document.getElementById('exportButton').addEventListener('click', function() {
+
+    var table = document.getElementById('barangTable');
+
+    var clonedTable = table.cloneNode(true);
+
+    var rows = clonedTable.querySelectorAll('tr');
+    rows.forEach(function(row) {
+        row.removeChild(row.lastElementChild);
+    });
+
+    var workbook = XLSX.utils.table_to_book(clonedTable, { sheet: "Data Master Barang" });
+
+    XLSX.writeFile(workbook, 'DataMasterBarang.xlsx');
     });
     </script>
 </body>

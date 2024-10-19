@@ -20,6 +20,9 @@
     <script src="{{ asset('lte/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('lte/dist/js/adminlte.min.js') }}"></script>
 
+    <!-- xlxs library for exporting Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.6/xlsx.full.min.js"></script>
+
     <style>
         /* Custom styling for the DataTable */
         #warehouseTable {
@@ -104,6 +107,8 @@
                 @if (is_null(Auth::user()->warehouse_id))
                 <a href="{{ route('master-data.warehouses.create') }}" class="btn btn-primary mb-3">Tambah Gudang</a>
                 @endif
+
+                <button id="exportButton" class="btn btn-success mb-3">Download to Excel</button>
             
 
                 <!-- Table responsive wrapper -->
@@ -199,6 +204,22 @@
         $('#cancelButton').on('click', function() {
             location.reload(); // Reload the page
         });
+    });
+
+    document.getElementById('exportButton').addEventListener('click', function() {
+
+    var table = document.getElementById('warehouseTable');
+
+    var clonedTable = table.cloneNode(true);
+
+    var rows = clonedTable.querySelectorAll('tr');
+    rows.forEach(function(row) {
+        row.removeChild(row.lastElementChild);
+    });
+
+    var workbook = XLSX.utils.table_to_book(clonedTable, { sheet: "Data Gudang" });
+
+    XLSX.writeFile(workbook, 'DataGudang.xlsx');
     });
     </script>
 </body>

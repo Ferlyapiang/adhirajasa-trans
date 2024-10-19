@@ -19,6 +19,8 @@
     <script src="https://cdn.datatables.net/1.13.3/js/jquery.dataTables.min.js"></script>
     <script src="{{ asset('lte/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('lte/dist/js/adminlte.min.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
 
     <style>
         /* Custom styling for the DataTable */
@@ -130,7 +132,7 @@
             <!-- Main content -->
             <div class="container-fluid pl-4">
                 <a href="{{ route('master-data.customers.create') }}" class="btn btn-primary mb-3">Add Customer</a>
-
+                <a id="downloadXlsx" class="btn btn-success mb-3">Download XLSX</a>
                 <div class="table-responsive">
                     <table id="customerTable" class="table table-striped table-bordered">
                         <thead>
@@ -221,6 +223,42 @@
     <script>
     $(document).ready(function() {
         var table = $('#customerTable').DataTable();
+
+        $('#downloadXlsx').on('click', function() {
+    var wb = XLSX.utils.book_new(); // Create a new workbook
+    var ws_data = [];
+
+    // Get the table header (excluding the last "Actions" column)
+    var headers = [];
+    $('#customerTable thead th').each(function(index) {
+        if (index !== 12) { // Exclude the "Actions" column
+            headers.push($(this).text());
+        }
+    });
+    ws_data.push(headers);
+
+    $('#customerTable tbody tr').each(function() {
+        var row = [];
+        $(this).find('td').each(function(index) {
+            if (index !== 12) { 
+                if (index === 9) {
+                    row.push($(this).text().trim());
+                } else {
+                    row.push($(this).text());
+                }
+            }
+        });
+        ws_data.push(row);
+    });
+
+    // Create a new worksheet and append the data
+    var ws = XLSX.utils.aoa_to_sheet(ws_data);
+    XLSX.utils.book_append_sheet(wb, ws, 'Customers');
+
+    // Export the file as XLSX
+    XLSX.writeFile(wb, 'customers_data.xlsx');
+});
+
 
         $('#searchInput').on('keyup', function() {
             table.search($(this).val()).draw();

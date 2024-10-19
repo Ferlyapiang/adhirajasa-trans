@@ -13,8 +13,8 @@
     <!-- Theme style -->
     <link rel="stylesheet" href="{{ asset('lte/dist/css/adminlte.min.css') }}">
 
-     <!-- Select2 CSS -->
-     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
         table {
             width: 100%;
@@ -47,9 +47,11 @@
         .select2-selection__rendered {
             line-height: 2.5 !important;
         }
+
         .select2-container .select2-selection--single {
             height: 50px !important;
         }
+
         .select2-container--default .select2-selection--single .select2-selection__arrow {
             height: 50px !important;
         }
@@ -100,16 +102,16 @@
 
                     <div class="form-group">
                         <label for="gudang">Gudang</label>
-                        <select name="gudang_id" id="gudang" class="form-control" 
+                        <select name="gudang_id" id="gudang" class="form-control"
                             {{ $user->warehouse_id ? 'disabled' : '' }} required>
                             @if (is_null($user->warehouse_id))
-                                <option value="" disabled selected>Pilih Gudang Penyimpanan</option>
+                            <option value="" disabled selected>Pilih Gudang Penyimpanan</option>
                             @endif
                             @foreach ($gudangs as $gudang)
-                                <option value="{{ $gudang->id }}" 
-                                    {{ $user->warehouse_id == $gudang->id ? 'selected' : '' }}>
-                                    {{ $gudang->name }}
-                                </option>
+                            <option value="{{ $gudang->id }}"
+                                {{ $user->warehouse_id == $gudang->id ? 'selected' : '' }}>
+                                {{ $gudang->name }}
+                            </option>
                             @endforeach
                         </select>
                     </div>
@@ -119,11 +121,11 @@
                         <select name="customer_id" id="nama_pemilik" class="form-control" required>
                             <option value="" disabled selected>Pilih Nama Pemilik Barang</option>
                             @foreach($pemilik as $owner)
-                                @if(Auth::user()->warehouse_id === null)
-                                    <option value="{{ $owner->id }}">{{ $owner->name }} | {{ optional($owner->warehouse)->name }}</option>
-                                @else
-                                    <option value="{{ $owner->id }}">{{ $owner->name }}</option>
-                                @endif
+                            @if(Auth::user()->warehouse_id === null)
+                            <option value="{{ $owner->id }}">{{ $owner->name }} | {{ optional($owner->warehouse)->name }}</option>
+                            @else
+                            <option value="{{ $owner->id }}">{{ $owner->name }}</option>
+                            @endif
                             @endforeach
                         </select>
                     </div>
@@ -133,12 +135,12 @@
                         <select name="type_mobil_id" id="type_mobil_id" class="form-control">
                             <option value="">Pilih Jenis Mobil</option>
                             @foreach ($typeMobilOptions as $typeMobil)
-                                <option value="{{ $typeMobil->id }}">{{ $typeMobil->type }}</option>
+                            <option value="{{ $typeMobil->id }}">{{ $typeMobil->type }}</option>
                             @endforeach
                         </select>
                     </div>
-                    
-                    
+
+
 
                     <div class="form-group">
                         <label for="selection" class="form-label">Choose Identification Type:</label>
@@ -148,12 +150,12 @@
                             <option value="nomer_container">Nomer Container</option>
                         </select>
                     </div>
-                    
+
                     <div id="nomer_polisi_field" class="mb-3" style="display:none;">
                         <label for="nomer_polisi">Nomer Polisi</label>
                         <input type="text" name="nomer_polisi" id="nomer_polisi" class="form-control">
                     </div>
-                    
+
                     <div id="nomer_container_field" class="mb-3" style="display:none;"> <!-- Fixed id here -->
                         <label for="nomer_container">Nomer Container</label>
                         <input type="text" name="nomer_container" id="nomer_container" class="form-control">
@@ -197,8 +199,14 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- Items will be added here dynamically -->
                         </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="1" style="text-align:right;">Total:</th>
+                                <th id="totalQuantity"></th>
+                                <th colspan="3"></th>
+                            </tr>
+                        </tfoot>
                     </table>
 
                     <br><br>
@@ -257,7 +265,7 @@
                         <label for="item_notes">Notes</label>
                         <textarea id="item_notes" class="form-control" rows="4" required></textarea>
                     </div>
-                    
+
 
                 </div>
                 <div class="modal-footer">
@@ -311,101 +319,101 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
-    $(document).ready(function() {
-        // Initialize Select2 for dropdowns
-        $('#gudang, #nama_pemilik, #item_name').select2({
-            placeholder: function() {
-                return $(this).data('placeholder');
-            },
-            allowClear: true
-        });
+        $(document).ready(function() {
+            // Initialize Select2 for dropdowns
+            $('#gudang, #nama_pemilik, #item_name').select2({
+                placeholder: function() {
+                    return $(this).data('placeholder');
+                },
+                allowClear: true
+            });
 
-        let editRow; // Store the row to be edited
-        let itemsInTable = []; // Array to keep track of items added to the table
+            let editRow; // Store the row to be edited
+            let itemsInTable = []; // Array to keep track of items added to the table
 
-        // Function to update the hidden input field with the list of items
-        function updateItemsInput() {
-            let items = [];
+            // Function to update the hidden input field with the list of items
+            function updateItemsInput() {
+                let items = [];
 
-            $('#items-table tbody tr').each(function() {
-                const itemId = $(this).data('id');
-                const itemQty = $(this).find('td:eq(1)').text();
-                const itemUnit = $(this).find('td:eq(2)').text();
-                const itemNotes = $(this).find('td:eq(3)').text();
+                $('#items-table tbody tr').each(function() {
+                    const itemId = $(this).data('id');
+                    const itemQty = $(this).find('td:eq(1)').text();
+                    const itemUnit = $(this).find('td:eq(2)').text();
+                    const itemNotes = $(this).find('td:eq(3)').text();
 
-                items.push({
-                    id: itemId,
-                    quantity: itemQty,
-                    unit: itemUnit,
-                    notes: itemNotes
+                    items.push({
+                        id: itemId,
+                        quantity: itemQty,
+                        unit: itemUnit,
+                        notes: itemNotes
+                    });
+                });
+
+                $('#items-input').val(JSON.stringify(items));
+            }
+
+            // Function to update the dropdown based on items in the table
+            function updateItemDropdown() {
+                $('#item_name option').each(function() {
+                    const optionId = $(this).val();
+                    if (itemsInTable.includes(optionId)) {
+                        $(this).prop('disabled', true); // Disable option if it's already in the table
+                    } else {
+                        $(this).prop('disabled', false); // Enable option if it's not in the table
+                    }
+                });
+            }
+
+            // Call updateItemDropdown on page load to initialize the dropdown correctly
+            updateItemDropdown();
+
+            // Fetch items based on selected owner
+            $('#nama_pemilik').change(function() {
+                const pemilik = $(this).val();
+                $.ajax({
+                    url: "{{ route('data-gudang.items-by-owner') }}",
+                    method: 'GET',
+                    data: {
+                        pemilik: pemilik
+                    },
+                    success: function(data) {
+                        if (data.error) {
+                            console.error(data.error);
+                            return;
+                        }
+
+                        let options = '<option value="">Select Item</option>';
+                        $.each(data, function(key, item) {
+                            if (!itemsInTable.includes(item.id)) {
+                                options += `<option value="${item.id}" data-jenis="${item.jenis}">${item.nama_barang}</option>`;
+                            }
+                        });
+                        $('#item_name').html(options);
+                    },
+                    error: function(xhr) {
+                        console.error('AJAX Error:', xhr.responseText);
+                    }
                 });
             });
 
-            $('#items-input').val(JSON.stringify(items));
-        }
-
-        // Function to update the dropdown based on items in the table
-        function updateItemDropdown() {
-            $('#item_name option').each(function() {
-                const optionId = $(this).val();
-                if (itemsInTable.includes(optionId)) {
-                    $(this).prop('disabled', true); // Disable option if it's already in the table
-                } else {
-                    $(this).prop('disabled', false); // Enable option if it's not in the table
-                }
+            // Fetch unit for selected item
+            $('#item_name').change(function() {
+                const unit = $('#item_name option:selected').data('jenis');
+                $('#item_unit').val(unit || '');
             });
-        }
 
-        // Call updateItemDropdown on page load to initialize the dropdown correctly
-        updateItemDropdown();
+            // Add item to the list
+            $('#add-item-to-list').click(function() {
+                const itemName = $('#item_name option:selected').text();
+                const itemId = $('#item_name').val(); // Get the selected item's id
+                const itemQty = $('#item_qty').val();
+                const itemUnit = $('#item_unit').val();
+                const itemNotes = $('#item_notes').val();
 
-        // Fetch items based on selected owner
-        $('#nama_pemilik').change(function() {
-            const pemilik = $(this).val();
-            $.ajax({
-                url: "{{ route('data-gudang.items-by-owner') }}",
-                method: 'GET',
-                data: {
-                    pemilik: pemilik
-                },
-                success: function(data) {
-                    if (data.error) {
-                        console.error(data.error);
-                        return;
-                    }
-
-                    let options = '<option value="">Select Item</option>';
-                    $.each(data, function(key, item) {
-                        if (!itemsInTable.includes(item.id)) {
-                            options += `<option value="${item.id}" data-jenis="${item.jenis}">${item.nama_barang}</option>`;
-                        }
-                    });
-                    $('#item_name').html(options);
-                },
-                error: function(xhr) {
-                    console.error('AJAX Error:', xhr.responseText);
-                }
-            });
-        });
-
-        // Fetch unit for selected item
-        $('#item_name').change(function() {
-            const unit = $('#item_name option:selected').data('jenis');
-            $('#item_unit').val(unit || '');
-        });
-
-        // Add item to the list
-        $('#add-item-to-list').click(function() {
-            const itemName = $('#item_name option:selected').text();
-            const itemId = $('#item_name').val(); // Get the selected item's id
-            const itemQty = $('#item_qty').val();
-            const itemUnit = $('#item_unit').val();
-            const itemNotes = $('#item_notes').val();
-
-            if (itemName && itemQty && itemUnit) {
-                // Check if the item is already in the table
-                if (!itemsInTable.includes(itemId)) {
-                    $('#items-table tbody').append(`
+                if (itemName && itemQty && itemUnit) {
+                    // Check if the item is already in the table
+                    if (!itemsInTable.includes(itemId)) {
+                        $('#items-table tbody').append(`
                         <tr data-id="${itemId}">
                             <td>${itemName}</td>
                             <td>${itemQty}</td>
@@ -418,85 +426,93 @@
                         </tr>
                     `);
 
-                    // Add the item ID to the itemsInTable array
-                    itemsInTable.push(itemId);
+                        // Add the item ID to the itemsInTable array
+                        itemsInTable.push(itemId);
 
-                    // Clear the form fields
-                    $('#item_name').val('').trigger('change'); // Clear select2
-                    $('#item_qty').val('');
-                    $('#item_unit').val('');
-                    $('#item_notes').val('');
+                        // Clear the form fields
+                        $('#item_name').val('').trigger('change'); // Clear select2
+                        $('#item_qty').val('');
+                        $('#item_unit').val('');
+                        $('#item_notes').val('');
 
-                    $('#itemModal').modal('hide');
-                    updateItemsInput(); // Update hidden input when item is added
-                    
-                    // Update the dropdown to remove added items
-                    updateItemDropdown();
+                        $('#itemModal').modal('hide');
+                        updateItemsInput(); // Update hidden input when item is added
+
+                        // Update the dropdown to remove added items
+                        updateItemDropdown();
+
+                        // Update total Quantity
+                        updateTotalQuantity();
+                    }
+                    // If the item is already in the table, do not show an alert
+                } else {
+                    alert('Please fill in all fields');
                 }
-                // If the item is already in the table, do not show an alert
-            } else {
-                alert('Please fill in all fields');
-            }
+            });
+
+            // Remove item from list
+            $(document).on('click', '.remove-item', function() {
+                const row = $(this).closest('tr');
+                const itemId = row.data('id');
+
+                // Remove the item ID from the itemsInTable array
+                itemsInTable = itemsInTable.filter(id => id !== itemId);
+
+                row.remove();
+
+                updateItemsInput(); // Update hidden input when item is removed
+
+                // Update the dropdown to show the removed item
+                updateItemDropdown();
+
+                // Update total Quantity
+                updateTotalQuantity();
+            });
+
+            // Open edit modal
+            $(document).on('click', '.edit-item', function() {
+                editRow = $(this).closest('tr');
+                const itemName = editRow.find('td:eq(0)').text(); // Get the item name
+                const itemQty = editRow.find('td:eq(1)').text();
+                const itemUnit = editRow.find('td:eq(2)').text();
+                const itemNotes = editRow.find('td:eq(3)').text();
+                $('#edit_item_name').val(itemName); // Set item name in readonly field
+                $('#edit_item_qty').val(itemQty);
+                $('#edit_item_unit').val(itemUnit);
+                $('#edit_item_notes').val(itemNotes);
+
+                $('#editItemModal').modal('show');
+            });
+
+            // Update item in the list
+            $('#update-item').click(function() {
+                const updatedQty = $('#edit_item_qty').val();
+                const updatedUnit = $('#edit_item_unit').val();
+                const updatedNotes = $('#edit_item_notes').val();
+
+                if (updatedQty) {
+                    editRow.find('td:eq(1)').text(updatedQty);
+                    editRow.find('td:eq(2)').text(updatedUnit);
+                    editRow.find('td:eq(3)').text(updatedNotes);
+                    $('#editItemModal').modal('hide');
+                    updateItemsInput(); // Update hidden input when item is edited
+                    // Update total Quantity
+                    updateTotalQuantity();
+                } else {
+                    alert('Please enter a valid quantity');
+                }
+            });
+
+            // Form validation on submit
+            $('#barangMasukForm').on('submit', function(event) {
+                if ($('#items-table tbody tr').length === 0) {
+                    event.preventDefault();
+                    alert('Tolong masukan Items setidaknya 1 barang.');
+                }
+            });
         });
-
-        // Remove item from list
-        $(document).on('click', '.remove-item', function() {
-            const row = $(this).closest('tr');
-            const itemId = row.data('id');
-
-            // Remove the item ID from the itemsInTable array
-            itemsInTable = itemsInTable.filter(id => id !== itemId);
-
-            row.remove();
-
-            updateItemsInput(); // Update hidden input when item is removed
-            
-            // Update the dropdown to show the removed item
-            updateItemDropdown();
-        });
-
-        // Open edit modal
-        $(document).on('click', '.edit-item', function() {
-            editRow = $(this).closest('tr');
-            const itemName = editRow.find('td:eq(0)').text(); // Get the item name
-            const itemQty = editRow.find('td:eq(1)').text();
-            const itemUnit = editRow.find('td:eq(2)').text();
-            const itemNotes = editRow.find('td:eq(3)').text();
-            $('#edit_item_name').val(itemName); // Set item name in readonly field
-            $('#edit_item_qty').val(itemQty);
-            $('#edit_item_unit').val(itemUnit);
-            $('#edit_item_notes').val(itemNotes);
-
-            $('#editItemModal').modal('show');
-        });
-
-        // Update item in the list
-        $('#update-item').click(function() {
-            const updatedQty = $('#edit_item_qty').val();
-            const updatedUnit = $('#edit_item_unit').val();
-            const updatedNotes = $('#edit_item_notes').val();
-
-            if (updatedQty) {
-                editRow.find('td:eq(1)').text(updatedQty);
-                editRow.find('td:eq(2)').text(updatedUnit);
-                editRow.find('td:eq(3)').text(updatedNotes);
-                $('#editItemModal').modal('hide');
-                updateItemsInput(); // Update hidden input when item is edited
-            } else {
-                alert('Please enter a valid quantity');
-            }
-        });
-
-        // Form validation on submit
-        $('#barangMasukForm').on('submit', function(event) {
-            if ($('#items-table tbody tr').length === 0) {
-                event.preventDefault();
-                alert('Tolong masukan Items setidaknya 1 barang.');
-            }
-        });
-    });
-     // Toggle fields based on selection
-     function toggleFields() {
+        // Toggle fields based on selection
+        function toggleFields() {
             var selection = document.getElementById('id_selection').value;
 
             // Hide both fields initially
@@ -527,13 +543,30 @@
         // Function to format input as Rupiah
         function formatRupiah(displayInput, hiddenInputId) {
             let angka = displayInput.value.replace(/[^,\d]/g, ''); // Only numbers
-            let formatted = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
+            let formatted = new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }).format(angka);
             displayInput.value = formatted.replace('IDR', 'Rp.');
 
             // Save the original numeric value to the hidden element
             document.getElementById(hiddenInputId).value = angka;
         }
-</script>
+
+        function updateTotalQuantity() {
+            let totalQuantity = 0;
+
+            // Loop melalui semua baris yang ada di tabel secara manual
+            $('#items-table tbody tr').each(function() {
+                var itemQty = parseFloat($(this).find('td:nth-child(2)').text()) || 0;
+                totalQuantity += itemQty;
+            });
+
+            // Update total Quantity di footer
+            $('#totalQuantity').text(totalQuantity);
+        }
+    </script>
 
 </body>
 

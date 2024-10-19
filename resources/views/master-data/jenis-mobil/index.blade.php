@@ -20,6 +20,9 @@
     <script src="{{ asset('lte/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('lte/dist/js/adminlte.min.js') }}"></script>
 
+    <!-- xlxs library for exporting Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.6/xlsx.full.min.js"></script>
+
     <style>
         /* Custom styling for the DataTable */
         #jenisMobilTable {
@@ -84,6 +87,8 @@
                 <h1>Jenis Mobil</h1>
                 <a href="{{ route('master-data.jenis-mobil.create') }}" class="btn btn-primary mb-3">Add Jenis Mobil</a>
 
+                <button id="exportButton" class="btn btn-success mb-3">Download to Excel</button>
+
                 <div class="table-responsive">
                 <table id="jenisMobilTable" class="table table-striped">
                     <thead>
@@ -131,6 +136,22 @@
     <script>
         $(document).ready(function() {
             $('#jenisMobilTable').DataTable();
+        });
+
+        document.getElementById('exportButton').addEventListener('click', function() {
+
+        var table = document.getElementById('jenisMobilTable');
+
+        var clonedTable = table.cloneNode(true);
+
+        var rows = clonedTable.querySelectorAll('tr');
+        rows.forEach(function(row) {
+            row.removeChild(row.lastElementChild);
+        });
+
+        var workbook = XLSX.utils.table_to_book(clonedTable, { sheet: "Data Master Jenis Mobil" });
+
+        XLSX.writeFile(workbook, 'DataMasterJenisMobil.xlsx');
         });
     </script>
 </body>

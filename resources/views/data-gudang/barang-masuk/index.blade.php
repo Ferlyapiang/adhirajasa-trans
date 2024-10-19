@@ -18,82 +18,17 @@
     <!-- DataTables CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.3/css/jquery.dataTables.min.css">
 
-    <!-- Custom CSS -->
-    <style>
-        /* Custom styling for the DataTable */
-        #barangMasukTable {
-            border-radius: 10px;
-            border: 1px solid #dee2e6;
-            width: 100%;
-            table-layout: auto;
-            /* Ensure table takes up the full width of its container */
-        }
-
-        .table-responsive {
-            max-height: 400px;
-            /* Set the maximum height for scrolling */
-            overflow-y: auto;
-            /* Enable vertical scrolling */
-        }
-
-        #barangMasukTable thead {
-            background-color: #f8f9fa;
-            position: sticky;
-            top: 0;
-            /* Sticky header to keep it visible when scrolling */
-            z-index: 1;
-            /* Ensure the header is above the other rows */
-        }
-
-        #barangMasukTable thead th {
-            border-top: 1px solid #dee2e6;
-            border-bottom: 2px solid #dee2e6;
-        }
-
-        #barangMasukTable tbody tr {
-            border-bottom: 1px solid #dee2e6;
-        }
-
-        #barangMasukTable td:nth-child(11) {
-            background-color: #d1e7dd;
-            /* Light green for FIFO IN */
-        }
-
-        #barangMasukTable td:nth-child(12) {
-            background-color: #f8d7da;
-            /* Light red for FIFO OUT */
-        }
-
-        #barangMasukTable td:nth-child(13) {
-            background-color: #fff3cd;
-            /* Light yellow for FIFO Sisa */
-        }
-
-        /* Modal styling */
-        .modal-content {
-            border-radius: 10px;
-        }
-
-        .modal-header {
-            border-bottom: 1px solid #dee2e6;
-        }
-
-        .modal-footer {
-            border-top: 1px solid #dee2e6;
-        }
-    </style>
-
+    <!-- xlxs library for exporting Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.6/xlsx.full.min.js"></script>
 </head>
 
 <body class="hold-transition sidebar-mini">
     <div class="wrapper">
         <!-- Navbar -->
         @include('admin.header')
-        <!-- /.navbar -->
 
         <!-- Main Sidebar Container -->
         <x-sidebar />
-        <!-- /.sidebar -->
 
         <!-- Content Wrapper -->
         <div class="content-wrapper">
@@ -107,7 +42,6 @@
                     </div>
                 </div>
             </div>
-            <!-- /.content-header -->
 
             <!-- Main content -->
             <div class="content">
@@ -116,31 +50,28 @@
                         <div class="col-lg-12">
                             <div class="card">
                                 <div class="card-header">
-                                    <h3 class="card-title">Daftar Barang Masuk</h3>
                                     <a href="{{ route('data-gudang.barang-masuk.create') }}" class="btn btn-primary float-right">Tambah Barang Masuk</a>
+                                    <button id="exportButton" class="btn btn-success mb-3">Download to Excel</button>
                                 </div>
                                 <div class="card-body">
                                     <div class="table-responsive">
                                         <table id="barangMasukTable" class="table table-bordered table-striped">
                                             <thead>
                                                 <tr>
-                                                    <th rowspan="2">No</th>
-                                                    <th rowspan="2">Tanggal Masuk</th>
-                                                    <th rowspan="2">Job Order</th>
-                                                    <th rowspan="2">Nama Barang</th>
-                                                    <th rowspan="2">Nama Pemilik</th>
-                                                    <th rowspan="2">Gudang</th>
-                                                    <th rowspan="2">Jenis Mobil</th>
-                                                    <th rowspan="2">Nomer Polisi</th>
-                                                    <th rowspan="2">Nomer Container</th>
-                                                    <th rowspan="2">Notes</th>
-                                                    <th colspan="3" class="text-center">FIFO</th>
-                                                    <th rowspan="2">Detail</th>
-                                                </tr>
-                                                <tr>
-                                                    <th>IN</th>
-                                                    <th>OUT</th>
+                                                    <th>No</th>
+                                                    <th>Tanggal Masuk<br><input type="text" id="searchTanggalMasuk" class="form-control form-control-sm" placeholder="Cari Tanggal"></th>
+                                                    <th>Job Order</th>
+                                                    <th>Nama Barang</th>
+                                                    <th>Nama Pemilik<br><input type="text" id="searchNamaPemilik" class="form-control form-control-sm" placeholder="Cari Nama"></th>
+                                                    <th>Gudang</th>
+                                                    <th>Jenis Mobil</th>
+                                                    <th>Nomer Polisi</th>
+                                                    <th>Nomer Container</th>
+                                                    <th>Notes</th>
+                                                    <th>FIFO IN</th>
+                                                    <th>FIFO OUT</th>
                                                     <th>SISA</th>
+                                                    <th>Detail</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -153,7 +84,7 @@
                                                                 {{ $barangMasuk->joc_number }}
                                                             </a>
                                                         </td>
-                                                        <td> {{ $barangMasuk->nama_barang }}</td>
+                                                        <td>{{ $barangMasuk->nama_barang }}</td>
                                                         <td>{{ $barangMasuk->nama_customer }}</td>
                                                         <td>{{ $barangMasuk->nama_gudang }}</td>
                                                         <td>{{ $barangMasuk->nama_type_mobil }}</td>
@@ -184,33 +115,24 @@
                                                 </tr>
                                             </tfoot>
                                         </table>
-                                        
                                     </div>
                                 </div>
-
-                                <!-- /.card-body -->
                             </div>
-                            <!-- /.card -->
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- /.content -->
         </div>
-
-        <!-- /.content-wrapper -->
 
         <!-- Footer -->
         @include('admin.footer')
-        <!-- /.footer -->
     </div>
-    <!-- ./wrapper -->
 
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- Bootstrap 4 -->
     <script src="{{ asset('lte/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-    <!-- DataTables & Plugins -->
+    <!-- DataTables -->
     <script src="https://cdn.datatables.net/1.13.3/js/jquery.dataTables.min.js"></script>
     <!-- AdminLTE App -->
     <script src="{{ asset('lte/dist/js/adminlte.min.js') }}"></script>
@@ -218,17 +140,28 @@
     <!-- Page-specific script -->
     <script>
         $(document).ready(function() {
-            var table = $('#barangMasukTable').DataTable();
-            
+            var table = $('#barangMasukTable').DataTable({
+        
+                    initComplete: function () {
+                        this.api().columns([1, 4]).every(function () {
+                            var column = this;
+                            $('input', this.header()).on('keyup change clear', function () {
+                                if (column.search() !== this.value) {
+                                    column.search(this.value).draw();
+                                }
+                            });
+                        });
+                    }
+                });
             function updateTotals() {
                 let totalFifoIn = 0;
                 let totalFifoOut = 0;
                 let totalFifoSisa = 0;
-    
+
                 table.rows({ filter: 'applied' }).every(function() {
                     var data = this.data();
-                    totalFifoIn += parseFloat(data[10]) || 0; 
-                    totalFifoOut += parseFloat(data[11]) || 0; 
+                    totalFifoIn += parseFloat(data[10]) || 0;
+                    totalFifoOut += parseFloat(data[11]) || 0;
                     totalFifoSisa += parseFloat(data[12]) || 0;
                 });
 
@@ -242,8 +175,20 @@
                 updateTotals();
             });
         });
+
+        document.getElementById('exportButton').addEventListener('click', function() {
+            var table = document.getElementById('barangMasukTable');
+            var clonedTable = table.cloneNode(true);
+
+            var rows = clonedTable.querySelectorAll('tr');
+            rows.forEach(function(row) {
+                row.removeChild(row.lastElementChild);
+            });
+
+            var workbook = XLSX.utils.table_to_book(clonedTable, { sheet: "Data Barang Masuk" });
+            XLSX.writeFile(workbook, 'DataBarangMasuk.xlsx');
+        });
     </script>
-    
 </body>
 
 </html>
