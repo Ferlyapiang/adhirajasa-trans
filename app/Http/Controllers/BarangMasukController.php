@@ -135,12 +135,17 @@ class BarangMasukController extends Controller
 
             
             if ($customer->type_payment_customer === 'Akhir Bulan') {
-                
-                $tanggalTagihanMasuk = $tanggalMasuk ? $tanggalMasuk->endOfMonth()->format('Y-m-d') : null;
+                if ($tanggalMasuk && $tanggalMasuk->day > 25) {
+                    // Jika tanggalMasuk di atas tanggal 25, gunakan bulan berikutnya
+                    $tanggalTagihanMasuk = $tanggalMasuk->copy()->addMonth()->endOfMonth()->format('Y-m-d');
+                } else {
+                    // Jika tanggalMasuk di 25 atau di bawah, gunakan bulan yang sama
+                    $tanggalTagihanMasuk = $tanggalMasuk ? $tanggalMasuk->endOfMonth()->format('Y-m-d') : null;
+                }
             } elseif ($customer->type_payment_customer === 'Pertanggal Masuk') {
-                
                 $tanggalTagihanMasuk = $tanggalMasuk ? $tanggalMasuk->copy()->addMonth()->subDay()->format('Y-m-d') : null;
             }
+            
             
             $barangMasuk = BarangMasuk::create([
                 'joc_number' => $jocNumber,
@@ -233,10 +238,14 @@ class BarangMasukController extends Controller
 
             
             if ($customer->type_payment_customer === 'Akhir Bulan') {
-                
-                $tanggalTagihanMasuk = $tanggalMasuk ? $tanggalMasuk->endOfMonth()->format('Y-m-d') : null;
+                if ($tanggalMasuk && $tanggalMasuk->day > 25) {
+                    
+                    $tanggalTagihanMasuk = $tanggalMasuk->copy()->addMonth()->endOfMonth()->format('Y-m-d');
+                } else {
+                    
+                    $tanggalTagihanMasuk = $tanggalMasuk ? $tanggalMasuk->endOfMonth()->format('Y-m-d') : null;
+                }
             } elseif ($customer->type_payment_customer === 'Pertanggal Masuk') {
-                
                 $tanggalTagihanMasuk = $tanggalMasuk ? $tanggalMasuk->copy()->addMonth()->subDay()->format('Y-m-d') : null;
             }
 

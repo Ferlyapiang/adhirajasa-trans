@@ -70,7 +70,7 @@
                                                 <tr>
                                                     <th><input type="checkbox" id="selectAllCheckbox"></th> <!-- Checkbox for select all -->
                                                     <th>No</th>
-                                                    <th>Tanggal Masuk</th>
+                                                    <th>Tanggal Tagihan</th>
                                                     <th>Job Order</th>
                                                     <th>Nama Pemilik</th>
                                                     <th>Gudang</th>
@@ -88,7 +88,7 @@
                                                 <tr>
                                                     <td><input type="checkbox" class="invoiceCheckbox" value="{{ $item->invoice_id }}"></td> <!-- Individual checkbox -->
                                                     <td>{{ $index + 1 }}</td>
-                                                    <td>{{ $item->tanggal_masuk }}</td>
+                                                    <td>{{ $item->tanggal_tagihan_masuk }}</td>
                                                     <td>
                                                         <a href="{{ route('data-gudang.barang-masuk.detail', $item->invoice_id) }}">
                                                             {{ $item->joc_number }}

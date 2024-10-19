@@ -19,7 +19,11 @@ class InvoiceBarangMasukController extends Controller
         $invoiceMasuk = BarangMasuk::select(
             'barang_masuks.id AS invoice_id',
             'barang_masuks.joc_number',
+            'barang_masuks.nomer_polisi',
+            'barang_masuks.nomer_container',
+            'type_mobil.type',
             'barang_masuks.tanggal_masuk',
+            'barang_masuks.tanggal_tagihan_masuk',
             'customers.name AS nama_customer',
             'customers.type_payment_customer',
             'warehouses.name AS nama_gudang',
@@ -38,6 +42,7 @@ class InvoiceBarangMasukController extends Controller
         )
         ->join('customers', 'barang_masuks.customer_id', '=', 'customers.id')
         ->join('warehouses', 'barang_masuks.gudang_id', '=', 'warehouses.id')
+        ->join('type_mobil', 'barang_masuks.type_mobil_id', '=', 'type_mobil.id') // Menambahkan join untuk type_mobil
         ->leftJoin(DB::raw('(
             SELECT 
                 barang_masuk_id,
@@ -63,7 +68,7 @@ class InvoiceBarangMasukController extends Controller
         }
     
         $invoiceMasuk = $invoiceMasuk->orderBy('barang_masuks.tanggal_masuk', 'desc')->get();
-    
+        
         return view('data-invoice.invoice-masuk.index', compact('invoiceMasuk'));
     }
     

@@ -177,14 +177,16 @@ class BarangKeluarController extends Controller
             $customer = Customer::find($request->customer_id);
             $tanggalKeluar = $request->tanggal_keluar ? Carbon::createFromFormat('Y-m-d', $request->tanggal_keluar) : null;
 
-            
             if ($customer->type_payment_customer === 'Akhir Bulan') {
-                
-                $tanggalTagihanKeluar = $tanggalKeluar ? $tanggalKeluar->endOfMonth()->format('Y-m-d') : null;
+                if ($tanggalKeluar && $tanggalKeluar->day > 25) {
+                    $tanggalTagihanKeluar = $tanggalKeluar->copy()->addMonth()->endOfMonth()->format('Y-m-d');
+                } else {
+                    $tanggalTagihanKeluar = $tanggalKeluar ? $tanggalKeluar->endOfMonth()->format('Y-m-d') : null;
+                }
             } elseif ($customer->type_payment_customer === 'Pertanggal Masuk') {
-                
                 $tanggalTagihanKeluar = $tanggalKeluar ? $tanggalKeluar->copy()->addMonth()->subDay()->format('Y-m-d') : null;
             }
+
 
             $barangKeluarData = [
                 'nomer_surat_jalan' => $validated['nomor_surat_jalan'],
@@ -388,16 +390,20 @@ class BarangKeluarController extends Controller
         $bank_transfer_id = $bankTransfer ? $bankTransfer->id : null;
 
         $customer = Customer::find($request->customer_id);
-            $tanggalKeluar = $request->tanggal_keluar ? Carbon::createFromFormat('Y-m-d', $request->tanggal_keluar) : null;
+        $tanggalKeluar = $request->tanggal_keluar ? Carbon::createFromFormat('Y-m-d', $request->tanggal_keluar) : null;
 
-            
-            if ($customer->type_payment_customer === 'Akhir Bulan') {
+        if ($customer->type_payment_customer === 'Akhir Bulan') {
+            if ($tanggalKeluar && $tanggalKeluar->day > 25) {
+                
+                $tanggalTagihanKeluar = $tanggalKeluar->copy()->addMonth()->endOfMonth()->format('Y-m-d');
+            } else {
                 
                 $tanggalTagihanKeluar = $tanggalKeluar ? $tanggalKeluar->endOfMonth()->format('Y-m-d') : null;
-            } elseif ($customer->type_payment_customer === 'Pertanggal Masuk') {
-                
-                $tanggalTagihanKeluar = $tanggalKeluar ? $tanggalKeluar->copy()->addMonth()->subDay()->format('Y-m-d') : null;
             }
+        } elseif ($customer->type_payment_customer === 'Pertanggal Masuk') {
+            $tanggalTagihanKeluar = $tanggalKeluar ? $tanggalKeluar->copy()->addMonth()->subDay()->format('Y-m-d') : null;
+        }
+
 
         $barangKeluarData = [
             'tanggal_keluar' => $validated['tanggal_keluar'],
