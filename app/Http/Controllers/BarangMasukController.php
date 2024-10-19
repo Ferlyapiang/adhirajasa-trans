@@ -21,38 +21,41 @@ class BarangMasukController extends Controller
     public function index() {
         $user = Auth::user();
     
-        $barangMasuks = BarangMasuk::select(
-            'barang_masuks.id AS barang_masuk_id',
-            'barang_masuks.tanggal_masuk',
-            'barang_masuks.joc_number',
-            'barangs.nama_barang AS nama_barang',
-            'customers.name AS nama_customer',
-            'warehouses.name AS nama_gudang',
-            'type_mobil.type AS nama_type_mobil',
-            'barang_masuks.nomer_polisi',
-            'barang_masuks.nomer_container',
-            'barang_masuk_items.notes',
-            'barang_masuk_items.qty as fifo_in',
-            DB::raw('IFNULL(barang_keluar_items.qty, 0) AS fifo_out'),
-            'barang_masuk_items.unit',
-            DB::raw('(barang_masuk_items.qty - IFNULL(barang_keluar_items.qty, 0)) AS fifo_sisa')
-        )
-        ->join('barang_masuk_items', 'barang_masuks.id', '=', 'barang_masuk_items.barang_masuk_id')
-        ->join('barangs', 'barang_masuk_items.barang_id', '=', 'barangs.id')
-        ->join('customers', 'barang_masuks.customer_id', '=', 'customers.id')
-        ->join('warehouses', 'barang_masuks.gudang_id', '=', 'warehouses.id')
-        ->join('type_mobil', 'barang_masuks.type_mobil_id', '=', 'type_mobil.id')
-        ->leftjoin('barang_keluar_items', 'barang_masuk_items.id', '=', 'barang_keluar_items.id')
-        ->where('barang_masuks.status_invoice', 'Barang Masuk');
-    
-        if ($user->warehouse_id) {
-            $barangMasuks = $barangMasuks->where('barang_masuks.gudang_id', $user->warehouse_id);
-        }
-    
-        $barangMasuks = $barangMasuks->orderBy('barang_masuks.tanggal_masuk', 'desc')->get();
+        $barangMasuks = DB::table('barang_masuks as bm')
+            ->select(
+                'bm.id AS barang_masuk_id',
+                'bki.id AS barang_keluar_id',
+                'bm.tanggal_masuk',
+                'bm.joc_number',
+                'b.nama_barang AS nama_barang',
+                'c.name AS nama_customer',
+                'w.name AS nama_gudang',
+                'tm.type AS nama_type_mobil',
+                'bm.nomer_polisi',
+                'bm.nomer_container',
+                'bmi.notes',
+                'bmi.qty AS fifo_in',
+                DB::raw('IFNULL(bki.qty, 0) AS fifo_out'),
+                'bmi.unit',
+                DB::raw('(bmi.qty - IFNULL(bki.qty, 0)) AS fifo_sisa')
+            )
+            ->join('barang_masuk_items as bmi', 'bm.id', '=', 'bmi.barang_masuk_id')
+            ->join('barangs as b', 'bmi.barang_id', '=', 'b.id')
+            ->join('customers as c', 'bm.customer_id', '=', 'c.id')
+            ->join('warehouses as w', 'bm.gudang_id', '=', 'w.id')
+            ->join('type_mobil as tm', 'bm.type_mobil_id', '=', 'tm.id')
+            ->leftJoin('barang_keluar_items as bki', function ($join) {
+                $join->on('bmi.barang_masuk_id', '=', 'bki.barang_masuk_id')
+                     ->whereColumn('bmi.barang_id', '=', 'bki.barang_id');
+            })
+            ->where('bm.status_invoice', 'Barang Masuk')
+            ->orderBy('bm.tanggal_masuk', 'desc')
+            ->get();
     
         return view('data-gudang.barang-masuk.index', compact('barangMasuks'));
     }
+    
+    
     
     public function showDetail($id)
     {
