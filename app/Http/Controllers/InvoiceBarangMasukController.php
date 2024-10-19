@@ -61,7 +61,8 @@ class InvoiceBarangMasukController extends Controller
             GROUP BY 
                 barang_masuk_id
         ) AS total_keluar'), 'barang_masuks.id', '=', 'total_keluar.barang_masuk_id')
-        ->where('barang_masuks.status_invoice', 'Barang Masuk');
+        ->where('barang_masuks.status_invoice', 'Barang Masuk')
+        ->where('barang_masuks.tanggal_tagihan_masuk', '<=', \Carbon\Carbon::now()->endOfMonth());
         
         if ($user->warehouse_id) {
             $invoiceMasuk = $invoiceMasuk->where('barang_masuks.gudang_id', $user->warehouse_id);
@@ -71,6 +72,7 @@ class InvoiceBarangMasukController extends Controller
         
         return view('data-invoice.invoice-masuk.index', compact('invoiceMasuk'));
     }
+    
     
 
     public function updateStatus(Request $request) {
