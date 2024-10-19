@@ -154,14 +154,13 @@
 
                                         <div class="form-group">
                                             <label for="shipping_option">Pilih Opsi Pengiriman</label>
-                                            <select name="shipping_option" id="shipping_option" class="form-control" onchange="toggleFieldsKirim()">
+                                            <select name="shipping_option" id="shipping_option" class="form-control" onchange="toggleFieldsKirim()" disabled>
                                                 <option value="">Pilih Opsi Pengiriman</option>
                                                 <option value="kirim">Kirim</option>
                                                 <option value="takeout">Pick Up</option>
                                             </select>
                                         </div>
-                                        
-                                        <!-- Tipe Mobil -->
+
                                         <div class="form-group" id="mobilField" style="display: none;">
                                             <label for="type_mobil_id">Tipe Mobil</label>
                                             <select name="type_mobil_id" id="type_mobil_id" class="form-control @error('type_mobil_id') is-invalid @enderror">
@@ -176,8 +175,6 @@
                                             <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
                                         </div>
-                                        
-                                        <!-- Harga Kirim Barang -->
                                         <div class="form-group" id="hargaKirimField" style="display: none;">
                                             <label for="harga_kirim_barang">Harga Kirim Barang</label>
                                             <input type="text" name="harga_kirim_barang" id="harga_kirim_barang"
@@ -187,20 +184,16 @@
                                             <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
                                         </div>
-                                        
-                                        <!-- Alamat Kirim -->
+
                                         <div class="form-group" id="alamatField" style="display: none;">
                                             <label for="address">Alamat Kirim</label>
-                                            <textarea name="address" id="address" placeholder="Alamat"
-                                                    class="form-control @error('address') is-invalid @enderror"
-                                                    rows="4">{{ old('address', $barangKeluar->address) }}</textarea>
-
+                                            <textarea name="address" id="address" placeholder="Alamat" class="form-control @error('address') is-invalid @enderror" rows="4">{{ old('address', $barangKeluar->address) }}</textarea>
                                             @error('address')
                                             <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
                                         </div>
 
-                                        
+
                                         <div class="mb-3">
                                             <label for="id_selection" class="form-label">Choose Identification Type:</label>
                                             <select id="id_selection" class="form-control" onchange="toggleFields()" required>
@@ -281,6 +274,13 @@
                                                     </tr>
                                                     @endforeach
                                                 </tbody>
+                                                <tfoot>
+                                                    <tr>
+                                                        <th colspan="2" style="text-align:right;">Total:</th>
+                                                        <th id="totalQuantity"></th>
+                                                        <th colspan="4"></th>
+                                                    </tr>
+                                                </tfoot>
                                             </table>
                                         </div>
 
@@ -487,6 +487,7 @@
                 }
 
                 updateItemsInput();
+                updateTotalQuantity();
 
                 $('#addItemButton').on('click', function() {
                     let barangId = barangSelect.val();
@@ -527,6 +528,7 @@
 
                     $('#items-table tbody').append(row);
                     updateItemsInput();
+                    updateTotalQuantity();
 
                     // Reset modal fields after adding item
                     barangSelect.val('');
@@ -542,6 +544,7 @@
                 $('#items-table').on('click', '.remove-item', function() {
                     $(this).closest('tr').remove();
                     updateItemsInput();
+                    updateTotalQuantity();
                 });
 
                 // Format harga input in modal
@@ -581,7 +584,7 @@
                     let unit = $('#edit_modal_unit').val();
                     let barangMasukId = $('#edit_modal_barang_masuk_id').val();
 
-                   
+
 
                     currentEditingRow.find('td:eq(0)').text(noRef);
                     currentEditingRow.find('td:eq(1)').text(barangName);
@@ -592,6 +595,7 @@
 
                     $('#editItemModal').modal('hide');
                     updateItemsInput();
+                    updateTotalQuantity();
                 });
 
                 $('#edit_modal_harga').on('input', function() {
@@ -658,26 +662,53 @@
             }
 
             function toggleFieldsKirim() {
-    const shippingOption = document.getElementById('shipping_option').value;
-    const mobilField = document.getElementById('mobilField');
-    const hargaKirimField = document.getElementById('hargaKirimField');
-    const alamatField = document.getElementById('alamatField');
+                const shippingOption = document.getElementById('shipping_option');
+                const mobilField = document.getElementById('mobilField');
+                const hargaKirimField = document.getElementById('hargaKirimField');
+                const alamatField = document.getElementById('alamatField');
+                const addressValue = document.getElementById('address').value.trim();
 
-    if (shippingOption === 'kirim') {
-        mobilField.style.display = 'block';
-        hargaKirimField.style.display = 'block';
-        alamatField.style.display = 'block';
-    } else if (shippingOption === 'takeout') {
-        mobilField.style.display = 'block';
-        hargaKirimField.style.display = 'none';
-        alamatField.style.display = 'none';
-    } else {
-        mobilField.style.display = 'none';
-        hargaKirimField.style.display = 'none';
-        alamatField.style.display = 'none';
-    }
-}
+                // Cek jika ada data di alamatField
+                if (addressValue !== '') {
+                    shippingOption.value = 'kirim'; // Set default ke "Kirim"
+                } else {
+                    shippingOption.value = 'takeout'; // Set default ke "Take Out"
+                }
 
+                if (shippingOption.value === 'kirim') {
+                    mobilField.style.display = 'block';
+                    hargaKirimField.style.display = 'block';
+                    alamatField.style.display = 'block';
+                } else if (shippingOption.value === 'takeout') {
+                    mobilField.style.display = 'block';
+                    hargaKirimField.style.display = 'none';
+                    alamatField.style.display = 'none';
+
+                    document.getElementById('harga_kirim_barang').value = '';
+                    document.getElementById('address').value = '';
+                } else {
+                    mobilField.style.display = 'none';
+                    hargaKirimField.style.display = 'none';
+                    alamatField.style.display = 'none';
+                }
+            }
+
+            window.onload = function() {
+                toggleFieldsKirim();
+            };
+
+            function updateTotalQuantity() {
+            let totalQuantity = 0;
+
+            // Loop melalui semua baris yang ada di tabel secara manual
+            $('#items-table tbody tr').each(function() {
+                var itemQty = parseFloat($(this).find('td:nth-child(3)').text()) || 0;
+                totalQuantity += itemQty;
+            });
+
+            // Update total Quantity di footer
+            $('#totalQuantity').text(totalQuantity);
+        }
         </script>
 
 

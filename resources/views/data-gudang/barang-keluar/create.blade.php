@@ -165,7 +165,7 @@
 
                                         <div class="form-group" id="hargaKirimField" style="display: none;">
                                             <label for="harga_kirim_barang">Harga Kirim Barang</label>
-                                            <input type="text" id="display_harga_kirim_barang " class="form-control @error('harga_kirim_barang') is-invalid @enderror" oninput="formatRupiah(this, 'harga_kirim_barang')">
+                                            <input type="text" id="display_harga_kirim_barang" class="form-control @error('harga_kirim_barang') is-invalid @enderror" oninput="formatRupiah(this, 'harga_kirim_barang')">
                                             <input type="hidden" name="harga_kirim_barang" id="harga_kirim_barang">
                                             @error('harga_kirim_barang')
                                             <span class="invalid-feedback">{{ $message }}</span>
@@ -174,15 +174,12 @@
 
                                         <div class="form-group" id="alamatField" style="display: none;">
                                             <label for="address">Alamat Kirim</label>
-                                            <textarea name="address" id="address" placeholder="Alamat"
-                                                      class="form-control @error('address') is-invalid @enderror"
-                                                      rows="4">{{ old('address') }}</textarea>
-                                        
+                                            <textarea name="address" id="address" placeholder="Alamat" class="form-control @error('address') is-invalid @enderror" rows="4">{{ old('address') }}</textarea>
                                             @error('address')
                                             <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
                                         </div>
-                                        
+
 
                                         <div class="form-group">
                                             <label for="select_type">Pilih Tipe</label>
@@ -248,6 +245,13 @@
                                                 </thead>
                                                 <tbody>
                                                 </tbody>
+                                                <tfoot>
+                                                    <tr>
+                                                        <th colspan="2" style="text-align:right;">Total:</th>
+                                                        <th id="totalQuantity"></th>
+                                                        <th colspan="4"></th>
+                                                    </tr>
+                                                </tfoot>
                                             </table>
                                         </div>
 
@@ -456,6 +460,7 @@
             window.removeItem = function(index) {
                 items.splice(index, 1);
                 updateItemsTable();
+                updateTotalQuantity();
             };
 
             $('#add-item-btn').click(function() {
@@ -499,6 +504,8 @@
                 nextJocNumber++;
 
                 updateItemsTable();
+
+                updateTotalQuantity();
 
                 $('#item_name').val('');
                 $('#item_qty').val('');
@@ -613,6 +620,7 @@
                 items[index].sisa_barang = $('#edit_item_sisa_barang').val();
 
                 updateItemsTable();
+                updateTotalQuantity();
                 $('#editItemModal').modal('hide');
             });
 
@@ -713,14 +721,29 @@
                 mobilField.style.display = 'block';
                 hargaKirimField.style.display = 'block';
                 alamatField.style.display = 'block';
-            }else if (shippingOption === 'takeout') {
+            } else if (shippingOption === 'takeout') {
                 mobilField.style.display = 'block';
+                hargaKirimField.style.display = 'none';
+                alamatField.style.display = 'none';
+
+                document.getElementById('display_harga_kirim_barang').value = '';
+                document.getElementById('harga_kirim_barang').value = '';
+                document.getElementById('address').value = '';
             } else {
                 mobilField.style.display = 'none';
                 hargaKirimField.style.display = 'none';
                 alamatField.style.display = 'none';
+
+                document.getElementById('display_harga_kirim_barang').value = '';
+                document.getElementById('harga_kirim_barang').value = '';
+                document.getElementById('address').value = '';
             }
         }
+
+        window.onload = function() {
+            toggleFieldsKirim();
+        };
+
 
         function toggleLembur() {
             let select = document.getElementById('ada_lembur');
@@ -791,6 +814,20 @@
             editItemQtyInput.addEventListener('input', checkEditQuantity);
             editItemSisaBarangInput.addEventListener('input', checkEditQuantity);
         });
+
+        function updateTotalQuantity() {
+            let totalQuantity = 0;
+
+            // Loop melalui semua baris yang ada di tabel secara manual
+            $('#items-table tbody tr').each(function() {
+                var itemQty = parseFloat($(this).find('td:nth-child(3)').text()) || 0;
+                totalQuantity += itemQty;
+            });
+
+            // Update total Quantity di footer
+            $('#totalQuantity').text(totalQuantity);
+        }
+
     </script>
 
 

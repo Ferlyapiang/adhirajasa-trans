@@ -18,6 +18,9 @@
     <!-- DataTables CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.3/css/jquery.dataTables.min.css">
 
+     <!-- xlxs library for exporting Excel -->
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.6/xlsx.full.min.js"></script>
+
     <!-- Custom CSS -->
     <style>
         /* Custom styling for the DataTable */
@@ -91,21 +94,23 @@
                         <div class="col-lg-12">
                             <div class="card">
                                 <div class="card-header">
-                                    <h3 class="card-title">Daftar Barang Keluar</h3>
                                     <a href="{{ route('data-gudang.barang-keluar.create') }}" class="btn btn-primary float-right">Tambah Barang Keluar</a>
+                                    <button id="exportButton" class="btn btn-success mb-3">Download to Excel</button>
                                 </div>
                                 <div class="card-body">
                                     <table id="barangKeluarTable" class="table table-bordered table-striped">
                                         <thead>
                                             <tr>
                                                 <th>No</th>
-                                                <th>Tanggal Keluar</th>
+                                                <th>Tanggal Keluar<br>
+                                                <input type="text" id="searchTanggalKeluar" class="form-control form-control-sm" placeholder="Cari Tanggal"></th>
                                                 <th>Surat Jalan</th>
                                                 {{-- <th>Nomer Invoice</th> --}}
                                                 <th>No Ref</th>
                                                 <th>Nama Barang</th>
                                                 <th>Gudang</th>
-                                                <th>Pemilik Barang</th>
+                                                <th>Pemilik Barang<br>
+                                                <input type="text" id="searchPemilikBarang" class="form-control form-control-sm" placeholder="Cari Pemilik"></th>
                                                 <th>qty</th>
                                                 <th>Tipe Mobil</th>
                                                 <th>Nomer Polisi</th>
@@ -182,8 +187,40 @@
 
     <!-- Page-specific script -->
     <script>
-        $(document).ready(function() {
-            $('#barangKeluarTable').DataTable();
+        var table = $('#barangKeluarTable').DataTable({
+        initComplete: function () {
+            // Pencarian untuk kolom Tanggal Keluar
+            this.api().columns([1]).every(function () {
+                var column = this;
+                $('#searchTanggalKeluar').on('keyup change clear', function () {
+                    if (column.search() !== this.value) {
+                        column.search(this.value).draw();
+                    }
+                });
+            });
+
+            // Pencarian untuk kolom Pemilik Barang
+            this.api().columns([6]).every(function () {
+                var column = this;
+                $('#searchPemilikBarang').on('keyup change clear', function () {
+                    if (column.search() !== this.value) {
+                        column.search(this.value).draw();
+                    }
+                });
+            });
+        }
+    });
+        document.getElementById('exportButton').addEventListener('click', function() {
+            var table = document.getElementById('barangKeluarTable');
+            var clonedTable = table.cloneNode(true);
+
+            var rows = clonedTable.querySelectorAll('tr');
+            rows.forEach(function(row) {
+                row.removeChild(row.lastElementChild);
+            });
+
+            var workbook = XLSX.utils.table_to_book(clonedTable, { sheet: "Data Barang Keluar" });
+            XLSX.writeFile(workbook, 'DataBarangKeluar.xlsx');
         });
     </script>
 </body>
