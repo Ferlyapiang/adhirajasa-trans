@@ -70,7 +70,7 @@
                                                 <tr>
                                                     <th><input type="checkbox" id="selectAllCheckbox"></th> <!-- Checkbox for select all -->
                                                     <th>No</th>
-                                                    <th>Tanggal Keluar</th>
+                                                    <th>Tanggal Invoice Keluar</th>
                                                     <th>Nama Customer</th>
                                                     <th>Gudang</th>
                                                     <th>Tipe Pembayaran Customer</th>
@@ -85,7 +85,7 @@
                                                 <tr>
                                                     <td><input type="checkbox" class="invoiceCheckbox" value="{{ $item->barang_keluar_id }}"></td> <!-- Individual checkbox -->
                                                     <td>{{ $index + 1 }}</td>
-                                                    <td>{{ $item->tanggal_keluar }}</td>
+                                                    <td>{{ $item->tanggal_tagihan_keluar }}</td>
                                                     <td>{{ $item->nama_customer }}</td>
                                                     <td>{{ $item->nama_gudang }}</td>
                                                     <td>{{ $item->type_payment_customer }}</td>

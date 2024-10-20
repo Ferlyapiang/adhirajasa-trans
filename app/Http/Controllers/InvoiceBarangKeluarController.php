@@ -15,37 +15,55 @@ class InvoiceBarangKeluarController extends Controller
      */
     public function index() {
         $user = Auth::user();
+        $currentDate = now();
+
+        $barangKeluars = BarangKeluar::where('tanggal_tagihan_keluar', '<=', $currentDate)
+            ->where('status_invoice', '<>', 'Invoice Barang Keluar')
+            ->get();
     
+        foreach ($barangKeluars as $barangKeluar) {
+            // Create a new Invoice for each BarangKeluar
+            $invoice = new Invoice();
+            $invoice->barang_keluars_id = $barangKeluar->id; 
+            $invoice->save();
+    
+            // Update the status_invoice
+            $barangKeluar->status_invoice = 'Invoice Barang Keluar';
+            $barangKeluar->save();
+        }
+    
+        // Build the base query
         $invoiceKeluar = BarangKeluar::select(
-            'bk.id AS barang_keluar_id',
-            'bk.tanggal_keluar',
-            'customers.name AS nama_customer',
-            'customers.type_payment_customer',
-            'warehouses.name AS nama_gudang',
-            'bk.type_mobil_id',
-            'bk.nomer_surat_jalan',
-            'bk.nomer_invoice',
-            'bk.nomer_polisi',
-            'bk.nomer_container',
-            'bk.harga_kirim_barang',
-            'bk.bank_transfer_id',
-            'bk.harga_lembur',
-            'bk.status_invoice',
-            DB::raw('COALESCE(total_keluar.total_qty, 0) AS total_qty')
-        )
-        ->from('barang_keluars AS bk')
-        ->join('customers', 'bk.customer_id', '=', 'customers.id')
-        ->join('warehouses', 'bk.gudang_id', '=', 'warehouses.id')
-        ->leftJoin(DB::raw('(
-            SELECT 
-                barang_masuk_id,
-                SUM(qty) AS total_qty
-            FROM 
-                barang_keluar_items
-            GROUP BY 
-                barang_masuk_id
-        ) AS total_keluar'), 'bk.id', '=', 'total_keluar.barang_masuk_id')
-        ->where('bk.status_invoice', 'Barang Keluar');
+                'bk.id AS barang_keluar_id',
+                'bk.tanggal_keluar',
+                'customers.name AS nama_customer',
+                'customers.type_payment_customer',
+                'warehouses.name AS nama_gudang',
+                'bk.type_mobil_id',
+                'bk.nomer_surat_jalan',
+                'bk.nomer_invoice',
+                'bk.nomer_polisi',
+                'bk.nomer_container',
+                'bk.harga_kirim_barang',
+                'bk.bank_transfer_id',
+                'bk.harga_lembur',
+                'bk.status_invoice',
+                'bk.tanggal_tagihan_keluar',
+                DB::raw('COALESCE(total_keluar.total_qty, 0) AS total_qty')
+            )
+            ->from('barang_keluars AS bk')
+            ->join('customers', 'bk.customer_id', '=', 'customers.id')
+            ->join('warehouses', 'bk.gudang_id', '=', 'warehouses.id')
+            ->leftJoin(DB::raw('(
+                SELECT 
+                    bki.barang_keluar_id,
+                    SUM(bki.qty) AS total_qty
+                FROM 
+                    barang_keluar_items AS bki
+                GROUP BY 
+                    bki.barang_keluar_id
+            ) AS total_keluar'), 'bk.id', '=', 'total_keluar.barang_keluar_id') // Use barang_keluar_id in the join
+            ->where('bk.status_invoice', 'Barang Keluar');
     
         // Apply warehouse filter if applicable
         if ($user->warehouse_id) {
@@ -56,6 +74,7 @@ class InvoiceBarangKeluarController extends Controller
     
         return view('data-invoice.invoice-keluar.index', compact('invoiceKeluar'));
     }
+    
     
     
     public function updateStatus(Request $request) {

@@ -45,7 +45,7 @@ class BarangKeluarController extends Controller
             ->join('warehouses', 'barang_keluars.gudang_id', '=', 'warehouses.id')
             ->join('customers', 'barang_keluars.customer_id', '=', 'customers.id')
             ->leftJoin('type_mobil', 'barang_keluars.type_mobil_id', '=', 'type_mobil.id')
-            ->where('barang_keluars.status_invoice', 'Barang Keluar')
+            // ->where('barang_keluars.status_invoice', 'Barang Keluar')
             ->orderBy('barang_keluars.nomer_invoice', 'desc')
             ->get();
 
