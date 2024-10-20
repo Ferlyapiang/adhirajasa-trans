@@ -15,7 +15,23 @@ class InvoiceBarangMasukController extends Controller
      */
     public function index() {
         $user = Auth::user();
-        
+        $currentDate = now();
+
+        $barangMasuks = BarangMasuk::where('tanggal_tagihan_masuk', '<=', $currentDate)
+            ->where('status_invoice', '<>', 'Invoice Barang Masuk')
+            ->get();
+    
+        foreach ($barangMasuks as $barangMasuk) {
+            // Create a new Invoice for each BarangMasuk
+            $invoice = new Invoice();
+            $invoice->barang_masuks_id = $barangMasuk->id; 
+            $invoice->save();
+    
+            // Update the status_invoice
+            $barangMasuk->status_invoice = 'Invoice Barang Masuk';
+            $barangMasuk->save();
+        }
+    
         $invoiceMasuk = BarangMasuk::select(
             'barang_masuks.id AS invoice_id',
             'barang_masuks.joc_number',
@@ -28,21 +44,59 @@ class InvoiceBarangMasukController extends Controller
             'customers.type_payment_customer',
             'warehouses.name AS nama_gudang',
             'barang_masuks.harga_simpan_barang',
-            'barang_masuks.harga_lembur',
+    
+            // CASE logic for harga_lembur
+            DB::raw("
+                CASE 
+                    WHEN customers.type_payment_customer = 'Akhir Bulan' 
+                        AND YEAR(barang_masuks.tanggal_masuk) = YEAR(barang_masuks.tanggal_tagihan_masuk)
+                        AND MONTH(barang_masuks.tanggal_masuk) = MONTH(barang_masuks.tanggal_tagihan_masuk)
+                    THEN barang_masuks.harga_lembur
+                    WHEN customers.type_payment_customer = 'Pertanggal Masuk' 
+                        AND barang_masuks.tanggal_tagihan_masuk <= DATE_ADD(barang_masuks.tanggal_masuk, INTERVAL 1 MONTH)
+                    THEN barang_masuks.harga_lembur
+                    ELSE 0
+                END AS harga_lembur
+            "),
+    
             DB::raw('COALESCE(total_items.total_qty, 0) AS total_qty_masuk'),
             DB::raw('COALESCE(total_keluar.total_qty, 0) AS total_qty_keluar'),
             DB::raw('COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0) AS total_sisa'),
+    
+            // CASE logic for total_harga_simpan
             DB::raw("
                 CASE
-                    WHEN COALESCE(total_items.total_qty, 0) = (COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0)) 
-                    THEN barang_masuks.harga_simpan_barang + barang_masuks.harga_lembur
-                    ELSE ((COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0)) / COALESCE(total_items.total_qty, 0)) * barang_masuks.harga_simpan_barang + barang_masuks.harga_lembur
+                    WHEN COALESCE(total_items.total_qty, 0) = (COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0))
+                    THEN barang_masuks.harga_simpan_barang + (
+                        CASE 
+                            WHEN customers.type_payment_customer = 'Akhir Bulan' 
+                                AND YEAR(barang_masuks.tanggal_masuk) = YEAR(barang_masuks.tanggal_tagihan_masuk)
+                                AND MONTH(barang_masuks.tanggal_masuk) = MONTH(barang_masuks.tanggal_tagihan_masuk)
+                            THEN barang_masuks.harga_lembur
+                            WHEN customers.type_payment_customer = 'Pertanggal Masuk'
+                                AND barang_masuks.tanggal_tagihan_masuk <= DATE_ADD(barang_masuks.tanggal_masuk, INTERVAL 1 MONTH)
+                            THEN barang_masuks.harga_lembur
+                            ELSE 0
+                        END
+                    )
+                    ELSE ((COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0)) / COALESCE(total_items.total_qty, 0)) * barang_masuks.harga_simpan_barang + (
+                        CASE 
+                            WHEN customers.type_payment_customer = 'Akhir Bulan' 
+                                AND YEAR(barang_masuks.tanggal_masuk) = YEAR(barang_masuks.tanggal_tagihan_masuk)
+                                AND MONTH(barang_masuks.tanggal_masuk) = MONTH(barang_masuks.tanggal_tagihan_masuk)
+                            THEN barang_masuks.harga_lembur
+                            WHEN customers.type_payment_customer = 'Pertanggal Masuk'
+                                AND barang_masuks.tanggal_tagihan_masuk <= DATE_ADD(barang_masuks.tanggal_masuk, INTERVAL 1 MONTH)
+                            THEN barang_masuks.harga_lembur
+                            ELSE 0
+                        END
+                    )
                 END AS total_harga_simpan
             ")
         )
         ->join('customers', 'barang_masuks.customer_id', '=', 'customers.id')
         ->join('warehouses', 'barang_masuks.gudang_id', '=', 'warehouses.id')
-        ->join('type_mobil', 'barang_masuks.type_mobil_id', '=', 'type_mobil.id') // Menambahkan join untuk type_mobil
+        ->join('type_mobil', 'barang_masuks.type_mobil_id', '=', 'type_mobil.id')
         ->leftJoin(DB::raw('(
             SELECT 
                 barang_masuk_id,
@@ -54,27 +108,35 @@ class InvoiceBarangMasukController extends Controller
         ) AS total_items'), 'barang_masuks.id', '=', 'total_items.barang_masuk_id')
         ->leftJoin(DB::raw('(
             SELECT 
-                barang_masuk_id,
-                SUM(qty) AS total_qty
+                bki.barang_masuk_id,
+                SUM(bki.qty) AS total_qty
             FROM 
-                barang_keluar_items
+                barang_keluar_items bki
+            JOIN 
+                barang_keluars ON bki.barang_keluar_id = barang_keluars.id
+            WHERE 
+                barang_keluars.tanggal_tagihan_keluar < CURDATE()
             GROUP BY 
-                barang_masuk_id
+                bki.barang_masuk_id
         ) AS total_keluar'), 'barang_masuks.id', '=', 'total_keluar.barang_masuk_id')
         ->where('barang_masuks.status_invoice', 'Barang Masuk')
-        ->where('barang_masuks.tanggal_tagihan_masuk', '<=', \Carbon\Carbon::now()->endOfMonth());
-        
+        ->where('barang_masuks.tanggal_tagihan_masuk', '<=', \Carbon\Carbon::now()->endOfMonth())
+        ->where(DB::raw('COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0)'), '<>', 0); // Use having for the aggregate condition
+    
+        // Filter berdasarkan warehouse user jika ada
         if ($user->warehouse_id) {
             $invoiceMasuk = $invoiceMasuk->where('barang_masuks.gudang_id', $user->warehouse_id);
         }
     
         $invoiceMasuk = $invoiceMasuk->orderBy('barang_masuks.tanggal_masuk', 'desc')->get();
-        
+    
         return view('data-invoice.invoice-masuk.index', compact('invoiceMasuk'));
     }
     
     
-
+    
+    
+        
     public function updateStatus(Request $request) {
         $request->validate([
             'ids' => 'required|array',

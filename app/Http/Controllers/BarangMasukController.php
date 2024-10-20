@@ -48,7 +48,7 @@ class BarangMasukController extends Controller
                 $join->on('bmi.barang_masuk_id', '=', 'bki.barang_masuk_id')
                      ->whereColumn('bmi.barang_id', '=', 'bki.barang_id');
             })
-            ->where('bm.status_invoice', 'Barang Masuk')
+            // ->where('bm.status_invoice', 'Barang Masuk')
             ->orderBy('bm.tanggal_masuk', 'desc')
             ->get();
     
