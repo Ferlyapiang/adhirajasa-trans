@@ -16,9 +16,19 @@ class InvoiceBarangKeluarController extends Controller
     public function index() {
         $user = Auth::user();
         $currentDate = now();
-
+    
+        // Update the status and create an invoice for barang_keluars where applicable
         $barangKeluars = BarangKeluar::where('tanggal_tagihan_keluar', '<=', $currentDate)
             ->where('status_invoice', '<>', 'Invoice Barang Keluar')
+            ->where(function($query) {
+                $query->where(function($subQuery) {
+                    $subQuery->whereNotNull('harga_kirim_barang')
+                             ->where('harga_kirim_barang', '!=', 0);
+                })->orWhere(function($subQuery) {
+                    $subQuery->whereNotNull('harga_lembur')
+                             ->where('harga_lembur', '!=', 0);
+                });
+            })
             ->get();
     
         foreach ($barangKeluars as $barangKeluar) {
@@ -32,7 +42,7 @@ class InvoiceBarangKeluarController extends Controller
             $barangKeluar->save();
         }
     
-        // Build the base query
+        // Build the base query for invoiceKeluar
         $invoiceKeluar = BarangKeluar::select(
                 'bk.id AS barang_keluar_id',
                 'bk.tanggal_keluar',
@@ -63,17 +73,30 @@ class InvoiceBarangKeluarController extends Controller
                 GROUP BY 
                     bki.barang_keluar_id
             ) AS total_keluar'), 'bk.id', '=', 'total_keluar.barang_keluar_id') // Use barang_keluar_id in the join
-            ->where('bk.status_invoice', 'Barang Keluar');
+            ->where('bk.status_invoice', 'Barang Keluar')
+            ->where(function($query) {
+                $query->where(function($subQuery) {
+                    $subQuery->whereNotNull('harga_kirim_barang')
+                             ->where('harga_kirim_barang', '!=', 0);
+                })->orWhere(function($subQuery) {
+                    $subQuery->whereNotNull('harga_lembur')
+                             ->where('harga_lembur', '!=', 0);
+                });
+            });
     
         // Apply warehouse filter if applicable
         if ($user->warehouse_id) {
             $invoiceKeluar = $invoiceKeluar->where('bk.gudang_id', $user->warehouse_id);
         }
     
+        // Order by tanggal_keluar descending
         $invoiceKeluar = $invoiceKeluar->orderBy('bk.tanggal_keluar', 'desc')->get();
     
+        // Return view with data
         return view('data-invoice.invoice-keluar.index', compact('invoiceKeluar'));
     }
+    
+    
     
     
     
