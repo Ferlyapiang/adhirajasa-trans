@@ -151,84 +151,103 @@ class InvoiceGeneratedController extends Controller
     }
 
     public function generateInvoice(Request $request)
-{
-    $invoiceIds = $request->input('ids');
+    {
+        $invoiceIds = $request->input('ids');
 
-    if (empty($invoiceIds)) {
-        return redirect()->back()->with('error', 'Please select at least one invoice.');
-    }
-
-    DB::beginTransaction();
-    try {
-        $generatedInvoices = [];
-        
-        $datePrefix = now()->format('Ymd');
-        $latestJoc = DB::table('invoices')->where('nomer_invoice', 'like', 'ATS/INV/' . $datePrefix . '%')
-            ->orderBy('nomer_invoice', 'desc')
-            ->first();
-
-        if ($latestJoc) {
-            $lastNumber = (int)substr($latestJoc->nomer_invoice, -3); // Assuming the last part has 3 digits
-            $newNumber = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
-        } else {
-            $newNumber = '001';
+        if (empty($invoiceIds)) {
+            return redirect()->back()->with('error', 'Please select at least one invoice.');
         }
 
-        $nomerGenerad = 'ATS/INV/' . $datePrefix . $newNumber;
+        DB::beginTransaction();
+        try {
+            $generatedInvoices = [];
 
-        foreach ($invoiceIds as $invoiceId) {
-            DB::table('invoices')->where('id', $invoiceId)->update([
-                'nomer_invoice' => $nomerGenerad,
-            ]);
+            $datePrefix = now()->format('Ymd');
+            $latestJoc = DB::table('invoices')->where('nomer_invoice', 'like', 'ATS/INV/' . $datePrefix . '%')
+                ->orderBy('nomer_invoice', 'desc')
+                ->first();
 
-            if (DB::table('invoices')->where('id', $invoiceId)->value('nomer_invoice') === $nomerGenerad) {
-                $generatedInvoices[] = $nomerGenerad;
+            // Determine the next invoice number
+            if ($latestJoc) {
+                $lastNumber = (int)substr($latestJoc->nomer_invoice, -3); // Assuming the last part has 3 digits
+                $newNumber = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+            } else {
+                $newNumber = '001'; // Start from 001 if no previous invoices exist
+            }
 
+            // Generate the new invoice number
+            $nomerGenerad = 'ATS/INV/' . $datePrefix . $newNumber;
+
+            foreach ($invoiceIds as $invoiceId) {
+                // Retrieve the invoice details
                 $invoice = DB::table('invoices')->where('id', $invoiceId)->first();
 
+                // Initialize tanggal_masuk
+                $tanggalMasuk = null;
+                $tanggalKeluar = null;
+
+                // Check if barang_masuks_id exists
                 if (!empty($invoice->barang_masuks_id)) {
                     $barangMasuk = DB::table('barang_masuks')->where('id', $invoice->barang_masuks_id)->first();
 
+                    // Set tanggal_masuk from barang_masuks
                     if (!empty($barangMasuk->tanggal_tagihan_masuk)) {
-                        $currentDate = new \DateTime($barangMasuk->tanggal_tagihan_masuk);
-                        
-                        if ($currentDate->format('d') == $currentDate->format('t')) {
-                            // If the current date is the last day of the month, go to the last day of the next month
-                            $currentDate->modify('last day of next month');
+                        $tanggalMasuk = $barangMasuk->tanggal_tagihan_masuk;
+                    }
+                }
+
+                if (!empty($invoice->barang_keluars_id)) {
+                    $barangKeluar = DB::table('barang_keluars')->where('id', $invoice->barang_keluars_id)->first();
+
+                    // Set tanggal_masuk from barang_masuks
+                    if (!empty($barangKeluar->tanggal_tagihan_keluar)) {
+                        $tanggalKeluar = $barangKeluar->tanggal_tagihan_keluar;
+                    }
+                }
+
+                $tanggalFinal = $tanggalMasuk ?? $tanggalKeluar ?? $invoice->tanggal_masuk;
+
+                DB::table('invoices')->where('id', $invoiceId)->update([
+                    'nomer_invoice' => $nomerGenerad,
+                    'tanggal_masuk' => $tanggalFinal,
+                ]);
+
+                if (DB::table('invoices')->where('id', $invoiceId)->value('nomer_invoice') === $nomerGenerad) {
+                    $generatedInvoices[] = $nomerGenerad;
+
+                    if (!empty($invoice->barang_masuks_id)) {
+                        if (!empty($barangMasuk->tanggal_tagihan_masuk)) {
+                            $currentDate = new \DateTime($barangMasuk->tanggal_tagihan_masuk);
+
+                            if ($currentDate->format('d') == $currentDate->format('t')) {
+
+                                $currentDate->modify('last day of next month');
+                            } else {
+                                $currentDate->modify('+1 month');
+                            }
+
+                            $newDate = $currentDate->format('Y-m-d');
                         } else {
-                            // Otherwise, just add one month to the current date
-                            $currentDate->modify('+1 month');
+
+                            $newDate = date('Y-m-d');
                         }
 
-                        $newDate = $currentDate->format('Y-m-d');
-                    } else {
-                        // If 'tanggal_tagihan_masuk' is empty, set it to today's date
-                        $newDate = date('Y-m-d');
+                        DB::table('barang_masuks')->where('id', $invoice->barang_masuks_id)->update([
+                            'tanggal_tagihan_masuk' => $newDate,
+                        ]);
                     }
-
-                    // Update the 'tanggal_tagihan_masuk' in the 'barang_masuks' table
-                    DB::table('barang_masuks')->where('id', $invoice->barang_masuks_id)->update([
-                        'tanggal_tagihan_masuk' => $newDate,
-                    ]);
                 }
             }
+
+            DB::commit();
+
+            return redirect()->back()->with('success', 'Invoices generated: ' . implode(', ', $generatedInvoices));
+        } catch (\Exception $e) {
+            DB::rollback();
+            return redirect()->back()->with('error', 'Failed to generate invoices: ' . $e->getMessage());
         }
-
-        DB::commit();
-
-        return redirect()->back()->with('success', 'Invoices generated: ' . implode(', ', $generatedInvoices));
-    } catch (\Exception $e) {
-        DB::rollback();
-        return redirect()->back()->with('error', 'Failed to generate invoices: ' . $e->getMessage());
     }
-}
 
-
-
-
-     
-
-    
 
 
     public function show(Request $request)
