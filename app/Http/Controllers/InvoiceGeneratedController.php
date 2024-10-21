@@ -153,44 +153,59 @@ class InvoiceGeneratedController extends Controller
     public function generateInvoice(Request $request)
     {
         $invoiceIds = $request->input('ids');
-
+    
         if (empty($invoiceIds)) {
             return redirect()->back()->with('error', 'Please select at least one invoice.');
         }
-
-        $today = date('Ymd');
-
-        $existingInvoicesCount = DB::table('invoices')
-            ->where('nomer_invoice', 'like', 'ATS/INV/' . $today . '%')
-            ->count();
-
+    
         DB::beginTransaction();
         try {
             $generatedInvoices = [];
 
-            $nomerGenerad = 'ATS/INV/' . $today . str_pad($existingInvoicesCount + 1, 3, '0', STR_PAD_LEFT);
-
-            foreach ($invoiceIds as $invoiceId) {
-                $invoice = DB::table('invoices')->where('id', $invoiceId)->first();
-                if (!empty($invoice->nomer_invoice)) {
-                    continue;
-                }
-
-                DB::table('invoices')->where('id', $invoiceId)->update([
-                    'nomer_invoice' => $nomerGenerad,
-                ]);
-
-                $generatedInvoices[] = $nomerGenerad;
+            $datePrefix = date('Ymd');
+    
+            // Mencari nomor invoice tertinggi yang sudah ada untuk tanggal ini
+            $latestJoc = DB::table('invoices')
+                ->select('nomer_invoice')
+                ->where('nomer_invoice', 'like', 'ATS/INV/' . $datePrefix . '%')
+                ->orderBy('nomer_invoice', 'desc')
+                ->first();
+    
+            // Mengambil nomor urut yang ada, dan mengubahnya menjadi angka
+            if ($latestJoc) {
+                $lastNumber = (int)substr($latestJoc->nomer_invoice, -4); // Mengambil 4 karakter terakhir
+                $newNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT); // Menambah 1 dan format menjadi 4 digit
+            } else {
+                $newNumber = '0001'; // Jika belum ada invoice, mulai dari 0001
             }
+    
+            // Format nomor invoice baru
+            $jocNumber = 'ATS/INV/' . $datePrefix . $newNumber;
 
+            $invoices = DB::table('invoices')->whereIn('id', $invoiceIds)->get();
+    
+            foreach ($invoices as $invoice) {
+                DB::table('invoices')->where('id', $invoice->id)->update([
+                    'nomer_invoice' => $jocNumber,
+                ]);
+                $generatedInvoices[] = $jocNumber;
+            }
+            
+    
             DB::commit();
-
-            return redirect()->back()->with('success', 'Invoices generated: ' . implode(', ', $generatedInvoices));
+    
+            return redirect()->back()->with('success', 'Invoices updated: ' . implode(', ', $generatedInvoices));
         } catch (\Exception $e) {
             DB::rollback();
-            return redirect()->back()->with('error', 'Failed to generate invoices: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to update invoices: ' . $e->getMessage());
         }
     }
+    
+
+
+     
+
+    
 
 
     public function show(Request $request)
