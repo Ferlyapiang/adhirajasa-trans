@@ -51,7 +51,8 @@
                             <div class="card">
                                 <div class="card-header">
                                     <h3 class="card-title">Daftar Invoice</h3>
-                                    <button id="updateStatusButton" class="btn btn-success float-right">Update Status</button>
+                                    <button id="updateStatusButton" class="btn btn-success float-right">Update
+                                        Status</button>
                                 </div>
                             </div>
                             <div class="card-body">
@@ -69,7 +70,8 @@
                                     <table id="barangMasukTable" class="table table-bordered table-striped">
                                         <thead>
                                             <tr>
-                                                <th><input type="checkbox" id="selectAllCheckbox"></th> <!-- Checkbox for select all -->
+                                                <th><input type="checkbox" id="selectAllCheckbox"></th>
+                                                <!-- Checkbox for select all -->
                                                 <th>No</th>
                                                 <th>Nomer Invoice</th>
                                                 <th>Nomer Referensi</th>
@@ -88,39 +90,49 @@
                                         </thead>
                                         <tbody>
                                             @foreach ($invoiceMaster as $index => $item)
-                                            <tr>
-                                                <td><input type="checkbox" class="invoiceCheckbox" value="{{ $item->id }}"></td> <!-- Individual checkbox -->
-                                                <td>{{ $index + 1 }}</td>
-                                                <td>
-                                                    <form action="{{ route('invoices.show') }}" method="POST" style="display:inline;">
-                                                        @csrf
-                                                        <input type="hidden" name="nomer_invoice" value="{{ $item->nomer_invoice }}">
-                                                        <button type="submit" style="background: none; border: none; color: blue; text-decoration: underline; cursor: pointer;">
-                                                            {{ $item->nomer_invoice }}
-                                                        </button>
-                                                    </form>
-                                                </td>
+                                                <tr>
+                                                    <td><input type="checkbox" class="invoiceCheckbox"
+                                                            value="{{ $item->id }}"></td>
+                                                    <!-- Individual checkbox -->
+                                                    <td>{{ $index + 1 }}</td>
+                                                    <td>
+                                                        <form action="{{ route('invoices.show') }}" method="POST"
+                                                            style="display:inline;">
+                                                            @csrf
+                                                            <input type="hidden" name="nomer_invoice"
+                                                                value="{{ $item->nomer_invoice }}">
+                                                            <button type="submit"
+                                                                style="background: none; border: none; color: blue; text-decoration: underline; cursor: pointer;">
+                                                                {{ $item->nomer_invoice }}
+                                                            </button>
+                                                        </form>
+                                                    </td>
 
 
 
 
-                                                <td>
-                                                    {{ $item->joc_number ? $item->joc_number : $item->nomer_surat_jalan }}
-                                                </td>
-                                                <td>{{ $item->tanggal_masuk_barang }}</td>
-                                                <td>{{ $item->tanggal_keluar }}</td>
-                                                <td>
-                                                    {{ $item->customer_masuk_name ? $item->customer_masuk_name : $item->customer_keluar_name }}
-                                                </td>
-                                                <td>{{ $item->warehouse_masuk_name ? $item->warehouse_masuk_name : $item->warehouse_keluar_name }}</td>
-                                                <td>{{ $item->type_payment_customer_masuk ? $item->type_payment_customer_masuk : $item->type_payment_customer_keluar }}</td>
-                                                <td>{{ $item->harga_lembur_masuk ?: $item->harga_lembur_keluar ?: '' }}</td>
-                                                <td>{{ $item->total_qty_masuk }}</td>
-                                                <td>{{ $item->total_qty_keluar }}</td>
-                                                <td>{{ $item->total_sisa }}</td>
-                                                <td>{{ number_format($item->total_harga_simpan, 0, ',', '.') }}</td>
-                                                <td>{{ number_format($item->harga_kirim_barang, 0, ',', '.') }}</td>
-                                            </tr>
+                                                    <td>
+                                                        {{ $item->joc_number ? $item->joc_number : $item->nomer_surat_jalan }}
+                                                    </td>
+                                                    <td>{{ $item->tanggal_masuk_barang }}</td>
+                                                    <td>{{ $item->tanggal_keluar }}</td>
+                                                    <td>
+                                                        {{ $item->customer_masuk_name ? $item->customer_masuk_name : $item->customer_keluar_name }}
+                                                    </td>
+                                                    <td>{{ $item->warehouse_masuk_name ? $item->warehouse_masuk_name : $item->warehouse_keluar_name }}
+                                                    </td>
+                                                    <td>{{ $item->type_payment_customer_masuk ? $item->type_payment_customer_masuk : $item->type_payment_customer_keluar }}
+                                                    </td>
+                                                    <td>{{ $item->harga_lembur_masuk ?: $item->harga_lembur_keluar ?: '' }}
+                                                    </td>
+                                                    <td>{{ $item->total_qty_masuk }}</td>
+                                                    <td>{{ $item->total_qty_keluar }}</td>
+                                                    <td>{{ $item->total_sisa }}</td>
+                                                    <td>{{ number_format($item->total_harga_simpan, 0, ',', '.') }}
+                                                    </td>
+                                                    <td>{{ number_format($item->harga_kirim_barang, 0, ',', '.') }}
+                                                    </td>
+                                                </tr>
                                             @endforeach
                                         </tbody>
 
@@ -135,7 +147,8 @@
                                                 <th id="totalHargaKirimBarang"></th>
                                             </tr>
                                             <tr>
-                                                <th colspan="9" style="text-align: right;">Dari Total Harga Lembur + Total Harga Simpan Barang + Total Harga Kirim Barang</th>
+                                                <th colspan="9" style="text-align: right;">Dari Total Harga Lembur +
+                                                    Total Harga Simpan Barang + Total Harga Kirim Barang</th>
                                                 <th colspan="2" style="text-align: right;">Total Keseluruhan:</th>
                                                 <th id="totalKeseluruhan" colspan="6"></th>
                                             </tr>
@@ -192,14 +205,15 @@
 
                 if (selectedIds.length > 0) {
                     $.ajax({
-                        url: '{{ route("invoice.generate") }}',
+                        url: '{{ route('invoice.generate') }}',
                         method: 'POST',
                         data: {
                             _token: '{{ csrf_token() }}',
                             ids: selectedIds // Ensure this matches the key in your controller
                         },
                         success: function(response) {
-                            alert('Invoices generated successfully!'); // Update the alert message for clarity
+                            alert(
+                            'Invoices generated successfully!'); // Update the alert message for clarity
                             window.location.reload();
                         },
                         error: function(xhr) {
@@ -227,12 +241,19 @@
                 table.rows().every(function() {
                     let data = this.data();
 
-                    totalHargaSimpan += parseFloat(data[13].replace('.', '').replace(',', '.')) || 0; // Total Harga Simpan
-                    totalHargaLembur += parseFloat(data[9]) || 0; // Lemburan
-                    totalMasuk += parseFloat(data[10]) || 0; // Total QTY Masuk
-                    totalKeluar += parseFloat(data[11]) || 0; // Total QTY Keluar
-                    totalSisa += parseFloat(data[11]) || 0; // Total QTY Sisa
-                    totalHargaKirimBarang += parseFloat(data[14].replace('.', '').replace(',', '.')) || 0; // Total Harga Kirim Barang
+                    // Menggunakan unary plus untuk konversi
+                    totalHargaSimpan += +data[13].replace(/\./g, '').replace(',',
+                    '.'); // Hapus titik dan ganti koma dengan titik
+
+                    totalHargaLembur += +data[9].replace(/\./g, '').replace(',',
+                    '.'); // Jika data[9] adalah string yang valid
+
+                    totalMasuk += +data[10] || 0; // Total QTY Masuk
+                    totalKeluar += +data[11] || 0; // Total QTY Keluar
+                    totalSisa += +data[12] || 0; // Total QTY Sisa
+                    totalHargaKirimBarang += +data[14].replace(/\./g, '').replace(',',
+                    '.'); // Total Harga Kirim Barang
+
                 });
 
                 // Calculate total keseluruhan
@@ -264,6 +285,7 @@
 
             // Calculate totals on page load
             calculateTotals();
+
         });
     </script>
 
