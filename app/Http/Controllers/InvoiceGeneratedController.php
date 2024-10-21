@@ -151,56 +151,62 @@ class InvoiceGeneratedController extends Controller
     }
 
     public function generateInvoice(Request $request)
-    {
-        $invoiceIds = $request->input('ids');
-    
-        if (empty($invoiceIds)) {
-            return redirect()->back()->with('error', 'Please select at least one invoice.');
-        }
-    
-        DB::beginTransaction();
-        try {
-            $generatedInvoices = [];
+{
+    $invoiceIds = $request->input('ids');
 
-            $datePrefix = date('Ymd');
-    
-            // Mencari nomor invoice tertinggi yang sudah ada untuk tanggal ini
-            $latestJoc = DB::table('invoices')
-                ->select('nomer_invoice')
-                ->where('nomer_invoice', 'like', 'ATS/INV/' . $datePrefix . '%')
-                ->orderBy('nomer_invoice', 'desc')
-                ->first();
-    
-            // Mengambil nomor urut yang ada, dan mengubahnya menjadi angka
-            if ($latestJoc) {
-                $lastNumber = (int)substr($latestJoc->nomer_invoice, -4); // Mengambil 4 karakter terakhir
-                $newNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT); // Menambah 1 dan format menjadi 4 digit
-            } else {
-                $newNumber = '0001'; // Jika belum ada invoice, mulai dari 0001
-            }
-    
-            // Format nomor invoice baru
-            $jocNumber = 'ATS/INV/' . $datePrefix . $newNumber;
-
-            $invoices = DB::table('invoices')->whereIn('id', $invoiceIds)->get();
-    
-            foreach ($invoices as $invoice) {
-                DB::table('invoices')->where('id', $invoice->id)->update([
-                    'nomer_invoice' => $jocNumber,
-                ]);
-                $generatedInvoices[] = $jocNumber;
-            }
-            
-    
-            DB::commit();
-    
-            return redirect()->back()->with('success', 'Invoices updated: ' . implode(', ', $generatedInvoices));
-        } catch (\Exception $e) {
-            DB::rollback();
-            return redirect()->back()->with('error', 'Failed to update invoices: ' . $e->getMessage());
-        }
+    if (empty($invoiceIds)) {
+        return redirect()->back()->with('error', 'Please select at least one invoice.');
     }
-    
+
+    DB::beginTransaction();
+    try {
+        $generatedInvoices = [];
+        $datePrefix = date('Ymd');
+
+        // Mencari nomor invoice tertinggi yang sudah ada untuk tanggal ini
+        $latestInvoice = DB::table('invoices')
+            ->select('nomer_invoice')
+            ->where('nomer_invoice', 'like', 'ATS/INV/' . $datePrefix . '%')
+            ->orderBy('nomer_invoice', 'desc')
+            ->first();
+
+        // Mengambil nomor urut yang ada, dan mengubahnya menjadi angka
+        if ($latestInvoice) {
+            $lastNumber = (int)substr($latestInvoice->nomer_invoice, -4); // Mengambil 4 karakter terakhir
+        } else {
+            $lastNumber = 0; // Jika belum ada invoice, mulai dari 0
+        }
+
+        // Mengambil data invoice berdasarkan ID yang dipilih
+        $invoices = DB::table('invoices')->whereIn('id', $invoiceIds)->get();
+
+        foreach ($invoices as $invoice) {
+            // Generate nomor invoice baru untuk setiap invoice
+            $newNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
+            $invoiceNumber = 'ATS/INV/' . $datePrefix . $newNumber;
+            $lastNumber++; // Increment nomor urut
+
+            // Update nomor invoice pada tabel invoices
+            DB::table('invoices')->where('id', $invoice->id)->update([
+                'nomer_invoice' => $invoiceNumber,
+            ]);
+            DB::table('barang_masuks')->where('id', $invoice->barang_masuks_id)->update([
+                'tanggal_tagihan_masuk' => date('Y-m-d'),
+            ]);
+
+            // Tambahkan nomor invoice yang baru ke daftar
+            $generatedInvoices[] = $invoiceNumber;
+        }
+
+        DB::commit();
+
+        return redirect()->back()->with('success', 'Invoices updated: ' . implode(', ', $generatedInvoices));
+    } catch (\Exception $e) {
+        DB::rollback();
+        return redirect()->back()->with('error', 'Failed to update invoices: ' . $e->getMessage());
+    }
+}
+
 
 
      
