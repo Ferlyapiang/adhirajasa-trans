@@ -167,30 +167,24 @@ class InvoiceGeneratedController extends Controller
                 ->orderBy('nomer_invoice', 'desc')
                 ->first();
 
-            // Determine the next invoice number
             if ($latestJoc) {
-                $lastNumber = (int)substr($latestJoc->nomer_invoice, -3); // Assuming the last part has 3 digits
+                $lastNumber = (int)substr($latestJoc->nomer_invoice, -3);
                 $newNumber = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
             } else {
-                $newNumber = '001'; // Start from 001 if no previous invoices exist
+                $newNumber = '001';
             }
 
-            // Generate the new invoice number
             $nomerGenerad = 'ATS/INV/' . $datePrefix . $newNumber;
 
             foreach ($invoiceIds as $invoiceId) {
-                // Retrieve the invoice details
                 $invoice = DB::table('invoices')->where('id', $invoiceId)->first();
 
-                // Initialize tanggal_masuk
                 $tanggalMasuk = null;
                 $tanggalKeluar = null;
 
-                // Check if barang_masuks_id exists
                 if (!empty($invoice->barang_masuks_id)) {
                     $barangMasuk = DB::table('barang_masuks')->where('id', $invoice->barang_masuks_id)->first();
 
-                    // Set tanggal_masuk from barang_masuks
                     if (!empty($barangMasuk->tanggal_tagihan_masuk)) {
                         $tanggalMasuk = $barangMasuk->tanggal_tagihan_masuk;
                     }
@@ -199,7 +193,6 @@ class InvoiceGeneratedController extends Controller
                 if (!empty($invoice->barang_keluars_id)) {
                     $barangKeluar = DB::table('barang_keluars')->where('id', $invoice->barang_keluars_id)->first();
 
-                    // Set tanggal_masuk from barang_masuks
                     if (!empty($barangKeluar->tanggal_tagihan_keluar)) {
                         $tanggalKeluar = $barangKeluar->tanggal_tagihan_keluar;
                     }
