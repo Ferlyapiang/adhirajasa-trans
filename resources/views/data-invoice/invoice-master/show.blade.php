@@ -64,11 +64,13 @@
                                             @foreach ($invoiceMaster as $index => $item)
                                             <tr>
                                                 <td>{{ $item->joc_number ? $item->joc_number : $item->nomer_surat_jalan }}</td>
-                                                <td>{{ $item->nomer_polisi_masuk ? $item->nomer_polisi_masuk : $item->nomer_container_masuk }}</td>
+                                                <td>{{ $item->nomer_polisi_masuk ?: $item->nomer_polisi_keluar ?: $item->nomer_container_masuk ?: $item->nomer_container_keluar ?: ''}}</td>
                                                 
-                                                <td>{{ $item->total_qty_masuk }}</td>
-                                                <td> Kontainer <strong>{{ $item->type_mobil_masuk ?: $item->type_mobil_keluar ?: ''}}</strong> <br> Masa Penimbunan : <strong>{{  $item->tanggal_tagihan_masuk ?: $item->tanggal_tagihan_keluar ?: ''}}</strong> - <strong>{{  $item->tanggal_tagihan_masuk ?: $item->tanggal_tagihan_keluar ?: ''}}</strong>  </td>
-                                                <td>{{ number_format($item->total_harga_simpan, 0, ',', '.') }}</td>
+                                                <td>{{ $item->total_qty_masuk ?: $item->total_qty_keluar_keluar ?: '' }}</td>
+                                                <td> Kontainer <strong>{{ $item->type_mobil_masuk ?: $item->type_mobil_keluar ?: ''}}</strong> 
+                                                    <br> 
+                                                    Masa Penimbunan : <strong>{{  $item->tanggal_masuk_barang ?: $item->tanggal_keluar ?: ''}}</strong> - <strong>{{  $item->tanggal_tagihan_masuk ?: $item->tanggal_tagihan_keluar ?: ''}}</strong>  </td>
+                                                <td>{{ number_format($item->total_harga_simpan_dan_lembur, 0, ',', '.') ?: number_format($item->total_harga_barang_keluar, 0, ',', '.') ?: '' }}</td>
                                             </tr>
                                             @endforeach
                                         </tbody>
@@ -102,5 +104,16 @@
     <script src="{{ asset('lte/dist/js/adminlte.min.js') }}"></script>
 
 </body>
+<script>
+    $(document).ready(function () {
+    $('#barangMasukTable').DataTable({
+        stateSave: true, // Simpan state DataTables
+        "order": [[0, "desc"]] // Contoh untuk mengurutkan kolom pertama secara default
+    });
+});
+window.onbeforeunload = function () {
+    window.location.href = "{{ route('data-invoice.invoice-master.index') }}";
+};
 
+</script>
 </html>

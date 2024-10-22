@@ -265,124 +265,195 @@ class InvoiceGeneratedController extends Controller
     {
         $user = Auth::user();
         $nomer_invoice = $request->input('nomer_invoice');
-    
+
         // Prepare the SQL query
         $sql = "
+        SELECT 
+            invoices.id,
+            invoices.nomer_invoice,
+            invoices.barang_masuks_id,
+            barang_masuks.joc_number,
+            barang_keluars.nomer_surat_jalan,
+            barang_masuks.tanggal_tagihan_masuk,
+            barang_keluars.tanggal_tagihan_keluar,
+            barang_masuks.tanggal_masuk AS tanggal_masuk_barang,
+            barang_masuks.gudang_id AS gudang_masuk,
+            warehouses_masuks.name AS warehouse_masuk_name,
+            barang_keluars.gudang_id AS gudang_keluar,
+            warehouses_keluars.name AS warehouse_keluar_name,
+            barang_masuks.customer_id,
+            customers_masuks.name AS customer_masuk_name,
+            customers_masuks.type_payment_customer AS type_payment_customer_masuk,
+            type_mobil_masuk.type AS type_mobil_masuk,
+            type_mobil_keluar.type AS type_mobil_keluar,
+            barang_masuks.nomer_polisi AS nomer_polisi_masuk,
+            barang_keluars.nomer_polisi AS nomer_polisi_keluar,
+            barang_masuks.nomer_container AS nomer_container_masuk,
+            barang_keluars.nomer_container AS nomer_container_keluar,
+            COALESCE(total_items.total_qty, 0) AS total_qty_masuk,
+            COALESCE(total_keluar.total_qty, 0) AS total_qty_keluar,
+            COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0) AS total_sisa,
+            
+            CASE
+                WHEN COALESCE(total_items.total_qty, 0) = (COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0))
+                THEN barang_masuks.harga_simpan_barang + (
+                    CASE 
+                        WHEN customers_masuks.type_payment_customer = 'Akhir Bulan' 
+                            AND YEAR(barang_masuks.tanggal_masuk) = YEAR(barang_masuks.tanggal_tagihan_masuk)
+                            AND MONTH(barang_masuks.tanggal_masuk) = MONTH(barang_masuks.tanggal_tagihan_masuk)
+                        THEN barang_masuks.harga_lembur
+                        WHEN customers_masuks.type_payment_customer = 'Pertanggal Masuk'
+                            AND barang_masuks.tanggal_tagihan_masuk <= DATE_ADD(barang_masuks.tanggal_masuk, INTERVAL 1 MONTH)
+                        THEN barang_masuks.harga_lembur
+                        ELSE 0
+                    END
+                )
+                ELSE ((COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0)) / COALESCE(total_items.total_qty, 0)) * barang_masuks.harga_simpan_barang + (
+                    CASE 
+                        WHEN customers_masuks.type_payment_customer = 'Akhir Bulan' 
+                            AND YEAR(barang_masuks.tanggal_masuk) = YEAR(barang_masuks.tanggal_tagihan_masuk)
+                            AND MONTH(barang_masuks.tanggal_masuk) = MONTH(barang_masuks.tanggal_tagihan_masuk)
+                        THEN barang_masuks.harga_lembur
+                        WHEN customers_masuks.type_payment_customer = 'Pertanggal Masuk'
+                            AND barang_masuks.tanggal_tagihan_masuk <= DATE_ADD(barang_masuks.tanggal_masuk, INTERVAL 1 MONTH)
+                        THEN barang_masuks.harga_lembur
+                        ELSE 0
+                    END
+                )
+            END AS total_harga_simpan,
+            
+            CASE 
+                WHEN customers_masuks.type_payment_customer = 'Akhir Bulan' 
+                    AND YEAR(barang_masuks.tanggal_masuk) = YEAR(barang_masuks.tanggal_tagihan_masuk)
+                    AND MONTH(barang_masuks.tanggal_masuk) = MONTH(barang_masuks.tanggal_tagihan_masuk)
+                THEN barang_masuks.harga_lembur
+                WHEN customers_masuks.type_payment_customer = 'Pertanggal Masuk' 
+                    AND barang_masuks.tanggal_tagihan_masuk <= DATE_ADD(barang_masuks.tanggal_masuk, INTERVAL 1 MONTH)
+                THEN barang_masuks.harga_lembur
+                ELSE 0
+            END AS harga_lembur_masuk,
+            
+            invoices.barang_keluars_id,
+            barang_keluars.tanggal_keluar,
+            barang_keluars.nomer_surat_jalan,
+            barang_keluars.gudang_id,
+            warehouses_keluars.name AS warehouse_keluar_name,
+            barang_keluars.customer_id,
+            customers_keluars.name AS customer_keluar_name,
+            customers_keluars.type_payment_customer AS type_payment_customer_keluar,
+            COALESCE(total_keluar_keluar.total_qty, 0) AS total_qty_keluar_keluar,
+            
+            CASE 
+                WHEN customers_keluars.type_payment_customer = 'Akhir Bulan' 
+                    AND YEAR(barang_keluars.tanggal_keluar) = YEAR(barang_keluars.tanggal_tagihan_keluar)
+                    AND MONTH(barang_keluars.tanggal_keluar) = MONTH(barang_keluars.tanggal_tagihan_keluar)
+                THEN barang_keluars.harga_lembur
+                WHEN customers_keluars.type_payment_customer = 'Pertanggal Masuk' 
+                    AND barang_keluars.tanggal_tagihan_keluar <= DATE_ADD(barang_keluars.tanggal_keluar, INTERVAL 1 MONTH)
+                THEN barang_keluars.harga_lembur
+                ELSE 0
+            END AS harga_lembur_keluar,
+            
+            barang_keluars.harga_kirim_barang,
+            (CASE 
+        WHEN customers_keluars.type_payment_customer = 'Akhir Bulan' 
+            AND YEAR(barang_keluars.tanggal_keluar) = YEAR(barang_keluars.tanggal_tagihan_keluar)
+            AND MONTH(barang_keluars.tanggal_keluar) = MONTH(barang_keluars.tanggal_tagihan_keluar)
+        THEN barang_keluars.harga_lembur
+        WHEN customers_keluars.type_payment_customer = 'Pertanggal Masuk' 
+            AND barang_keluars.tanggal_tagihan_keluar <= DATE_ADD(barang_keluars.tanggal_keluar, INTERVAL 1 MONTH)
+        THEN barang_keluars.harga_lembur
+        ELSE 0
+    END) + barang_keluars.harga_kirim_barang AS total_harga_barang_keluar,
+
+    CASE
+    WHEN COALESCE(total_items.total_qty, 0) = (COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0))
+    THEN barang_masuks.harga_simpan_barang + (
+        CASE 
+            WHEN customers_masuks.type_payment_customer = 'Akhir Bulan' 
+                AND YEAR(barang_masuks.tanggal_masuk) = YEAR(barang_masuks.tanggal_tagihan_masuk)
+                AND MONTH(barang_masuks.tanggal_masuk) = MONTH(barang_masuks.tanggal_tagihan_masuk)
+            THEN barang_masuks.harga_lembur
+            WHEN customers_masuks.type_payment_customer = 'Pertanggal Masuk'
+                AND barang_masuks.tanggal_tagihan_masuk <= DATE_ADD(barang_masuks.tanggal_masuk, INTERVAL 1 MONTH)
+            THEN barang_masuks.harga_lembur
+            ELSE 0
+        END
+    )
+    ELSE ((COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0)) / COALESCE(total_items.total_qty, 0)) * barang_masuks.harga_simpan_barang + (
+        CASE 
+            WHEN customers_masuks.type_payment_customer = 'Akhir Bulan'
+                AND YEAR(barang_masuks.tanggal_masuk) = YEAR(barang_masuks.tanggal_tagihan_masuk)
+                AND MONTH(barang_masuks.tanggal_masuk) = MONTH(barang_masuks.tanggal_tagihan_masuk)
+            THEN barang_masuks.harga_lembur
+            WHEN customers_masuks.type_payment_customer = 'Pertanggal Masuk'
+                AND barang_masuks.tanggal_tagihan_masuk <= DATE_ADD(barang_masuks.tanggal_masuk, INTERVAL 1 MONTH)
+            THEN barang_masuks.harga_lembur
+            ELSE 0
+        END
+    )
+END 
++ 
+CASE 
+    WHEN customers_masuks.type_payment_customer = 'Akhir Bulan'
+        AND YEAR(barang_masuks.tanggal_masuk) = YEAR(barang_masuks.tanggal_tagihan_masuk)
+        AND MONTH(barang_masuks.tanggal_masuk) = MONTH(barang_masuks.tanggal_tagihan_masuk)
+    THEN barang_masuks.harga_lembur
+    WHEN customers_masuks.type_payment_customer = 'Pertanggal Masuk' 
+        AND barang_masuks.tanggal_tagihan_masuk <= DATE_ADD(barang_masuks.tanggal_masuk, INTERVAL 1 MONTH)
+    THEN barang_masuks.harga_lembur
+    ELSE 0
+END AS total_harga_simpan_dan_lembur
+
+
+        FROM invoices
+        LEFT JOIN barang_masuks ON invoices.barang_masuks_id = barang_masuks.id
+        LEFT JOIN barang_keluars ON invoices.barang_keluars_id = barang_keluars.id
+        LEFT JOIN warehouses AS warehouses_masuks ON barang_masuks.gudang_id = warehouses_masuks.id
+        LEFT JOIN customers AS customers_masuks ON barang_masuks.customer_id = customers_masuks.id
+        LEFT JOIN warehouses AS warehouses_keluars ON barang_keluars.gudang_id = warehouses_keluars.id
+        LEFT JOIN customers AS customers_keluars ON barang_keluars.customer_id = customers_keluars.id
+        LEFT JOIN (
+            SELECT barang_masuk_id, SUM(qty) AS total_qty 
+            FROM barang_masuk_items 
+            GROUP BY barang_masuk_id
+        ) AS total_items ON barang_masuks.id = total_items.barang_masuk_id
+        LEFT JOIN (
             SELECT 
-                invoices.id,
-                invoices.nomer_invoice,
-                invoices.barang_masuks_id,
-                barang_masuks.joc_number,
-                barang_keluars.nomer_surat_jalan,
-                barang_masuks.tanggal_tagihan_masuk,
-                barang_keluars.tanggal_tagihan_keluar,
-                barang_masuks.tanggal_masuk AS tanggal_masuk_barang,
-                barang_masuks.gudang_id AS gudang_masuk,
-                warehouses_masuks.name AS warehouse_masuk_name,
-                barang_keluars.gudang_id AS gudang_keluar,
-                warehouses_keluars.name AS warehouse_keluar_name,
-                barang_masuks.customer_id,
-                customers_masuks.name AS customer_masuk_name,
-                customers_masuks.type_payment_customer AS type_payment_customer_masuk,
-                type_mobil_masuk.type AS type_mobil_masuk,
-                type_mobil_keluar.type AS type_mobil_keluar,
-                barang_masuks.nomer_polisi AS nomer_polisi_masuk,
-                barang_keluars.nomer_polisi AS nomer_polisi_keluar,
-                barang_masuks.nomer_container AS nomer_container_masuk,
-                barang_keluars.nomer_container AS nomer_container_keluar,
-                COALESCE(total_items.total_qty, 0) AS total_qty_masuk,
-                COALESCE(total_keluar.total_qty, 0) AS total_qty_keluar,
-                COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0) AS total_sisa,
-                
-                CASE
-                    WHEN COALESCE(total_items.total_qty, 0) = (COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0))
-                    THEN barang_masuks.harga_simpan_barang + (
-                        CASE 
-                            WHEN customers_masuks.type_payment_customer = 'Akhir Bulan' 
-                                AND YEAR(barang_masuks.tanggal_masuk) = YEAR(barang_masuks.tanggal_tagihan_masuk)
-                                AND MONTH(barang_masuks.tanggal_masuk) = MONTH(barang_masuks.tanggal_tagihan_masuk)
-                            THEN barang_masuks.harga_lembur
-                            WHEN customers_masuks.type_payment_customer = 'Pertanggal Masuk'
-                                AND barang_masuks.tanggal_tagihan_masuk <= DATE_ADD(barang_masuks.tanggal_masuk, INTERVAL 1 MONTH)
-                            THEN barang_masuks.harga_lembur
-                            ELSE 0
-                        END
-                    )
-                    ELSE ((COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0)) / COALESCE(total_items.total_qty, 0)) * barang_masuks.harga_simpan_barang + (
-                        CASE 
-                            WHEN customers_masuks.type_payment_customer = 'Akhir Bulan' 
-                                AND YEAR(barang_masuks.tanggal_masuk) = YEAR(barang_masuks.tanggal_tagihan_masuk)
-                                AND MONTH(barang_masuks.tanggal_masuk) = MONTH(barang_masuks.tanggal_tagihan_masuk)
-                            THEN barang_masuks.harga_lembur
-                            WHEN customers_masuks.type_payment_customer = 'Pertanggal Masuk'
-                                AND barang_masuks.tanggal_tagihan_masuk <= DATE_ADD(barang_masuks.tanggal_masuk, INTERVAL 1 MONTH)
-                            THEN barang_masuks.harga_lembur
-                            ELSE 0
-                        END
-                    )
-                END AS total_harga_simpan,
-                
-                CASE 
-                    WHEN customers_masuks.type_payment_customer = 'Akhir Bulan' 
-                        AND YEAR(barang_masuks.tanggal_masuk) = YEAR(barang_masuks.tanggal_tagihan_masuk)
-                        AND MONTH(barang_masuks.tanggal_masuk) = MONTH(barang_masuks.tanggal_tagihan_masuk)
-                    THEN barang_masuks.harga_lembur
-                    WHEN customers_masuks.type_payment_customer = 'Pertanggal Masuk' 
-                        AND barang_masuks.tanggal_tagihan_masuk <= DATE_ADD(barang_masuks.tanggal_masuk, INTERVAL 1 MONTH)
-                    THEN barang_masuks.harga_lembur
-                    ELSE 0
-                END AS harga_lembur_masuk,
-                
-                invoices.barang_keluars_id,
-                barang_keluars.tanggal_keluar,
-                barang_keluars.nomer_surat_jalan,
-                barang_keluars.gudang_id,
-                warehouses_keluars.name AS warehouse_keluar_name,
-                barang_keluars.customer_id,
-                customers_keluars.name AS customer_keluar_name,
-                customers_keluars.type_payment_customer AS type_payment_customer_keluar,
-                
-                CASE 
-                    WHEN customers_keluars.type_payment_customer = 'Akhir Bulan' 
-                        AND YEAR(barang_keluars.tanggal_keluar) = YEAR(barang_keluars.tanggal_tagihan_keluar)
-                        AND MONTH(barang_keluars.tanggal_keluar) = MONTH(barang_keluars.tanggal_tagihan_keluar)
-                    THEN barang_keluars.harga_lembur
-                    WHEN customers_keluars.type_payment_customer = 'Pertanggal Masuk' 
-                        AND barang_keluars.tanggal_tagihan_keluar <= DATE_ADD(barang_keluars.tanggal_keluar, INTERVAL 1 MONTH)
-                    THEN barang_keluars.harga_lembur
-                    ELSE 0
-                END AS harga_lembur_keluar,
-                
-                barang_keluars.harga_kirim_barang
-            FROM invoices
-            LEFT JOIN barang_masuks ON invoices.barang_masuks_id = barang_masuks.id
-            LEFT JOIN barang_keluars ON invoices.barang_keluars_id = barang_keluars.id
-            LEFT JOIN warehouses AS warehouses_masuks ON barang_masuks.gudang_id = warehouses_masuks.id
-            LEFT JOIN customers AS customers_masuks ON barang_masuks.customer_id = customers_masuks.id
-            LEFT JOIN warehouses AS warehouses_keluars ON barang_keluars.gudang_id = warehouses_keluars.id
-            LEFT JOIN customers AS customers_keluars ON barang_keluars.customer_id = customers_keluars.id
-            LEFT JOIN (
-                SELECT barang_masuk_id, SUM(qty) AS total_qty 
-                FROM barang_masuk_items 
-                GROUP BY barang_masuk_id
-            ) AS total_items ON barang_masuks.id = total_items.barang_masuk_id
-            LEFT JOIN (
-                SELECT bki.barang_masuk_id, SUM(bki.qty) AS total_qty
-                FROM barang_keluar_items bki
-                JOIN invoices ON bki.barang_keluar_id = invoices.id
-                WHERE invoices.tanggal_masuk < CURDATE()
-                GROUP BY bki.barang_masuk_id
-            ) AS total_keluar ON barang_masuks.id = total_keluar.barang_masuk_id
-            LEFT JOIN type_mobil AS type_mobil_masuk ON barang_masuks.type_mobil_id = type_mobil_masuk.id
-            LEFT JOIN type_mobil AS type_mobil_keluar ON barang_keluars.type_mobil_id = type_mobil_keluar.id
-            WHERE invoices.nomer_invoice = ?
-            ORDER BY barang_keluars.tanggal_keluar DESC;
-        ";
-    
+                bki.barang_keluar_id,
+                SUM(bki.qty) AS total_qty
+            FROM 
+                barang_keluar_items AS bki
+            GROUP BY 
+                bki.barang_keluar_id
+        ) AS total_keluar_keluar 
+        ON barang_keluars.id = total_keluar_keluar.barang_keluar_id
+LEFT JOIN 
+    (SELECT 
+        bki.barang_masuk_id,
+        SUM(bki.qty) AS total_qty
+     FROM 
+        barang_keluar_items bki
+     JOIN 
+        barang_keluars ON bki.barang_keluar_id = barang_keluars.id
+     WHERE 
+        barang_keluars.tanggal_tagihan_keluar < CURDATE()
+     GROUP BY 
+        bki.barang_masuk_id) AS total_keluar ON barang_masuks.id = total_keluar.barang_masuk_id
+        LEFT JOIN type_mobil AS type_mobil_masuk ON barang_masuks.type_mobil_id = type_mobil_masuk.id
+        LEFT JOIN type_mobil AS type_mobil_keluar ON barang_keluars.type_mobil_id = type_mobil_keluar.id
+        WHERE invoices.nomer_invoice = ?
+        ORDER BY barang_keluars.tanggal_keluar DESC;
+    ";
+
         // Execute the SQL query with the provided invoice number
         $invoiceMaster = DB::select($sql, [$nomer_invoice]);
-    
+
+        if (empty($invoiceMaster)) {
+
+            return redirect()->route('data-invoice.invoice-master.index')->with('error', 'Invoice not found.');
+        }
+
         return view('data-invoice.invoice-master.show', compact('invoiceMaster'));
     }
-    
 }
