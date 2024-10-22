@@ -403,7 +403,11 @@ CASE
         AND barang_masuks.tanggal_tagihan_masuk <= DATE_ADD(barang_masuks.tanggal_masuk, INTERVAL 1 MONTH)
     THEN barang_masuks.harga_lembur
     ELSE 0
-END AS total_harga_simpan_dan_lembur
+END AS total_harga_simpan_dan_lembur,
+customers_masuks.no_npwp AS no_npwp_masuk,
+            customers_masuks.no_ktp AS no_ktp_masuk,
+            customers_keluars.no_npwp AS no_npwp_keluar,
+            customers_keluars.no_ktp AS no_ktp_keluar
 
 
         FROM invoices
