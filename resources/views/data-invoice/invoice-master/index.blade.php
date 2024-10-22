@@ -79,7 +79,7 @@
                                                 <th>Tanggal Keluar</th>
                                                 <th>Nama Pemilik</th>
                                                 <th>Gudang</th>
-                                                <th>Tipe Pembayaran Customer</th>
+                                                <th>Tanggal Penagihan</th>
                                                 <th>Lemburan</th>
                                                 <th>Total QTY Masuk</th>
                                                 <th>Total QTY Keluar</th>
@@ -121,7 +121,7 @@
                                                     </td>
                                                     <td>{{ $item->warehouse_masuk_name ? $item->warehouse_masuk_name : $item->warehouse_keluar_name }}
                                                     </td>
-                                                    <td>{{ $item->type_payment_customer_masuk ? $item->type_payment_customer_masuk : $item->type_payment_customer_keluar }}
+                                                    <td>{{ $item->tanggal_tagihan_masuk ?: $item->tanggal_tagihan_keluar ?: '' }}
                                                     </td>
                                                     <td>{{ $item->harga_lembur_masuk ?: $item->harga_lembur_keluar ?: '' }}
                                                     </td>
