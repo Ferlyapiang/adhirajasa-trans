@@ -123,7 +123,18 @@
                                                     </td>
                                                     <td>{{ $item->tanggal_tagihan_masuk ?: $item->tanggal_tagihan_keluar ?: '' }}
                                                     </td>
-                                                    <td>{{ $item->harga_lembur_masuk ?: $item->harga_lembur_keluar ?: '' }}
+                                                    <td>
+                                                        @if(!is_null($item->harga_lembur_masuk) && $item->harga_lembur_masuk != 0)
+                                                            {{ number_format($item->harga_lembur_masuk, 0, ',', '.') }}
+                                                        @elseif(!is_null($item->harga_lembur_keluar) && $item->harga_lembur_keluar != 0)
+                                                            {{ number_format($item->harga_lembur_keluar, 0, ',', '.') }}
+                                                        @else
+                                                            {{ '' }}
+                                                        @endif
+                                                    </td>
+
+
+
                                                     </td>
                                                     <td>{{ $item->total_qty_masuk }}</td>
                                                     <td>{{ $item->total_qty_keluar }}</td>

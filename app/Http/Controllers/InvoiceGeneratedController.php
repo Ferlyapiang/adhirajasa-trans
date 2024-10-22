@@ -100,8 +100,16 @@ class InvoiceGeneratedController extends Controller
                         ELSE 0
                     END
                 )
-            END AS total_harga_simpan
+            END AS total_harga_simpan_lembur
         '),
+        DB::raw('
+    CASE
+        WHEN COALESCE(total_items.total_qty, 0) = (COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0))
+        THEN barang_masuks.harga_simpan_barang
+        ELSE ((COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0)) / COALESCE(total_items.total_qty, 0)) * barang_masuks.harga_simpan_barang
+    END AS total_harga_simpan
+'),
+
                 DB::raw('
             CASE 
                 WHEN customers_masuks.type_payment_customer = "Akhir Bulan" 
@@ -159,14 +167,39 @@ class InvoiceGeneratedController extends Controller
                 'total_keluar.barang_masuk_id'
             );
 
-        if ($user->warehouse_id) {
-            $invoiceMaster = $invoiceMaster->where('barang_keluars.gudang_id', $user->warehouse_id);
-        }
-
-        $invoiceMaster = $invoiceMaster->orderBy('barang_keluars.tanggal_keluar', 'desc')->get();
-
-        return view('data-invoice.invoice-master.index', compact('invoiceMaster'));
-    }
+            if ($user->warehouse_id) {
+                $invoiceMaster = $invoiceMaster->where('barang_keluars.gudang_id', $user->warehouse_id);
+            }
+            
+            $invoiceMaster = $invoiceMaster->whereRaw('COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0) > 0 
+                OR (
+                    (CASE 
+                        WHEN customers_keluars.type_payment_customer = "Akhir Bulan" 
+                            AND YEAR(barang_keluars.tanggal_keluar) = YEAR(barang_keluars.tanggal_tagihan_keluar)
+                            AND MONTH(barang_keluars.tanggal_keluar) = MONTH(barang_keluars.tanggal_tagihan_keluar)
+                        THEN barang_keluars.harga_lembur
+                        WHEN customers_keluars.type_payment_customer = "Pertanggal Masuk" 
+                            AND barang_keluars.tanggal_tagihan_keluar <= DATE_ADD(barang_keluars.tanggal_keluar, INTERVAL 1 MONTH)
+                        THEN barang_keluars.harga_lembur
+                        ELSE 0
+                    END) > 0 
+                    OR (CASE 
+                        WHEN customers_masuks.type_payment_customer = "Akhir Bulan" 
+                            AND YEAR(barang_masuks.tanggal_masuk) = YEAR(barang_masuks.tanggal_tagihan_masuk)
+                            AND MONTH(barang_masuks.tanggal_masuk) = MONTH(barang_masuks.tanggal_tagihan_masuk)
+                        THEN barang_masuks.harga_lembur
+                        WHEN customers_masuks.type_payment_customer = "Pertanggal Masuk" 
+                            AND barang_masuks.tanggal_tagihan_masuk <= DATE_ADD(barang_masuks.tanggal_masuk, INTERVAL 1 MONTH)
+                        THEN barang_masuks.harga_lembur
+                        ELSE 0
+                    END) > 0
+                    OR barang_keluars.harga_kirim_barang > 0
+                )');
+            
+            $invoiceMaster = $invoiceMaster->orderBy('barang_keluars.tanggal_keluar', 'desc')->get();
+            
+            return view('data-invoice.invoice-master.index', compact('invoiceMaster'));
+        }            
 
     public function generateInvoice(Request $request)
     {
@@ -320,8 +353,12 @@ class InvoiceGeneratedController extends Controller
                         ELSE 0
                     END
                 )
+            END AS total_harga_simpan_lembur,
+            CASE
+                WHEN COALESCE(total_items.total_qty, 0) = (COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0))
+                THEN barang_masuks.harga_simpan_barang
+                ELSE ((COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0)) / COALESCE(total_items.total_qty, 0)) * barang_masuks.harga_simpan_barang
             END AS total_harga_simpan,
-            
             CASE 
                 WHEN customers_masuks.type_payment_customer = 'Akhir Bulan' 
                     AND YEAR(barang_masuks.tanggal_masuk) = YEAR(barang_masuks.tanggal_tagihan_masuk)
@@ -446,7 +483,7 @@ LEFT JOIN
         bki.barang_masuk_id) AS total_keluar ON barang_masuks.id = total_keluar.barang_masuk_id
         LEFT JOIN type_mobil AS type_mobil_masuk ON barang_masuks.type_mobil_id = type_mobil_masuk.id
         LEFT JOIN type_mobil AS type_mobil_keluar ON barang_keluars.type_mobil_id = type_mobil_keluar.id
-        WHERE invoices.nomer_invoice = ?
+        WHERE invoices.nomer_invoice = ? 
         ORDER BY barang_keluars.tanggal_keluar DESC;
     ";
 
