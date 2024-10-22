@@ -197,8 +197,12 @@ class InvoiceGeneratedController extends Controller
                 )');
             
             $invoiceMaster = $invoiceMaster->orderBy('barang_keluars.tanggal_keluar', 'desc')->get();
+            $owners = $invoiceMaster->pluck('customer_masuk_name')
+            ->merge($invoiceMaster->pluck('customer_keluar_name'))
+            ->unique()
+            ->values();
             
-            return view('data-invoice.invoice-master.index', compact('invoiceMaster'));
+            return view('data-invoice.invoice-master.index', compact('invoiceMaster', 'owners'));
         }            
 
     public function generateInvoice(Request $request)
