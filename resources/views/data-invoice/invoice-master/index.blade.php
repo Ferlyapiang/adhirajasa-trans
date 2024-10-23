@@ -79,9 +79,9 @@
                                                 <th>Nomer Referensi</th>
                                                 <th>Tanggal Masuk</th>
                                                 <th>Tanggal Keluar</th>
+                                                <th>Tanggal Penagihan</th>
                                                 <th>Nama Pemilik</th>
                                                 <th>Gudang</th>
-                                                <th>Tanggal Penagihan</th>
                                                 <th>Lemburan</th>
                                                 <th>Total QTY Masuk</th>
                                                 <th>Total QTY Keluar</th>
@@ -118,12 +118,13 @@
                                                 </td>
                                                 <td>{{ $item->tanggal_masuk_barang }}</td>
                                                 <td>{{ $item->tanggal_keluar }}</td>
+                                                <td>{{ $item->tanggal_tagihan_masuk ?: $item->tanggal_tagihan_keluar ?: '' }}
                                                 <td>
                                                     {{ $item->customer_masuk_name ? $item->customer_masuk_name : $item->customer_keluar_name }}
                                                 </td>
                                                 <td>{{ $item->warehouse_masuk_name ? $item->warehouse_masuk_name : $item->warehouse_keluar_name }}
                                                 </td>
-                                                <td>{{ $item->tanggal_tagihan_masuk ?: $item->tanggal_tagihan_keluar ?: '' }}
+                                                
                                                 </td>
                                                 <td>
                                                     @if(!is_null($item->harga_lembur_masuk) && $item->harga_lembur_masuk != 0)
@@ -198,26 +199,41 @@
 
     <!-- Page-specific script -->
     <script>
-        $(document).ready(function() {
+    $(document).ready(function() {
 
-            $('#ownerNameFilter').on('change', function() {
-                var filterValue = $(this).val();
-                table.column(6).search(filterValue).draw();
-                calculateTotals();
+        $('#selectAllCheckbox').prop('disabled', true);
+        $('.invoiceCheckbox').prop('disabled', true);
+
+        $('#ownerNameFilter').on('change', function() {
+            var selectedOwner = $(this).val(); 
+            var filterValue = $(this).val();
+
+            if (selectedOwner && selectedOwner !== "") {
+                table.column(7).search(filterValue).draw();
+                calculateTotals(); // Hitung ulang total setelah filter diterapkan
+                $('#selectAllCheckbox').prop('disabled', false);
+                $('.invoiceCheckbox').prop('disabled', false);
+            } else {
+                table.column(7).search(filterValue).draw();
+                calculateTotals(); // Hitung ulang total meskipun filter direset
+                $('#selectAllCheckbox').prop('checked', false).prop('disabled', true);
+                $('.invoiceCheckbox').prop('checked', false).prop('disabled', true);
+                // Reset totals if necessary
+            }
+        });
+
+        $('#selectAllCheckbox').on('change', function() {
+            var isChecked = $(this).is(':checked');
+            $('.invoiceCheckbox').prop('checked', isChecked);
+        });
+
+        $('#updateStatusButton').on('click', function() {
+            var selectedIds = [];
+            $('.invoiceCheckbox:checked').each(function() {
+                selectedIds.push($(this).val());
             });
 
-            $('#selectAllCheckbox').on('change', function() {
-                var isChecked = $(this).is(':checked');
-                $('.invoiceCheckbox').prop('checked', isChecked);
-            });
-
-            $('#updateStatusButton').on('click', function() {
-                var selectedIds = [];
-                $('.invoiceCheckbox:checked').each(function() {
-                    selectedIds.push($(this).val());
-                });
-
-                if (selectedIds.length > 0) {
+            if (selectedIds.length > 0) {
                 $.ajax({
                     url: "{{ route('invoice.generate') }}",
                     method: 'POST',
@@ -237,71 +253,70 @@
             } else {
                 alert('Please select at least one invoice.');
             }
+        });
 
+        // Initialize DataTable
+        var table = $('#barangMasukTable').DataTable();
+
+        // Function to calculate totals for visible rows only
+        function calculateTotals() {
+            let totalHargaSimpan = 0;
+            let totalHargaLembur = 0;
+            let totalMasuk = 0;
+            let totalKeluar = 0;
+            let totalSisa = 0;
+            let totalHargaKirimBarang = 0;
+
+            // Loop through only the visible rows
+            table.rows({ search: 'applied' }).every(function() {
+                let data = this.data();
+
+                // Menggunakan unary plus untuk konversi
+                totalHargaSimpan += +data[13].replace(/\./g, '').replace(',',
+                    '.'); // Hapus titik dan ganti koma dengan titik
+
+                totalHargaLembur += +data[9].replace(/\./g, '').replace(',',
+                    '.'); // Jika data[9] adalah string yang valid
+
+                totalMasuk += +data[10] || 0; // Total QTY Masuk
+                totalKeluar += +data[11] || 0; // Total QTY Keluar
+                totalSisa += +data[12] || 0; // Total QTY Sisa
+                totalHargaKirimBarang += +data[14].replace(/\./g, '').replace(',',
+                    '.'); // Total Harga Kirim Barang
             });
 
-            // Initialize DataTable
-            var table = $('#barangMasukTable').DataTable();
+            // Calculate total keseluruhan
+            const totalKeseluruhan = totalHargaSimpan + totalHargaLembur + totalHargaKirimBarang;
 
-            // Function to calculate totals
-            function calculateTotals() {
-                let totalHargaSimpan = 0;
-                let totalHargaLembur = 0;
-                let totalMasuk = 0;
-                let totalKeluar = 0;
-                let totalSisa = 0;
-                let totalHargaKirimBarang = 0;
+            // Update the footer with totals
+            $('#totalHargaSimpan').text(totalHargaSimpan.toLocaleString('id-ID', {
+                minimumFractionDigits: 0
+            }));
+            $('#totalHargaLembur').text(totalHargaLembur.toLocaleString('id-ID', {
+                minimumFractionDigits: 0
+            }));
+            $('#totalMasuk').text(totalMasuk.toLocaleString('id-ID', {
+                minimumFractionDigits: 0
+            }));
+            $('#totalKeluar').text(totalKeluar.toLocaleString('id-ID', {
+                minimumFractionDigits: 0
+            }));
+            $('#totalSisa').text(totalSisa.toLocaleString('id-ID', {
+                minimumFractionDigits: 0
+            }));
+            $('#totalHargaKirimBarang').text(totalHargaKirimBarang.toLocaleString('id-ID', {
+                minimumFractionDigits: 0
+            }));
+            $('#totalKeseluruhan').text(totalKeseluruhan.toLocaleString('id-ID', {
+                minimumFractionDigits: 0
+            }));
+        }
 
-                table.rows().every(function() {
-                    let data = this.data();
+        // Calculate totals on page load
+        calculateTotals();
+    });
+</script>
 
-                    // Menggunakan unary plus untuk konversi
-                    totalHargaSimpan += +data[13].replace(/\./g, '').replace(',',
-                        '.'); // Hapus titik dan ganti koma dengan titik
-
-                    totalHargaLembur += +data[9].replace(/\./g, '').replace(',',
-                        '.'); // Jika data[9] adalah string yang valid
-
-                    totalMasuk += +data[10] || 0; // Total QTY Masuk
-                    totalKeluar += +data[11] || 0; // Total QTY Keluar
-                    totalSisa += +data[12] || 0; // Total QTY Sisa
-                    totalHargaKirimBarang += +data[14].replace(/\./g, '').replace(',',
-                        '.'); // Total Harga Kirim Barang
-
-                });
-
-                // Calculate total keseluruhan
-                const totalKeseluruhan = totalHargaSimpan + totalHargaLembur + totalHargaKirimBarang;
-
-                // Update the footer with totals
-                $('#totalHargaSimpan').text(totalHargaSimpan.toLocaleString('id-ID', {
-                    minimumFractionDigits: 0
-                }));
-                $('#totalHargaLembur').text(totalHargaLembur.toLocaleString('id-ID', {
-                    minimumFractionDigits: 0
-                }));
-                $('#totalMasuk').text(totalMasuk.toLocaleString('id-ID', {
-                    minimumFractionDigits: 0
-                }));
-                $('#totalKeluar').text(totalKeluar.toLocaleString('id-ID', {
-                    minimumFractionDigits: 0
-                }));
-                $('#totalSisa').text(totalSisa.toLocaleString('id-ID', {
-                    minimumFractionDigits: 0
-                }));
-                $('#totalHargaKirimBarang').text(totalHargaKirimBarang.toLocaleString('id-ID', {
-                    minimumFractionDigits: 0
-                }));
-                $('#totalKeseluruhan').text(totalKeseluruhan.toLocaleString('id-ID', {
-                    minimumFractionDigits: 0
-                }));
-            }
-
-            // Calculate totals on page load
-            calculateTotals();
-
-        });
-    </script>
 
 </body>
 

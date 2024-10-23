@@ -503,6 +503,29 @@ LEFT JOIN
             return redirect()->route('data-invoice.invoice-master.index')->with('error', 'Invoice not found.');
         }
 
-        return view('data-invoice.invoice-master.show', compact('invoiceMaster'));
+        session(['invoiceMaster' => $invoiceMaster]);
+
+        // return view('data-invoice.invoice-master.show', compact('invoiceMaster'));
+        return redirect()->route('data-invoice.invoice-master.display');
     }
+
+    public function display()
+    {
+        // Get data from session
+        $user = Auth::user();
+
+        if (!$user ) {
+            return redirect()->route('login')->with('alert', 'Waktu login Anda telah habis, silakan login ulang.');
+        } else {
+        $invoiceMaster = session('invoiceMaster');
+
+        if (empty($invoiceMaster)) {
+            return redirect()->route('data-invoice.invoice-master.index')->with('error', 'No invoice data available.');
+        }
+
+        // Show the view with the invoice data
+        return view('data-invoice.invoice-master.show', compact('invoiceMaster'));
+        }
+    }
+
 }

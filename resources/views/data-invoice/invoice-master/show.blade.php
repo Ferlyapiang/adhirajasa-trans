@@ -66,10 +66,13 @@
                                                 <td>{{ $item->joc_number ? $item->joc_number : $item->nomer_surat_jalan }}</td>
                                                 <td>{{ $item->nomer_polisi_masuk ?: $item->nomer_polisi_keluar ?: $item->nomer_container_masuk ?: $item->nomer_container_keluar ?: '' }}</td>
                                                 <td>{{ $item->total_qty_masuk ?: $item->total_qty_keluar_keluar ?: '' }}</td>
-                                                <td>
+                                                <td style="text-align: center;">
                                                     Kontainer <strong>{{ $item->type_mobil_masuk ?: $item->type_mobil_keluar ?: '' }}</strong>
                                                     <br>
-                                                    Masa Penimbunan : <strong>{{  $item->tanggal_masuk_barang ?: $item->tanggal_keluar ?: '' }}</strong> - <strong>{{  $item->tanggal_tagihan_masuk ?: $item->tanggal_tagihan_keluar ?: '' }}</strong>
+                                                    Masa Penimbunan : 
+    <strong>{{ $item->tanggal_masuk_barang ? \Carbon\Carbon::parse($item->tanggal_masuk_barang)->format('d/m/Y') : ($item->tanggal_keluar ? \Carbon\Carbon::parse($item->tanggal_keluar)->format('d/m/Y') : '') }}</strong> 
+    - 
+    <strong>{{ $item->tanggal_tagihan_masuk ? \Carbon\Carbon::parse($item->tanggal_tagihan_masuk)->format('d/m/Y') : ($item->tanggal_tagihan_keluar ? \Carbon\Carbon::parse($item->tanggal_tagihan_keluar)->format('d/m/Y') : '') }}</strong>
                                                 </td>
                                                 <td>{{ number_format($item->total_harga_simpan_dan_lembur ?: $item->total_harga_barang_keluar, 0, ',', '.') }}</td>
                                             </tr>
