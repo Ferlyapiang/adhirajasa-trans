@@ -219,7 +219,7 @@
 
                 if (selectedIds.length > 0) {
                 $.ajax({
-                    url: '{{ route('invoice.generate') }}',
+                    url: "{{ route('invoice.generate') }}",
                     method: 'POST',
                     data: {
                         _token: '{{ csrf_token() }}',
