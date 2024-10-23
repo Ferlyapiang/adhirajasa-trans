@@ -218,27 +218,26 @@
                 });
 
                 if (selectedIds.length > 0) {
-                    $.ajax({
-                        url: '{{ route('
-                        invoice.generate ') }}',
-                        method: 'POST',
-                        data: {
-                            _token: '{{ csrf_token() }}',
-                            ids: selectedIds // Ensure this matches the key in your controller
-                        },
-                        success: function(response) {
-                            alert(
-                                'Invoices generated successfully!'); // Update the alert message for clarity
-                            window.location.reload();
-                        },
-                        error: function(xhr) {
-                            alert('Failed to generate invoices. Please try again.');
-                            console.error(xhr.responseJSON);
-                        }
-                    });
-                } else {
-                    alert('Please select at least one invoice.');
-                }
+                $.ajax({
+                    url: '{{ route('invoice.generate') }}',
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        ids: selectedIds
+                    },
+                    success: function(response) {
+                        alert('Invoices generated successfully!');
+                        window.location.reload();
+                    },
+                    error: function(xhr) {
+                        alert('Failed to generate invoices. Please try again.');
+                        console.error(xhr.responseJSON);
+                    }
+                });
+            } else {
+                alert('Please select at least one invoice.');
+            }
+
             });
 
             // Initialize DataTable
