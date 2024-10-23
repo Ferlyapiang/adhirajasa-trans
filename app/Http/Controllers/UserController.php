@@ -16,16 +16,19 @@ class UserController extends Controller
     public function index()
     {
         $loggedInUser = Auth::user();
-
-        if ($loggedInUser && $loggedInUser->warehouse_id) {
-            $users = User::with('group', 'warehouse')
-                        ->where('warehouse_id', $loggedInUser->warehouse_id)
-                        ->get();
+        if (!$loggedInUser) {
+            return redirect()->route('login')->with('alert', 'Waktu login Anda telah habis, silakan login ulang.');
         } else {
-            $users = User::with('group', 'warehouse')->get();
-        }
+            if ($loggedInUser && $loggedInUser->warehouse_id) {
+                $users = User::with('group', 'warehouse')
+                            ->where('warehouse_id', $loggedInUser->warehouse_id)
+                            ->get();
+            } else {
+                $users = User::with('group', 'warehouse')->get();
+            }
 
-        return view('admin.management-user.users.index', compact('users'));
+            return view('admin.management-user.users.index', compact('users'));
+        }
     }
 
 

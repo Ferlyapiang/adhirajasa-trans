@@ -20,6 +20,10 @@ class BarangMasukController extends Controller
 
     public function index() {
         $user = Auth::user();
+
+        if (!$user ) {
+            return redirect()->route('login')->with('alert', 'Waktu login Anda telah habis, silakan login ulang.');
+        } else {
     
         $barangMasuks = DB::table('barang_masuks as bm')
             ->select(
@@ -51,6 +55,8 @@ class BarangMasukController extends Controller
             // ->where('bm.status_invoice', 'Barang Masuk')
             ->orderBy('bm.tanggal_masuk', 'desc')
             ->get();
+
+        }
     
         return view('data-gudang.barang-masuk.index', compact('barangMasuks'));
     }

@@ -167,9 +167,13 @@ class InvoiceGeneratedController extends Controller
                 'total_keluar.barang_masuk_id'
             );
 
-            if ($user->warehouse_id) {
+            if (!$user ) {
+                return redirect()->route('login')->with('alert', 'Waktu login Anda telah habis, silakan login ulang.');
+            } else {
                 $invoiceMaster = $invoiceMaster->where('barang_keluars.gudang_id', $user->warehouse_id);
             }
+            
+            
             
             $invoiceMaster = $invoiceMaster->whereRaw('COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0) > 0 
                 OR (

@@ -11,8 +11,13 @@ class ItemTypeController extends Controller
 {
     public function index()
     {
+        $user = Auth::user();
+        if (!$user ) {
+            return redirect()->route('login')->with('alert', 'Waktu login Anda telah habis, silakan login ulang.');
+        } else {
         $itemTypes = ItemType::all();
         return view('master-data.item-types.index', compact('itemTypes'));
+        }
     }
 
     public function create()

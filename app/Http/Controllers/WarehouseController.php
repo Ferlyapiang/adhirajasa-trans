@@ -12,14 +12,17 @@ class WarehouseController extends Controller
     public function index()
     {
         $user = Auth::user();
-
-        if ($user->warehouse_id) {
-            $warehouses = Warehouse::where('id', $user->warehouse_id)->get();
+        if (!$user ) {
+            return redirect()->route('login')->with('alert', 'Waktu login Anda telah habis, silakan login ulang.');
         } else {
-            $warehouses = Warehouse::all();
-        }
+            if ($user->warehouse_id) {
+                $warehouses = Warehouse::where('id', $user->warehouse_id)->get();
+            } else {
+                $warehouses = Warehouse::all();
+            }
 
-        return view('master-data.warehouses.index', compact('warehouses'));
+            return view('master-data.warehouses.index', compact('warehouses'));
+        }
     }
 
     

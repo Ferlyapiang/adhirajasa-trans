@@ -14,14 +14,18 @@ class CustomerController extends Controller
     {
         $user = Auth::user();
 
-        if ($user->warehouse_id) {
-
-            $customers = Customer::where('warehouse_id', $user->warehouse_id)->get();
+        if (!$user ) {
+            return redirect()->route('login')->with('alert', 'Waktu login Anda telah habis, silakan login ulang.');
         } else {
-            
-            $customers = Customer::all();
-        }
 
+            if ($user->warehouse_id) {
+
+                $customers = Customer::where('warehouse_id', $user->warehouse_id)->get();
+            } else {
+                
+                $customers = Customer::all();
+            }
+        }
         $warehouses = Warehouse::all();
 
         return view('master-data.customers.index', compact('customers', 'warehouses'));

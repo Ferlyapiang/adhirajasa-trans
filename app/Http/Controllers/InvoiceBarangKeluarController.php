@@ -85,9 +85,12 @@ class InvoiceBarangKeluarController extends Controller
             });
     
         // Apply warehouse filter if applicable
-        if ($user->warehouse_id) {
+        if (!$user ) {
+            return redirect()->route('login')->with('alert', 'Waktu login Anda telah habis, silakan login ulang.');
+        } else {
             $invoiceKeluar = $invoiceKeluar->where('bk.gudang_id', $user->warehouse_id);
         }
+    
     
         // Order by tanggal_keluar descending
         $invoiceKeluar = $invoiceKeluar->orderBy('bk.tanggal_keluar', 'desc')->get();

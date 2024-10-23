@@ -124,10 +124,11 @@ class InvoiceBarangMasukController extends Controller
         ->where(DB::raw('COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0)'), '<>', 0); // Use having for the aggregate condition
     
         // Filter berdasarkan warehouse user jika ada
-        if ($user->warehouse_id) {
+        if (!$user ) {
+            return redirect()->route('login')->with('alert', 'Waktu login Anda telah habis, silakan login ulang.');
+        } else {
             $invoiceMasuk = $invoiceMasuk->where('barang_masuks.gudang_id', $user->warehouse_id);
         }
-    
         $invoiceMasuk = $invoiceMasuk->orderBy('barang_masuks.tanggal_masuk', 'desc')->get();
     
         return view('data-invoice.invoice-masuk.index', compact('invoiceMasuk'));

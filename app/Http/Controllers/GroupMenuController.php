@@ -6,15 +6,20 @@ use App\Models\GroupMenu;
 use App\Models\Group;
 use App\Models\Menu;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class GroupMenuController extends Controller
 {
     public function index()
     {
-        $groupMenus = GroupMenu::with(['group', 'menu'])->get();
-        $groups = Group::all();
-        $menus = Menu::all();
-
+        $user = Auth::user();
+        if (!$user ) {
+            return redirect()->route('login')->with('alert', 'Waktu login Anda telah habis, silakan login ulang.');
+        } else {
+            $groupMenus = GroupMenu::with(['group', 'menu'])->get();
+            $groups = Group::all();
+            $menus = Menu::all();
+        }
         return view('admin.management-menu.group_menu.index', compact('groupMenus', 'groups', 'menus'));
     }
 

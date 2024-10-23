@@ -87,6 +87,11 @@
                             <h2>Selamat Datang di <span style="color:#4169E1;">ATS Digital</span></h2>
                             <p>Masukkan Email dan password Adhirajasa Trans Sejahtera Digital untuk masuk.</p>
                         </div>
+                        @if (session('alert'))
+                            <div class="alert alert-warning">
+                                {{ session('alert') }}
+                            </div>
+                        @endif
 
                         <form action="{{ route('login') }}" method="POST">
                             @csrf

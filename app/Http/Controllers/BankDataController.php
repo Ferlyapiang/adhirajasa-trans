@@ -13,15 +13,18 @@ class BankDataController extends Controller
     public function index()
     {
         $user = Auth::user();
-        
-        if ($user->warehouse_id) {
-            
-            $bankDatas = BankData::with('warehouse')
-                ->where('warehouse_id', $user->warehouse_id)
-                ->get();
+        if (!$user) {
+            return redirect()->route('login')->with('alert', 'Waktu login Anda telah habis, silakan login ulang.');
         } else {
-            
-            $bankDatas = BankData::with('warehouse')->get();
+            if ($user->warehouse_id) {
+                
+                $bankDatas = BankData::with('warehouse')
+                    ->where('warehouse_id', $user->warehouse_id)
+                    ->get();
+            } else {
+                
+                $bankDatas = BankData::with('warehouse')->get();
+            }
         }
 
         

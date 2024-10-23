@@ -4,13 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Models\JenisMobil;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class JenisMobilController extends Controller
 {
     public function index()
     {
+        $user = Auth::user();
+        if (!$user ) {
+            return redirect()->route('login')->with('alert', 'Waktu login Anda telah habis, silakan login ulang.');
+        } else {
         $jenisMobil = JenisMobil::all();
         return view('master-data.jenis-mobil.index', compact('jenisMobil'));
+        }
     }
 
     // Menampilkan form untuk menambah jenis mobil

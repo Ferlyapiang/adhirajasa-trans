@@ -14,17 +14,19 @@ class BarangController extends Controller
     public function index()
 {
     $user = Auth::user();
-    
-    if ($user->warehouse_id) {
-        $barangs = Barang::with('customer')
-                    ->whereHas('customer', function ($query) use ($user) {
-                        $query->where('warehouse_id', $user->warehouse_id);
-                    })
-                    ->get();
+    if (!$user ) {
+        return redirect()->route('login')->with('alert', 'Waktu login Anda telah habis, silakan login ulang.');
     } else {
-        $barangs = Barang::with('customer')->get();
+        if ($user->warehouse_id) {
+            $barangs = Barang::with('customer')
+                        ->whereHas('customer', function ($query) use ($user) {
+                            $query->where('warehouse_id', $user->warehouse_id);
+                        })
+                        ->get();
+        } else {
+            $barangs = Barang::with('customer')->get();
+        }
     }
-    
     return view('master-data.barang.index', compact('barangs'));
 }
 

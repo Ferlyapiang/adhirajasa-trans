@@ -25,6 +25,10 @@ class BarangKeluarController extends Controller
      */
     public function index()
     {
+        $user = Auth::user();
+        if (!$user ) {
+            return redirect()->route('login')->with('alert', 'Waktu login Anda telah habis, silakan login ulang.');
+        } else {
         $barangKeluars = DB::table('barang_keluars')
             ->select(
                 'barang_keluars.id AS barang_keluar_id',
@@ -48,7 +52,7 @@ class BarangKeluarController extends Controller
             // ->where('barang_keluars.status_invoice', 'Barang Keluar')
             ->orderBy('barang_keluars.nomer_invoice', 'desc')
             ->get();
-
+            }
         $typeMobilOptions = JenisMobil::all();
 
         return view('data-gudang.barang-keluar.index', compact('barangKeluars', 'typeMobilOptions'));

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Menu;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class MenuController extends Controller
 {
@@ -12,10 +13,14 @@ class MenuController extends Controller
      */
     public function index()
 {
-    $menus = Menu::with('children')
-        ->get();
-    
-    return view('admin.management-menu.menus.index', compact('menus'));
+    $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('login')->with('alert', 'Waktu login Anda telah habis, silakan login ulang.');
+        } else {
+            $menus = Menu::with('children')
+                ->get();
+        }
+        return view('admin.management-menu.menus.index', compact('menus'));
 }
 
     /**
