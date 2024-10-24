@@ -63,6 +63,15 @@
                                                 <option value="Pertanggal Masuk">Pertanggal Masuk</option>
                                             </select>
                                         </div>
+                                        <div class="col-md-3">
+                                            <label for="ownerNameFilter">Nama Pemilik:</label>
+                                            <select id="ownerNameFilter" class="form-control">
+                                                <option value="">Semua</option>
+                                                @foreach ($owners as $owner)
+                                                <option value="{{ $owner }}">{{ $owner }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
                                     </div>
                                     <div class="table-responsive">
                                         <table id="barangMasukTable" class="table table-bordered table-striped">
@@ -151,11 +160,33 @@
         $(document).ready(function() {
             var table = $('#barangMasukTable').DataTable();
 
+            $('#selectAllCheckbox').prop('disabled', true);
+            $('.invoiceCheckbox').prop('disabled', true);
+
+
             $('#paymentTypeFilter').on('change', function() {
                 var filterValue = $(this).val();
                 table.column(6).search(filterValue).draw(); 
                 updateTotals(); 
             });
+
+            $('#ownerNameFilter').on('change', function() {
+            var selectedOwner = $(this).val(); 
+            var filterValue = $(this).val();
+
+            if (selectedOwner && selectedOwner !== "") {
+                table.column(4).search(filterValue).draw();
+                updateTotals(); // Hitung ulang total setelah filter diterapkan
+                $('#selectAllCheckbox').prop('disabled', false);
+                $('.invoiceCheckbox').prop('disabled', false);
+            } else {
+                table.column(4).search(filterValue).draw();
+                updateTotals(); // Hitung ulang total meskipun filter direset
+                $('#selectAllCheckbox').prop('checked', false).prop('disabled', true);
+                $('.invoiceCheckbox').prop('checked', false).prop('disabled', true);
+                // Reset totals if necessary
+            }
+        });
 
             $('#selectAllCheckbox').on('change', function() {
                 var isChecked = $(this).is(':checked');

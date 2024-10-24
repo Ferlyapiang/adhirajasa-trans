@@ -84,19 +84,23 @@ class InvoiceBarangKeluarController extends Controller
                 });
             });
     
-        // Apply warehouse filter if applicable
         if (!$user ) {
             return redirect()->route('login')->with('alert', 'Waktu login Anda telah habis, silakan login ulang.');
+        }
+
+        if ($user->warehouse_id === null) {
         } else {
             $invoiceKeluar = $invoiceKeluar->where('bk.gudang_id', $user->warehouse_id);
         }
-    
-    
-        // Order by tanggal_keluar descending
+        
         $invoiceKeluar = $invoiceKeluar->orderBy('bk.tanggal_keluar', 'desc')->get();
+
+        $owners = $invoiceKeluar->pluck('nama_customer')
+            ->unique()
+            ->values();
     
         // Return view with data
-        return view('data-invoice.invoice-keluar.index', compact('invoiceKeluar'));
+        return view('data-invoice.invoice-keluar.index', compact('invoiceKeluar', 'owners'));
     }
     
     

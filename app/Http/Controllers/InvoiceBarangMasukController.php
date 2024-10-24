@@ -121,17 +121,24 @@ class InvoiceBarangMasukController extends Controller
         ) AS total_keluar'), 'barang_masuks.id', '=', 'total_keluar.barang_masuk_id')
         ->where('barang_masuks.status_invoice', 'Barang Masuk')
         ->where('barang_masuks.tanggal_tagihan_masuk', '<=', \Carbon\Carbon::now()->endOfMonth())
-        ->where(DB::raw('COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0)'), '<>', 0); // Use having for the aggregate condition
+        ->where(DB::raw('COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0)'), '<>', 0);
     
         // Filter berdasarkan warehouse user jika ada
-        if (!$user ) {
+        if (!$user) {
             return redirect()->route('login')->with('alert', 'Waktu login Anda telah habis, silakan login ulang.');
+        } 
+        if ($user->warehouse_id === null) {
         } else {
             $invoiceMasuk = $invoiceMasuk->where('barang_masuks.gudang_id', $user->warehouse_id);
         }
+        
+        $owners = $invoiceMasuk->pluck('nama_customer')
+            ->unique()
+            ->values();
+
         $invoiceMasuk = $invoiceMasuk->orderBy('barang_masuks.tanggal_masuk', 'desc')->get();
     
-        return view('data-invoice.invoice-masuk.index', compact('invoiceMasuk'));
+        return view('data-invoice.invoice-masuk.index', compact('invoiceMasuk', 'owners'));
     }
     
     
