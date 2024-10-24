@@ -269,6 +269,16 @@ class InvoiceGeneratedController extends Controller
                 if (DB::table('invoices')->where('id', $invoiceId)->value('nomer_invoice') === $nomerGenerad) {
                     $generatedInvoices[] = $nomerGenerad;
 
+                    DB::table('invoices_reporting')->insert([
+                        'nomer_invoice' => $nomerGenerad,
+                        'barang_masuks_id' => $invoice->barang_masuks_id,
+                        'barang_keluars_id' => $invoice->barang_keluars_id,
+                        'tanggal_masuk' => $tanggalFinal,
+                        'diskon' => $invoice->diskon,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+
                     if (!empty($invoice->barang_masuks_id)) {
                         if (!empty($barangMasuk->tanggal_tagihan_masuk)) {
                             $currentDate = new \DateTime($barangMasuk->tanggal_tagihan_masuk);
