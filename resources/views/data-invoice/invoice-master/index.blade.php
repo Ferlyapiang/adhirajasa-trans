@@ -200,7 +200,9 @@
     <!-- Page-specific script -->
     <script>
     $(document).ready(function() {
-
+        // Initialize DataTable
+        var table = $('#barangMasukTable').DataTable();
+        
         $('#selectAllCheckbox').prop('disabled', true);
         $('.invoiceCheckbox').prop('disabled', true);
 
@@ -254,9 +256,6 @@
                 alert('Please select at least one invoice.');
             }
         });
-
-        // Initialize DataTable
-        var table = $('#barangMasukTable').DataTable();
 
         // Function to calculate totals for visible rows only
         function calculateTotals() {
