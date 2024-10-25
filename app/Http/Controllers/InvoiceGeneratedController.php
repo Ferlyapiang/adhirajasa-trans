@@ -74,35 +74,6 @@ class InvoiceGeneratedController extends Controller
                 DB::raw('COALESCE(total_keluar.total_qty, 0) AS total_qty_keluar'),
                 DB::raw('COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0) AS total_sisa'),
                 DB::raw('
-            CASE
-                WHEN COALESCE(total_items.total_qty, 0) = (COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0))
-                THEN barang_masuks.harga_simpan_barang + (
-                    CASE 
-                        WHEN customers_masuks.type_payment_customer = "Akhir Bulan" 
-                            AND YEAR(barang_masuks.tanggal_masuk) = YEAR(barang_masuks.tanggal_tagihan_masuk)
-                            AND MONTH(barang_masuks.tanggal_masuk) = MONTH(barang_masuks.tanggal_tagihan_masuk)
-                        THEN barang_masuks.harga_lembur
-                        WHEN customers_masuks.type_payment_customer = "Pertanggal Masuk"
-                            AND barang_masuks.tanggal_tagihan_masuk <= DATE_ADD(barang_masuks.tanggal_masuk, INTERVAL 1 MONTH)
-                        THEN barang_masuks.harga_lembur
-                        ELSE 0
-                    END
-                )
-                ELSE ((COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0)) / COALESCE(total_items.total_qty, 0)) * barang_masuks.harga_simpan_barang + (
-                    CASE 
-                        WHEN customers_masuks.type_payment_customer = "Akhir Bulan" 
-                            AND YEAR(barang_masuks.tanggal_masuk) = YEAR(barang_masuks.tanggal_tagihan_masuk)
-                            AND MONTH(barang_masuks.tanggal_masuk) = MONTH(barang_masuks.tanggal_tagihan_masuk)
-                        THEN barang_masuks.harga_lembur
-                        WHEN customers_masuks.type_payment_customer = "Pertanggal Masuk"
-                            AND barang_masuks.tanggal_tagihan_masuk <= DATE_ADD(barang_masuks.tanggal_masuk, INTERVAL 1 MONTH)
-                        THEN barang_masuks.harga_lembur
-                        ELSE 0
-                    END
-                )
-            END AS total_harga_simpan_lembur
-        '),
-        DB::raw('
     CASE
         WHEN COALESCE(total_items.total_qty, 0) = (COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0))
         THEN barang_masuks.harga_simpan_barang
@@ -167,15 +138,15 @@ class InvoiceGeneratedController extends Controller
                 'total_keluar.barang_masuk_id'
             );
 
-            if (!$user ) {
-                return redirect()->route('login')->with('alert', 'Waktu login Anda telah habis, silakan login ulang.');
-            } else {
-                $invoiceMaster = $invoiceMaster->where('barang_keluars.gudang_id', $user->warehouse_id);
-            }
-            
-            
-            
-            $invoiceMaster = $invoiceMaster->whereRaw('COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0) > 0 
+        if (!$user) {
+            return redirect()->route('login')->with('alert', 'Waktu login Anda telah habis, silakan login ulang.');
+        } else {
+            $invoiceMaster = $invoiceMaster->where('barang_keluars.gudang_id', $user->warehouse_id);
+        }
+
+
+
+        $invoiceMaster = $invoiceMaster->whereRaw('COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0) > 0 
                 OR (
                     (CASE 
                         WHEN customers_keluars.type_payment_customer = "Akhir Bulan" 
@@ -199,17 +170,17 @@ class InvoiceGeneratedController extends Controller
                     END) > 0
                     OR barang_keluars.harga_kirim_barang > 0
                 )');
-            
-            $invoiceMaster = $invoiceMaster->orderBy('barang_keluars.tanggal_keluar', 'desc')->get();
-            $owners = $invoiceMaster->map(function ($item) {
-                return $item->customer_masuk_name ?: $item->customer_keluar_name;
-            })
+
+        $invoiceMaster = $invoiceMaster->orderBy('barang_keluars.tanggal_keluar', 'desc')->get();
+        $owners = $invoiceMaster->map(function ($item) {
+            return $item->customer_masuk_name ?: $item->customer_keluar_name;
+        })
             ->unique()
             ->values();
-            
-            
-            return view('data-invoice.invoice-master.index', compact('invoiceMaster', 'owners'));
-        }            
+
+
+        return view('data-invoice.invoice-master.index', compact('invoiceMaster', 'owners'));
+    }
 
     public function generateInvoice(Request $request)
     {
@@ -401,19 +372,8 @@ class InvoiceGeneratedController extends Controller
             customers_keluars.type_payment_customer AS type_payment_customer_keluar,
             COALESCE(total_keluar_keluar.total_qty, 0) AS total_qty_keluar_keluar,
             
-            CASE 
-                WHEN customers_keluars.type_payment_customer = 'Akhir Bulan' 
-                    AND YEAR(barang_keluars.tanggal_keluar) = YEAR(barang_keluars.tanggal_tagihan_keluar)
-                    AND MONTH(barang_keluars.tanggal_keluar) = MONTH(barang_keluars.tanggal_tagihan_keluar)
-                THEN barang_keluars.harga_lembur
-                WHEN customers_keluars.type_payment_customer = 'Pertanggal Masuk' 
-                    AND barang_keluars.tanggal_tagihan_keluar <= DATE_ADD(barang_keluars.tanggal_keluar, INTERVAL 1 MONTH)
-                THEN barang_keluars.harga_lembur
-                ELSE 0
-            END AS harga_lembur_keluar,
-            
-            barang_keluars.harga_kirim_barang,
-            (CASE 
+           COALESCE(
+    CASE 
         WHEN customers_keluars.type_payment_customer = 'Akhir Bulan' 
             AND YEAR(barang_keluars.tanggal_keluar) = YEAR(barang_keluars.tanggal_tagihan_keluar)
             AND MONTH(barang_keluars.tanggal_keluar) = MONTH(barang_keluars.tanggal_tagihan_keluar)
@@ -422,46 +382,26 @@ class InvoiceGeneratedController extends Controller
             AND barang_keluars.tanggal_tagihan_keluar <= DATE_ADD(barang_keluars.tanggal_keluar, INTERVAL 1 MONTH)
         THEN barang_keluars.harga_lembur
         ELSE 0
-    END) + barang_keluars.harga_kirim_barang AS total_harga_barang_keluar,
+    END, 0
+) AS harga_lembur_keluar,
 
-    CASE
-    WHEN COALESCE(total_items.total_qty, 0) = (COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0))
-    THEN barang_masuks.harga_simpan_barang + (
-        CASE 
-            WHEN customers_masuks.type_payment_customer = 'Akhir Bulan' 
-                AND YEAR(barang_masuks.tanggal_masuk) = YEAR(barang_masuks.tanggal_tagihan_masuk)
-                AND MONTH(barang_masuks.tanggal_masuk) = MONTH(barang_masuks.tanggal_tagihan_masuk)
-            THEN barang_masuks.harga_lembur
-            WHEN customers_masuks.type_payment_customer = 'Pertanggal Masuk'
-                AND barang_masuks.tanggal_tagihan_masuk <= DATE_ADD(barang_masuks.tanggal_masuk, INTERVAL 1 MONTH)
-            THEN barang_masuks.harga_lembur
-            ELSE 0
-        END
-    )
-    ELSE ((COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0)) / COALESCE(total_items.total_qty, 0)) * barang_masuks.harga_simpan_barang + (
-        CASE 
-            WHEN customers_masuks.type_payment_customer = 'Akhir Bulan'
-                AND YEAR(barang_masuks.tanggal_masuk) = YEAR(barang_masuks.tanggal_tagihan_masuk)
-                AND MONTH(barang_masuks.tanggal_masuk) = MONTH(barang_masuks.tanggal_tagihan_masuk)
-            THEN barang_masuks.harga_lembur
-            WHEN customers_masuks.type_payment_customer = 'Pertanggal Masuk'
-                AND barang_masuks.tanggal_tagihan_masuk <= DATE_ADD(barang_masuks.tanggal_masuk, INTERVAL 1 MONTH)
-            THEN barang_masuks.harga_lembur
-            ELSE 0
-        END
-    )
-END 
-+ 
-CASE 
-    WHEN customers_masuks.type_payment_customer = 'Akhir Bulan'
-        AND YEAR(barang_masuks.tanggal_masuk) = YEAR(barang_masuks.tanggal_tagihan_masuk)
-        AND MONTH(barang_masuks.tanggal_masuk) = MONTH(barang_masuks.tanggal_tagihan_masuk)
-    THEN barang_masuks.harga_lembur
-    WHEN customers_masuks.type_payment_customer = 'Pertanggal Masuk' 
-        AND barang_masuks.tanggal_tagihan_masuk <= DATE_ADD(barang_masuks.tanggal_masuk, INTERVAL 1 MONTH)
-    THEN barang_masuks.harga_lembur
-    ELSE 0
-END AS total_harga_simpan_dan_lembur,
+COALESCE(barang_keluars.harga_kirim_barang, 0) AS harga_kirim_barang,
+
+COALESCE(
+    CASE 
+        WHEN customers_keluars.type_payment_customer = 'Akhir Bulan' 
+            AND YEAR(barang_keluars.tanggal_keluar) = YEAR(barang_keluars.tanggal_tagihan_keluar)
+            AND MONTH(barang_keluars.tanggal_keluar) = MONTH(barang_keluars.tanggal_tagihan_keluar)
+        THEN barang_keluars.harga_lembur
+        WHEN customers_keluars.type_payment_customer = 'Pertanggal Masuk' 
+            AND barang_keluars.tanggal_tagihan_keluar <= DATE_ADD(barang_keluars.tanggal_keluar, INTERVAL 1 MONTH)
+        THEN barang_keluars.harga_lembur
+        ELSE 0
+    END, 0
+) + COALESCE(barang_keluars.harga_kirim_barang, 0) AS total_harga_barang_keluar,
+
+
+    
 customers_masuks.no_npwp AS no_npwp_masuk,
             customers_masuks.no_ktp AS no_ktp_masuk,
             customers_keluars.no_npwp AS no_npwp_keluar,
@@ -504,7 +444,7 @@ LEFT JOIN
         bki.barang_masuk_id) AS total_keluar ON barang_masuks.id = total_keluar.barang_masuk_id
         LEFT JOIN type_mobil AS type_mobil_masuk ON barang_masuks.type_mobil_id = type_mobil_masuk.id
         LEFT JOIN type_mobil AS type_mobil_keluar ON barang_keluars.type_mobil_id = type_mobil_keluar.id
-        WHERE invoices.nomer_invoice = ? 
+        WHERE invoices.nomer_invoice = ?
         ORDER BY barang_keluars.tanggal_keluar DESC;
     ";
 
@@ -515,6 +455,7 @@ LEFT JOIN
 
             return redirect()->route('data-invoice.invoice-master.index')->with('error', 'Invoice not found.');
         }
+
 
         session(['invoiceMaster' => $invoiceMaster]);
 
@@ -527,18 +468,17 @@ LEFT JOIN
         // Get data from session
         $user = Auth::user();
 
-        if (!$user ) {
+        if (!$user) {
             return redirect()->route('login')->with('alert', 'Waktu login Anda telah habis, silakan login ulang.');
         } else {
-        $invoiceMaster = session('invoiceMaster');
+            $invoiceMaster = session('invoiceMaster');
 
-        if (empty($invoiceMaster)) {
-            return redirect()->route('data-invoice.invoice-master.index')->with('error', 'No invoice data available.');
-        }
+            if (empty($invoiceMaster)) {
+                return redirect()->route('data-invoice.invoice-master.index')->with('error', 'No invoice data available.');
+            }
 
-        // Show the view with the invoice data
-        return view('data-invoice.invoice-master.show', compact('invoiceMaster'));
+            // Show the view with the invoice data
+            return view('data-invoice.invoice-master.show', compact('invoiceMaster'));
         }
     }
-
 }

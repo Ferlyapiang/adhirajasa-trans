@@ -62,57 +62,73 @@
                                         </thead>
                                         <tbody>
                                             @foreach ($invoiceMaster as $index => $item)
-                                            <tr>
-                                                <td>{{ $item->joc_number ? $item->joc_number : $item->nomer_surat_jalan }}</td>
-                                                <td>{{ $item->nomer_polisi_masuk ?: $item->nomer_polisi_keluar ?: $item->nomer_container_masuk ?: $item->nomer_container_keluar ?: '' }}</td>
-                                                <td>{{ $item->total_qty_masuk ?: $item->total_qty_keluar_keluar ?: '' }}</td>
-                                                <td style="text-align: center;">
-                                                    Kontainer <strong>{{ $item->type_mobil_masuk ?: $item->type_mobil_keluar ?: '' }}</strong>
-                                                    <br>
-                                                    Masa Penimbunan :
-                                                    <strong>{{ $item->tanggal_masuk_barang ? \Carbon\Carbon::parse($item->tanggal_masuk_barang)->format('d/m/Y') : ($item->tanggal_keluar ? \Carbon\Carbon::parse($item->tanggal_keluar)->format('d/m/Y') : '') }}</strong>
-                                                    -
-                                                    <strong>{{ $item->tanggal_tagihan_masuk ? \Carbon\Carbon::parse($item->tanggal_tagihan_masuk)->format('d/m/Y') : ($item->tanggal_tagihan_keluar ? \Carbon\Carbon::parse($item->tanggal_tagihan_keluar)->format('d/m/Y') : '') }}</strong>
-                                                </td>
-                                                <td>{{ number_format($item->total_harga_simpan_dan_lembur ?: $item->total_harga_barang_keluar, 0, ',', '.') }}</td>
-                                            </tr>
+                                                <tr>
+                                                    <td>{{ $item->joc_number ? $item->joc_number : $item->nomer_surat_jalan }}
+                                                    </td>
+                                                    <td>{{ $item->nomer_polisi_masuk ?: $item->nomer_polisi_keluar ?: $item->nomer_container_masuk ?: $item->nomer_container_keluar ?: '' }}
+                                                    </td>
+                                                    <td>{{ $item->total_qty_masuk ?: $item->total_qty_keluar_keluar ?: '' }}
+                                                    </td>
+                                                    <td style="text-align: center;">
+                                                        Kontainer
+                                                        <strong>{{ $item->type_mobil_masuk ?: $item->type_mobil_keluar ?: '' }}</strong>
+                                                        <br>
+                                                        Masa Penimbunan :
+                                                        <strong>{{ $item->tanggal_masuk_barang ? \Carbon\Carbon::parse($item->tanggal_masuk_barang)->format('d/m/Y') : ($item->tanggal_keluar ? \Carbon\Carbon::parse($item->tanggal_keluar)->format('d/m/Y') : '') }}</strong>
+                                                        -
+                                                        <strong>{{ $item->tanggal_tagihan_masuk ? \Carbon\Carbon::parse($item->tanggal_tagihan_masuk)->format('d/m/Y') : ($item->tanggal_tagihan_keluar ? \Carbon\Carbon::parse($item->tanggal_tagihan_keluar)->format('d/m/Y') : '') }}</strong>
+                                                    </td>
+                                                    <td>{{ number_format($item->total_harga_simpan_lembur ?: $item->total_harga_barang_keluar, 0, ',', '.') }}
+                                                    </td>
+                                                </tr>
                                             @endforeach
                                         </tbody>
 
                                         @php
-                                        // Hitung total harga
-                                        $totalHarga = array_reduce($invoiceMaster, function($carry, $item) {
-                                        return $carry + ($item->total_harga_simpan_dan_lembur ?: $item->total_harga_barang_keluar ?: 0);
-                                        }, 0);
+                                            // Hitung total harga
+                                            $totalHarga = array_reduce(
+                                                $invoiceMaster,
+                                                function ($carry, $item) {
+                                                    return $carry +
+                                                        ($item->total_harga_simpan_lembur ?:
+                                                        $item->total_harga_barang_keluar ?:
+                                                            0);
+                                                },
+                                                0,
+                                            );
 
-                                        // Hitung total diskon
-                                        $totalDiskon = array_reduce($invoiceMaster, function($carry, $item) {
-                                        return $carry + ($item->diskon ?: 0); // Assumes diskon is a property of each item
-                                        }, 0);
+                                            // Hitung total diskon
+                                            $totalDiskon = array_reduce(
+                                                $invoiceMaster,
+                                                function ($carry, $item) {
+                                                    return $carry + ($item->diskon ?: 0); // Assumes diskon is a property of each item
+                                                },
+                                                0,
+                                            );
 
-                                        // Inisialisasi PPN dan PPH
-                                        $ppn = 0;
-                                        $pph = 0;
+                                            // Inisialisasi PPN dan PPH
+                                            $ppn = 0;
+                                            $pph = 0;
 
-                                        // Cek apakah $invoiceMaster tidak kosong
-                                        if (count($invoiceMaster) > 0) {
-                                        $firstItem = $invoiceMaster[0];
+                                            // Cek apakah $invoiceMaster tidak kosong
+                                            if (count($invoiceMaster) > 0) {
+                                                $firstItem = $invoiceMaster[0];
 
-                                        // Jika ada no_npwp_masuk atau no_npwp_keluar
-                                        if ($firstItem->no_npwp_masuk || $firstItem->no_npwp_keluar) {
-                                        $ppn = $totalHarga * 0.011; // 1.1%
-                                        $pph = $totalHarga * 0.02; // 2%
-                                        }
-                                        // Jika hanya ada no_ktp_keluar, tidak ada pajak tambahan
-                                        elseif ($firstItem->no_ktp_keluar || $firstItem->no_ktp_masuk) {
-                                        // Tidak ada perhitungan pajak
-                                        $ppn = 0;
-                                        $pph = 0;
-                                        }
-                                        }
+                                                // Jika ada no_npwp_masuk atau no_npwp_keluar
+                                                if ($firstItem->no_npwp_masuk || $firstItem->no_npwp_keluar) {
+                                                    $ppn = $totalHarga * 0.011; // 1.1%
+                                                    $pph = $totalHarga * 0.02; // 2%
+                                                }
+                                                // Jika hanya ada no_ktp_keluar, tidak ada pajak tambahan
+                                                elseif ($firstItem->no_ktp_keluar || $firstItem->no_ktp_masuk) {
+                                                    // Tidak ada perhitungan pajak
+                                                    $ppn = 0;
+                                                    $pph = 0;
+                                                }
+                                            }
 
-                                        // Total akhir
-                                        $totalAkhir = $totalHarga + $ppn + $pph - $totalDiskon; // Subtract total diskon
+                                            // Total akhir
+                                            $totalAkhir = $totalHarga + $ppn + $pph - $totalDiskon; // Subtract total diskon
                                         @endphp
 
                                         <tfoot>
@@ -123,25 +139,28 @@
                                                 </td>
                                             </tr>
 
-                                            @if ($ppn > 0 || $pph > 0) <!-- Hanya tampilkan PPN dan PPH jika ada -->
-                                            <tr>
-                                                <td colspan="4" class="text-right"><strong>PPN (1.1%)</strong></td>
-                                                <td>
-                                                    {{ number_format($ppn, 0, ',', '.') }}
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td colspan="4" class="text-right"><strong>PPH (2%)</strong></td>
-                                                <td>
-                                                    {{ number_format($pph, 0, ',', '.') }}
-                                                </td>
-                                            </tr>
+                                            @if ($ppn > 0 || $pph > 0)
+                                                <!-- Hanya tampilkan PPN dan PPH jika ada -->
+                                                <tr>
+                                                    <td colspan="4" class="text-right"><strong>PPN (1.1%)</strong>
+                                                    </td>
+                                                    <td>
+                                                        {{ number_format($ppn, 0, ',', '.') }}
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="4" class="text-right"><strong>PPH (2%)</strong></td>
+                                                    <td>
+                                                        {{ number_format($pph, 0, ',', '.') }}
+                                                    </td>
+                                                </tr>
                                             @endif
 
                                             <tr>
                                                 <td colspan="4" class="text-right"><strong>Diskon</strong></td>
                                                 <td>
-                                                    {{ number_format($totalDiskon, 0, ',', '.') }} <!-- Total Diskon -->
+                                                    {{ number_format($totalDiskon, 0, ',', '.') }}
+                                                    <!-- Total Diskon -->
                                                 </td>
                                             </tr>
 
