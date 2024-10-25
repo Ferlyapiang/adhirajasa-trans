@@ -275,6 +275,8 @@
                                                 </tr>
                                             </tfoot>
                                         </table>
+                                        <a href="{{ route('invoice.download', $invoiceMaster[0]->id) }}" class="btn btn-primary">Download PDF</a>
+
                                     </div>
                                 </div>
                             </div>

@@ -9,6 +9,7 @@ use App\Models\BarangMasuk;
 use App\Models\Invoice;
 use App\Models\BarangKeluar;
 use App\Models\Warehouse;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class InvoiceGeneratedController extends Controller
 {
@@ -458,4 +459,25 @@ LEFT JOIN
             return view('data-invoice.invoice-master.show', compact('invoiceMaster', 'headOffice', 'branchOffices'));
         }
     }
+    
+    public function download($id)
+{
+    $invoice = Invoice::find($id); // Replace with your actual model and logic
+
+    $invoiceMaster = session('invoiceMaster');
+
+            if (empty($invoiceMaster)) {
+                return redirect()->route('data-invoice.invoice-master.index')->with('error', 'No invoice data available.');
+            }
+
+            $warehouses = Warehouse::all(); // Get all warehouses
+            $headOffice = $warehouses->where('status_office', 'head_office')->first();
+            $branchOffices = $warehouses->where('status_office', 'branch_office');
+
+
+    // Generate PDF
+    $pdf = PDF::loadView('data-invoice.invoice-master.pdf', compact('invoice', 'invoiceMaster', 'headOffice', 'branchOffices')); // Ensure the view exists
+    return $pdf->download('invoice_' . $id . '.pdf');
+}
+
 }

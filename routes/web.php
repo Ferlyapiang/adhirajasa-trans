@@ -189,6 +189,8 @@ Route::get('/data-invoice/invoice-master', [InvoiceGeneratedController::class, '
 Route::post('/invoices/generate', [InvoiceGeneratedController::class, 'generateInvoice'])->name('invoice.generate');
 Route::post('/invoices', [InvoiceGeneratedController::class, 'show'])->name('invoices.show');
 Route::get('/data-invoice/invoice-master/display', [InvoiceGeneratedController::class, 'display'])->name('data-invoice.invoice-master.display');
+Route::get('/invoice/download/{id}', [InvoiceGeneratedController::class, 'download'])->name('invoice.download');
+
 
 
 
