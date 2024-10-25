@@ -20,6 +20,7 @@ use App\Http\Controllers\JenisMobilController;
 use App\Http\Controllers\InvoiceBarangMasukController;
 use App\Http\Controllers\InvoiceBarangKeluarController;
 use App\Http\Controllers\InvoiceGeneratedController;
+use App\Http\Controllers\InvoiceReportingController;
 
 // Login and Logout
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login.form');
@@ -191,6 +192,10 @@ Route::post('/invoices', [InvoiceGeneratedController::class, 'show'])->name('inv
 Route::get('/data-invoice/invoice-master/display', [InvoiceGeneratedController::class, 'display'])->name('data-invoice.invoice-master.display');
 Route::get('/invoice/download/{id}', [InvoiceGeneratedController::class, 'download'])->name('invoice.download');
 
+Route::get('/data-reporting-invoice/invoice-reporting', [InvoiceReportingController::class, 'index'])->name('data-invoice.invoice-reporting.index');
+Route::post('/data-reporting-invoice', [InvoiceReportingController::class, 'show'])->name('invoices-report.show');
+Route::get('/data-reporting-invoice/invoice-reporting/display', [InvoiceReportingController::class, 'display'])->name('data-invoice.invoice-reporting.display');
+Route::get('/data-reporting-invoice/invoice-reporting/download/{id}', [InvoiceReportingController::class, 'download'])->name('invoice-report.download');
 
 
 

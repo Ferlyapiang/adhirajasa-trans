@@ -87,6 +87,16 @@ class MenuSeeder extends Seeder
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+        $dataReportingId = DB::table('menus')->insertGetId([
+            'name' => 'Data Reporting Invoice',
+            'url' => '/data-reporting-invoice/*',
+            'router' => null,
+            'icon' => 'fa fa-university',
+            'is_active' => 1,
+            'priority' => 5, // Priority
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
 
         DB::table('menus')->insert([
             [
@@ -276,6 +286,20 @@ class MenuSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
+        ]);
+
+        DB::table('menus')->insert([
+            [
+                'name' => 'Reporting Invoice',
+                'url' => '/data-reporting-invoice/invoice-reporting',
+                'router' => 'data-invoice.invoice-reporting.index',
+                'icon' => 'far fa-circle',
+                'is_active' => 1,
+                'priority' => 1, // Priority untuk submenu
+                'parent_id' => $dataReportingId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
         ]);
     }
 }
