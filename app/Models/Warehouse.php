@@ -19,10 +19,12 @@ class Warehouse extends Model
     // Define which attributes are mass assignable
     protected $fillable = [
         'name',
+        'initial',
         'address',
         'status',
         'phone_number',
-        'email'
+        'email',
+        'status_office',
     ];
 
     // Optionally define any attributes that should be hidden from arrays or JSON representations

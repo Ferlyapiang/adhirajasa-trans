@@ -48,6 +48,16 @@
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-lg-12">
+                            <div class="text-left mb-3">
+                                <img src="{{ asset('ats/ATSLogo.png') }}" alt="ATS Logo" style="height: 80px;">
+                            </div>
+                            <div>
+                                <h4>Kantor Pusat:</h4>
+                                <p>{{ $headOffice->address ?? 'Alamat tidak tersedia' }}</p>
+                            
+                                <h4>Kantor Cabang:</h4>
+                                <p>{{ $branchOffice->address ?? 'Alamat tidak tersedia' }}</p>
+                            </div>
                             <div class="card-body">
                                 <div class="table-responsive">
                                     <table id="barangMasukTable" class="table table-bordered table-striped">

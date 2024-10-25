@@ -117,7 +117,9 @@
                         <thead>
                             <tr>
                                 <th>Nama Gudang</th>
+                                <th>Nama Inisial Gudang</th>
                                 <th>Alamat Gudang</th>
+                                <th>Status Gudang</th>
                                 <th>Status</th>
                                 <th>Nomer Telpon</th>
                                 <th>Email</th>
@@ -128,7 +130,18 @@
                             @foreach($warehouses as $warehouse)
                                 <tr>
                                     <td>{{ $warehouse->name }}</td>
+                                    <td>{{ $warehouse->initial }}</td>
                                     <td>{{ $warehouse->address }}</td>
+                                    <td>
+                                        @if ($warehouse->status_office === 'head_office')
+                                            Kantor Pusat
+                                        @elseif ($warehouse->status_office === 'branch_office')
+                                            Kantor Cabang
+                                        @else
+                                            Kantor Cabang
+                                        @endif
+                                    </td>
+                                    
                                     <td>{{ $warehouse->status }}</td>
                                     <td>{{ $warehouse->phone_number }}</td>
                                     <td>{{ $warehouse->email }}</td>

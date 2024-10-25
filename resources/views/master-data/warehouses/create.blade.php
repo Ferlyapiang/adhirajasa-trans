@@ -55,6 +55,10 @@
                                 <input type="text" id="name" name="name" class="form-control" required>
                             </div>
                             <div class="mb-3">
+                                <label for="initial" class="form-label">Nama Initial Gudang:</label>
+                                <input type="text" id="initial" name="initial" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
                                 <label for="address" class="form-label">Alamat Gudang:</label>
                                 <textarea id="address" name="address" class="form-control" rows="4" required></textarea>
                             </div>
@@ -65,6 +69,13 @@
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email:</label>
                                 <input type="text" id="email" name="email" class="form-control">
+                            </div>
+                            <div class="mb-3">
+                                <label for="status_office" class="form-label">Status Office:</label>
+                                <select id="status_office" name="status" class="form-select" required>
+                                    <option value="head_office">Kantor Pusat</option>
+                                    <option value="branch_office">Kantor Cabang</option>
+                                </select>
                             </div>
                             <div class="mb-3">
                                 <label for="status" class="form-label">Status:</label>

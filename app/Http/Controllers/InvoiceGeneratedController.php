@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\BarangMasuk;
 use App\Models\Invoice;
 use App\Models\BarangKeluar;
+use App\Models\Warehouse;
 
 class InvoiceGeneratedController extends Controller
 {
@@ -476,6 +477,9 @@ LEFT JOIN
             if (empty($invoiceMaster)) {
                 return redirect()->route('data-invoice.invoice-master.index')->with('error', 'No invoice data available.');
             }
+
+            $headOffice = Warehouse::where('status', 'head_office')->first(); // Misalnya status menandakan kantor pusat
+            $branchOffice = Warehouse::where('status', 'branch_office')->first();
 
             // Show the view with the invoice data
             return view('data-invoice.invoice-master.show', compact('invoiceMaster'));

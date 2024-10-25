@@ -36,7 +36,9 @@ class WarehouseController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'initial' => 'nullable|string|max:255',
             'address' => 'required|string|max:255',
+            'status_office' => 'required|in:head_office,branch_office',
             'status' => 'required|in:active,inactive',
             'phone_number' => 'nullable|string|max:255',
             'email' => 'nullable|string|max:255',
@@ -64,8 +66,10 @@ class WarehouseController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'initial' => 'nullable|string|max:255',
             'address' => 'required|string|max:255',
             'status' => 'required|in:active,inactive',
+            'status_office' => 'required|in:head_office,branch_office',
             'phone_number' => 'nullable|string|max:255',
             'email' => 'nullable|string|max:255',
         ]);
