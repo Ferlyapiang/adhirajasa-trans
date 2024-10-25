@@ -279,6 +279,7 @@ class InvoiceGeneratedController extends Controller
             invoices.nomer_invoice,
             invoices.barang_masuks_id,
             invoices.diskon,
+            invoices.tanggal_masuk,
             barang_masuks.joc_number,
             barang_keluars.nomer_surat_jalan,
             barang_masuks.tanggal_tagihan_masuk,
@@ -290,6 +291,7 @@ class InvoiceGeneratedController extends Controller
             warehouses_keluars.name AS warehouse_keluar_name,
             barang_masuks.customer_id,
             customers_masuks.name AS customer_masuk_name,
+            customers_masuks.no_hp AS customer_masuk_no_hp,
             customers_masuks.type_payment_customer AS type_payment_customer_masuk,
             type_mobil_masuk.type AS type_mobil_masuk,
             type_mobil_keluar.type AS type_mobil_keluar,
@@ -369,25 +371,13 @@ class InvoiceGeneratedController extends Controller
 
 COALESCE(barang_keluars.harga_kirim_barang, 0) AS harga_kirim_barang,
 
-COALESCE(
-    CASE 
-        WHEN customers_keluars.type_payment_customer = 'Akhir Bulan' 
-            AND YEAR(barang_keluars.tanggal_keluar) = YEAR(barang_keluars.tanggal_tagihan_keluar)
-            AND MONTH(barang_keluars.tanggal_keluar) = MONTH(barang_keluars.tanggal_tagihan_keluar)
-        THEN barang_keluars.harga_lembur
-        WHEN customers_keluars.type_payment_customer = 'Pertanggal Masuk' 
-            AND barang_keluars.tanggal_tagihan_keluar <= DATE_ADD(barang_keluars.tanggal_keluar, INTERVAL 1 MONTH)
-        THEN barang_keluars.harga_lembur
-        ELSE 0
-    END, 0
-) + COALESCE(barang_keluars.harga_kirim_barang, 0) AS total_harga_barang_keluar,
-
-
+COALESCE(barang_keluars.harga_lembur, 0) + COALESCE(barang_keluars.harga_kirim_barang, 0) AS total_harga_barang_keluar,
     
 customers_masuks.no_npwp AS no_npwp_masuk,
             customers_masuks.no_ktp AS no_ktp_masuk,
             customers_keluars.no_npwp AS no_npwp_keluar,
-            customers_keluars.no_ktp AS no_ktp_keluar
+            customers_keluars.no_ktp AS no_ktp_keluar,
+            customers_keluars.no_hp AS customer_keluar_no_hp
 
 
         FROM invoices
@@ -465,7 +455,7 @@ LEFT JOIN
 
 
             // Show the view with the invoice data
-            return view('data-invoice.invoice-master.show', compact('invoiceMaster'));
+            return view('data-invoice.invoice-master.show', compact('invoiceMaster', 'headOffice', 'branchOffices'));
         }
     }
 }
