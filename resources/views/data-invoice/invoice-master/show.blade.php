@@ -53,11 +53,21 @@
                             </div>
                             <div>
                                 <h4>Kantor Pusat:</h4>
-                                <p>{{ $headOffice->address ?? 'Alamat tidak tersedia' }}</p>
-                            
+                                <p>Alamat: {{ $headOffice->address ?? 'Alamat tidak tersedia' }}</p>
+                                <p>Nomor Telepon: {{ $headOffice->phone_number ?? 'Nomor telepon tidak tersedia' }}</p>
+                                
                                 <h4>Kantor Cabang:</h4>
-                                <p>{{ $branchOffice->address ?? 'Alamat tidak tersedia' }}</p>
+                                @if ($branchOffices->isEmpty())
+                                    <p>Tidak ada kantor cabang tersedia.</p>
+                                @else
+                                    @foreach ($branchOffices as $branchOffice)
+                                        <h5>Kantor Cabang {{ $loop->iteration }}:</h5>
+                                        <p>Alamat: {{ $branchOffice->address ?? 'Alamat tidak tersedia' }}</p>
+                                        <p>Nomor Telepon: {{ $branchOffice->phone_number ?? 'Nomor telepon tidak tersedia' }}</p>
+                                    @endforeach
+                                @endif
                             </div>
+                            
                             <div class="card-body">
                                 <div class="table-responsive">
                                     <table id="barangMasukTable" class="table table-bordered table-striped">

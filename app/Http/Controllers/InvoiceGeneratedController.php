@@ -102,18 +102,7 @@ class InvoiceGeneratedController extends Controller
                 'barang_keluars.customer_id',
                 'customers_keluars.name AS customer_keluar_name',
                 'customers_keluars.type_payment_customer AS type_payment_customer_keluar',
-                DB::raw('
-            CASE 
-                WHEN customers_keluars.type_payment_customer = "Akhir Bulan" 
-                    AND YEAR(barang_keluars.tanggal_keluar) = YEAR(barang_keluars.tanggal_tagihan_keluar)
-                    AND MONTH(barang_keluars.tanggal_keluar) = MONTH(barang_keluars.tanggal_tagihan_keluar)
-                THEN barang_keluars.harga_lembur
-                WHEN customers_keluars.type_payment_customer = "Pertanggal Masuk" 
-                    AND barang_keluars.tanggal_tagihan_keluar <= DATE_ADD(barang_keluars.tanggal_keluar, INTERVAL 1 MONTH)
-                THEN barang_keluars.harga_lembur
-                ELSE 0
-            END AS harga_lembur_keluar
-        '),
+                'barang_keluars.harga_lembur AS harga_lembur_keluar',
                 'barang_keluars.harga_kirim_barang'
             )
             ->leftJoin('barang_masuks', 'invoices.barang_masuks_id', '=', 'barang_masuks.id')
@@ -149,16 +138,7 @@ class InvoiceGeneratedController extends Controller
 
         $invoiceMaster = $invoiceMaster->whereRaw('COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0) > 0 
                 OR (
-                    (CASE 
-                        WHEN customers_keluars.type_payment_customer = "Akhir Bulan" 
-                            AND YEAR(barang_keluars.tanggal_keluar) = YEAR(barang_keluars.tanggal_tagihan_keluar)
-                            AND MONTH(barang_keluars.tanggal_keluar) = MONTH(barang_keluars.tanggal_tagihan_keluar)
-                        THEN barang_keluars.harga_lembur
-                        WHEN customers_keluars.type_payment_customer = "Pertanggal Masuk" 
-                            AND barang_keluars.tanggal_tagihan_keluar <= DATE_ADD(barang_keluars.tanggal_keluar, INTERVAL 1 MONTH)
-                        THEN barang_keluars.harga_lembur
-                        ELSE 0
-                    END) > 0 
+                    (COALESCE(barang_keluars.harga_lembur, 0)) > 0
                     OR (CASE 
                         WHEN customers_masuks.type_payment_customer = "Akhir Bulan" 
                             AND YEAR(barang_masuks.tanggal_masuk) = YEAR(barang_masuks.tanggal_tagihan_masuk)
@@ -169,8 +149,9 @@ class InvoiceGeneratedController extends Controller
                         THEN barang_masuks.harga_lembur
                         ELSE 0
                     END) > 0
-                    OR barang_keluars.harga_kirim_barang > 0
-                )');
+                )
+                OR COALESCE(barang_keluars.harga_kirim_barang,0) > 0
+            ');
 
         $invoiceMaster = $invoiceMaster->orderBy('barang_keluars.tanggal_keluar', 'desc')->get();
         $owners = $invoiceMaster->map(function ($item) {
@@ -478,8 +459,10 @@ LEFT JOIN
                 return redirect()->route('data-invoice.invoice-master.index')->with('error', 'No invoice data available.');
             }
 
-            $headOffice = Warehouse::where('status', 'head_office')->first(); // Misalnya status menandakan kantor pusat
-            $branchOffice = Warehouse::where('status', 'branch_office')->first();
+            $warehouses = Warehouse::all(); // Get all warehouses
+            $headOffice = $warehouses->where('status_office', 'head_office')->first();
+            $branchOffices = $warehouses->where('status_office', 'branch_office');
+
 
             // Show the view with the invoice data
             return view('data-invoice.invoice-master.show', compact('invoiceMaster'));
