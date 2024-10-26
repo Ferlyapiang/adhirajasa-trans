@@ -74,11 +74,16 @@
         <img src="{{ public_path('ATSLogo.jpg') }}" alt="ATS Logo" style="height: 80px; margin-bottom: 20px;"> <br> <br>
 
         <div class="invoice-header">
-            <h4>Kantor Pusat:</h4>
-            <p>Alamat: <span class="text-primary">{{ $headOffice->address ?? 'Alamat tidak tersedia' }}</span></p>
-            <p>Nomor Telepon: <span
-                    class="text-primary">{{ $headOffice->phone_number ?? 'Nomor telepon tidak tersedia' }}</span></p>
-            <p>Email: <span class="text-primary">{{ $headOffice->email ?? 'Email tidak tersedia' }}</span></p>
+            <h4 style="font-size: 1.2em; margin-bottom: 5px;">Kantor Pusat:</h4>
+            <p style="font-size: 0.85em; margin: 2px 0;">Alamat: <br> <span
+                    class="text-primary">{{ $headOffice->address ?? 'Alamat tidak tersedia' }}</span>
+            </p>
+            <p style="font-size: 0.85em; margin: 2px 0;">Nomor Telepon: <br> <span
+                    class="text-primary">{{ $headOffice->phone_number ?? 'Nomor telepon tidak tersedia' }}</span>
+            </p>
+            <p style="font-size: 0.85em; margin: 2px 0;">Email: <br> <span
+                    class="text-primary">{{ $headOffice->email ?? 'Email tidak tersedia' }}</span>
+            </p>
         </div>
 
         <h1>Invoice</h1>
@@ -92,7 +97,7 @@
             <tbody>
                 <tr>
                     <td>{{ $invoiceMaster[0]->nomer_invoice }}</td>
-                    <td>{{ $invoiceMaster[0]->tanggal_masuk ?: ($invoiceMaster[0]->tanggal_keluar ?: 'Tanggal transaksi tidak tersedia') }}
+                    <td>{{ $invoiceMaster[0]->tanggal_invoice_tagihan ?: ($invoiceMaster[0]->tanggal_invoice_tagihan ?: 'Tanggal transaksi tidak tersedia') }}
                     </td>
                 </tr>
             </tbody>

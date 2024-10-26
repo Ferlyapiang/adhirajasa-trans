@@ -139,7 +139,7 @@
                                         <tbody>
                                             <tr>
                                                 <td>{{ $invoiceMaster[0]->nomer_invoice }}</td>
-                                                <td>{{ $invoiceMaster[0]->tanggal_masuk ?: ($invoiceMaster[0]->tanggal_keluar ?: 'Tanggal transaksi tidak tersedia') }}
+                                                <td>{{ $invoiceMaster[0]->tanggal_invoice_tagihan ?: ($invoiceMaster[0]->tanggal_invoice_tagihan ?: 'Tanggal transaksi tidak tersedia') }}
                                                 </td>
                                             </tr>
                                         </tbody>

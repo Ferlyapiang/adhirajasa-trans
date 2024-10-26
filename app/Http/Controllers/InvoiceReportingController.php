@@ -177,7 +177,7 @@ class InvoiceReportingController extends Controller
             invoices_reporting.nomer_invoice,
             invoices_reporting.barang_masuks_id,
             invoices_reporting.diskon,
-            invoices_reporting.tanggal_masuk,
+            invoices_reporting.tanggal_masuk as tanggal_invoice_tagihan,
             barang_masuks.joc_number,
             barang_keluars.nomer_surat_jalan,
             barang_masuks.tanggal_tagihan_masuk,
@@ -330,7 +330,7 @@ LEFT JOIN
         session(['invoiceMaster' => $invoiceMaster]);
 
         // return view('data-invoice.invoice-master.show', compact('invoiceMaster'));
-        return redirect()->route('data-invoice.invoice-master.display');
+        return redirect()->route('data-invoice.invoice-reporting.display');
     }
 
     public function display()

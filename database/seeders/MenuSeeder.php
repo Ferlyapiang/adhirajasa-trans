@@ -88,7 +88,7 @@ class MenuSeeder extends Seeder
             'updated_at' => now(),
         ]);
         $dataReportingId = DB::table('menus')->insertGetId([
-            'name' => 'Data Reporting Invoice',
+            'name' => 'Reporting Invoice',
             'url' => '/data-reporting-invoice/*',
             'router' => null,
             'icon' => 'fa fa-university',

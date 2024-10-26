@@ -275,8 +275,8 @@
                                                 </tr>
                                             </tfoot>
                                         </table>
-                                        <a href="{{ route('invoice.download', $invoiceMaster[0]->id) }}" class="btn btn-primary">Download PDF</a>
-                                        <a href="{{ route('data-invoice.invoice-reporting.index') }}" class="btn btn-secondary">Back</a>
+                                        <a href="{{ route('invoice-report.download', $invoiceMaster[0]->id) }}" class="btn btn-primary">Download PDF</a>
+                                        <a href="{{ route('data-invoice.invoice-reporting.display') }}" class="btn btn-secondary">Back</a>
                                     </div>
                                 </div>
                             </div>
