@@ -25,6 +25,7 @@ return new class extends Migration
             $table->decimal('harga_lembur', 15, 2)->nullable();
             $table->string('status_invoice')->nullable();
             $table->date('tanggal_tagihan_masuk')->nullable();
+            $table->date('tanggal_penimbunan')->nullable();
             $table->timestamps();
         });
 

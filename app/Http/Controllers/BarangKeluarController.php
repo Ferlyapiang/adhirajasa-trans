@@ -178,19 +178,9 @@ class BarangKeluarController extends Controller
             $formattedNumber = sprintf('%03d', $nextNumber);
             $nomer_invoice = "ATS/INV/{$year}/{$romanMonth}/{$warehouseCode}/{$formattedNumber}";
             
-            $customer = Customer::find($request->customer_id);
             $tanggalKeluar = $request->tanggal_keluar ? Carbon::createFromFormat('Y-m-d', $request->tanggal_keluar) : null;
 
-            if ($customer->type_payment_customer === 'Akhir Bulan') {
-                if ($tanggalKeluar && $tanggalKeluar->day > 25) {
-                    $tanggalTagihanKeluar = $tanggalKeluar->copy()->addMonth()->endOfMonth()->format('Y-m-d');
-                } else {
-                    $tanggalTagihanKeluar = $tanggalKeluar ? $tanggalKeluar->endOfMonth()->format('Y-m-d') : null;
-                }
-            } elseif ($customer->type_payment_customer === 'Pertanggal Masuk') {
-                $tanggalTagihanKeluar = $tanggalKeluar ? $tanggalKeluar->copy()->addMonth()->subDay()->format('Y-m-d') : null;
-            }
-
+            $tanggalTagihanKeluar = $tanggalKeluar ? $tanggalKeluar->copy()->addMonth()->startOfMonth()->addDays(2)->format('Y-m-d') : null;
 
             $barangKeluarData = [
                 'nomer_surat_jalan' => $validated['nomor_surat_jalan'],
@@ -396,17 +386,7 @@ class BarangKeluarController extends Controller
         $customer = Customer::find($request->customer_id);
         $tanggalKeluar = $request->tanggal_keluar ? Carbon::createFromFormat('Y-m-d', $request->tanggal_keluar) : null;
 
-        if ($customer->type_payment_customer === 'Akhir Bulan') {
-            if ($tanggalKeluar && $tanggalKeluar->day > 25) {
-                
-                $tanggalTagihanKeluar = $tanggalKeluar->copy()->addMonth()->endOfMonth()->format('Y-m-d');
-            } else {
-                
-                $tanggalTagihanKeluar = $tanggalKeluar ? $tanggalKeluar->endOfMonth()->format('Y-m-d') : null;
-            }
-        } elseif ($customer->type_payment_customer === 'Pertanggal Masuk') {
-            $tanggalTagihanKeluar = $tanggalKeluar ? $tanggalKeluar->copy()->addMonth()->subDay()->format('Y-m-d') : null;
-        }
+        $tanggalTagihanKeluar = $tanggalKeluar ? $tanggalKeluar->copy()->addMonth()->startOfMonth()->addDays(2)->format('Y-m-d') : null;
 
 
         $barangKeluarData = [

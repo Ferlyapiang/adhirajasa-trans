@@ -20,46 +20,58 @@ class BarangMasukController extends Controller
 
     public function index() {
         $user = Auth::user();
-
-        if (!$user ) {
+    
+        if (!$user) {
             return redirect()->route('login')->with('alert', 'Waktu login Anda telah habis, silakan login ulang.');
         } else {
-    
-        $barangMasuks = DB::table('barang_masuks as bm')
-            ->select(
-                'bm.id AS barang_masuk_id',
-                'bki.id AS barang_keluar_id',
-                'bm.tanggal_masuk',
-                'bm.joc_number',
-                'b.nama_barang AS nama_barang',
-                'c.name AS nama_customer',
-                'w.name AS nama_gudang',
-                'tm.type AS nama_type_mobil',
-                'bm.nomer_polisi',
-                'bm.nomer_container',
-                'bmi.notes',
-                'bmi.qty AS fifo_in',
-                DB::raw('IFNULL(bki.qty, 0) AS fifo_out'),
-                'bmi.unit',
-                DB::raw('(bmi.qty - IFNULL(bki.qty, 0)) AS fifo_sisa')
-            )
-            ->join('barang_masuk_items as bmi', 'bm.id', '=', 'bmi.barang_masuk_id')
-            ->join('barangs as b', 'bmi.barang_id', '=', 'b.id')
-            ->join('customers as c', 'bm.customer_id', '=', 'c.id')
-            ->join('warehouses as w', 'bm.gudang_id', '=', 'w.id')
-            ->join('type_mobil as tm', 'bm.type_mobil_id', '=', 'tm.id')
-            ->leftJoin('barang_keluar_items as bki', function ($join) {
-                $join->on('bmi.barang_masuk_id', '=', 'bki.barang_masuk_id')
-                     ->whereColumn('bmi.barang_id', '=', 'bki.barang_id');
-            })
-            // ->where('bm.status_invoice', 'Barang Masuk')
-            ->orderBy('bm.tanggal_masuk', 'desc')
-            ->get();
-
+            $barangMasuks = DB::table('barang_masuks as bm')
+                ->select(
+                    'bm.id AS barang_masuk_id',
+                    DB::raw('MAX(bki.id) AS barang_keluar_id'),  // Menggunakan MAX untuk mendapatkan satu id dari barang keluar
+                    'bm.tanggal_masuk',
+                    'bm.joc_number',
+                    'b.nama_barang AS nama_barang',
+                    'c.name AS nama_customer',
+                    'w.name AS nama_gudang',
+                    'tm.type AS nama_type_mobil',
+                    'bm.nomer_polisi',
+                    'bm.nomer_container',
+                    'bmi.notes',
+                    DB::raw('MIN(bmi.qty) AS fifo_in'),  // Mengambil nilai qty pertama dari barang masuk
+                    DB::raw('COALESCE(SUM(bki.qty), 0) AS fifo_out'),  // Menghitung total fifo_out, default ke 0 jika tidak ada
+                    'bmi.unit',
+                    DB::raw('(MIN(bmi.qty) - COALESCE(SUM(bki.qty), 0)) AS fifo_sisa')  // Menghitung fifo_sisa
+                )
+                ->join('barang_masuk_items as bmi', 'bm.id', '=', 'bmi.barang_masuk_id')
+                ->join('barangs as b', 'bmi.barang_id', '=', 'b.id')
+                ->join('customers as c', 'bm.customer_id', '=', 'c.id')
+                ->join('warehouses as w', 'bm.gudang_id', '=', 'w.id')
+                ->join('type_mobil as tm', 'bm.type_mobil_id', '=', 'tm.id')
+                ->leftJoin('barang_keluar_items as bki', function ($join) {
+                    $join->on('bmi.barang_masuk_id', '=', 'bki.barang_masuk_id')
+                         ->whereColumn('bmi.barang_id', '=', 'bki.barang_id');
+                })
+                // ->where('bm.status_invoice', 'Barang Masuk')
+                ->groupBy(
+                    'bm.id',
+                    'bm.tanggal_masuk',
+                    'bm.joc_number',
+                    'b.nama_barang',
+                    'c.name',
+                    'w.name',
+                    'tm.type',
+                    'bm.nomer_polisi',
+                    'bm.nomer_container',
+                    'bmi.notes',
+                    'bmi.unit'
+                )
+                ->orderBy('bm.tanggal_masuk', 'desc')
+                ->get();
         }
     
         return view('data-gudang.barang-masuk.index', compact('barangMasuks'));
     }
+    
     
     
     
@@ -143,14 +155,15 @@ class BarangMasukController extends Controller
             if ($customer->type_payment_customer === 'Akhir Bulan') {
                 if ($tanggalMasuk && $tanggalMasuk->day > 25) {
                     // Jika tanggalMasuk di atas tanggal 25, gunakan bulan berikutnya
-                    $tanggalTagihanMasuk = $tanggalMasuk->copy()->addMonth()->endOfMonth()->format('Y-m-d');
+                    $tanggalPenimbunanMasuk = $tanggalMasuk->copy()->addMonth()->endOfMonth()->format('Y-m-d');
                 } else {
                     // Jika tanggalMasuk di 25 atau di bawah, gunakan bulan yang sama
-                    $tanggalTagihanMasuk = $tanggalMasuk ? $tanggalMasuk->endOfMonth()->format('Y-m-d') : null;
+                    $tanggalPenimbunanMasuk = $tanggalMasuk ? $tanggalMasuk->endOfMonth()->format('Y-m-d') : null;
                 }
             } elseif ($customer->type_payment_customer === 'Pertanggal Masuk') {
-                $tanggalTagihanMasuk = $tanggalMasuk ? $tanggalMasuk->copy()->addMonth()->subDay()->format('Y-m-d') : null;
+                $tanggalPenimbunanMasuk = $tanggalMasuk ? $tanggalMasuk->copy()->addMonth()->subDay()->format('Y-m-d') : null;
             }
+            $tanggalTagihanMasuk = $tanggalMasuk ? $tanggalMasuk->copy()->addMonth()->startOfMonth()->addDays(2)->format('Y-m-d') : null;
             
             
             $barangMasuk = BarangMasuk::create([
@@ -165,6 +178,7 @@ class BarangMasukController extends Controller
                 'harga_simpan_barang' => $request->harga_simpan_barang ?? 0,
                 'harga_lembur' => $request->harga_lembur ?? 0,
                 'tanggal_tagihan_masuk' => $tanggalTagihanMasuk,
+                'tanggal_penimbunan' => $tanggalPenimbunanMasuk
             ]);
 
             $items = json_decode($request->items, true);
@@ -246,14 +260,15 @@ class BarangMasukController extends Controller
             if ($customer->type_payment_customer === 'Akhir Bulan') {
                 if ($tanggalMasuk && $tanggalMasuk->day > 25) {
                     
-                    $tanggalTagihanMasuk = $tanggalMasuk->copy()->addMonth()->endOfMonth()->format('Y-m-d');
+                    $tanggalPenimbunanMasuk = $tanggalMasuk->copy()->addMonth()->endOfMonth()->format('Y-m-d');
                 } else {
                     
-                    $tanggalTagihanMasuk = $tanggalMasuk ? $tanggalMasuk->endOfMonth()->format('Y-m-d') : null;
+                    $tanggalPenimbunanMasuk = $tanggalMasuk ? $tanggalMasuk->endOfMonth()->format('Y-m-d') : null;
                 }
             } elseif ($customer->type_payment_customer === 'Pertanggal Masuk') {
-                $tanggalTagihanMasuk = $tanggalMasuk ? $tanggalMasuk->copy()->addMonth()->subDay()->format('Y-m-d') : null;
+                $tanggalPenimbunanMasuk = $tanggalMasuk ? $tanggalMasuk->copy()->addMonth()->subDay()->format('Y-m-d') : null;                
             }
+            $tanggalTagihanMasuk = $tanggalMasuk ? $tanggalMasuk->copy()->addMonth()->startOfMonth()->addDays(2)->format('Y-m-d') : null;
 
             $barangMasuk->update([
                 'tanggal_masuk' => $request->tanggal_masuk,
@@ -266,6 +281,7 @@ class BarangMasukController extends Controller
                 'harga_simpan_barang' => $request->harga_simpan_barang ?? 0,
                 'harga_lembur' => $request->harga_lembur ?? 0,
                 'tanggal_tagihan_masuk' => $tanggalTagihanMasuk,
+                'tanggal_penimbunan' => $tanggalPenimbunanMasuk,
             ]);
 
             $items = json_decode($request->items, true);

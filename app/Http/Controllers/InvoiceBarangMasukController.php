@@ -25,6 +25,7 @@ class InvoiceBarangMasukController extends Controller
             // Create a new Invoice for each BarangMasuk
             $invoice = new Invoice();
             $invoice->barang_masuks_id = $barangMasuk->id; 
+            $invoice->tanggal_masuk = $barangMasuk->tanggal_tagihan_masuk;
             $invoice->save();
     
             // Update the status_invoice
@@ -120,7 +121,7 @@ class InvoiceBarangMasukController extends Controller
                 bki.barang_masuk_id
         ) AS total_keluar'), 'barang_masuks.id', '=', 'total_keluar.barang_masuk_id')
         ->where('barang_masuks.status_invoice', 'Barang Masuk')
-        ->where('barang_masuks.tanggal_tagihan_masuk', '<=', \Carbon\Carbon::now()->endOfMonth())
+        // ->where('barang_masuks.tanggal_tagihan_masuk', '<=', \Carbon\Carbon::now()->endOfMonth())
         ->where(DB::raw('COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0)'), '<>', 0);
     
         // Filter berdasarkan warehouse user jika ada

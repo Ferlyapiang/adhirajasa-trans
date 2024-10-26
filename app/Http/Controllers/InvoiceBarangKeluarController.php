@@ -35,6 +35,7 @@ class InvoiceBarangKeluarController extends Controller
             // Create a new Invoice for each BarangKeluar
             $invoice = new Invoice();
             $invoice->barang_keluars_id = $barangKeluar->id; 
+            $invoice->tanggal_masuk = $barangKeluar->tanggal_tagihan_keluar;
             $invoice->save();
     
             // Update the status_invoice
