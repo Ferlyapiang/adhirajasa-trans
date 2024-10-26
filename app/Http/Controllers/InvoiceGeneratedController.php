@@ -137,7 +137,9 @@ class InvoiceGeneratedController extends Controller
 
 
 
-        $invoiceMaster = $invoiceMaster->whereRaw('COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0) > 0 
+        $invoiceMaster = $invoiceMaster
+        ->where('invoices.tanggal_masuk', '<=', DB::raw('LAST_DAY(CURDATE())'))
+        ->whereRaw('COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0) > 0 
                 OR (
                     (COALESCE(barang_keluars.harga_lembur, 0)) > 0
                     OR (CASE 
