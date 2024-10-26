@@ -17,31 +17,31 @@ class InvoiceBarangKeluarController extends Controller
         $user = Auth::user();
         $currentDate = now();
     
-        // Update the status and create an invoice for barang_keluars where applicable
-        $barangKeluars = BarangKeluar::where('tanggal_tagihan_keluar', '<=', $currentDate)
-            ->where('status_invoice', '<>', 'Invoice Barang Keluar')
-            ->where(function($query) {
-                $query->where(function($subQuery) {
-                    $subQuery->whereNotNull('harga_kirim_barang')
-                             ->where('harga_kirim_barang', '!=', 0);
-                })->orWhere(function($subQuery) {
-                    $subQuery->whereNotNull('harga_lembur')
-                             ->where('harga_lembur', '!=', 0);
-                });
-            })
-            ->get();
+        // // Update the status and create an invoice for barang_keluars where applicable
+        // $barangKeluars = BarangKeluar::where('tanggal_tagihan_keluar', '<=', $currentDate)
+        //     ->where('status_invoice', '<>', 'Invoice Barang Keluar')
+        //     ->where(function($query) {
+        //         $query->where(function($subQuery) {
+        //             $subQuery->whereNotNull('harga_kirim_barang')
+        //                      ->where('harga_kirim_barang', '!=', 0);
+        //         })->orWhere(function($subQuery) {
+        //             $subQuery->whereNotNull('harga_lembur')
+        //                      ->where('harga_lembur', '!=', 0);
+        //         });
+        //     })
+        //     ->get();
     
-        foreach ($barangKeluars as $barangKeluar) {
-            // Create a new Invoice for each BarangKeluar
-            $invoice = new Invoice();
-            $invoice->barang_keluars_id = $barangKeluar->id; 
-            $invoice->tanggal_masuk = $barangKeluar->tanggal_tagihan_keluar;
-            $invoice->save();
+        // foreach ($barangKeluars as $barangKeluar) {
+        //     // Create a new Invoice for each BarangKeluar
+        //     $invoice = new Invoice();
+        //     $invoice->barang_keluars_id = $barangKeluar->id; 
+        //     $invoice->tanggal_masuk = $barangKeluar->tanggal_tagihan_keluar;
+        //     $invoice->save();
     
-            // Update the status_invoice
-            $barangKeluar->status_invoice = 'Invoice Barang Keluar';
-            $barangKeluar->save();
-        }
+        //     // Update the status_invoice
+        //     $barangKeluar->status_invoice = 'Invoice Barang Keluar';
+        //     $barangKeluar->save();
+        // }
     
         // Build the base query for invoiceKeluar
         $invoiceKeluar = BarangKeluar::select(

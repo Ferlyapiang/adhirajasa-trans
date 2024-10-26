@@ -402,7 +402,8 @@ class BarangKeluarController extends Controller
             'harga_kirim_barang' => $validated['harga_kirim_barang'],
             'harga_lembur' => $validated['harga_lembur'],
             'address' => $validated['address'],
-            'tanggal_tagihan_keluar' => $tanggalTagihanKeluar
+            'tanggal_tagihan_keluar' => $tanggalTagihanKeluar,
+            'status_invoice' => 'Barang Keluar',
         ];
 
         $items = $validated['items'];

@@ -20,6 +20,7 @@ class CreateInvoicesTable extends Migration
             $table->foreignId('barang_keluars_id')->nullable()->constrained('barang_keluars')->onDelete('set null'); // Foreign key to barang_keluars table, nullable
             $table->date('tanggal_masuk')->nullable();
             $table->integer('diskon')->nullable();
+            $table->decimal('harga_total', 15, 2)->nullable();
             $table->timestamps();
         });
     }

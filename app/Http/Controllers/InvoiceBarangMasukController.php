@@ -17,21 +17,21 @@ class InvoiceBarangMasukController extends Controller
         $user = Auth::user();
         $currentDate = now();
 
-        $barangMasuks = BarangMasuk::where('tanggal_tagihan_masuk', '<=', $currentDate)
-            ->where('status_invoice', '<>', 'Invoice Barang Masuk')
-            ->get();
+        // $barangMasuks = BarangMasuk::where('tanggal_tagihan_masuk', '<=', $currentDate)
+        //     ->where('status_invoice', '<>', 'Invoice Barang Masuk')
+        //     ->get();
     
-        foreach ($barangMasuks as $barangMasuk) {
-            // Create a new Invoice for each BarangMasuk
-            $invoice = new Invoice();
-            $invoice->barang_masuks_id = $barangMasuk->id; 
-            $invoice->tanggal_masuk = $barangMasuk->tanggal_tagihan_masuk;
-            $invoice->save();
+        // foreach ($barangMasuks as $barangMasuk) {
+        //     // Create a new Invoice for each BarangMasuk
+        //     $invoice = new Invoice();
+        //     $invoice->barang_masuks_id = $barangMasuk->id; 
+        //     $invoice->tanggal_masuk = $barangMasuk->tanggal_tagihan_masuk;
+        //     $invoice->save();
     
-            // Update the status_invoice
-            $barangMasuk->status_invoice = 'Invoice Barang Masuk';
-            $barangMasuk->save();
-        }
+        //     // Update the status_invoice
+        //     $barangMasuk->status_invoice = 'Invoice Barang Masuk';
+        //     $barangMasuk->save();
+        // }
     
         $invoiceMasuk = BarangMasuk::select(
             'barang_masuks.id AS invoice_id',

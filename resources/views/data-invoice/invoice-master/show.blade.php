@@ -191,7 +191,7 @@
                                                             Masa Penimbunan:
                                                             <strong>{{ $item->tanggal_masuk_barang ? \Carbon\Carbon::parse($item->tanggal_masuk_barang)->format('d/m/Y') : ($item->tanggal_keluar ? \Carbon\Carbon::parse($item->tanggal_keluar)->format('d/m/Y') : '') }}</strong>
                                                             -
-                                                            <strong>{{ $item->tanggal_tagihan_masuk ? \Carbon\Carbon::parse($item->tanggal_tagihan_masuk)->format('d/m/Y') : ($item->tanggal_tagihan_keluar ? \Carbon\Carbon::parse($item->tanggal_tagihan_keluar)->format('d/m/Y') : '') }}</strong>
+                                                            <strong>{{ $item->tanggal_penimbunan ? \Carbon\Carbon::parse($item->tanggal_penimbunan)->format('d/m/Y') : ($item->tanggal_penimbunan ? \Carbon\Carbon::parse($item->tanggal_penimbunan)->format('d/m/Y') : '') }}</strong>
                                                         </td>
                                                         <td>{{ number_format($item->total_harga_simpan_lembur ?: $item->total_harga_barang_keluar, 0, ',', '.') }}
                                                         </td>
