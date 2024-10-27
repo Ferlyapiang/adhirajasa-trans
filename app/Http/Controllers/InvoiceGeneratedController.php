@@ -78,32 +78,30 @@ class InvoiceGeneratedController extends Controller
                 DB::raw('COALESCE(CASE WHEN invoices.nomer_invoice IS NULL OR invoices.nomer_invoice = \'\' THEN 0 ELSE total_keluar.total_qty END, 0) AS total_qty_keluar'),
                 DB::raw('COALESCE(total_items.total_qty, 0) - COALESCE(CASE WHEN invoices.nomer_invoice IS NULL OR invoices.nomer_invoice = \'\' THEN 0 ELSE total_keluar.total_qty END, 0)  AS total_sisa'),
                 DB::raw('
-            CASE
-                WHEN COALESCE(total_items.total_qty, 0) = (COALESCE(total_items.total_qty, 0) - COALESCE(
-                    CASE 
-                        WHEN invoices.nomer_invoice IS NULL OR invoices.nomer_invoice = "" THEN 0
-                        ELSE total_keluar.total_qty
-                    END, 0))
-                THEN barang_masuks.harga_simpan_barang
-                ELSE ((COALESCE(total_items.total_qty, 0) - COALESCE(
-                    CASE 
-                        WHEN invoices.nomer_invoice IS NULL OR invoices.nomer_invoice = "" THEN 0
-                        ELSE total_keluar.total_qty
-                    END, 0)) / COALESCE(total_items.total_qty, 0)) * barang_masuks.harga_simpan_barang
-            END AS total_harga_simpan
-        '),
+                            CASE
+                                WHEN COALESCE(total_items.total_qty, 0) = (COALESCE(total_items.total_qty, 0) - COALESCE(
+                                    CASE 
+                                        WHEN invoices.nomer_invoice IS NULL OR invoices.nomer_invoice = "" THEN 0
+                                        ELSE total_keluar.total_qty
+                                    END, 0))
+                                THEN barang_masuks.harga_simpan_barang
+                                ELSE ((COALESCE(total_items.total_qty, 0) - COALESCE(
+                                    CASE 
+                                        WHEN invoices.nomer_invoice IS NULL OR invoices.nomer_invoice = "" THEN 0
+                                        ELSE total_keluar.total_qty
+                                    END, 0)) / COALESCE(total_items.total_qty, 0)) * barang_masuks.harga_simpan_barang
+                            END AS total_harga_simpan
+                        '),
                 DB::raw('
-    COALESCE(
-        CASE 
-            WHEN DATEDIFF(barang_masuks.tanggal_tagihan_masuk, barang_masuks.tanggal_masuk) <= 60
-                AND (invoices.nomer_invoice IS NULL OR invoices.nomer_invoice = "")
-            THEN barang_masuks.harga_lembur
-            ELSE 0
-        END, 
-    0) AS harga_lembur_masuk
-'),
-
-
+                            COALESCE(
+                                CASE 
+                                    WHEN DATEDIFF(barang_masuks.tanggal_tagihan_masuk, barang_masuks.tanggal_masuk) <= 60
+                                        AND (invoices.nomer_invoice IS NULL OR invoices.nomer_invoice = "")
+                                    THEN barang_masuks.harga_lembur
+                                    ELSE 0
+                                END, 
+                            0) AS harga_lembur_masuk
+                        '),
                 'invoices.barang_keluars_id',
                 'barang_keluars.tanggal_keluar',
                 'barang_keluars.nomer_surat_jalan',
@@ -136,42 +134,45 @@ class InvoiceGeneratedController extends Controller
                 '=',
                 'total_keluar.barang_masuk_id'
             );
-
         if (!$user) {
             return redirect()->route('login')->with('alert', 'Waktu login Anda telah habis, silakan login ulang.');
         } else {
             $invoiceMaster = $invoiceMaster->where('barang_keluars.gudang_id', $user->warehouse_id);
         }
 
+        
+
         $invoiceMaster = $invoiceMaster
             ->whereRaw('invoices.tanggal_masuk <= LAST_DAY(CURDATE())
-                AND (
-                        (invoices.barang_keluars_id IS NOT NULL AND (invoices.nomer_invoice IS NULL OR invoices.nomer_invoice = ""))
-                        OR invoices.barang_masuks_id IS NOT NULL
-                    )
-                    AND (
-                        COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0) > 0 
-                        OR (
-                            COALESCE(barang_keluars.harga_lembur, 0) > 0
-                            OR (
-                                CASE 
-                                    WHEN customers_masuks.type_payment_customer = "Akhir Bulan" 
-                                        AND YEAR(barang_masuks.tanggal_masuk) = YEAR(barang_masuks.tanggal_tagihan_masuk)
-                                        AND MONTH(barang_masuks.tanggal_masuk) = MONTH(barang_masuks.tanggal_tagihan_masuk)
-                                    THEN barang_masuks.harga_lembur
-                                    WHEN customers_masuks.type_payment_customer = "Pertanggal Masuk" 
-                                        AND barang_masuks.tanggal_tagihan_masuk <= DATE_ADD(barang_masuks.tanggal_masuk, INTERVAL 1 MONTH)
-                                    THEN barang_masuks.harga_lembur
-                                    ELSE 0
-                                END
-                            ) > 0
-                        )
-                        OR COALESCE(barang_keluars.harga_kirim_barang, 0) > 0
-                    )
-    ');
+                        AND (
+                                (invoices.barang_keluars_id IS NOT NULL AND (invoices.nomer_invoice IS NULL OR invoices.nomer_invoice = ""))
+                                OR invoices.barang_masuks_id IS NOT NULL
+                            )
+                            AND (
+                                COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0) > 0 
+                                OR (
+                                    COALESCE(barang_keluars.harga_lembur, 0) > 0
+                                    OR (
+                                        CASE 
+                                            WHEN customers_masuks.type_payment_customer = "Akhir Bulan" 
+                                                AND YEAR(barang_masuks.tanggal_masuk) = YEAR(barang_masuks.tanggal_tagihan_masuk)
+                                                AND MONTH(barang_masuks.tanggal_masuk) = MONTH(barang_masuks.tanggal_tagihan_masuk)
+                                            THEN barang_masuks.harga_lembur
+                                            WHEN customers_masuks.type_payment_customer = "Pertanggal Masuk" 
+                                                AND barang_masuks.tanggal_tagihan_masuk <= DATE_ADD(barang_masuks.tanggal_masuk, INTERVAL 1 MONTH)
+                                            THEN barang_masuks.harga_lembur
+                                            ELSE 0
+                                        END
+                                    ) > 0
+                                )
+                                OR COALESCE(barang_keluars.harga_kirim_barang, 0) > 0
+                            )
+                    ');
 
 
-        $invoiceMaster = $invoiceMaster->orderBy('barang_keluars.tanggal_keluar', 'desc')->get();
+        $invoiceMaster = $invoiceMaster->orderBy('invoices.tanggal_masuk', 'desc')->get();
+        dd($invoiceMaster);
+        
 
         $owners = $invoiceMaster->map(function ($item) {
             return $item->customer_masuk_name ?: $item->customer_keluar_name;
