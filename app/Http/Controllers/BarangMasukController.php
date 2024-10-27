@@ -154,16 +154,30 @@ class BarangMasukController extends Controller
             
             if ($customer->type_payment_customer === 'Akhir Bulan') {
                 if ($tanggalMasuk && $tanggalMasuk->day > 25) {
-                    // Jika tanggalMasuk di atas tanggal 25, gunakan bulan berikutnya
-                    $tanggalPenimbunanMasuk = $tanggalMasuk->copy()->addMonth()->endOfMonth()->format('Y-m-d');
+                    if ($tanggalMasuk->isLastOfMonth()) {
+                        $tanggalPenimbunanMasuk = $tanggalMasuk->copy()->addMonthsNoOverflow(1)->endOfMonth()->format('Y-m-d');
+                    } else {
+                        $tanggalPenimbunanMasuk = $tanggalMasuk->copy()->addMonth()->endOfMonth()->format('Y-m-d');
+                    }
                 } else {
-                    // Jika tanggalMasuk di 25 atau di bawah, gunakan bulan yang sama
                     $tanggalPenimbunanMasuk = $tanggalMasuk ? $tanggalMasuk->endOfMonth()->format('Y-m-d') : null;
                 }
             } elseif ($customer->type_payment_customer === 'Pertanggal Masuk') {
                 $tanggalPenimbunanMasuk = $tanggalMasuk ? $tanggalMasuk->copy()->addMonth()->subDay()->format('Y-m-d') : null;
             }
-            $tanggalTagihanMasuk = $tanggalMasuk ? $tanggalMasuk->copy()->addMonth()->startOfMonth()->addDays(2)->format('Y-m-d') : null;
+
+            // $tanggalTagihanMasuk = $tanggalMasuk->copy()->addMonthsNoOverflow(1)->startOfMonth()->addDays(2)->format('Y-m-d');
+            if ($tanggalMasuk) {
+                $tanggalMasukNormal = $request->tanggal_masuk ? Carbon::parse($request->tanggal_masuk) : null;
+                if ($tanggalMasukNormal->day <= 2) {
+            
+                    $tanggalTagihanMasuk = $tanggalMasuk->copy()->startOfMonth()->addDays(2)->format('Y-m-d');
+                } else {
+                    $tanggalTagihanMasuk = $tanggalMasuk->copy()->addMonthNoOverflow()->startOfMonth()->addDays(2)->format('Y-m-d');
+                }
+            } else {
+                $tanggalTagihanMasuk = null;
+            }
             
             
             $barangMasuk = BarangMasuk::create([
@@ -256,19 +270,32 @@ class BarangMasukController extends Controller
             $customer = Customer::find($request->customer_id);
             $tanggalMasuk = $request->tanggal_masuk ? Carbon::createFromFormat('Y-m-d', $request->tanggal_masuk) : null;
 
-            
             if ($customer->type_payment_customer === 'Akhir Bulan') {
                 if ($tanggalMasuk && $tanggalMasuk->day > 25) {
-                    
-                    $tanggalPenimbunanMasuk = $tanggalMasuk->copy()->addMonth()->endOfMonth()->format('Y-m-d');
+                    if ($tanggalMasuk->isLastOfMonth()) {
+                        $tanggalPenimbunanMasuk = $tanggalMasuk->copy()->addMonthsNoOverflow(1)->endOfMonth()->format('Y-m-d');
+                    } else {
+                        $tanggalPenimbunanMasuk = $tanggalMasuk->copy()->addMonth()->endOfMonth()->format('Y-m-d');
+                    }
                 } else {
-                    
                     $tanggalPenimbunanMasuk = $tanggalMasuk ? $tanggalMasuk->endOfMonth()->format('Y-m-d') : null;
                 }
             } elseif ($customer->type_payment_customer === 'Pertanggal Masuk') {
-                $tanggalPenimbunanMasuk = $tanggalMasuk ? $tanggalMasuk->copy()->addMonth()->subDay()->format('Y-m-d') : null;                
+                $tanggalPenimbunanMasuk = $tanggalMasuk ? $tanggalMasuk->copy()->addMonth()->subDay()->format('Y-m-d') : null;
             }
-            $tanggalTagihanMasuk = $tanggalMasuk ? $tanggalMasuk->copy()->addMonth()->startOfMonth()->addDays(2)->format('Y-m-d') : null;
+
+            // $tanggalTagihanMasuk = $tanggalMasuk->copy()->addMonthsNoOverflow(1)->startOfMonth()->addDays(2)->format('Y-m-d');
+            if ($tanggalMasuk) {
+                $tanggalMasukNormal = $request->tanggal_masuk ? Carbon::parse($request->tanggal_masuk) : null;
+                if ($tanggalMasukNormal->day <= 2) {
+            
+                    $tanggalTagihanMasuk = $tanggalMasuk->copy()->startOfMonth()->addDays(2)->format('Y-m-d');
+                } else {
+                    $tanggalTagihanMasuk = $tanggalMasuk->copy()->addMonthNoOverflow()->startOfMonth()->addDays(2)->format('Y-m-d');
+                }
+            } else {
+                $tanggalTagihanMasuk = null;
+            }
 
             $barangMasuk->update([
                 'tanggal_masuk' => $request->tanggal_masuk,

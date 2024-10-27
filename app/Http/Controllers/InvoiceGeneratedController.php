@@ -144,23 +144,32 @@ class InvoiceGeneratedController extends Controller
         }
 
         $invoiceMaster = $invoiceMaster
-            ->where('invoices.tanggal_masuk', '<=', DB::raw('LAST_DAY(CURDATE())'))
-            ->whereRaw('COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0) > 0 
-            OR (
-                (COALESCE(barang_keluars.harga_lembur, 0)) > 0
-                OR (CASE 
-                    WHEN customers_masuks.type_payment_customer = "Akhir Bulan" 
-                        AND YEAR(barang_masuks.tanggal_masuk) = YEAR(barang_masuks.tanggal_tagihan_masuk)
-                        AND MONTH(barang_masuks.tanggal_masuk) = MONTH(barang_masuks.tanggal_tagihan_masuk)
-                    THEN barang_masuks.harga_lembur
-                    WHEN customers_masuks.type_payment_customer = "Pertanggal Masuk" 
-                        AND barang_masuks.tanggal_tagihan_masuk <= DATE_ADD(barang_masuks.tanggal_masuk, INTERVAL 1 MONTH)
-                    THEN barang_masuks.harga_lembur
-                    ELSE 0
-                END) > 0
-            )
-            OR COALESCE(barang_keluars.harga_kirim_barang,0) > 0
-        ');
+            ->whereRaw('invoices.tanggal_masuk <= LAST_DAY(CURDATE())
+                AND (
+                        (invoices.barang_keluars_id IS NOT NULL AND (invoices.nomer_invoice IS NULL OR invoices.nomer_invoice = ""))
+                        OR invoices.barang_masuks_id IS NOT NULL
+                    )
+                    AND (
+                        COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0) > 0 
+                        OR (
+                            COALESCE(barang_keluars.harga_lembur, 0) > 0
+                            OR (
+                                CASE 
+                                    WHEN customers_masuks.type_payment_customer = "Akhir Bulan" 
+                                        AND YEAR(barang_masuks.tanggal_masuk) = YEAR(barang_masuks.tanggal_tagihan_masuk)
+                                        AND MONTH(barang_masuks.tanggal_masuk) = MONTH(barang_masuks.tanggal_tagihan_masuk)
+                                    THEN barang_masuks.harga_lembur
+                                    WHEN customers_masuks.type_payment_customer = "Pertanggal Masuk" 
+                                        AND barang_masuks.tanggal_tagihan_masuk <= DATE_ADD(barang_masuks.tanggal_masuk, INTERVAL 1 MONTH)
+                                    THEN barang_masuks.harga_lembur
+                                    ELSE 0
+                                END
+                            ) > 0
+                        )
+                        OR COALESCE(barang_keluars.harga_kirim_barang, 0) > 0
+                    )
+    ');
+
 
         $invoiceMaster = $invoiceMaster->orderBy('barang_keluars.tanggal_keluar', 'desc')->get();
 
