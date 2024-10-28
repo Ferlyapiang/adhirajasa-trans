@@ -10,6 +10,7 @@ use App\Models\Invoice;
 use App\Models\BarangKeluar;
 use App\Models\Warehouse;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 
 class InvoiceGeneratedController extends Controller
 {
@@ -142,43 +143,70 @@ class InvoiceGeneratedController extends Controller
 
         
 
-        $invoiceMaster = $invoiceMaster
-            ->whereRaw('invoices.tanggal_masuk <= LAST_DAY(CURDATE())
-                        AND (
-                                (invoices.barang_keluars_id IS NOT NULL AND (invoices.nomer_invoice IS NULL OR invoices.nomer_invoice = ""))
-                                OR invoices.barang_masuks_id IS NOT NULL
-                            )
-                            AND (
-                                COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0) > 0 
-                                OR (
-                                    COALESCE(barang_keluars.harga_lembur, 0) > 0
-                                    OR (
-                                        CASE 
-                                            WHEN customers_masuks.type_payment_customer = "Akhir Bulan" 
-                                                AND YEAR(barang_masuks.tanggal_masuk) = YEAR(barang_masuks.tanggal_tagihan_masuk)
-                                                AND MONTH(barang_masuks.tanggal_masuk) = MONTH(barang_masuks.tanggal_tagihan_masuk)
-                                            THEN barang_masuks.harga_lembur
-                                            WHEN customers_masuks.type_payment_customer = "Pertanggal Masuk" 
-                                                AND barang_masuks.tanggal_tagihan_masuk <= DATE_ADD(barang_masuks.tanggal_masuk, INTERVAL 1 MONTH)
-                                            THEN barang_masuks.harga_lembur
-                                            ELSE 0
-                                        END
-                                    ) > 0
-                                )
-                                OR COALESCE(barang_keluars.harga_kirim_barang, 0) > 0
-                            )
-                    ');
+        // $invoiceMaster = $invoiceMaster
+        //     ->whereRaw('invoices.tanggal_masuk <= LAST_DAY(CURDATE())
+        //                 AND (
+        //                         (invoices.barang_keluars_id IS NOT NULL AND (invoices.nomer_invoice IS NULL OR invoices.nomer_invoice = ""))
+        //                         OR invoices.barang_masuks_id IS NOT NULL
+        //                     )
+        //                     AND (
+        //                         COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0) > 0 
+        //                         OR (
+        //                             COALESCE(barang_keluars.harga_lembur, 0) > 0
+        //                             OR (
+        //                                 CASE 
+        //                                     WHEN customers_masuks.type_payment_customer = "Akhir Bulan" 
+        //                                         AND YEAR(barang_masuks.tanggal_masuk) = YEAR(barang_masuks.tanggal_tagihan_masuk)
+        //                                         AND MONTH(barang_masuks.tanggal_masuk) = MONTH(barang_masuks.tanggal_tagihan_masuk)
+        //                                     THEN barang_masuks.harga_lembur
+        //                                     WHEN customers_masuks.type_payment_customer = "Pertanggal Masuk" 
+        //                                         AND barang_masuks.tanggal_tagihan_masuk <= DATE_ADD(barang_masuks.tanggal_masuk, INTERVAL 1 MONTH)
+        //                                     THEN barang_masuks.harga_lembur
+        //                                     ELSE 0
+        //                                 END
+        //                             ) > 0
+        //                         )
+        //                         OR COALESCE(barang_keluars.harga_kirim_barang, 0) > 0
+        //                     )
+        //             ');
 
 
-        $invoiceMaster = $invoiceMaster->orderBy('invoices.tanggal_masuk', 'desc')->get();
-        dd($invoiceMaster);
+        // $invoiceMaster = $invoiceMaster->orderBy('invoices.tanggal_masuk', 'desc')->get();
+        // dd($invoiceMaster);
         
 
-        $owners = $invoiceMaster->map(function ($item) {
-            return $item->customer_masuk_name ?: $item->customer_keluar_name;
-        })
-            ->unique()
-            ->values();
+        // $owners = $invoiceMaster->map(function ($item) {
+        //     return $item->customer_masuk_name ?: $item->customer_keluar_name;
+        // })
+        //     ->unique()
+        //     ->values();
+
+        $invoiceMaster = $invoiceMaster
+        ->where('invoices.tanggal_masuk', '<=', DB::raw('LAST_DAY(CURDATE())'))
+        ->whereRaw('COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0) > 0 
+        OR (
+            (COALESCE(barang_keluars.harga_lembur, 0)) > 0
+            OR (CASE 
+                WHEN customers_masuks.type_payment_customer = "Akhir Bulan" 
+                    AND YEAR(barang_masuks.tanggal_masuk) = YEAR(barang_masuks.tanggal_tagihan_masuk)
+                    AND MONTH(barang_masuks.tanggal_masuk) = MONTH(barang_masuks.tanggal_tagihan_masuk)
+                THEN barang_masuks.harga_lembur
+                WHEN customers_masuks.type_payment_customer = "Pertanggal Masuk" 
+                    AND barang_masuks.tanggal_tagihan_masuk <= DATE_ADD(barang_masuks.tanggal_masuk, INTERVAL 1 MONTH)
+                THEN barang_masuks.harga_lembur
+                ELSE 0
+            END) > 0
+        )
+        OR COALESCE(barang_keluars.harga_kirim_barang,0) > 0
+    ');
+
+    $invoiceMaster = $invoiceMaster->orderBy('barang_keluars.tanggal_keluar', 'desc')->get();
+
+    $owners = $invoiceMaster->map(function ($item) {
+        return $item->customer_masuk_name ?: $item->customer_keluar_name;
+    })
+        ->unique()
+        ->values();
 
         return view('data-invoice.invoice-master.index', compact('invoiceMaster', 'owners'));
     }
@@ -236,24 +264,54 @@ class InvoiceGeneratedController extends Controller
 
             $nomerGenerad = "ATS/INV/{$year}/{$monthRoman}/KPK/{$newNumber}";
 
-            // Optional: Store the generated invoice number
             $generatedInvoices[] = $nomerGenerad;
-
-            // Debug output (optional)
-            // dd($generatedInvoices);
-
 
             foreach ($invoiceIds as $invoiceId) {
                 $invoice = DB::table('invoices')->where('id', $invoiceId)->first();
 
                 $tanggalMasuk = null;
                 $tanggalKeluar = null;
+                $jocNumber = null;
+                $nomerContainer = null;
+                $qty = null;
+                $unit = null;
+                $typeMobil = null;
+                $tanggal_masuk_penimbunan = null;
+                $tanggal_keluar_penimbunan = null;
+
 
                 if (!empty($invoice->barang_masuks_id)) {
                     $barangMasuk = DB::table('barang_masuks')->where('id', $invoice->barang_masuks_id)->first();
 
                     if (!empty($barangMasuk->tanggal_tagihan_masuk)) {
                         $tanggalMasuk = $barangMasuk->tanggal_tagihan_masuk;
+                        if (!empty($barangMasuk->tanggal_masuk)) {
+                            $tanggal_masuk_penimbunan = $barangMasuk->tanggal_masuk;
+                            $tanggal_keluar_penimbunan = $barangMasuk->tanggal_penimbunan;
+                            
+                            // Mendapatkan customer dan type_payment_customer
+                            $customer = DB::table('customers')->where('id', $barangMasuk->customer_id)->first();
+                            
+                            if ($customer) {
+                                if ($customer->type_payment_customer === 'Pertanggal Masuk') {
+                                    // Set tanggal_keluar_penimbunan satu bulan setelah tanggal_masuk_penimbunan
+                                    $tanggal_keluar_penimbunan = Carbon::parse($tanggal_masuk_penimbunan)->addMonth()->format('Y-m-d');
+                                } elseif ($customer->type_payment_customer === 'Akhir Bulan') {
+                                    // Set tanggal_keluar_penimbunan ke akhir bulan dari tanggal_masuk_penimbunan
+                                    $tanggal_masuk_penimbunan = Carbon::parse($tanggal_masuk_penimbunan)->startOfMonth()->format('Y-m-d');
+                                    $tanggal_keluar_penimbunan = Carbon::parse($tanggal_masuk_penimbunan)->endOfMonth()->format('Y-m-d');
+                                }
+                            }
+                        }
+                        
+                        $jocNumber = $barangMasuk->joc_number;
+                        $nomerContainer = $barangMasuk->nomer_container ?: ($barangMasuk->nomer_polisi ?: null);
+                        $typeMobil = DB::table('type_mobil')
+                                    ->where('id', $barangMasuk->type_mobil_id)
+                                    ->value('type');
+                        $unit = DB::table('barang_masuk_items')
+                            ->where('barang_masuk_id', $invoice->barang_masuks_id)
+                            ->value('unit');
                     }
                 }
 
@@ -262,10 +320,40 @@ class InvoiceGeneratedController extends Controller
 
                     if (!empty($barangKeluar->tanggal_tagihan_keluar)) {
                         $tanggalKeluar = $barangKeluar->tanggal_tagihan_keluar;
+                        $jocNumber = $barangKeluar->joc_number;
+                        $nomerContainer = $barangKeluar->nomer_container ?: ($barangKeluar->nomer_polisi ?: null);
+                        $typeMobil = DB::table('type_mobil')
+                                    ->where('id', $barangKeluar->type_mobil_id)
+                                    ->value('type');
+                        $unit = DB::table('barang_keluar_items')
+                        ->where('barang_keluar_id', $invoice->barang_keluars_id)
+                        ->value('unit');
                     }
                 }
 
                 $tanggalFinal = $tanggalMasuk ?? $tanggalKeluar ?? $invoice->tanggal_masuk;
+
+                $qty = DB::table('barang_masuks')
+                ->leftJoin(
+                    DB::raw('(SELECT barang_masuk_id, SUM(qty) AS total_qty FROM barang_masuk_items GROUP BY barang_masuk_id) AS total_items'),
+                    'barang_masuks.id',
+                    '=',
+                    'total_items.barang_masuk_id'
+                )
+                ->leftJoin(
+                    DB::raw('(SELECT bki.barang_masuk_id, SUM(bki.qty) AS total_qty
+                              FROM barang_keluar_items bki
+                              JOIN barang_keluars ON bki.barang_keluar_id = barang_keluars.id
+                              GROUP BY bki.barang_masuk_id) AS total_keluar'),
+                    'barang_masuks.id',
+                    '=',
+                    'total_keluar.barang_masuk_id'
+                )
+                ->leftJoin('invoices', 'barang_masuks.id', '=', 'invoices.barang_masuks_id')
+                ->where('invoices.id', $invoiceId)
+                ->selectRaw('COALESCE(total_items.total_qty, 0) - COALESCE(CASE WHEN invoices.nomer_invoice IS NULL OR invoices.nomer_invoice = \'\' THEN 0 ELSE total_keluar.total_qty END, 0) AS total_sisa')
+                ->value('total_sisa');
+            
 
                 DB::table('invoices')->where('id', $invoiceId)->update([
                     'nomer_invoice' => $nomerGenerad,
@@ -280,7 +368,14 @@ class InvoiceGeneratedController extends Controller
                         'barang_masuks_id' => $invoice->barang_masuks_id,
                         'barang_keluars_id' => $invoice->barang_keluars_id,
                         'tanggal_masuk' => $tanggalFinal,
+                        'job_number' => $jocNumber,
+                        'nomer_container' => $nomerContainer,
+                        'qty' => $qty,
+                        'unit' => $unit,
+                        'type_mobil' => $typeMobil,
                         'diskon' => $invoice->diskon,
+                        'tanggal_masuk_penimbunan' => $tanggal_masuk_penimbunan,
+                        'tanggal_keluar_penimbunan' => $tanggal_keluar_penimbunan,
                         'created_at' => now(),
                         'updated_at' => now(),
                     ]);
