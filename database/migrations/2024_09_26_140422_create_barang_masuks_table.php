@@ -26,6 +26,8 @@ return new class extends Migration
             $table->string('status_invoice')->nullable();
             $table->date('tanggal_tagihan_masuk')->nullable();
             $table->date('tanggal_penimbunan')->nullable();
+            $table->date('tanggal_invoice_masuk')->nullable();
+            $table->date('tanggal_invoice_keluar')->nullable();
             $table->timestamps();
         });
 

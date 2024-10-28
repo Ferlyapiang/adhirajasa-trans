@@ -276,8 +276,12 @@ class InvoiceGeneratedController extends Controller
                 $qty = null;
                 $unit = null;
                 $typeMobil = null;
-                $tanggal_masuk_penimbunan = null;
-                $tanggal_keluar_penimbunan = null;
+                $tanggalMasukPenimbunan = null;
+                $tanggalKeluarPenimbunan = null;
+                $tanggalMasukPenimbunanInvoice = null;
+                $tanggalKeluarPenimbunanInvoice = null;
+                $tanggalMasukPenimbunanInvoiceData = null;
+                $tanggalKeluarPenimbunanInvoiceData = null;
 
 
                 if (!empty($invoice->barang_masuks_id)) {
@@ -285,24 +289,10 @@ class InvoiceGeneratedController extends Controller
 
                     if (!empty($barangMasuk->tanggal_tagihan_masuk)) {
                         $tanggalMasuk = $barangMasuk->tanggal_tagihan_masuk;
-                        if (!empty($barangMasuk->tanggal_masuk)) {
-                            $tanggal_masuk_penimbunan = $barangMasuk->tanggal_masuk;
-                            $tanggal_keluar_penimbunan = $barangMasuk->tanggal_penimbunan;
-                            
-                            // Mendapatkan customer dan type_payment_customer
-                            $customer = DB::table('customers')->where('id', $barangMasuk->customer_id)->first();
-                            
-                            if ($customer) {
-                                if ($customer->type_payment_customer === 'Pertanggal Masuk') {
-                                    // Set tanggal_keluar_penimbunan satu bulan setelah tanggal_masuk_penimbunan
-                                    $tanggal_keluar_penimbunan = Carbon::parse($tanggal_masuk_penimbunan)->addMonth()->format('Y-m-d');
-                                } elseif ($customer->type_payment_customer === 'Akhir Bulan') {
-                                    // Set tanggal_keluar_penimbunan ke akhir bulan dari tanggal_masuk_penimbunan
-                                    $tanggal_masuk_penimbunan = Carbon::parse($tanggal_masuk_penimbunan)->startOfMonth()->format('Y-m-d');
-                                    $tanggal_keluar_penimbunan = Carbon::parse($tanggal_masuk_penimbunan)->endOfMonth()->format('Y-m-d');
-                                }
-                            }
-                        }
+                        $tanggalMasukPenimbunan = $barangMasuk->tanggal_masuk;
+                        $tanggalKeluarPenimbunan = $barangMasuk->tanggal_penimbunan;
+                        $tanggalMasukPenimbunanInvoiceData =  $barangMasuk->tanggal_invoice_masuk;
+                        $tanggalKeluarPenimbunanInvoiceData =  $barangMasuk->tanggal_invoice_keluar;
                         
                         $jocNumber = $barangMasuk->joc_number;
                         $nomerContainer = $barangMasuk->nomer_container ?: ($barangMasuk->nomer_polisi ?: null);
@@ -353,12 +343,27 @@ class InvoiceGeneratedController extends Controller
                 ->where('invoices.id', $invoiceId)
                 ->selectRaw('COALESCE(total_items.total_qty, 0) - COALESCE(CASE WHEN invoices.nomer_invoice IS NULL OR invoices.nomer_invoice = \'\' THEN 0 ELSE total_keluar.total_qty END, 0) AS total_sisa')
                 ->value('total_sisa');
-            
+                    
 
                 DB::table('invoices')->where('id', $invoiceId)->update([
                     'nomer_invoice' => $nomerGenerad,
                     'tanggal_masuk' => $tanggalFinal,
                 ]);
+
+                
+                $customer = DB::table('customers')->where('id', $barangMasuk->customer_id)->first();
+                    if ($customer) {
+
+                        if ($customer->type_payment_customer === 'Pertanggal Masuk') {
+                            $tanggalMasukPenimbunanInvoice = Carbon::parse($tanggalMasukPenimbunan)->addMonth()->format('Y-m-d');
+                            $tanggalKeluarPenimbunanInvoice = Carbon::parse($tanggalKeluarPenimbunan)->addMonth()->format('Y-m-d');
+                        }
+
+                        elseif ($customer->type_payment_customer === 'Akhir Bulan') {
+                            $tanggalMasukPenimbunanInvoice = Carbon::parse($tanggalMasuk)->startOfMonth()->format('Y-m-d');
+                            $tanggalKeluarPenimbunanInvoice = Carbon::parse($tanggalMasuk)->copy()->endOfMonth()->format('Y-m-d');
+                        }
+                    }
 
                 if (DB::table('invoices')->where('id', $invoiceId)->value('nomer_invoice') === $nomerGenerad) {
                     $generatedInvoices[] = $nomerGenerad;
@@ -374,8 +379,12 @@ class InvoiceGeneratedController extends Controller
                         'unit' => $unit,
                         'type_mobil' => $typeMobil,
                         'diskon' => $invoice->diskon,
-                        'tanggal_masuk_penimbunan' => $tanggal_masuk_penimbunan,
-                        'tanggal_keluar_penimbunan' => $tanggal_keluar_penimbunan,
+                        'tanggal_masuk_penimbunan' => isset($tanggalMasukPenimbunanInvoiceData) && !empty($tanggalMasukPenimbunanInvoiceData) 
+                                                ? $tanggalMasukPenimbunanInvoiceData 
+                                                : $tanggalMasukPenimbunan,
+                        'tanggal_keluar_penimbunan' => isset($tanggalKeluarPenimbunanInvoiceData) && !empty($tanggalKeluarPenimbunanInvoiceData) 
+                                                ? $tanggalKeluarPenimbunanInvoiceData 
+                                                : $tanggalKeluarPenimbunan,
                         'created_at' => now(),
                         'updated_at' => now(),
                     ]);
@@ -397,8 +406,11 @@ class InvoiceGeneratedController extends Controller
                             $newDate = date('Y-m-d');
                         }
 
+
                         DB::table('barang_masuks')->where('id', $invoice->barang_masuks_id)->update([
                             'tanggal_tagihan_masuk' => $newDate,
+                            'tanggal_invoice_masuk' => $tanggalMasukPenimbunanInvoice,
+                            'tanggal_invoice_keluar' => $tanggalKeluarPenimbunanInvoice,
                         ]);
                     }
                 }
