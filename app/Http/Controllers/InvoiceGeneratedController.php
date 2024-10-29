@@ -185,7 +185,6 @@ class InvoiceGeneratedController extends Controller
             $year = $date->format('Y');
             $month = $date->format('m');
 
-            // Function to convert month number to Roman numeral
             function monthToRoman($monthNumber)
             {
                 $romans = [
@@ -237,7 +236,48 @@ class InvoiceGeneratedController extends Controller
                         $tanggalMasukPenimbunanInvoiceData = $barangMasuk->tanggal_invoice_masuk ?? null;
                         $tanggalKeluarPenimbunanInvoiceData = $barangMasuk->tanggal_invoice_keluar ?? null;
                         $hargaLembur = $barangMasuk->harga_lembur ?? null;
-                        $hargaSimpanBarang = $barangMasuk->harga_simpan_barang ?? null;
+                        // $hargaSimpanBarang = $barangMasuk->harga_simpan_barang ?? null;
+                        $totalItems = DB::table('barang_masuks')
+                        ->leftJoin(
+                            DB::raw('(SELECT barang_masuk_id, SUM(qty) AS total_qty FROM barang_masuk_items GROUP BY barang_masuk_id) AS total_items'),
+                            'barang_masuks.id',
+                            '=',
+                            'total_items.barang_masuk_id'
+                        )
+                        ->leftJoin(
+                            DB::raw('
+                            (
+                                SELECT bki.barang_masuk_id, SUM(bki.qty) AS total_qty
+                                FROM barang_keluar_items bki
+                                JOIN barang_keluars ON bki.barang_keluar_id = barang_keluars.id
+                                JOIN invoices_reporting ir ON barang_keluars.id = ir.barang_keluars_id
+                                GROUP BY bki.barang_masuk_id
+                            ) AS total_keluar'),
+                            'barang_masuks.id',
+                            '=',
+                            'total_keluar.barang_masuk_id'
+                        )
+                        ->where('barang_masuks.id', $invoice->barang_masuks_id)
+                        ->selectRaw('
+                            COALESCE(total_items.total_qty, 0) AS total_qty,
+                            COALESCE(total_keluar.total_qty, 0) AS total_keluar_qty
+                        ')
+                        ->first();
+            
+                    if ($totalItems) {
+                        $qtyTotal = $totalItems->total_qty;
+                        $qtyKeluar = $totalItems->total_keluar_qty;
+            
+                        if ($qtyTotal === ($qtyTotal - $qtyKeluar)) {
+                            $hargaSimpanBarang = $barangMasuk->harga_simpan_barang;
+                        } else {
+                            if ($qtyTotal > 0) {
+                                $hargaSimpanBarang = (($qtyTotal - $qtyKeluar) / $qtyTotal) * $barangMasuk->harga_simpan_barang;
+                            } else {
+                                $hargaSimpanBarang = 0; 
+                            }
+                        }
+                    }
 
                         $jocNumber = $barangMasuk->joc_number ?? null;
                         $nomerContainer = $barangMasuk->nomer_container ?: ($barangMasuk->nomer_polisi ?? null);
