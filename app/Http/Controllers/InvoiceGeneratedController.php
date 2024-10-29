@@ -182,6 +182,7 @@ class InvoiceGeneratedController extends Controller
         //     ->values();
 
         $invoiceMaster = $invoiceMaster
+        ->whereNull('invoices.nomer_invoice')
         ->where('invoices.tanggal_masuk', '<=', DB::raw('LAST_DAY(CURDATE())'))
         ->whereRaw('COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0) > 0 
         OR (
@@ -268,7 +269,7 @@ class InvoiceGeneratedController extends Controller
 
             foreach ($invoiceIds as $invoiceId) {
                 $invoice = DB::table('invoices')->where('id', $invoiceId)->first();
-
+            
                 $tanggalMasuk = null;
                 $tanggalKeluar = null;
                 $jocNumber = null;
@@ -282,138 +283,147 @@ class InvoiceGeneratedController extends Controller
                 $tanggalKeluarPenimbunanInvoice = null;
                 $tanggalMasukPenimbunanInvoiceData = null;
                 $tanggalKeluarPenimbunanInvoiceData = null;
-
-
-                if (!empty($invoice->barang_masuks_id)) {
+                $hargaLembur = null;
+                $hargaKirimBarang = null;
+                $hargaSimpanBarang = null;
+            
+                if ($invoice && !empty($invoice->barang_masuks_id)) {
                     $barangMasuk = DB::table('barang_masuks')->where('id', $invoice->barang_masuks_id)->first();
-
-                    if (!empty($barangMasuk->tanggal_tagihan_masuk)) {
-                        $tanggalMasuk = $barangMasuk->tanggal_tagihan_masuk;
-                        $tanggalMasukPenimbunan = $barangMasuk->tanggal_masuk;
-                        $tanggalKeluarPenimbunan = $barangMasuk->tanggal_penimbunan;
-                        $tanggalMasukPenimbunanInvoiceData =  $barangMasuk->tanggal_invoice_masuk;
-                        $tanggalKeluarPenimbunanInvoiceData =  $barangMasuk->tanggal_invoice_keluar;
-                        
-                        $jocNumber = $barangMasuk->joc_number;
-                        $nomerContainer = $barangMasuk->nomer_container ?: ($barangMasuk->nomer_polisi ?: null);
+            
+                    if ($barangMasuk) {
+                        $tanggalMasuk = $barangMasuk->tanggal_tagihan_masuk ?? null;
+                        $tanggalMasukPenimbunan = $barangMasuk->tanggal_masuk ?? null;
+                        $tanggalKeluarPenimbunan = $barangMasuk->tanggal_penimbunan ?? null;
+                        $tanggalMasukPenimbunanInvoiceData = $barangMasuk->tanggal_invoice_masuk ?? null;
+                        $tanggalKeluarPenimbunanInvoiceData = $barangMasuk->tanggal_invoice_keluar ?? null;
+                        $hargaLembur = $barangMasuk->harga_lembur ?? null;
+                        $hargaSimpanBarang = $barangMasuk->harga_simpan_barang ?? null;
+            
+                        $jocNumber = $barangMasuk->joc_number ?? null;
+                        $nomerContainer = $barangMasuk->nomer_container ?: ($barangMasuk->nomer_polisi ?? null);
                         $typeMobil = DB::table('type_mobil')
                                     ->where('id', $barangMasuk->type_mobil_id)
-                                    ->value('type');
+                                    ->value('type') ?? null;
                         $unit = DB::table('barang_masuk_items')
                             ->where('barang_masuk_id', $invoice->barang_masuks_id)
-                            ->value('unit');
+                            ->value('unit') ?? null;
                     }
                 }
-
-                if (!empty($invoice->barang_keluars_id)) {
+            
+                if ($invoice && !empty($invoice->barang_keluars_id)) {
                     $barangKeluar = DB::table('barang_keluars')->where('id', $invoice->barang_keluars_id)->first();
-
-                    if (!empty($barangKeluar->tanggal_tagihan_keluar)) {
-                        $tanggalKeluar = $barangKeluar->tanggal_tagihan_keluar;
-                        $jocNumber = $barangKeluar->joc_number;
-                        $nomerContainer = $barangKeluar->nomer_container ?: ($barangKeluar->nomer_polisi ?: null);
+            
+                    if ($barangKeluar) {
+                        $tanggalKeluar = $barangKeluar->tanggal_tagihan_keluar ?? null;
+                        $jocNumber = $barangKeluar->nomer_surat_jalan ?? null;
+                        $nomerContainer = $barangKeluar->nomer_container ?: ($barangKeluar->nomer_polisi ?? null);
                         $typeMobil = DB::table('type_mobil')
                                     ->where('id', $barangKeluar->type_mobil_id)
-                                    ->value('type');
+                                    ->value('type') ?? null;
                         $unit = DB::table('barang_keluar_items')
-                        ->where('barang_keluar_id', $invoice->barang_keluars_id)
-                        ->value('unit');
+                            ->where('barang_keluar_id', $invoice->barang_keluars_id)
+                            ->value('unit') ?? null;
+                        $hargaLembur = $barangKeluar->harga_lembur ?? null;
+                        $hargaKirimBarang = $barangKeluar->harga_kirim_barang ?? null;
                     }
                 }
-
-                $tanggalFinal = $tanggalMasuk ?? $tanggalKeluar ?? $invoice->tanggal_masuk;
-
+            
+                $tanggalFinal = $tanggalMasuk ?? $tanggalKeluar ?? $invoice->tanggal_masuk ?? null;
+            
                 $qty = DB::table('barang_masuks')
-                ->leftJoin(
-                    DB::raw('(SELECT barang_masuk_id, SUM(qty) AS total_qty FROM barang_masuk_items GROUP BY barang_masuk_id) AS total_items'),
-                    'barang_masuks.id',
-                    '=',
-                    'total_items.barang_masuk_id'
-                )
-                ->leftJoin(
-                    DB::raw('(SELECT bki.barang_masuk_id, SUM(bki.qty) AS total_qty
-                              FROM barang_keluar_items bki
-                              JOIN barang_keluars ON bki.barang_keluar_id = barang_keluars.id
-                              GROUP BY bki.barang_masuk_id) AS total_keluar'),
-                    'barang_masuks.id',
-                    '=',
-                    'total_keluar.barang_masuk_id'
-                )
-                ->leftJoin('invoices', 'barang_masuks.id', '=', 'invoices.barang_masuks_id')
-                ->where('invoices.id', $invoiceId)
-                ->selectRaw('COALESCE(total_items.total_qty, 0) - COALESCE(CASE WHEN invoices.nomer_invoice IS NULL OR invoices.nomer_invoice = \'\' THEN 0 ELSE total_keluar.total_qty END, 0) AS total_sisa')
-                ->value('total_sisa');
-                    
-
+                    ->leftJoin(
+                        DB::raw('(SELECT barang_masuk_id, SUM(qty) AS total_qty FROM barang_masuk_items GROUP BY barang_masuk_id) AS total_items'),
+                        'barang_masuks.id',
+                        '=',
+                        'total_items.barang_masuk_id'
+                    )
+                    ->leftJoin(
+                        DB::raw('(SELECT bki.barang_masuk_id, SUM(bki.qty) AS total_qty
+                                  FROM barang_keluar_items bki
+                                  JOIN barang_keluars ON bki.barang_keluar_id = barang_keluars.id
+                                  GROUP BY bki.barang_masuk_id) AS total_keluar'),
+                        'barang_masuks.id',
+                        '=',
+                        'total_keluar.barang_masuk_id'
+                    )
+                    ->leftJoin('invoices', 'barang_masuks.id', '=', 'invoices.barang_masuks_id')
+                    ->where('invoices.id', $invoiceId)
+                    ->selectRaw('COALESCE(total_items.total_qty, 0) - COALESCE(CASE WHEN invoices.nomer_invoice IS NULL OR invoices.nomer_invoice = \'\' THEN 0 ELSE total_keluar.total_qty END, 0) AS total_sisa')
+                    ->value('total_sisa') ?? null;
+            
                 DB::table('invoices')->where('id', $invoiceId)->update([
                     'nomer_invoice' => $nomerGenerad,
                     'tanggal_masuk' => $tanggalFinal,
                 ]);
-
-                
-                $customer = DB::table('customers')->where('id', $barangMasuk->customer_id)->first();
-                    if ($customer) {
-
-                        if ($customer->type_payment_customer === 'Pertanggal Masuk') {
-                            $tanggalMasukPenimbunanInvoice = Carbon::parse($tanggalMasukPenimbunan)->addMonth()->format('Y-m-d');
-                            $tanggalKeluarPenimbunanInvoice = Carbon::parse($tanggalKeluarPenimbunan)->addMonth()->format('Y-m-d');
-                        }
-
-                        elseif ($customer->type_payment_customer === 'Akhir Bulan') {
-                            $tanggalMasukPenimbunanInvoice = Carbon::parse($tanggalMasuk)->startOfMonth()->format('Y-m-d');
-                            $tanggalKeluarPenimbunanInvoice = Carbon::parse($tanggalMasuk)->copy()->endOfMonth()->format('Y-m-d');
-                        }
+            
+                $customer = isset($barangMasuk) ? DB::table('customers')->where('id', $barangMasuk->customer_id)->first() : null;
+                if ($customer) {
+                    if ($customer->type_payment_customer === 'Pertanggal Masuk') {
+                        $tanggalMasukPenimbunanInvoice = $tanggalMasukPenimbunan ? Carbon::parse($tanggalMasukPenimbunan)->addMonth()->format('Y-m-d') : null;
+                        $tanggalKeluarPenimbunanInvoice = $tanggalKeluarPenimbunan ? Carbon::parse($tanggalKeluarPenimbunan)->addMonth()->format('Y-m-d') : null;
+                    } elseif ($customer->type_payment_customer === 'Akhir Bulan') {
+                        $tanggalMasukPenimbunanInvoice = $tanggalMasuk ? Carbon::parse($tanggalMasuk)->startOfMonth()->format('Y-m-d') : null;
+                        $tanggalKeluarPenimbunanInvoice = $tanggalMasuk ? Carbon::parse($tanggalMasuk)->copy()->endOfMonth()->format('Y-m-d') : null;
                     }
-
+                }
+            
                 if (DB::table('invoices')->where('id', $invoiceId)->value('nomer_invoice') === $nomerGenerad) {
                     $generatedInvoices[] = $nomerGenerad;
-
+            
                     DB::table('invoices_reporting')->insert([
                         'nomer_invoice' => $nomerGenerad,
-                        'barang_masuks_id' => $invoice->barang_masuks_id,
-                        'barang_keluars_id' => $invoice->barang_keluars_id,
+                        'barang_masuks_id' => $invoice->barang_masuks_id ?? null,
+                        'barang_keluars_id' => $invoice->barang_keluars_id ?? null,
                         'tanggal_masuk' => $tanggalFinal,
-                        'job_number' => $jocNumber,
-                        'nomer_container' => $nomerContainer,
-                        'qty' => $qty,
-                        'unit' => $unit,
-                        'type_mobil' => $typeMobil,
-                        'diskon' => $invoice->diskon,
-                        'tanggal_masuk_penimbunan' => isset($tanggalMasukPenimbunanInvoiceData) && !empty($tanggalMasukPenimbunanInvoiceData) 
-                                                ? $tanggalMasukPenimbunanInvoiceData 
-                                                : $tanggalMasukPenimbunan,
-                        'tanggal_keluar_penimbunan' => isset($tanggalKeluarPenimbunanInvoiceData) && !empty($tanggalKeluarPenimbunanInvoiceData) 
-                                                ? $tanggalKeluarPenimbunanInvoiceData 
-                                                : $tanggalKeluarPenimbunan,
+                        'job_number' => $jocNumber ?? null,
+                        'nomer_container' => $nomerContainer ?? null,
+                        'qty' => $qty ?? null,
+                        'unit' => $unit ?? null,
+                        'type_mobil' => $typeMobil ?? null,
+                        'diskon' => $invoice->diskon ?? null,
+                        'tanggal_masuk_penimbunan' => $tanggalMasukPenimbunanInvoiceData ?? $tanggalMasukPenimbunan ?? null,
+                        'tanggal_keluar_penimbunan' => $tanggalKeluarPenimbunanInvoiceData ?? $tanggalKeluarPenimbunan ?? null,
+                        'harga_simpan_barang' => $hargaSimpanBarang ?? null,
+                        'harga_kirim_barang' => $hargaKirimBarang ?? null,
                         'created_at' => now(),
                         'updated_at' => now(),
                     ]);
 
-                    if (!empty($invoice->barang_masuks_id)) {
-                        if (!empty($barangMasuk->tanggal_tagihan_masuk)) {
-                            $currentDate = new \DateTime($barangMasuk->tanggal_tagihan_masuk);
+                    // dd($hargaLembur, $hargaKirimBarang);
 
-                            if ($currentDate->format('d') == $currentDate->format('t')) {
-
-                                $currentDate->modify('last day of next month');
-                            } else {
-                                $currentDate->modify('+1 month');
-                            }
-
-                            $newDate = $currentDate->format('Y-m-d');
-                        } else {
-
-                            $newDate = date('Y-m-d');
-                        }
-
-
-                        DB::table('barang_masuks')->where('id', $invoice->barang_masuks_id)->update([
-                            'tanggal_tagihan_masuk' => $newDate,
-                            'tanggal_invoice_masuk' => $tanggalMasukPenimbunanInvoice,
-                            'tanggal_invoice_keluar' => $tanggalKeluarPenimbunanInvoice,
+                    if (!is_null($hargaLembur)) {
+                        DB::table('invoices_reporting')->insert([
+                            'nomer_invoice' => $nomerGenerad,
+                            'barang_masuks_id' => $invoice->barang_masuks_id ?? null,
+                            'barang_keluars_id' => $invoice->barang_keluars_id ?? null,
+                            'tanggal_masuk' => $tanggalFinal ?? null,
+                            'harga_lembur' => $hargaLembur ?? null,
+                            'created_at' => now(),
+                            'updated_at' => now(),
                         ]);
                     }
+            
+                    if (!empty($invoice->barang_masuks_id) && isset($barangMasuk->tanggal_tagihan_masuk)) {
+                        $currentDate = new \DateTime($barangMasuk->tanggal_tagihan_masuk);
+            
+                        if ($currentDate->format('d') == $currentDate->format('t')) {
+                            $currentDate->modify('last day of next month');
+                        } else {
+                            $currentDate->modify('+1 month');
+                        }
+            
+                        $newDate = $currentDate->format('Y-m-d');
+                    } else {
+                        $newDate = date('Y-m-d');
+                    }
+            
+                    DB::table('barang_masuks')->where('id', $invoice->barang_masuks_id ?? null)->update([
+                        'tanggal_tagihan_masuk' => $newDate ?? null,
+                        'tanggal_invoice_masuk' => $tanggalMasukPenimbunanInvoice ?? null,
+                        'tanggal_invoice_keluar' => $tanggalKeluarPenimbunanInvoice ?? null,
+                    ]);
                 }
+            
             }
 
             DB::commit();

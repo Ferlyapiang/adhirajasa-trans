@@ -28,7 +28,8 @@ class CreateInvoicesReportingTable extends Migration
             $table->date('tanggal_masuk')->nullable();
             $table->integer('diskon')->nullable();
             $table->decimal('harga_lembur', 15, 2)->nullable();
-            $table->decimal('harga', 15, 2)->nullable(); // Ensure this is sufficient for your use case
+            $table->decimal('harga_kirim_barang', 15, 2)->nullable();
+            $table->decimal('harga_simpan_barang', 15, 2)->nullable(); // Ensure this is sufficient for your use case
             $table->timestamps();
         });
     }
