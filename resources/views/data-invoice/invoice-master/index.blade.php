@@ -75,11 +75,10 @@
                                                 <th><input type="checkbox" id="selectAllCheckbox"></th>
                                                 <!-- Checkbox for select all -->
                                                 <th>No</th>
-                                                <th>Nomer Invoice</th>
+                                                <th>Tanggal Penagihan</th>
                                                 <th>Nomer Referensi</th>
                                                 <th>Tanggal Masuk</th>
                                                 <th>Tanggal Keluar</th>
-                                                <th>Tanggal Penagihan</th>
                                                 <th>Nama Pemilik</th>
                                                 <th>Gudang</th>
                                                 <th>Lemburan</th>
@@ -97,28 +96,12 @@
                                                         value="{{ $item->id }}"></td>
                                                 <!-- Individual checkbox -->
                                                 <td>{{ $index + 1 }}</td>
-                                                <td>
-                                                    <form action="{{ route('invoices.show') }}" method="POST"
-                                                        style="display:inline;">
-                                                        @csrf
-                                                        <input type="hidden" name="nomer_invoice"
-                                                            value="{{ $item->nomer_invoice }}">
-                                                        <button type="submit"
-                                                            style="background: none; border: none; color: blue; text-decoration: underline; cursor: pointer;">
-                                                            {{ $item->nomer_invoice }}
-                                                        </button>
-                                                    </form>
-                                                </td>
-
-
-
-
+                                                <td>{{ $item->tanggal_tagihan_masuk ?: $item->tanggal_tagihan_keluar ?: '' }}
                                                 <td>
                                                     {{ $item->joc_number ? $item->joc_number : $item->nomer_surat_jalan }}
                                                 </td>
                                                 <td>{{ $item->tanggal_masuk_barang }}</td>
                                                 <td>{{ $item->tanggal_keluar }}</td>
-                                                <td>{{ $item->tanggal_tagihan_masuk ?: $item->tanggal_tagihan_keluar ?: '' }}
                                                 <td>
                                                     {{ $item->customer_masuk_name ? $item->customer_masuk_name : $item->customer_keluar_name }}
                                                 </td>
@@ -152,7 +135,7 @@
 
                                         <tfoot>
                                             <tr>
-                                                <th colspan="9" style="text-align: right;">Total:</th>
+                                                <th colspan="8" style="text-align: right;">Total:</th>
                                                 <th id="totalHargaLembur"></th>
                                                 <th id="totalMasuk"></th>
                                                 <th id="totalKeluar"></th>
@@ -161,10 +144,10 @@
                                                 <th id="totalHargaKirimBarang"></th>
                                             </tr>
                                             <tr>
-                                                <th colspan="9" style="text-align: right;">Dari Total Harga Lembur +
+                                                <th colspan="8" style="text-align: right;">Dari Total Harga Lembur +
                                                     Total Harga Simpan Barang + Total Harga Kirim Barang</th>
                                                 <th colspan="2" style="text-align: right;">Total Keseluruhan:</th>
-                                                <th id="totalKeseluruhan" colspan="6"></th>
+                                                <th id="totalKeseluruhan" colspan="5"></th>
                                             </tr>
                                         </tfoot>
 
@@ -211,12 +194,12 @@
             var filterValue = $(this).val();
 
             if (selectedOwner && selectedOwner !== "") {
-                table.column(7).search(filterValue).draw();
+                table.column(6).search(filterValue).draw();
                 calculateTotals(); // Hitung ulang total setelah filter diterapkan
                 $('#selectAllCheckbox').prop('disabled', false);
                 $('.invoiceCheckbox').prop('disabled', false);
             } else {
-                table.column(7).search(filterValue).draw();
+                table.column(6).search(filterValue).draw();
                 calculateTotals(); // Hitung ulang total meskipun filter direset
                 $('#selectAllCheckbox').prop('checked', false).prop('disabled', true);
                 $('.invoiceCheckbox').prop('checked', false).prop('disabled', true);
@@ -271,16 +254,16 @@
                 let data = this.data();
 
                 // Menggunakan unary plus untuk konversi
-                totalHargaSimpan += +data[13].replace(/\./g, '').replace(',',
+                totalHargaSimpan += +data[12].replace(/\./g, '').replace(',',
                     '.'); // Hapus titik dan ganti koma dengan titik
 
-                totalHargaLembur += +data[9].replace(/\./g, '').replace(',',
+                totalHargaLembur += +data[8].replace(/\./g, '').replace(',',
                     '.'); // Jika data[9] adalah string yang valid
 
-                totalMasuk += +data[10] || 0; // Total QTY Masuk
-                totalKeluar += +data[11] || 0; // Total QTY Keluar
-                totalSisa += +data[12] || 0; // Total QTY Sisa
-                totalHargaKirimBarang += +data[14].replace(/\./g, '').replace(',',
+                totalMasuk += +data[9] || 0; // Total QTY Masuk
+                totalKeluar += +data[10] || 0; // Total QTY Keluar
+                totalSisa += +data[11] || 0; // Total QTY Sisa
+                totalHargaKirimBarang += +data[13].replace(/\./g, '').replace(',',
                     '.'); // Total Harga Kirim Barang
             });
 

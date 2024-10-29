@@ -141,46 +141,6 @@ class InvoiceGeneratedController extends Controller
             $invoiceMaster = $invoiceMaster->where('barang_keluars.gudang_id', $user->warehouse_id);
         }
 
-        
-
-        // $invoiceMaster = $invoiceMaster
-        //     ->whereRaw('invoices.tanggal_masuk <= LAST_DAY(CURDATE())
-        //                 AND (
-        //                         (invoices.barang_keluars_id IS NOT NULL AND (invoices.nomer_invoice IS NULL OR invoices.nomer_invoice = ""))
-        //                         OR invoices.barang_masuks_id IS NOT NULL
-        //                     )
-        //                     AND (
-        //                         COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0) > 0 
-        //                         OR (
-        //                             COALESCE(barang_keluars.harga_lembur, 0) > 0
-        //                             OR (
-        //                                 CASE 
-        //                                     WHEN customers_masuks.type_payment_customer = "Akhir Bulan" 
-        //                                         AND YEAR(barang_masuks.tanggal_masuk) = YEAR(barang_masuks.tanggal_tagihan_masuk)
-        //                                         AND MONTH(barang_masuks.tanggal_masuk) = MONTH(barang_masuks.tanggal_tagihan_masuk)
-        //                                     THEN barang_masuks.harga_lembur
-        //                                     WHEN customers_masuks.type_payment_customer = "Pertanggal Masuk" 
-        //                                         AND barang_masuks.tanggal_tagihan_masuk <= DATE_ADD(barang_masuks.tanggal_masuk, INTERVAL 1 MONTH)
-        //                                     THEN barang_masuks.harga_lembur
-        //                                     ELSE 0
-        //                                 END
-        //                             ) > 0
-        //                         )
-        //                         OR COALESCE(barang_keluars.harga_kirim_barang, 0) > 0
-        //                     )
-        //             ');
-
-
-        // $invoiceMaster = $invoiceMaster->orderBy('invoices.tanggal_masuk', 'desc')->get();
-        // dd($invoiceMaster);
-        
-
-        // $owners = $invoiceMaster->map(function ($item) {
-        //     return $item->customer_masuk_name ?: $item->customer_keluar_name;
-        // })
-        //     ->unique()
-        //     ->values();
-
         $invoiceMaster = $invoiceMaster
         ->whereNull('invoices.nomer_invoice')
         ->where('invoices.tanggal_masuk', '<=', DB::raw('LAST_DAY(CURDATE())'))
@@ -248,11 +208,17 @@ class InvoiceGeneratedController extends Controller
                 return $romans[(int)$monthNumber];
             }
 
-            // Get the Roman numeral for the current month
             $monthRoman = monthToRoman($month);
 
-            // Find the latest invoice number for the current year and month
-            $latestJoc = DB::table('invoices')->where('nomer_invoice', 'like', "ATS/INV/{$year}/{$monthRoman}/KPK/%")
+            $customer_initial = isset($barangMasuk) ? DB::table('customers')
+                ->join('warehouses', 'customers.warehouse_id', '=', 'warehouses.id')
+                ->where('customers.id', $barangMasuk->customer_id)
+                ->value('warehouses.initial') : null;
+
+            $initial = $customer_initial ?? 'KPK';
+
+            $latestJoc = DB::table('invoices_reporting')
+                ->where('nomer_invoice', 'like', "ATS/INV/{$year}/{$monthRoman}/{$initial}/%")
                 ->orderBy('nomer_invoice', 'desc')
                 ->first();
 
@@ -263,9 +229,10 @@ class InvoiceGeneratedController extends Controller
                 $newNumber = '001';
             }
 
-            $nomerGenerad = "ATS/INV/{$year}/{$monthRoman}/KPK/{$newNumber}";
+            $nomerGenerad = "ATS/INV/{$year}/{$monthRoman}/{$initial}/{$newNumber}";
 
             $generatedInvoices[] = $nomerGenerad;
+
 
             foreach ($invoiceIds as $invoiceId) {
                 $invoice = DB::table('invoices')->where('id', $invoiceId)->first();
@@ -421,7 +388,10 @@ class InvoiceGeneratedController extends Controller
                         'tanggal_tagihan_masuk' => $newDate ?? null,
                         'tanggal_invoice_masuk' => $tanggalMasukPenimbunanInvoice ?? null,
                         'tanggal_invoice_keluar' => $tanggalKeluarPenimbunanInvoice ?? null,
+                        'status_invoice' => 'Barang Masuk'
                     ]);
+
+                    DB::table('invoices')->where('id', $invoiceId)->delete();
                 }
             
             }
