@@ -166,18 +166,18 @@ class InvoiceGeneratedController extends Controller
             ->unique()
             ->values();
 
-            foreach ($invoiceMaster as $invoice) {
-                $totalSisa = DB::table('invoices')
-                    ->selectRaw('COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0) AS total_sisa')
-                    ->leftJoin('barang_masuks', 'invoices.barang_masuks_id', '=', 'barang_masuks.id')
-                    ->leftJoin(
-                        DB::raw('(SELECT barang_masuk_id, SUM(qty) AS total_qty FROM barang_masuk_items GROUP BY barang_masuk_id) AS total_items'),
-                        'barang_masuks.id',
-                        '=',
-                        'total_items.barang_masuk_id'
-                    )
-                    ->leftJoin(
-                        DB::raw('
+        foreach ($invoiceMaster as $invoice) {
+            $totalSisa = DB::table('invoices')
+                ->selectRaw('COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0) AS total_sisa')
+                ->leftJoin('barang_masuks', 'invoices.barang_masuks_id', '=', 'barang_masuks.id')
+                ->leftJoin(
+                    DB::raw('(SELECT barang_masuk_id, SUM(qty) AS total_qty FROM barang_masuk_items GROUP BY barang_masuk_id) AS total_items'),
+                    'barang_masuks.id',
+                    '=',
+                    'total_items.barang_masuk_id'
+                )
+                ->leftJoin(
+                    DB::raw('
                             (
                                 SELECT bki.barang_masuk_id, SUM(bki.qty) AS total_qty
                                 FROM barang_keluar_items bki
@@ -185,19 +185,19 @@ class InvoiceGeneratedController extends Controller
                                 JOIN invoices_reporting ir ON barang_keluars.id = ir.barang_keluars_id
                                 GROUP BY bki.barang_masuk_id
                             ) AS total_keluar'),
-                        'barang_masuks.id',
-                        '=',
-                        'total_keluar.barang_masuk_id'
-                    )
-                    ->where('invoices.id', $invoice->id)
-                    ->value('total_sisa');
-            
-                // Update the specific invoice's total_qty with the calculated total_sisa
-                DB::table('invoices')
-                    ->where('id', $invoice->id)
-                    ->update(['total_qty' => $totalSisa ?? 0]); // Ensure null fallback is handled as 0 or appropriate value
-            }
-            
+                    'barang_masuks.id',
+                    '=',
+                    'total_keluar.barang_masuk_id'
+                )
+                ->where('invoices.id', $invoice->id)
+                ->value('total_sisa');
+
+            // Update the specific invoice's total_qty with the calculated total_sisa
+            DB::table('invoices')
+                ->where('id', $invoice->id)
+                ->update(['total_qty' => $totalSisa ?? 0]); // Ensure null fallback is handled as 0 or appropriate value
+        }
+
 
         return view('data-invoice.invoice-master.index', compact('invoiceMaster', 'owners'));
     }
@@ -271,14 +271,14 @@ class InvoiceGeneratedController extends Controller
                         $totalQtySimpan = $invoice->total_qty ?? null;
                         // $hargaSimpanBarang = $barangMasuk->harga_simpan_barang ?? null;
                         $totalItems = DB::table('barang_masuks')
-                        ->leftJoin(
-                            DB::raw('(SELECT barang_masuk_id, SUM(qty) AS total_qty FROM barang_masuk_items GROUP BY barang_masuk_id) AS total_items'),
-                            'barang_masuks.id',
-                            '=',
-                            'total_items.barang_masuk_id'
-                        )
-                        ->leftJoin(
-                            DB::raw('
+                            ->leftJoin(
+                                DB::raw('(SELECT barang_masuk_id, SUM(qty) AS total_qty FROM barang_masuk_items GROUP BY barang_masuk_id) AS total_items'),
+                                'barang_masuks.id',
+                                '=',
+                                'total_items.barang_masuk_id'
+                            )
+                            ->leftJoin(
+                                DB::raw('
                             (
                                 SELECT bki.barang_masuk_id, SUM(bki.qty) AS total_qty
                                 FROM barang_keluar_items bki
@@ -286,30 +286,30 @@ class InvoiceGeneratedController extends Controller
                                 JOIN invoices_reporting ir ON barang_keluars.id = ir.barang_keluars_id
                                 GROUP BY bki.barang_masuk_id
                             ) AS total_keluar'),
-                            'barang_masuks.id',
-                            '=',
-                            'total_keluar.barang_masuk_id'
-                        )
-                        ->where('barang_masuks.id', $invoice->barang_masuks_id)
-                        ->selectRaw('
+                                'barang_masuks.id',
+                                '=',
+                                'total_keluar.barang_masuk_id'
+                            )
+                            ->where('barang_masuks.id', $invoice->barang_masuks_id)
+                            ->selectRaw('
                             COALESCE(total_items.total_qty, 0) AS total_qty
                         ')
-                        ->first();
-            
-                    if ($totalItems) {
-                        $qtyTotal = $totalItems->total_qty;
-                        $qtyKeluar = $totalQtySimpan;
-            
-                        if ($qtyTotal === ($qtyTotal - $qtyKeluar)) {
-                            $hargaSimpanBarang = $barangMasuk->harga_simpan_barang;
-                        } else {
-                            if ($qtyTotal > 0) {
-                                $hargaSimpanBarang = ( $qtyKeluar / $qtyTotal) * $barangMasuk->harga_simpan_barang;
+                            ->first();
+
+                        if ($totalItems) {
+                            $qtyTotal = $totalItems->total_qty;
+                            $qtyKeluar = $totalQtySimpan;
+
+                            if ($qtyTotal === ($qtyTotal - $qtyKeluar)) {
+                                $hargaSimpanBarang = $barangMasuk->harga_simpan_barang;
                             } else {
-                                $hargaSimpanBarang = 0; 
+                                if ($qtyTotal > 0) {
+                                    $hargaSimpanBarang = ($qtyKeluar / $qtyTotal) * $barangMasuk->harga_simpan_barang;
+                                } else {
+                                    $hargaSimpanBarang = 0;
+                                }
                             }
                         }
-                    }
                         $jocNumber = $barangMasuk->joc_number ?? null;
                         $nomerContainer = $barangMasuk->nomer_container ?: ($barangMasuk->nomer_polisi ?? null);
                         $typeMobil = DB::table('type_mobil')
@@ -341,32 +341,46 @@ class InvoiceGeneratedController extends Controller
 
                 $tanggalFinal = $tanggalMasuk ?? $tanggalKeluar ?? $invoice->tanggal_masuk ?? null;
 
-                $customer_initial = isset($barangMasuk) ? DB::table('customers')
+                $customer_initial = DB::table('customers')
                     ->join('warehouses', 'customers.warehouse_id', '=', 'warehouses.id')
-                    ->where('customers.id', $barangMasuk->customer_id)
-                    ->value('warehouses.initial') : null;
+                    ->where('customers.id', isset($barangMasuk) ? $barangMasuk->customer_id : (isset($barangKeluar) ? $barangKeluar->customer_id : null))
+                    ->value('warehouses.initial');
 
                 $initial = $customer_initial ?? 'ACL';
 
+                $currentTimestamp = now(); // Get the current timestamp
+
+                // Replace the latestJoc query to use the invoice number pattern
                 $latestJoc = DB::table('invoices_reporting')
                     ->where('nomer_invoice', 'like', "ATS/INV/{$year}/{$monthRoman}/{$initial}/%")
                     ->orderBy('nomer_invoice', 'desc')
                     ->first();
 
+                $reuseInvoice = false;
+
                 if ($latestJoc) {
-                    $lastNumber = (int)substr($latestJoc->nomer_invoice, -3);
-                    $newNumber = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+                    $lastInvoiceTime = \Carbon\Carbon::parse($latestJoc->created_at);
+
+                    // Check if the last invoice's timestamp is in the same minute and second
+                    if ($lastInvoiceTime->isSameMinute($currentTimestamp) && $lastInvoiceTime->second === $currentTimestamp->second) {
+                        // Reuse the last invoice number
+                        $nomerGenerad = $latestJoc->nomer_invoice;
+                        $reuseInvoice = true;
+                    } else {
+                        // Generate a new invoice number
+                        $lastNumber = (int)substr($latestJoc->nomer_invoice, -3);
+                        $newNumber = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+                        $nomerGenerad = "ATS/INV/{$year}/{$monthRoman}/{$initial}/{$newNumber}";
+                    }
                 } else {
-                    $newNumber = '001';
+                    // No previous invoice found, start with the first number
+                    $nomerGenerad = "ATS/INV/{$year}/{$monthRoman}/{$initial}/001";
                 }
-
-                $nomerGenerad = "ATS/INV/{$year}/{$monthRoman}/{$initial}/{$newNumber}";
-
-                $generatedInvoices[] = $nomerGenerad;
 
                 DB::table('invoices')->where('id', $invoiceId)->update([
                     'nomer_invoice' => $nomerGenerad,
                     'tanggal_masuk' => $tanggalFinal,
+                    'created_at' => $currentTimestamp
                 ]);
 
                 $customer = isset($barangMasuk) ? DB::table('customers')->where('id', $barangMasuk->customer_id)->first() : null;
@@ -408,7 +422,7 @@ class InvoiceGeneratedController extends Controller
                             'barang_masuks_id' => $invoice->barang_masuks_id ?? null,
                             'barang_keluars_id' => $invoice->barang_keluars_id ?? null,
                             'tanggal_masuk' => $tanggalFinal ?? null,
-                            'harga_lembur' => $hargaLembur,
+                            'harga_lembur' => $hargaLembur ?? null,
                             'created_at' => now(),
                             'updated_at' => now(),
                         ]);
@@ -440,6 +454,8 @@ class InvoiceGeneratedController extends Controller
                     DB::table('invoices')->where('id', $invoiceId)->delete();
                 }
             }
+
+            // dd($generatedInvoices, $hargaLembur);
 
             DB::commit();
 
