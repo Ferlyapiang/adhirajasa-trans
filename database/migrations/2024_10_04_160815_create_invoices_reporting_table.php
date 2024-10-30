@@ -15,7 +15,7 @@ class CreateInvoicesReportingTable extends Migration
     {
         Schema::create('invoices_reporting', function (Blueprint $table) {
             $table->id(); // Auto-incrementing primary key
-            $table->string('nomer_invoice')->nullable();
+            $table->string('nomer_invoice')->nullable(); // Not unique by default
             $table->foreignId('barang_masuks_id')->nullable()->constrained('barang_masuks')->onDelete('set null'); // Foreign key to barang_masuks table
             $table->foreignId('barang_keluars_id')->nullable()->constrained('barang_keluars')->onDelete('set null'); // Foreign key to barang_keluars table
             $table->string('job_number')->nullable();

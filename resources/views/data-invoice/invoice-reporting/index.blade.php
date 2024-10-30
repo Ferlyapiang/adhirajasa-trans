@@ -60,7 +60,7 @@
                                         <select id="ownerNameFilter" class="form-control">
                                             <option value="">Semua</option>
                                             @foreach ($owners as $owner)
-                                            <option value="{{ $owner }}">{{ $owner }}</option>
+                                                <option value="{{ $owner }}">{{ $owner }}</option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -72,93 +72,55 @@
                                             <tr>
                                                 <th>No</th>
                                                 <th>Nomer Invoice</th>
-                                                <th>Nomer Referensi</th>
-                                                <th>Tanggal Masuk</th>
-                                                <th>Tanggal Keluar</th>
                                                 <th>Tanggal Penagihan</th>
+                                                <th>Nomer Referensi</th>
                                                 <th>Nama Pemilik</th>
                                                 <th>Gudang</th>
+                                                <th>Tanggal Masuk Penimbunan</th>
+                                                <th>Tanggal Keluar Penimbunan</th>
                                                 <th>Lemburan</th>
-                                                <th>Total QTY Masuk</th>
-                                                <th>Total QTY Keluar</th>
+                                                <th>Harga Kirim Barang</th>
                                                 <th>Total QTY Sisa</th>
                                                 <th>Total Harga Simpan</th>
-                                                <th>Harga Kirim Barang</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             @foreach ($invoiceMaster as $index => $item)
-                                            <tr>
-                                                <!-- Individual checkbox -->
-                                                <td>{{ $index + 1 }}</td>
-                                                <td>
-                                                    <form action="{{ route('invoices-report.show') }}" method="POST"
-                                                        style="display:inline;">
-                                                        @csrf
-                                                        <input type="hidden" name="nomer_invoice"
-                                                            value="{{ $item->nomer_invoice }}">
-                                                        <button type="submit"
-                                                            style="background: none; border: none; color: blue; text-decoration: underline; cursor: pointer;">
-                                                            {{ $item->nomer_invoice }}
-                                                        </button>
-                                                    </form>
-                                                </td>
+                                                <tr>
+                                                    <!-- Individual checkbox -->
+                                                    <td>{{ $index + 1 }}</td>
+                                                    <td>
+                                                        <form action="{{ route('invoices-report.show') }}"
+                                                            method="POST" style="display:inline;">
+                                                            @csrf
+                                                            <input type="hidden" name="nomer_invoice"
+                                                                value="{{ $item->nomer_invoice }}">
+                                                            <button type="submit"
+                                                                style="background: none; border: none; color: blue; text-decoration: underline; cursor: pointer;">
+                                                                {{ $item->nomer_invoice ?? 'X' }}
+                                                            </button>
+                                                        </form>
+                                                    </td>
 
-                                                <td>
-                                                    {{ $item->joc_number ? $item->joc_number : $item->nomer_surat_jalan }}
-                                                </td>
-                                                <td>{{ $item->tanggal_masuk_barang }}</td>
-                                                <td>{{ $item->tanggal_keluar }}</td>
-                                                <td>{{ $item->tanggal_tagihan_masuk ?: $item->tanggal_tagihan_keluar ?: '' }}
-                                                <td>
-                                                    {{ $item->customer_masuk_name ? $item->customer_masuk_name : $item->customer_keluar_name }}
-                                                </td>
-                                                <td>{{ $item->warehouse_masuk_name ? $item->warehouse_masuk_name : $item->warehouse_keluar_name }}
-                                                </td>
-                                                
-                                                </td>
-                                                <td>
-                                                    @if(!is_null($item->harga_lembur_masuk) && $item->harga_lembur_masuk != 0)
-                                                    {{ number_format($item->harga_lembur_masuk, 0, ',', '.') }}
-                                                    @elseif(!is_null($item->harga_lembur_keluar) && $item->harga_lembur_keluar != 0)
-                                                    {{ number_format($item->harga_lembur_keluar, 0, ',', '.') }}
-                                                    @else
-                                                    {{ '' }}
-                                                    @endif
-                                                </td>
-
-
-
-                                                </td>
-                                                <td>{{ $item->total_qty_masuk }}</td>
-                                                <td>{{ $item->total_qty_keluar }}</td>
-                                                <td>{{ $item->total_sisa }}</td>
-                                                <td>{{ number_format($item->total_harga_simpan, 0, ',', '.') }}
-                                                </td>
-                                                <td>{{ number_format($item->harga_kirim_barang, 0, ',', '.') }}
-                                                </td>
-                                            </tr>
+                                                    <td>
+                                                        {{ $item->joc_number ?? ($item->nomer_surat_jalan ?? 'X') }}
+                                                    </td>
+                                                    <td>{{ $item->joc_number ?? ($item->nomer_surat_jalan ?? 'X') }}</td>
+                                                    <td>{{ $item->customer_name ?? 'X' }}
+                                                    <td>
+                                                        {{ $item->warehouse_name ?? 'X' }}
+                                                    </td>
+                                                    <td>{{ $item->tanggal_masuk_penimbunan ?? 'X' }}</td>
+                                                    <td>{{ $item->tanggal_keluar_penimbunan ?? 'X' }}</td>
+                                                    <td>{{ $item->harga_lembur ?? 'X' }}</td>
+                                                    <td>{{ $item->harga_kirim_barang ?? 'X' }}</td>
+                                                    <td>{{ $item->total_sisa ?? 'X' }}</td>
+                                                    <td>
+                                                        {{ $item->harga_simpan_barang ?? 'X' }}
+                                                    </td>
+                                                </tr>
                                             @endforeach
                                         </tbody>
-
-                                        <tfoot>
-                                            <tr>
-                                                <th colspan="8" style="text-align: right;">Total:</th>
-                                                <th id="totalHargaLembur"></th>
-                                                <th id="totalMasuk"></th>
-                                                <th id="totalKeluar"></th>
-                                                <th id="totalSisa"></th>
-                                                <th id="totalHargaSimpan"></th>
-                                                <th id="totalHargaKirimBarang"></th>
-                                            </tr>
-                                            <tr>
-                                                <th colspan="8" style="text-align: right;">Dari Total Harga Lembur +
-                                                    Total Harga Simpan Barang + Total Harga Kirim Barang</th>
-                                                <th colspan="2" style="text-align: right;">Total Keseluruhan:</th>
-                                                <th id="totalKeseluruhan" colspan="5"></th>
-                                            </tr>
-                                        </tfoot>
-
                                     </table>
                                 </div>
                             </div>
@@ -190,84 +152,17 @@
 
     <!-- Page-specific script -->
     <script>
-    $(document).ready(function() {
-        // Initialize DataTable
-        var table = $('#barangMasukTable').DataTable();
-        
-
-        $('#ownerNameFilter').on('change', function() {
-            var selectedOwner = $(this).val(); 
-            
-
-            if (selectedOwner && selectedOwner !== "") {
-                table.column(6).search(filterValue).draw();
-                calculateTotals(); // Hitung ulang total setelah filter diterapkan
-              
-            } else {
-                table.column(6).search(filterValue).draw();
-                calculateTotals(); // Hitung ulang total meskipun filter direse
-                // Reset totals if necessary
-            }
-        });
-
-        // Function to calculate totals for visible rows only
-        function calculateTotals() {
-            let totalHargaSimpan = 0;
-            let totalHargaLembur = 0;
-            let totalMasuk = 0;
-            let totalKeluar = 0;
-            let totalSisa = 0;
-            let totalHargaKirimBarang = 0;
-
-            // Loop through only the visible rows
-            table.rows({ search: 'applied' }).every(function() {
-                let data = this.data();
-
-                // Menggunakan unary plus untuk konversi
-                totalHargaSimpan += +data[12].replace(/\./g, '').replace(',',
-                    '.'); // Hapus titik dan ganti koma dengan titik
-
-                totalHargaLembur += +data[8].replace(/\./g, '').replace(',',
-                    '.'); // Jika data[9] adalah string yang valid
-
-                totalMasuk += +data[9] || 0; // Total QTY Masuk
-                totalKeluar += +data[10] || 0; // Total QTY Keluar
-                totalSisa += +data[11] || 0; // Total QTY Sisa
-                totalHargaKirimBarang += +data[13].replace(/\./g, '').replace(',',
-                    '.'); // Total Harga Kirim Barang
+        $(document).ready(function() {
+            // Initialize DataTable
+            var table = $('#barangMasukTable').DataTable();
+            $('#ownerNameFilter').on('change', function() {
+                var selectedOwner = $(this).val(); // Get selected value
+                // Custom search function to filter by customer_name
+                table.column(4).search(selectedOwner).draw();
             });
 
-            // Calculate total keseluruhan
-            const totalKeseluruhan = totalHargaSimpan + totalHargaLembur + totalHargaKirimBarang;
-
-            // Update the footer with totals
-            $('#totalHargaSimpan').text(totalHargaSimpan.toLocaleString('id-ID', {
-                minimumFractionDigits: 0
-            }));
-            $('#totalHargaLembur').text(totalHargaLembur.toLocaleString('id-ID', {
-                minimumFractionDigits: 0
-            }));
-            $('#totalMasuk').text(totalMasuk.toLocaleString('id-ID', {
-                minimumFractionDigits: 0
-            }));
-            $('#totalKeluar').text(totalKeluar.toLocaleString('id-ID', {
-                minimumFractionDigits: 0
-            }));
-            $('#totalSisa').text(totalSisa.toLocaleString('id-ID', {
-                minimumFractionDigits: 0
-            }));
-            $('#totalHargaKirimBarang').text(totalHargaKirimBarang.toLocaleString('id-ID', {
-                minimumFractionDigits: 0
-            }));
-            $('#totalKeseluruhan').text(totalKeseluruhan.toLocaleString('id-ID', {
-                minimumFractionDigits: 0
-            }));
-        }
-
-        // Calculate totals on page load
-        calculateTotals();
-    });
-</script>
+        });
+    </script>
 
 
 </body>

@@ -139,7 +139,7 @@
                                         <tbody>
                                             <tr>
                                                 <td>{{ $invoiceMaster[0]->nomer_invoice }}</td>
-                                                <td>{{ $invoiceMaster[0]->tanggal_masuk ?: ($invoiceMaster[0]->tanggal_keluar ?: 'Tanggal transaksi tidak tersedia') }}
+                                                <td>{{ $invoiceMaster[0]->tanggal_masuk ?? 'Tanggal transaksi tidak tersedia' }}
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -152,10 +152,10 @@
                                 <div class="col-lg-6">
                                     <h1>BILL TO</h1>
                                     <div class="header-info">
-                                        {{ $invoiceMaster[0]->customer_masuk_name ?? ($invoiceMaster[0]->customer_keluar_name ?? 'Nama pelanggan tidak tersedia') }}
+                                        {{ $invoiceMaster[0]->customername ?? 'Nama pelanggan tidak tersedia' }}
                                         <br>
                                         Telp:
-                                        {{ $invoiceMaster[0]->customer_masuk_no_hp ?? $invoiceMaster[0]->customer_keluar_no_hp }}
+                                        {{ $invoiceMaster[0]->customer_no_hp ?? 'Nomor telepon pelanggan tidak tersedia' }}
                                     </div>
                                 </div>
                             </div>
@@ -181,99 +181,23 @@
                                                 @foreach ($invoiceMaster as $item)
                                                     <tr>
                                                         <td>{{ $item->joc_number ?: $item->nomer_surat_jalan }}</td>
-                                                        <td>{{ $item->nomer_polisi_masuk ?: $item->nomer_polisi_keluar ?: $item->nomer_container_masuk ?: $item->nomer_container_keluar ?: '' }}
+                                                        <td>{{ $item->nomer_polisi ?: $item->nomer_container ?: 'X' }}
                                                         </td>
-                                                        <td>{{ $item->total_qty_masuk ?: $item->total_qty_keluar_keluar ?: '' }}
+                                                        <td>{{ $item->total_sisa ?? 'X' }}
                                                         </td>
                                                         <td style="text-align: center;">
                                                             Kontainer
-                                                            <strong>{{ $item->type_mobil_masuk ?: $item->type_mobil_keluar ?: '' }}</strong><br>
+                                                            <strong>{{ $item->type_mobil ?? '' }}</strong><br>
                                                             Masa Penimbunan:
-                                                            <strong>{{ $item->tanggal_masuk_barang ? \Carbon\Carbon::parse($item->tanggal_masuk_barang)->format('d/m/Y') : ($item->tanggal_keluar ? \Carbon\Carbon::parse($item->tanggal_keluar)->format('d/m/Y') : '') }}</strong>
+                                                            <strong>{{ $item->tanggal_masuk_penimbunan ?: \Carbon\Carbon::parse($item->tanggal_masuk_penimbunan)->format('d/m/Y') ?? '' }}</strong>
                                                             -
-                                                            <strong>{{ $item->tanggal_tagihan_masuk ? \Carbon\Carbon::parse($item->tanggal_tagihan_masuk)->format('d/m/Y') : ($item->tanggal_tagihan_keluar ? \Carbon\Carbon::parse($item->tanggal_tagihan_keluar)->format('d/m/Y') : '') }}</strong>
+                                                            <strong>{{ $item->tanggal_keluar_penimbunan ?: \Carbon\Carbon::parse($item->tanggal_keluar_penimbunan )->format('d/m/Y') ?? '' }}</strong>
                                                         </td>
-                                                        <td>{{ number_format($item->total_harga_simpan_lembur ?: $item->total_harga_barang_keluar, 0, ',', '.') }}
+                                                        <td>{{ $item->harga_simpan_barang ?? $item->harga_lembur ?? $item->harga_kirim_barang ?? "X"}}
                                                         </td>
                                                     </tr>
                                                 @endforeach
                                             </tbody>
-
-                                            @php
-                                                // Hitung total harga
-                                                $totalHarga = array_reduce(
-                                                    $invoiceMaster,
-                                                    function ($carry, $item) {
-                                                        return $carry +
-                                                            ($item->total_harga_simpan_lembur ?:
-                                                            $item->total_harga_barang_keluar ?:
-                                                                0);
-                                                    },
-                                                    0,
-                                                );
-
-                                                // Hitung total diskon
-                                                $totalDiskon = array_reduce(
-                                                    $invoiceMaster,
-                                                    function ($carry, $item) {
-                                                        return $carry + ($item->diskon ?: 0); // Assumes diskon is a property of each item
-                                                    },
-                                                    0,
-                                                );
-
-                                                // Inisialisasi PPN dan PPH
-                                                $ppn = 0;
-                                                $pph = 0;
-
-                                                // Cek apakah $invoiceMaster tidak kosong
-                                                if (count($invoiceMaster) > 0) {
-                                                    $firstItem = $invoiceMaster[0];
-
-                                                    // Jika ada no_npwp_masuk atau no_npwp_keluar
-                                                    if ($firstItem->no_npwp_masuk || $firstItem->no_npwp_keluar) {
-                                                        $ppn = $totalHarga * 0.011; // 1.1%
-                                                        $pph = $totalHarga * 0.02; // 2%
-                                                    }
-                                                    // Jika hanya ada no_ktp_keluar, tidak ada pajak tambahan
-                                                    elseif ($firstItem->no_ktp_keluar || $firstItem->no_ktp_masuk) {
-                                                        // Tidak ada perhitungan pajak
-                                                        $ppn = 0;
-                                                        $pph = 0;
-                                                    }
-                                                }
-
-                                                // Total akhir
-                                                $totalAkhir = $totalHarga + $ppn + $pph - $totalDiskon; // Subtract total diskon
-                                            @endphp
-
-
-                                            <tfoot>
-                                                <tr>
-                                                    <td colspan="4" class="text-right"><strong>Total</strong></td>
-                                                    <td>{{ number_format($totalHarga, 0, ',', '.') }}</td>
-                                                </tr>
-                                                @if ($ppn > 0 || $pph > 0)
-                                                    <tr>
-                                                        <td colspan="4" class="text-right"><strong>PPN
-                                                                (1.1%)</strong></td>
-                                                        <td>{{ number_format($ppn, 0, ',', '.') }}</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td colspan="4" class="text-right"><strong>PPH (2%)</strong>
-                                                        </td>
-                                                        <td>{{ number_format($pph, 0, ',', '.') }}</td>
-                                                    </tr>
-                                                @endif
-                                                <tr>
-                                                    <td colspan="4" class="text-right"><strong>Diskon</strong></td>
-                                                    <td>{{ number_format($totalDiskon, 0, ',', '.') }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td colspan="4" class="text-right"><strong>Total Akhir</strong>
-                                                    </td>
-                                                    <td>{{ number_format($totalAkhir, 0, ',', '.') }}</td>
-                                                </tr>
-                                            </tfoot>
                                         </table>
                                         <a href="{{ route('invoice-report.download', $invoiceMaster[0]->id) }}" class="btn btn-primary">Download PDF</a>
                                         <a href="{{ route('data-invoice.invoice-reporting.display') }}" class="btn btn-secondary">Back</a>
