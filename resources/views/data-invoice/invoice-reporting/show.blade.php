@@ -152,7 +152,7 @@
                                 <div class="col-lg-6">
                                     <h1>BILL TO</h1>
                                     <div class="header-info">
-                                        {{ $invoiceMaster[0]->customername ?? 'Nama pelanggan tidak tersedia' }}
+                                        {{ $invoiceMaster[0]->customer_name ?? 'Nama pelanggan tidak tersedia' }}
                                         <br>
                                         Telp:
                                         {{ $invoiceMaster[0]->customer_no_hp ?? 'Nomor telepon pelanggan tidak tersedia' }}
@@ -178,27 +178,135 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
+                                                @php
+                                                    $subtotal = 0;
+                                                @endphp
                                                 @foreach ($invoiceMaster as $item)
                                                     <tr>
-                                                        <td>{{ $item->joc_number ?: $item->nomer_surat_jalan }}</td>
-                                                        <td>{{ $item->nomer_polisi ?: $item->nomer_container ?: 'X' }}
+                                                        <td>
+                                                            @if ($item->harga_lembur)
+                                                                X
+                                                            @elseif ($item->harga_kirim_barang)
+                                                                {{ $item->joc_number ?: $item->nomer_surat_jalan }}
+                                                            @else
+                                                                {{ $item->joc_number ?: $item->nomer_surat_jalan }}
+                                                            @endif
                                                         </td>
-                                                        <td>{{ $item->total_sisa ?? 'X' }}
+                                                        <td>
+                                                            @if ($item->harga_lembur)
+                                                                X
+                                                            @elseif ($item->harga_kirim_barang)
+                                                                X
+                                                            @else
+                                                                {{ $item->nomer_polisi ?: $item->nomer_container ?: 'X' }}
+                                                            @endif
+                                                        </td>
+                                                        <td>
+                                                            @if ($item->harga_lembur)
+                                                                X
+                                                            @elseif ($item->harga_kirim_barang)
+                                                                1X Engkel
+                                                            @else
+                                                                {{ $item->total_sisa ?? 'X' }}
+                                                            @endif
                                                         </td>
                                                         <td style="text-align: center;">
-                                                            Kontainer
-                                                            <strong>{{ $item->type_mobil ?? '' }}</strong><br>
-                                                            Masa Penimbunan:
-                                                            <strong>{{ $item->tanggal_masuk_penimbunan ?: \Carbon\Carbon::parse($item->tanggal_masuk_penimbunan)->format('d/m/Y') ?? '' }}</strong>
-                                                            -
-                                                            <strong>{{ $item->tanggal_keluar_penimbunan ?: \Carbon\Carbon::parse($item->tanggal_keluar_penimbunan )->format('d/m/Y') ?? '' }}</strong>
+                                                            @if ($item->harga_lembur)
+                                                                CASH LEMBUR BONGKAR {{ $item->joc_number ?? $item->nomer_surat_jalan }}
+                                                            @elseif ($item->harga_kirim_barang)
+                                                                Sewa Mobil <strong>{{ $item->warehouse_name ?? 'X' }}<br></strong> 
+                                                                {{ $item->address ?? 'X' }}<br>
+                                                                Nomer Container: <strong>{{ $item->nomer_container ?? $item->nomer_polisi ?? 'X' }}</strong> 
+                                                            @else
+                                                                Kontainer <strong>{{ $item->type_mobil ?? '' }}</strong><br>
+                                                                Masa Penimbunan:
+                                                                <strong>{{ $item->tanggal_masuk_penimbunan ? \Carbon\Carbon::parse($item->tanggal_masuk_penimbunan)->format('d/m/Y') : '' }}</strong>
+                                                                -
+                                                                <strong>{{ $item->tanggal_keluar_penimbunan ? \Carbon\Carbon::parse($item->tanggal_keluar_penimbunan)->format('d/m/Y') : '' }}</strong>
+                                                            @endif
                                                         </td>
-                                                        <td>{{ $item->harga_simpan_barang ?? $item->harga_lembur ?? $item->harga_kirim_barang ?? "X"}}
+                                                        <td>
+                                                            @php
+                                                                $unitPrice = $item->harga_lembur ?? $item->harga_kirim_barang ?? $item->harga_simpan_barang ?? 0;
+                                                                $subtotal += $unitPrice;
+                                                            @endphp
+                                                            {{ number_format($unitPrice) }}
                                                         </td>
                                                     </tr>
                                                 @endforeach
                                             </tbody>
+                                            @php
+function convertToWords($number) {
+    $units = ['', 'Satu', 'Dua', 'Tiga', 'Empat', 'Lima', 'Enam', 'Tujuh', 'Delapan', 'Sembilan'];
+    $words = '';
+
+    if ($number < 10) {
+        $words = $units[$number];
+    } elseif ($number < 20) {
+        $words = $units[$number - 10] . ' Belas';
+    } elseif ($number < 100) {
+        $words = $units[intval($number / 10)] . ' Puluh ' . $units[$number % 10];
+    } elseif ($number < 1000) {
+        $words = $units[intval($number / 100)] . ' Ratus ' . convertToWords($number % 100);
+    } elseif ($number < 1000000) {
+        $words = convertToWords(intval($number / 1000)) . ' Ribu ' . convertToWords($number % 1000);
+    } elseif ($number < 1000000000) {
+        $words = convertToWords(intval($number / 1000000)) . ' Juta ' . convertToWords($number % 1000000);
+    }
+
+    return trim($words);
+}
+
+// Wrap the function call to add "Rupiah" only once
+function convertToWordsWithCurrency($number) {
+    return convertToWords($number) . ' Rupiah';
+}
+
+
+@endphp
+
+<tfoot>
+    @php
+        $ppn = 0.011 * $subtotal;  // 11% PPN
+        $pph = 0.02 * $subtotal;   // 2% PPH
+        $total = $subtotal + $ppn + $pph;
+    @endphp
+
+    @if (!empty($invoiceMaster[0]->customer_no_npwp))
+        <tr>
+            <td colspan="4" style="text-align: right;">Subtotal</td>
+            <td>{{ number_format($subtotal) }}</td>
+        </tr>
+        <tr>
+            <td colspan="4" style="text-align: right;">PPN (1.1%)</td>
+            <td>{{ number_format($ppn) }}</td>
+        </tr>
+        <tr>
+            <td colspan="4" style="text-align: right;">PPH (2%)</td>
+            <td>{{ number_format($pph) }}</td>
+        </tr>
+        <tr>
+            <td colspan="4" style="text-align: right; font-weight: bold;">Total</td>
+            <td style="font-weight: bold;">{{ number_format($total) }}</td>
+        </tr>
+        <tr>
+            <td colspan="5" style="text-align: right; font-style: italic;">Total: {{ convertToWordsWithCurrency($total) }}</td>
+        </tr>
+    @elseif (!empty($invoiceMaster[0]->customer_no_ktp))
+        <tr>
+            <td colspan="4" style="text-align: right; font-weight: bold;">Total</td>
+            <td style="font-weight: bold;">{{ number_format($subtotal) }}</td>
+        </tr>
+        <tr>
+            <td colspan="5" style="text-align: right; font-style: italic;">Total: {{ convertToWordsWithCurrency($subtotal) }}</td>
+        </tr>
+    @endif
+</tfoot>
+
+                                            
                                         </table>
+                                        
+                                        
                                         <a href="{{ route('invoice-report.download', $invoiceMaster[0]->id) }}" class="btn btn-primary">Download PDF</a>
                                         <a href="{{ route('data-invoice.invoice-reporting.display') }}" class="btn btn-secondary">Back</a>
                                     </div>

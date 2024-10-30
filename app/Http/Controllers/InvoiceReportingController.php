@@ -117,9 +117,12 @@ class InvoiceReportingController extends Controller
     barang_masuks.joc_number,
     invoices_reporting.barang_keluars_id,
     barang_keluars.nomer_surat_jalan,
+    barang_keluars.address,
     invoices_reporting.tanggal_masuk_penimbunan,
     invoices_reporting.tanggal_keluar_penimbunan,
     invoices_reporting.tanggal_masuk,
+    COALESCE(customers_masuks.no_npwp, customers_keluars.no_npwp) AS customer_no_npwp,
+    COALESCE(customers_masuks.no_ktp, customers_keluars.no_ktp) AS customer_no_ktp,
     
     COALESCE(barang_masuks.gudang_id, barang_keluars.gudang_id) AS gudang_id,
     COALESCE(warehouses_masuks.name, warehouses_keluars.name) AS warehouse_name,
