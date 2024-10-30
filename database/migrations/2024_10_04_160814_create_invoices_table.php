@@ -21,6 +21,7 @@ class CreateInvoicesTable extends Migration
             $table->date('tanggal_masuk')->nullable();
             $table->integer('diskon')->nullable();
             $table->decimal('harga_total', 15, 2)->nullable();
+            $table->integer('total_qty')->nullable();
             $table->timestamps();
         });
     }
