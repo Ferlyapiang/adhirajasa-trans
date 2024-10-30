@@ -97,7 +97,7 @@
             <tbody>
                 <tr>
                     <td>{{ $invoiceMaster[0]->nomer_invoice }}</td>
-                    <td>{{ $invoiceMaster[0]->tanggal_invoice_tagihan ?: ($invoiceMaster[0]->tanggal_invoice_tagihan ?: 'Tanggal transaksi tidak tersedia') }}
+                    <td>{{ $invoiceMaster[0]->tanggal_masuk ?? 'Tanggal transaksi tidak tersedia' }}
                     </td>
                 </tr>
             </tbody>
@@ -106,8 +106,10 @@
         <div class="row mb-4">
             <h1>BILL TO</h1>
             <div class="header-info">
-                {{ $invoiceMaster[0]->customer_masuk_name ?? ($invoiceMaster[0]->customer_keluar_name ?? 'Nama pelanggan tidak tersedia') }}<br>
-                Telp: {{ $invoiceMaster[0]->customer_masuk_no_hp ?? $invoiceMaster[0]->customer_keluar_no_hp }}
+                {{ $invoiceMaster[0]->customer_name ?? 'Nama pelanggan tidak tersedia' }}
+                <br>
+                Telp:
+                {{ $invoiceMaster[0]->customer_no_hp ?? 'Nomor telepon pelanggan tidak tersedia' }}
             </div>
         </div>
 
@@ -123,93 +125,169 @@
                 </tr>
             </thead>
             <tbody>
+                @php
+                    $subtotal = 0;
+                @endphp
                 @foreach ($invoiceMaster as $item)
                     <tr>
-                        <td>{{ $item->joc_number ?: $item->nomer_surat_jalan }}</td>
-                        <td>{{ $item->nomer_polisi_masuk ?: $item->nomer_polisi_keluar ?: $item->nomer_container_masuk ?: $item->nomer_container_keluar ?: '' }}
-                        </td>
-                        <td>{{ $item->total_qty_masuk ?: $item->total_qty_keluar_keluar ?: '' }}</td>
                         <td>
-                            Kontainer
-                            <strong>{{ $item->type_mobil_masuk ?: $item->type_mobil_keluar ?: '' }}</strong><br>
-                            Masa Penimbunan:
-                            <strong>{{ $item->tanggal_masuk_barang ? \Carbon\Carbon::parse($item->tanggal_masuk_barang)->format('d/m/Y') : ($item->tanggal_keluar ? \Carbon\Carbon::parse($item->tanggal_keluar)->format('d/m/Y') : '') }}</strong>
-                            -
-                            <strong>{{ $item->tanggal_tagihan_masuk ? \Carbon\Carbon::parse($item->tanggal_tagihan_masuk)->format('d/m/Y') : ($item->tanggal_tagihan_keluar ? \Carbon\Carbon::parse($item->tanggal_tagihan_keluar)->format('d/m/Y') : '') }}</strong>
+                            @if ($item->harga_lembur)
+                                X
+                            @elseif ($item->harga_kirim_barang)
+                                {{ $item->joc_number ?: $item->nomer_surat_jalan }}
+                            @else
+                                {{ $item->joc_number ?: $item->nomer_surat_jalan }}
+                            @endif
                         </td>
-                        <td>{{ number_format($item->total_harga_simpan_lembur ?: $item->total_harga_barang_keluar, 0, ',', '.') }}
+                        <td>
+                            @if ($item->harga_lembur)
+                                X
+                            @elseif ($item->harga_kirim_barang)
+                                X
+                            @else
+                                {{ $item->nomer_polisi ?: $item->nomer_container ?: 'X' }}
+                            @endif
+                        </td>
+                        <td>
+                            @if ($item->harga_lembur)
+                                X
+                            @elseif ($item->harga_kirim_barang)
+                                1X Engkel
+                            @else
+                                {{ $item->total_sisa ?? 'X' }}
+                            @endif
+                        </td>
+                        <td style="text-align: center;">
+                            @if ($item->harga_lembur)
+                                CASH LEMBUR BONGKAR
+                                {{ $item->joc_number ?? $item->nomer_surat_jalan }}
+                            @elseif ($item->harga_kirim_barang)
+                                Sewa Mobil
+                                <strong>{{ $item->warehouse_name ?? 'X' }}<br></strong>
+                                {{ $item->address ?? 'X' }}<br>
+                                Nomer Container:
+                                <strong>{{ $item->nomer_container ?? ($item->nomer_polisi ?? 'X') }}</strong>
+                            @else
+                                Kontainer
+                                <strong>{{ $item->type_mobil ?? '' }}</strong><br>
+                                Masa Penimbunan:
+                                <strong>{{ $item->tanggal_masuk_penimbunan ? \Carbon\Carbon::parse($item->tanggal_masuk_penimbunan)->format('d/m/Y') : '' }}</strong>
+                                -
+                                <strong>{{ $item->tanggal_keluar_penimbunan ? \Carbon\Carbon::parse($item->tanggal_keluar_penimbunan)->format('d/m/Y') : '' }}</strong>
+                            @endif
+                        </td>
+                        <td>
+                            @php
+                                $unitPrice =
+                                    $item->harga_lembur ??
+                                    ($item->harga_kirim_barang ??
+                                        ($item->harga_simpan_barang ?? 0));
+                                $subtotal += $unitPrice;
+                            @endphp
+                            {{ number_format($unitPrice) }}
                         </td>
                     </tr>
                 @endforeach
             </tbody>
             @php
-                // Hitung total harga
-                $totalHarga = array_reduce(
-                    $invoiceMaster,
-                    function ($carry, $item) {
-                        return $carry + ($item->total_harga_simpan_lembur ?: $item->total_harga_barang_keluar ?: 0);
-                    },
-                    0,
-                );
+                function convertToWords($number)
+                {
+                    $units = [
+                        '',
+                        'Satu',
+                        'Dua',
+                        'Tiga',
+                        'Empat',
+                        'Lima',
+                        'Enam',
+                        'Tujuh',
+                        'Delapan',
+                        'Sembilan',
+                    ];
+                    $words = '';
 
-                // Hitung total diskon
-                $totalDiskon = array_reduce(
-                    $invoiceMaster,
-                    function ($carry, $item) {
-                        return $carry + ($item->diskon ?: 0); // Assumes diskon is a property of each item
-                    },
-                    0,
-                );
-
-                // Inisialisasi PPN dan PPH
-                $ppn = 0;
-                $pph = 0;
-
-                // Cek apakah $invoiceMaster tidak kosong
-                if (count($invoiceMaster) > 0) {
-                    $firstItem = $invoiceMaster[0];
-
-                    // Jika ada no_npwp_masuk atau no_npwp_keluar
-                    if ($firstItem->no_npwp_masuk || $firstItem->no_npwp_keluar) {
-                        $ppn = $totalHarga * 0.011; // 1.1%
-                        $pph = $totalHarga * 0.02; // 2%
+                    if ($number < 10) {
+                        $words = $units[$number];
+                    } elseif ($number < 20) {
+                        $words = $units[$number - 10] . ' Belas';
+                    } elseif ($number < 100) {
+                        $words =
+                            $units[intval($number / 10)] .
+                            ' Puluh ' .
+                            $units[$number % 10];
+                    } elseif ($number < 1000) {
+                        $words =
+                            $units[intval($number / 100)] .
+                            ' Ratus ' .
+                            convertToWords($number % 100);
+                    } elseif ($number < 1000000) {
+                        $words =
+                            convertToWords(intval($number / 1000)) .
+                            ' Ribu ' .
+                            convertToWords($number % 1000);
+                    } elseif ($number < 1000000000) {
+                        $words =
+                            convertToWords(intval($number / 1000000)) .
+                            ' Juta ' .
+                            convertToWords($number % 1000000);
                     }
-                    // Jika hanya ada no_ktp_keluar, tidak ada pajak tambahan
-                    elseif ($firstItem->no_ktp_keluar || $firstItem->no_ktp_masuk) {
-                        // Tidak ada perhitungan pajak
-                        $ppn = 0;
-                        $pph = 0;
-                    }
+
+                    return trim($words);
                 }
 
-                // Total akhir
-                $totalAkhir = $totalHarga + $ppn + $pph - $totalDiskon; // Subtract total diskon
+                // Wrap the function call to add "Rupiah" only once
+                function convertToWordsWithCurrency($number)
+                {
+                    return convertToWords($number) . ' Rupiah';
+                }
+
             @endphp
 
             <tfoot>
-                <tr>
-                    <td colspan="4" class="text-right"><strong>Total</strong></td>
-                    <td>{{ number_format($totalHarga, 0, ',', '.') }}</td>
-                </tr>
-                @if ($ppn > 0 || $pph > 0)
+                @php
+                    $ppn = 0.011 * $subtotal; // 11% PPN
+                    $pph = 0.02 * $subtotal; // 2% PPH
+                    $total = $subtotal + $ppn + $pph;
+                @endphp
+
+                @if (!empty($invoiceMaster[0]->customer_no_npwp))
                     <tr>
-                        <td colspan="4" class="text-right"><strong>PPN (1.1%)</strong></td>
-                        <td>{{ number_format($ppn, 0, ',', '.') }}</td>
+                        <td colspan="4" style="text-align: right;">Subtotal</td>
+                        <td>{{ number_format($subtotal) }}</td>
                     </tr>
                     <tr>
-                        <td colspan="4" class="text-right"><strong>PPH (2%)</strong></td>
-                        <td>{{ number_format($pph, 0, ',', '.') }}</td>
+                        <td colspan="4" style="text-align: right;">PPN (1.1%)</td>
+                        <td>{{ number_format($ppn) }}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="4" style="text-align: right;">PPH (2%)</td>
+                        <td>{{ number_format($pph) }}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="4"
+                            style="text-align: right; font-weight: bold;">Total</td>
+                        <td style="font-weight: bold;">{{ number_format($total) }}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="5"
+                            style="text-align: right; font-style: italic;">Total:
+                            {{ convertToWordsWithCurrency($total) }}</td>
+                    </tr>
+                @elseif (!empty($invoiceMaster[0]->customer_no_ktp))
+                    <tr>
+                        <td colspan="4"
+                            style="text-align: right; font-weight: bold;">Total</td>
+                        <td style="font-weight: bold;">{{ number_format($subtotal) }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="5"
+                            style="text-align: right; font-style: italic;">Total:
+                            {{ convertToWordsWithCurrency($subtotal) }}</td>
                     </tr>
                 @endif
-                <tr>
-                    <td colspan="4" class="text-right"><strong>Diskon</strong></td>
-                    <td>{{ number_format($totalDiskon, 0, ',', '.') }}</td>
-                </tr>
-                <tr>
-                    <td colspan="4" class="text-right"><strong>Total Akhir</strong></td>
-                    <td>{{ number_format($totalAkhir, 0, ',', '.') }}</td>
-                </tr>
             </tfoot>
+
         </table>
     </div>
 </body>

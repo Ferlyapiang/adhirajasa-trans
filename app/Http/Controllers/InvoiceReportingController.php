@@ -110,70 +110,70 @@ class InvoiceReportingController extends Controller
         // Prepare the SQL query
         $sql = "
         SELECT 
-    invoices_reporting.id,
-    invoices_reporting.nomer_invoice,
-    invoices_reporting.tanggal_masuk AS tanggal_tagihan,
-    invoices_reporting.barang_masuks_id,
-    barang_masuks.joc_number,
-    invoices_reporting.barang_keluars_id,
-    barang_keluars.nomer_surat_jalan,
-    barang_keluars.address,
-    invoices_reporting.tanggal_masuk_penimbunan,
-    invoices_reporting.tanggal_keluar_penimbunan,
-    invoices_reporting.tanggal_masuk,
-    COALESCE(customers_masuks.no_npwp, customers_keluars.no_npwp) AS customer_no_npwp,
-    COALESCE(customers_masuks.no_ktp, customers_keluars.no_ktp) AS customer_no_ktp,
-    
-    COALESCE(barang_masuks.gudang_id, barang_keluars.gudang_id) AS gudang_id,
-    COALESCE(warehouses_masuks.name, warehouses_keluars.name) AS warehouse_name,
-    
-    COALESCE(barang_masuks.customer_id, barang_keluars.customer_id) AS customer_id,
-    COALESCE(customers_masuks.name, customers_keluars.name) AS customer_name,
-    
-    -- Unified payment type field
-    COALESCE(customers_masuks.type_payment_customer, customers_keluars.type_payment_customer) AS type_payment_customer,
-    
-    -- Quantity and price calculations
-    COALESCE(total_items.total_qty, 0) AS total_qty_masuk,
-    COALESCE(invoices_reporting.qty, 0) AS total_sisa,
-    invoices_reporting.harga_lembur,
-    invoices_reporting.harga_simpan_barang,
-    invoices_reporting.harga_kirim_barang,
-    COALESCE(customers_masuks.no_hp, customers_keluars.no_hp) AS customer_no_hp,
-    COALESCE(barang_masuks.nomer_polisi, barang_keluars.nomer_polisi) AS nomer_polisi,
-    COALESCE(barang_masuks.nomer_container, barang_keluars.nomer_container) AS nomer_container, 
-    COALESCE(type_mobil_masuk.type, type_mobil_keluar.type) AS type_mobil
+            invoices_reporting.id,
+            invoices_reporting.nomer_invoice,
+            invoices_reporting.tanggal_masuk AS tanggal_tagihan,
+            invoices_reporting.barang_masuks_id,
+            barang_masuks.joc_number,
+            invoices_reporting.barang_keluars_id,
+            barang_keluars.nomer_surat_jalan,
+            barang_keluars.address,
+            invoices_reporting.tanggal_masuk_penimbunan,
+            invoices_reporting.tanggal_keluar_penimbunan,
+            invoices_reporting.tanggal_masuk,
+            COALESCE(customers_masuks.no_npwp, customers_keluars.no_npwp) AS customer_no_npwp,
+            COALESCE(customers_masuks.no_ktp, customers_keluars.no_ktp) AS customer_no_ktp,
+            
+            COALESCE(barang_masuks.gudang_id, barang_keluars.gudang_id) AS gudang_id,
+            COALESCE(warehouses_masuks.name, warehouses_keluars.name) AS warehouse_name,
+            
+            COALESCE(barang_masuks.customer_id, barang_keluars.customer_id) AS customer_id,
+            COALESCE(customers_masuks.name, customers_keluars.name) AS customer_name,
+            
+            -- Unified payment type field
+            COALESCE(customers_masuks.type_payment_customer, customers_keluars.type_payment_customer) AS type_payment_customer,
+            
+            -- Quantity and price calculations
+            COALESCE(total_items.total_qty, 0) AS total_qty_masuk,
+            COALESCE(invoices_reporting.qty, 0) AS total_sisa,
+            invoices_reporting.harga_lembur,
+            invoices_reporting.harga_simpan_barang,
+            invoices_reporting.harga_kirim_barang,
+            COALESCE(customers_masuks.no_hp, customers_keluars.no_hp) AS customer_no_hp,
+            COALESCE(barang_masuks.nomer_polisi, barang_keluars.nomer_polisi) AS nomer_polisi,
+            COALESCE(barang_masuks.nomer_container, barang_keluars.nomer_container) AS nomer_container, 
+            COALESCE(type_mobil_masuk.type, type_mobil_keluar.type) AS type_mobil
 
 
-FROM 
-    invoices_reporting
-LEFT JOIN 
-    barang_masuks ON invoices_reporting.barang_masuks_id = barang_masuks.id
-LEFT JOIN 
-    barang_keluars ON invoices_reporting.barang_keluars_id = barang_keluars.id
-LEFT JOIN 
-    warehouses AS warehouses_masuks ON barang_masuks.gudang_id = warehouses_masuks.id
-LEFT JOIN 
-    customers AS customers_masuks ON barang_masuks.customer_id = customers_masuks.id
-LEFT JOIN 
-    warehouses AS warehouses_keluars ON barang_keluars.gudang_id = warehouses_keluars.id
-LEFT JOIN 
-    customers AS customers_keluars ON barang_keluars.customer_id = customers_keluars.id
-LEFT JOIN (
-    SELECT 
-        barang_masuk_id, SUM(qty) AS total_qty 
-    FROM 
-        barang_masuk_items 
-    GROUP BY 
-        barang_masuk_id
-) AS total_items ON barang_masuks.id = total_items.barang_masuk_id
-LEFT JOIN type_mobil AS type_mobil_masuk ON barang_masuks.type_mobil_id = type_mobil_masuk.id
-LEFT JOIN type_mobil AS type_mobil_keluar ON barang_keluars.type_mobil_id = type_mobil_keluar.id
+        FROM 
+            invoices_reporting
+        LEFT JOIN 
+            barang_masuks ON invoices_reporting.barang_masuks_id = barang_masuks.id
+        LEFT JOIN 
+            barang_keluars ON invoices_reporting.barang_keluars_id = barang_keluars.id
+        LEFT JOIN 
+            warehouses AS warehouses_masuks ON barang_masuks.gudang_id = warehouses_masuks.id
+        LEFT JOIN 
+            customers AS customers_masuks ON barang_masuks.customer_id = customers_masuks.id
+        LEFT JOIN 
+            warehouses AS warehouses_keluars ON barang_keluars.gudang_id = warehouses_keluars.id
+        LEFT JOIN 
+            customers AS customers_keluars ON barang_keluars.customer_id = customers_keluars.id
+        LEFT JOIN (
+            SELECT 
+                barang_masuk_id, SUM(qty) AS total_qty 
+            FROM 
+                barang_masuk_items 
+            GROUP BY 
+                barang_masuk_id
+        ) AS total_items ON barang_masuks.id = total_items.barang_masuk_id
+        LEFT JOIN type_mobil AS type_mobil_masuk ON barang_masuks.type_mobil_id = type_mobil_masuk.id
+        LEFT JOIN type_mobil AS type_mobil_keluar ON barang_keluars.type_mobil_id = type_mobil_keluar.id
 
-WHERE 
-    invoices_reporting.nomer_invoice = ? ; 
+        WHERE 
+            invoices_reporting.nomer_invoice = ? ; 
 
-    ";
+            ";
 
         // Execute the SQL query with the provided invoice number
         $invoiceMaster = DB::select($sql, [$nomer_invoice]);
@@ -215,25 +215,24 @@ WHERE
             return view('data-invoice.invoice-reporting.show', compact('invoiceMaster', 'headOffice', 'branchOffices'));
         }
     }
-    
+
     public function download($id)
-{
-    $invoice = Invoice::find($id); // Replace with your actual model and logic
+    {
+        $invoice = Invoice::find($id); // Replace with your actual model and logic
 
-    $invoiceMaster = session('invoiceMaster');
+        $invoiceMaster = session('invoiceMaster');
 
-            if (empty($invoiceMaster)) {
-                return redirect()->route('data-invoice.invoice-reporting.index')->with('error', 'No invoice data available.');
-            }
+        if (empty($invoiceMaster)) {
+            return redirect()->route('data-invoice.invoice-reporting.index')->with('error', 'No invoice data available.');
+        }
 
-            $warehouses = Warehouse::all(); // Get all warehouses
-            $headOffice = $warehouses->where('status_office', 'head_office')->first();
-            $branchOffices = $warehouses->where('status_office', 'branch_office');
+        $warehouses = Warehouse::all(); // Get all warehouses
+        $headOffice = $warehouses->where('status_office', 'head_office')->first();
+        $branchOffices = $warehouses->where('status_office', 'branch_office');
 
 
-    // Generate PDF
-    $pdf = PDF::loadView('data-invoice.invoice-master.pdf', compact('invoice', 'invoiceMaster', 'headOffice', 'branchOffices')); // Ensure the view exists
-    return $pdf->download('invoice_' . $id . '.pdf');
-}
-
+        // Generate PDF
+        $pdf = PDF::loadView('data-invoice.invoice-reporting.pdf', compact('invoice', 'invoiceMaster', 'headOffice', 'branchOffices')); // Ensure the view exists
+        return $pdf->download('invoice_' . $id . '.pdf');
+    }
 }
