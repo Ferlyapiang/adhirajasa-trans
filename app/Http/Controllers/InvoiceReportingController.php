@@ -142,7 +142,10 @@ class InvoiceReportingController extends Controller
             COALESCE(customers_masuks.no_hp, customers_keluars.no_hp) AS customer_no_hp,
             COALESCE(barang_masuks.nomer_polisi, barang_keluars.nomer_polisi) AS nomer_polisi,
             COALESCE(barang_masuks.nomer_container, barang_keluars.nomer_container) AS nomer_container, 
-            COALESCE(type_mobil_masuk.type, type_mobil_keluar.type) AS type_mobil
+            COALESCE(type_mobil_masuk.type, type_mobil_keluar.type) AS type_mobil,
+            COALESCE(bank_datas_masuk.bank_name, bank_datas_keluar.bank_name) AS bank_name,
+            COALESCE(bank_datas_masuk.account_number, bank_datas_keluar.account_number) AS account_number,
+            COALESCE(bank_datas_masuk.account_name, bank_datas_keluar.account_name) AS account_name
 
 
         FROM 
@@ -159,6 +162,8 @@ class InvoiceReportingController extends Controller
             warehouses AS warehouses_keluars ON barang_keluars.gudang_id = warehouses_keluars.id
         LEFT JOIN 
             customers AS customers_keluars ON barang_keluars.customer_id = customers_keluars.id
+        LEFT JOIN bank_datas AS bank_datas_masuk ON warehouses_masuks.id = bank_datas_masuk.id
+        LEFT JOIN bank_datas AS bank_datas_keluar ON warehouses_keluars.id = bank_datas_keluar.id
         LEFT JOIN (
             SELECT 
                 barang_masuk_id, SUM(qty) AS total_qty 
@@ -207,8 +212,9 @@ class InvoiceReportingController extends Controller
 
         // dd($invoiceMaster);
 
-
-        session(['invoiceMaster' => $invoiceMaster]);
+        session([
+            'invoiceMaster' => $invoiceMaster
+        ]);
 
         // return view('data-invoice.invoice-master.show', compact('invoiceMaster'));
         return redirect()->route('data-invoice.invoice-reporting.display');

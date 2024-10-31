@@ -247,7 +247,7 @@
                 @php
                     $ppn = 0.011 * $subtotal; // 11% PPN
                     $pph = 0.02 * $subtotal; // 2% PPH
-                    $total = $subtotal + $ppn + $pph;
+                    $total = $subtotal + $ppn - $pph;
                 @endphp
 
                 @if (!empty($invoiceMaster[0]->customer_no_npwp))
@@ -261,7 +261,7 @@
                     </tr>
                     <tr>
                         <td colspan="4" style="text-align: right;">PPH (2%)</td>
-                        <td>{{ number_format($pph) }}</td>
+                        <td> - {{ number_format($pph) }} </td>
                     </tr>
                     <tr>
                         <td colspan="4"
@@ -289,6 +289,27 @@
             </tfoot>
 
         </table>
+        <div class="wire-transfer">
+            <strong class="header">W I R E T R A N S F E R</strong>
+
+            <div class="row" style="margin-top: 10px;">
+                <span class="label">Bank Transfer</span>
+                <span class="colon">:</span>
+                <span class="value" style="font-weight: bold">{{ $invoiceMaster[0]->bank_name ?? 'N/A' }}</span>
+            </div>
+
+            <div class="row">
+                <span class="label">A/C Number</span>
+                <span class="colon">:</span>
+                <span class="value" style="font-weight: bold">{{ $invoiceMaster[0]->account_number ?? 'N/A' }}</span>
+            </div>
+
+            <div class="row">
+                <span class="label">A/C Name</span>
+                <span class="colon">:</span>
+                <span class="value" style="font-weight: bold">{{ $invoiceMaster[0]->account_name ?? 'N/A' }}</span>
+            </div>
+        </div>
     </div>
 </body>
 
