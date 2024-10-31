@@ -103,7 +103,7 @@
                                                     </td>
 
                                                     <td>
-                                                        {{ $item->joc_number ?? ($item->nomer_surat_jalan ?? 'X') }}
+                                                        {{ $item->tanggal_tagihan ?? ($item->tanggal_tagihan ?? 'X') }}
                                                     </td>
                                                     <td>{{ $item->joc_number ?? ($item->nomer_surat_jalan ?? 'X') }}</td>
                                                     <td>{{ $item->customer_name ?? 'X' }}

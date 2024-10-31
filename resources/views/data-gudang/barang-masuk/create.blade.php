@@ -95,6 +95,12 @@
                     @csrf
 
                     <div class="form-group">
+                        <label for="joc_number">Nomer JO</label>
+                        <input type="text" name="joc_number" id="joc_number" class="form-control"
+                            placeholder="Masukan Nomer JO">
+                    </div>
+
+                    <div class="form-group">
                         <label for="tanggal_masuk">Tanggal Masuk</label>
                         <input type="date" name="tanggal_masuk" id="tanggal_masuk" class="form-control"
                             placeholder="Select date" required>

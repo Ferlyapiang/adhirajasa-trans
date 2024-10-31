@@ -120,6 +120,7 @@ class BarangMasukController extends Controller
             }
     
             $request->validate([
+                'joc_number' => 'nullable|string',
                 'tanggal_masuk' => 'required|date',
                 'gudang_id' => 'required|exists:warehouses,id',
                 'customer_id' => 'required|exists:customers,id',
@@ -181,7 +182,7 @@ class BarangMasukController extends Controller
             
             
             $barangMasuk = BarangMasuk::create([
-                'joc_number' => $jocNumber,
+                'joc_number' => $request->joc_number ?? $jocNumber,
                 'tanggal_masuk' => $request->tanggal_masuk,
                 'gudang_id' => $request->gudang_id,
                 'customer_id' => $request->customer_id,
@@ -194,6 +195,7 @@ class BarangMasukController extends Controller
                 'tanggal_tagihan_masuk' => $tanggalTagihanMasuk,
                 'tanggal_penimbunan' => $tanggalPenimbunanMasuk
             ]);
+            // dd($barangMasuk);
 
             $items = json_decode($request->items, true);
             Log::info('Decoded Items:', ['items' => $items]);

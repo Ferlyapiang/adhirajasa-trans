@@ -40,15 +40,15 @@ class InvoiceGeneratedController extends Controller
 
         $barangKeluars = BarangKeluar::where('tanggal_tagihan_keluar', '<=', $currentDate)
             ->where('status_invoice', '<>', 'Invoice Barang Keluar')
-            ->where(function ($query) {
-                $query->where(function ($subQuery) {
-                    $subQuery->whereNotNull('harga_kirim_barang')
-                        ->where('harga_kirim_barang', '!=', 0);
-                })->orWhere(function ($subQuery) {
-                    $subQuery->whereNotNull('harga_lembur')
-                        ->where('harga_lembur', '!=', 0);
-                });
-            })
+            // ->where(function ($query) {
+            //     $query->where(function ($subQuery) {
+            //         $subQuery->whereNotNull('harga_kirim_barang')
+            //             ->where('harga_kirim_barang', '!=', 0);
+            //     })->orWhere(function ($subQuery) {
+            //         $subQuery->whereNotNull('harga_lembur')
+            //             ->where('harga_lembur', '!=', 0);
+            //     });
+            // })
             ->get();
 
         foreach ($barangKeluars as $barangKeluar) {
@@ -143,7 +143,7 @@ class InvoiceGeneratedController extends Controller
             ->where('invoices.tanggal_masuk', '<=', DB::raw('LAST_DAY(CURDATE())'))
             ->whereRaw('COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0) > 0 
         OR (
-            (COALESCE(barang_keluars.harga_lembur, 0)) > 0
+            (COALESCE(barang_keluars.harga_lembur, 0)) >= 0
             OR (CASE 
                 WHEN customers_masuks.type_payment_customer = "Akhir Bulan" 
                     AND YEAR(barang_masuks.tanggal_masuk) = YEAR(barang_masuks.tanggal_tagihan_masuk)

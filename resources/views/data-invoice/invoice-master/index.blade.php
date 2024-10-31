@@ -98,8 +98,11 @@
                                                 <td>{{ $index + 1 }}</td>
                                                 <td>{{ $item->tanggal_tagihan_masuk ?: $item->tanggal_tagihan_keluar ?: '' }}
                                                 <td>
-                                                    {{ $item->joc_number ? $item->joc_number : $item->nomer_surat_jalan }}
+                                                    <a href="{{ $item->joc_number ? route('data-gudang.barang-masuk.detail', $item->barang_masuks_id) : route('data-gudang.barang-keluar.showSuratJalan', $item->barang_keluars_id) }}">
+                                                        {{ $item->joc_number ? $item->joc_number : $item->nomer_surat_jalan }}
+                                                    </a>
                                                 </td>
+
                                                 <td>{{ $item->tanggal_masuk_barang }}</td>
                                                 <td>{{ $item->tanggal_keluar }}</td>
                                                 <td>
