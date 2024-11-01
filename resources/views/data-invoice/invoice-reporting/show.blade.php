@@ -47,6 +47,20 @@
             margin-bottom: 20px;
             padding: 10px;
         }
+
+        .label {
+            font-weight: bold;
+            flex: 0 0 150px;
+            margin-right: 10px;
+        }
+
+        .colon {
+            margin-right: 10px;
+        }
+
+        .value {
+            flex: 1;
+        }
     </style>
 </head>
 
