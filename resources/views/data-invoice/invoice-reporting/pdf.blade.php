@@ -66,6 +66,75 @@
             font-weight: bold;
             background-color: #f9f9f9;
         }
+
+        /* General container styling */
+.container {
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* Row layout with left and right columns */
+.row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+/* Left column for wire transfer details */
+.left-column {
+    width: 40%;
+}
+
+.card {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 15px;
+}
+
+.card-header {
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.card-body .row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.label, .colon, .value {
+    font-weight: bold;
+}
+
+/* Right column for signatures */
+.right-column {
+    width: 55%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.signature {
+    display: flex;
+    gap: 50px;
+    margin-top: 20px;
+}
+
+.left-signature, .right-signature {
+    text-align: center;
+}
+
+/* Footer text styling */
+.footer-text {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 14px;
+    color: #666;
+}
+
+
     </style>
 </head>
 
@@ -289,27 +358,58 @@
             </tfoot>
 
         </table>
-        <div class="wire-transfer">
-            <strong class="header">W I R E T R A N S F E R</strong>
-
-            <div class="row" style="margin-top: 10px;">
-                <span class="label">Bank Transfer</span>
-                <span class="colon">:</span>
-                <span class="value" style="font-weight: bold">{{ $invoiceMaster[0]->bank_name ?? 'N/A' }}</span>
-            </div>
-
+        <div class="container">
             <div class="row">
-                <span class="label">A/C Number</span>
-                <span class="colon">:</span>
-                <span class="value" style="font-weight: bold">{{ $invoiceMaster[0]->account_number ?? 'N/A' }}</span>
+                <!-- Left Column: Wire Transfer Information -->
+                <div class="left-column">
+                    <div class="card">
+                        <div class="card-header">
+                            <strong class="header">W I R E T R A N S F E R</strong>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <span class="label">Bank Transfer</span>
+                                <span class="colon">:</span>
+                                <span class="value">{{ $invoiceMaster[0]->bank_name ?? 'N/A' }}</span>
+                            </div>
+                            <div class="row">
+                                <span class="label">A/C Number</span>
+                                <span class="colon">:</span>
+                                <span class="value">{{ $invoiceMaster[0]->account_number ?? 'N/A' }}</span>
+                            </div>
+                            <div class="row">
+                                <span class="label">A/C Name</span>
+                                <span class="colon">:</span>
+                                <span class="value">{{ $invoiceMaster[0]->account_name ?? 'N/A' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        
+                <!-- Right Column: Footer Signature -->
+                <div class="right-column">
+                    <div class="signature">
+                        <div class="left-signature">
+                            <p>Tanda Terima</p>
+                            <p>_______________________</p>
+                        </div>
+                        <div class="right-signature">
+                            <p>Hormat Kami</p>
+                            <p>ATS Digital</p>
+                        </div>
+                    </div>
+                </div>
             </div>
-
-            <div class="row">
-                <span class="label">A/C Name</span>
-                <span class="colon">:</span>
-                <span class="value" style="font-weight: bold">{{ $invoiceMaster[0]->account_name ?? 'N/A' }}</span>
+        
+            <!-- Footer Text at Bottom -->
+            <div class="footer-text">
+                <p>&copy; {{ date('Y') }} ATS Digital. All rights reserved.</p>
             </div>
         </div>
+        
+        
+    </div>
+        
     </div>
 </body>
 
