@@ -50,7 +50,7 @@
                         <div class="col-lg-12">
                             <div class="card">
                                 <div class="card-header">
-                                    <h3 class="card-title">Daftar Invoice</h3>
+                                    <button id="exportButton" class="btn btn-success mb-3">Download to Excel</button>
                                 </div>
                             </div>
                             <div class="card-body">
@@ -77,10 +77,10 @@
                                                 <th>Nama Pemilik</th>
                                                 <th>Gudang</th>
                                                 <th>Tanggal Masuk Penimbunan</th>
-                                                <th>Tanggal Keluar Penimbunan</th>
+                                                <th>Tanggal Keluar Penimbunan</th>                                                
+                                                <th>Total QTY Sisa</th>
                                                 <th>Lemburan</th>
                                                 <th>Harga Kirim Barang</th>
-                                                <th>Total QTY Sisa</th>
                                                 <th>Total Harga Simpan</th>
                                             </tr>
                                         </thead>
@@ -112,11 +112,11 @@
                                                     </td>
                                                     <td>{{ $item->tanggal_masuk_penimbunan ?? 'X' }}</td>
                                                     <td>{{ $item->tanggal_keluar_penimbunan ?? 'X' }}</td>
-                                                    <td>{{ $item->harga_lembur ?? 'X' }}</td>
-                                                    <td>{{ $item->harga_kirim_barang ?? 'X' }}</td>
                                                     <td>{{ $item->total_sisa ?? 'X' }}</td>
+                                                    <td>{{ number_format($item->harga_lembur) ?? 'X' }}</td>
+                                                    <td>{{ number_format($item->harga_kirim_barang) ?? 'X' }}</td>
                                                     <td>
-                                                        {{ $item->harga_simpan_barang ?? 'X' }}
+                                                        {{ number_format($item->harga_simpan_barang) ?? 'X' }}
                                                     </td>
                                                 </tr>
                                             @endforeach
@@ -149,6 +149,9 @@
     <script src="https://cdn.datatables.net/1.13.3/js/jquery.dataTables.min.js"></script>
     <!-- AdminLTE App -->
     <script src="{{ asset('lte/dist/js/adminlte.min.js') }}"></script>
+    
+    <!-- xlxs library for exporting Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.6/xlsx.full.min.js"></script>
 
     <!-- Page-specific script -->
     <script>
@@ -162,6 +165,16 @@
             });
 
         });
+
+        document.getElementById('exportButton').addEventListener('click', function() {
+            var table = document.getElementById('barangMasukTable');
+            var clonedTable = table.cloneNode(true);
+
+            // Convert the cloned table to a workbook and save it as an Excel file
+            var workbook = XLSX.utils.table_to_book(clonedTable, { sheet: "Data Barang Masuk" });
+            XLSX.writeFile(workbook, 'DataReportingInvoice.xlsx');
+        });
+
     </script>
 
 

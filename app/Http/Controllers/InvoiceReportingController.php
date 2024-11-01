@@ -129,6 +129,7 @@ class InvoiceReportingController extends Controller
             
             COALESCE(barang_masuks.customer_id, barang_keluars.customer_id) AS customer_id,
             COALESCE(customers_masuks.name, customers_keluars.name) AS customer_name,
+            COALESCE(customers_masuks.address, customers_keluars.address) AS customer_address,
             
             -- Unified payment type field
             COALESCE(customers_masuks.type_payment_customer, customers_keluars.type_payment_customer) AS type_payment_customer,

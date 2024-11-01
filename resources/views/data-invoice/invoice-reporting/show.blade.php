@@ -76,92 +76,100 @@
 
             <!-- Main content -->
             <div class="content">
-                <div class="container-fluid">
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <img src="{{ asset('ats/ATSLogo.png') }}" alt="ATS Logo" style="height: 80px;">
-                            <div class="row">
-                                <!-- Kantor Pusat Section -->
-                                <div class="col-lg-2">
-                                    <div class="invoice-header text-left">
-                                        <h4 style="font-size: 1.2em; margin-bottom: 5px;">Kantor Pusat:</h4>
-                                        <p style="font-size: 0.85em; margin: 2px 0;">Alamat: <br> <span
-                                                class="text-primary">{{ $headOffice->address ?? 'Alamat tidak tersedia' }}</span>
-                                        </p>
-                                        <p style="font-size: 0.85em; margin: 2px 0;">Nomor Telepon: <br> <span
-                                                class="text-primary">{{ $headOffice->phone_number ?? 'Nomor telepon tidak tersedia' }}</span>
-                                        </p>
-                                        <p style="font-size: 0.85em; margin: 2px 0;">Email: <br> <span
-                                                class="text-primary">{{ $headOffice->email ?? 'Email tidak tersedia' }}</span>
-                                        </p>
-                                    </div>
-                                </div>
+                <div class="card">
+                    <div class="container-fluid" style="margin-top: 20px;">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <img src="{{ asset('ats/ATSLogo.png') }}" alt="ATS Logo" style="height: 80px;">
 
-                                <!-- Kantor Cabang Section -->
-                                <div class="col-lg-4">
-                                    <div class="branch-offices">
-                                        @if ($branchOffices->isEmpty())
-                                            <p style="color: #777; font-size: 0.85em;">Tidak ada kantor cabang tersedia.
-                                            </p>
-                                        @else
-                                            @foreach ($branchOffices as $branchOffice)
-                                                <div>
-                                                    <h5 style="font-size: 0.95em; margin: 5px 0;">Kantor Cabang
-                                                        {{ $loop->iteration }}:</h5>
-                                                    <p style="font-size: 0.85em; margin: 2px 0;">Alamat: <span
-                                                            class="text-primary">{{ $branchOffice->address ?? 'Alamat tidak tersedia' }}</span>
-                                                    </p>
-                                                    <p style="font-size: 0.85em; margin: 2px 0;">Nomor Telepon: <span
-                                                            class="text-primary">{{ $branchOffice->phone_number ?? 'Nomor telepon tidak tersedia' }}</span>
-                                                    </p>
-                                                </div>
-                                            @endforeach
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Invoice Header and Details -->
-
-                            <!-- Invoice Details Table -->
-                            <div class="card">
-                                <div class="card-header">
-                                    <h1>Invoice</h1>
-                                </div>
                                 <div class="card-body">
-                                    <table class="table table-bordered">
-                                        <thead>
-                                            <tr>
-                                                <th>Invoice No</th>
-                                                <th>Tanggal</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>{{ $invoiceMaster[0]->nomer_invoice }}</td>
-                                                <td>{{ $invoiceMaster[0]->tanggal_masuk ?? 'Tanggal transaksi tidak tersedia' }}
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
+                                    <div class="row">
+                                        <div class="col-auto">
+                                            <div class="card-header">
+                                                <h4 style="font-size: 1.2em; margin-bottom: 5px;">Kantor Pusat:</h4>
+                                            </div>
 
-                            <!-- Billing Information -->
-                            <div class="row mb-4">
-                                <div class="col-lg-6">
-                                    <h1>BILL TO</h1>
-                                    <div class="header-info">
-                                        {{ $invoiceMaster[0]->customer_name ?? 'Nama pelanggan tidak tersedia' }}
-                                        <br>
-                                        Telp:
-                                        {{ $invoiceMaster[0]->customer_no_hp ?? 'Nomor telepon pelanggan tidak tersedia' }}
+                                            <p style="font-size: 0.85em; margin: 2px 0;">Alamat: <br> <span
+                                                    class="text-primary">{{ $headOffice->address ?? 'Alamat tidak tersedia' }}</span>
+                                            </p>
+                                            <p style="font-size: 0.85em; margin: 2px 0;">Nomor Telepon: <br> <span
+                                                    class="text-primary">{{ $headOffice->phone_number ?? 'Nomor telepon tidak tersedia' }}</span>
+                                            </p>
+                                            <p style="font-size: 0.85em; margin: 2px 0;">Email: <br> <span
+                                                    class="text-primary">{{ $headOffice->email ?? 'Email tidak tersedia' }}</span>
+                                            </p>
+                                        </div>
+                                        <div class="col-auto">
+                                            <div class="branch-offices">
+                                                @if ($branchOffices->isEmpty())
+                                                    <p style="color: #777; font-size: 0.85em;">Tidak ada kantor cabang
+                                                        tersedia.
+                                                    </p>
+                                                @else
+                                                    @foreach ($branchOffices as $branchOffice)
+                                                        <div>
+                                                            <h5 style="font-size: 0.95em; margin: 5px 0;">Kantor Cabang
+                                                                {{ $loop->iteration }}:</h5>
+                                                            <p style="font-size: 0.85em; margin: 2px 0;">Alamat: <span
+                                                                    class="text-primary">{{ $branchOffice->address ?? 'Alamat tidak tersedia' }}</span>
+                                                            </p>
+                                                            <p style="font-size: 0.85em; margin: 2px 0;">Nomor Telepon:
+                                                                <span
+                                                                    class="text-primary">{{ $branchOffice->phone_number ?? 'Nomor telepon tidak tersedia' }}</span>
+                                                            </p>
+                                                        </div>
+                                                    @endforeach
+                                                @endif
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+                            <div class="col-lg-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h1>Invoice</h1>
+                                    </div>
+                                    <div class="card-body">
+                                        <table class="table table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th>Invoice No</th>
+                                                    <th>Tanggal</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>{{ $invoiceMaster[0]->nomer_invoice }}</td>
+                                                    <td>{{ $invoiceMaster[0]->tanggal_masuk ?? 'Tanggal transaksi tidak tersedia' }}
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="row mb-4">
+                                    <div class="col-lg-12">
+                                        <div class="card-header">
 
-                            <!-- Barang Masuk Table -->
-                            <div class="card">
+                                            <h1>BILL TO</h1>
+                                        </div>
+                                        <div class="card-body header-info">
+                                            {{ $invoiceMaster[0]->customer_name ?? 'Nama pelanggan tidak tersedia' }}
+                                            <br>
+                                            Telp:
+                                            {{ $invoiceMaster[0]->customer_no_hp ?? 'Nomor telepon pelanggan tidak tersedia' }}
+                                            <br>
+                                            Alamat:
+                                            <td>{{ $invoiceMaster[0]->customer_address ?? 'Alamat pelanggan tidak tersedia' }}
+                                            </td>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
                                 <div class="card-header">
                                     <h1>Detail Barang</h1>
                                 </div>
@@ -309,33 +317,40 @@
                                                         <td>{{ number_format($subtotal) }}</td>
                                                     </tr>
                                                     <tr>
-                                                        <td colspan="4" style="text-align: right;">PPN (1.1%)</td>
+                                                        <td colspan="4" style="text-align: right;">PPN (1.1%)
+                                                        </td>
                                                         <td>{{ number_format($ppn) }}</td>
                                                     </tr>
                                                     <tr>
                                                         <td colspan="4" style="text-align: right;">PPH (2%)</td>
-                                                        <td>(  - {{ number_format($pph) }} )</td>
+                                                        <td>( - {{ number_format($pph) }} )</td>
                                                     </tr>
                                                     <tr>
                                                         <td colspan="4"
-                                                            style="text-align: right; font-weight: bold;">Total</td>
-                                                        <td style="font-weight: bold;">{{ number_format($total) }}</td>
+                                                            style="text-align: right; font-weight: bold;">
+                                                            Total</td>
+                                                        <td style="font-weight: bold;">{{ number_format($total) }}
+                                                        </td>
                                                     </tr>
                                                     <tr>
                                                         <td colspan="5"
-                                                            style="text-align: right; font-style: italic;">Total:
+                                                            style="text-align: right; font-style: italic;">
+                                                            Total:
                                                             {{ convertToWordsWithCurrency($total) }}</td>
                                                     </tr>
                                                 @elseif (!empty($invoiceMaster[0]->customer_no_ktp))
                                                     <tr>
                                                         <td colspan="4"
-                                                            style="text-align: right; font-weight: bold;">Total</td>
-                                                        <td style="font-weight: bold;">{{ number_format($subtotal) }}
+                                                            style="text-align: right; font-weight: bold;">
+                                                            Total</td>
+                                                        <td style="font-weight: bold;">
+                                                            {{ number_format($subtotal) }}
                                                         </td>
                                                     </tr>
                                                     <tr>
                                                         <td colspan="5"
-                                                            style="text-align: right; font-style: italic;">Total:
+                                                            style="text-align: right; font-style: italic;">
+                                                            Total:
                                                             {{ convertToWordsWithCurrency($subtotal) }}</td>
                                                     </tr>
                                                 @endif
@@ -343,35 +358,67 @@
 
 
                                         </table>
-                                        <div class="wire-transfer">
-                                            <strong class="header">W I R E T R A N S F E R</strong>
+                                        <div class="container">
+                                            <div class="row">
+                                                <!-- Left Column: Wire Transfer Information -->
+                                                <div class="col-md-4">
+                                                    <div class="card">
+                                                        <div class="card-header">
+                                                            <strong class="header">W I R E T R A N S F E R</strong>
+                                                        </div>
+                                                        <div class="card-body">
+                                                            <div class="row" style="margin-top: 10px;">
+                                                                <span class="label">Bank Transfer</span>
+                                                                <span class="colon">:</span>
+                                                                <span class="value"
+                                                                    style="font-weight: bold">{{ $invoiceMaster[0]->bank_name ?? 'N/A' }}</span>
+                                                            </div>
+                                                            <div class="row">
+                                                                <span class="label">A/C Number</span>
+                                                                <span class="colon">:</span>
+                                                                <span class="value"
+                                                                    style="font-weight: bold">{{ $invoiceMaster[0]->account_number ?? 'N/A' }}</span>
+                                                            </div>
+                                                            <div class="row">
+                                                                <span class="label">A/C Name</span>
+                                                                <span class="colon">:</span>
+                                                                <span class="value"
+                                                                    style="font-weight: bold">{{ $invoiceMaster[0]->account_name ?? 'N/A' }}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
 
-                                            <div class="row" style="margin-top: 10px;">
-                                                <span class="label">Bank Transfer</span>
-                                                <span class="colon">:</span>
-                                                <span class="value" style="font-weight: bold">{{ $invoiceMaster[0]->bank_name ?? 'N/A' }}</span>
+                                                <!-- Right Column: Footer Signature -->
+                                                <div class="col-md-8 d-flex flex-column align-items-end footer">
+                                                    <div class="signature">
+                                                        <div class="left-signature">
+                                                            <p>Tanda Terima</p>
+                                                            <p>_______________________</p>
+                                                        </div>
+                                                        <div class="right-signature">
+                                                            <p>Hormat Kami</p>
+                                                            <p>ATS Digital</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
 
-                                            <div class="row">
-                                                <span class="label">A/C Number</span>
-                                                <span class="colon">:</span>
-                                                <span class="value" style="font-weight: bold">{{ $invoiceMaster[0]->account_number ?? 'N/A' }}</span>
-                                            </div>
-
-                                            <div class="row">
-                                                <span class="label">A/C Name</span>
-                                                <span class="colon">:</span>
-                                                <span class="value" style="font-weight: bold">{{ $invoiceMaster[0]->account_name ?? 'N/A' }}</span>
+                                            <!-- Footer Text at Bottom -->
+                                            <div class="row mt-3">
+                                                <div class="col text-center">
+                                                    <p>&copy; {{ date('Y') }} ATS Digital. All rights reserved.
+                                                    </p>
+                                                </div>
                                             </div>
                                         </div>
-
-
-
-                                        <a href="{{ route('invoice-report.download', $invoiceMaster[0]->id) }}"
-                                            class="btn btn-primary">Download PDF</a>
-                                        <a href="{{ route('data-invoice.invoice-reporting.display') }}"
-                                            class="btn btn-secondary">Back</a>
                                     </div>
+                                </div>
+                                <div class="card-header">
+                                    <a href="{{ route('invoice-report.download', $invoiceMaster[0]->id) }}"
+                                        class="btn btn-primary">Download PDF</a>
+                                    <a href="{{ route('data-invoice.invoice-reporting.index') }}"
+                                        class="btn btn-secondary">Back</a>
                                 </div>
                             </div>
                         </div>

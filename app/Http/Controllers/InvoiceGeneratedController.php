@@ -158,7 +158,7 @@ class InvoiceGeneratedController extends Controller
         OR COALESCE(barang_keluars.harga_kirim_barang,0) > 0
     ');
 
-        $invoiceMaster = $invoiceMaster->orderBy('barang_keluars.tanggal_keluar', 'desc')->get();
+        $invoiceMaster = $invoiceMaster->orderBy('barang_keluars.tanggal_keluar', 'asc')->get();
 
         $owners = $invoiceMaster->map(function ($item) {
             return $item->customer_masuk_name ?: $item->customer_keluar_name;

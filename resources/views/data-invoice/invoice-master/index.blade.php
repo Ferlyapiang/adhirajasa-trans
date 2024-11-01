@@ -17,6 +17,10 @@
 
     <!-- DataTables CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.3/css/jquery.dataTables.min.css">
+
+    <!-- xlxs library for exporting Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.6/xlsx.full.min.js"></script>
+
 </head>
 
 <body class="hold-transition sidebar-mini">
@@ -50,7 +54,7 @@
                         <div class="col-lg-12">
                             <div class="card">
                                 <div class="card-header">
-                                    <h3 class="card-title">Daftar Invoice</h3>
+                                    <button id="exportButton" class="btn btn-success mb-3">Download to Excel</button>
                                     <button id="updateStatusButton" class="btn btn-success float-right">Update
                                         Status</button>
                                 </div>
@@ -62,7 +66,7 @@
                                         <select id="ownerNameFilter" class="form-control">
                                             <option value="">Semua</option>
                                             @foreach ($owners as $owner)
-                                            <option value="{{ $owner }}">{{ $owner }}</option>
+                                                <option value="{{ $owner }}">{{ $owner }}</option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -81,72 +85,69 @@
                                                 <th>Tanggal Keluar</th>
                                                 <th>Nama Pemilik</th>
                                                 <th>Gudang</th>
-                                                <th>Lemburan</th>
                                                 <th>Total QTY Masuk</th>
                                                 <th>Total QTY Keluar</th>
                                                 <th>Total QTY Sisa</th>
-                                                <th>Total Harga Simpan</th>
+                                                <th>Lemburan</th>                                                
                                                 <th>Harga Kirim Barang</th>
+                                                <th>Total Harga Simpan</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             @foreach ($invoiceMaster as $index => $item)
-                                            <tr>
-                                                <td><input type="checkbox" class="invoiceCheckbox"
-                                                        value="{{ $item->id }}"></td>
-                                                <!-- Individual checkbox -->
-                                                <td>{{ $index + 1 }}</td>
-                                                <td>{{ $item->tanggal_tagihan_masuk ?: $item->tanggal_tagihan_keluar ?: '' }}
-                                                <td>
-                                                    <a href="{{ $item->joc_number ? route('data-gudang.barang-masuk.detail', $item->barang_masuks_id) : route('data-gudang.barang-keluar.showSuratJalan', $item->barang_keluars_id) }}">
-                                                        {{ $item->joc_number ? $item->joc_number : $item->nomer_surat_jalan }}
-                                                    </a>
-                                                </td>
+                                                <tr>
+                                                    <td><input type="checkbox" class="invoiceCheckbox"
+                                                            value="{{ $item->id }}"></td>
+                                                    <!-- Individual checkbox -->
+                                                    <td>{{ $index + 1 }}</td>
+                                                    <td>{{ $item->tanggal_tagihan_masuk ?: $item->tanggal_tagihan_keluar ?: '' }}
+                                                    <td>
+                                                        <a
+                                                            href="{{ $item->joc_number ? route('data-gudang.barang-masuk.detail', $item->barang_masuks_id) : route('data-gudang.barang-keluar.showSuratJalan', $item->barang_keluars_id) }}">
+                                                            {{ $item->joc_number ? $item->joc_number : $item->nomer_surat_jalan }}
+                                                        </a>
+                                                    </td>
 
-                                                <td>{{ $item->tanggal_masuk_barang }}</td>
-                                                <td>{{ $item->tanggal_keluar }}</td>
-                                                <td>
-                                                    {{ $item->customer_masuk_name ? $item->customer_masuk_name : $item->customer_keluar_name }}
-                                                </td>
-                                                <td>{{ $item->warehouse_masuk_name ? $item->warehouse_masuk_name : $item->warehouse_keluar_name }}
-                                                </td>
-                                                
-                                                </td>
-                                                <td>
-                                                    @if(!is_null($item->harga_lembur_masuk) && $item->harga_lembur_masuk != 0)
-                                                    {{ number_format($item->harga_lembur_masuk, 0, ',', '.') }}
-                                                    @elseif(!is_null($item->harga_lembur_keluar) && $item->harga_lembur_keluar != 0)
-                                                    {{ number_format($item->harga_lembur_keluar, 0, ',', '.') }}
-                                                    @else
-                                                    {{ '' }}
-                                                    @endif
-                                                </td>
-
-
-
-                                                </td>
-                                                <td>{{ $item->total_qty_masuk }}</td>
-                                                <td>{{ $item->total_qty_keluar }}</td>
-                                                <td>{{ $item->total_sisa }}</td>
-                                                <td>{{ number_format($item->total_harga_simpan, 0, ',', '.') }}
-                                                </td>
-                                                <td>{{ number_format($item->harga_kirim_barang, 0, ',', '.') }}
-                                                </td>
-                                            </tr>
+                                                    <td>{{ $item->tanggal_masuk_barang }}</td>
+                                                    <td>{{ $item->tanggal_keluar }}</td>
+                                                    <td>
+                                                        {{ $item->customer_masuk_name ? $item->customer_masuk_name : $item->customer_keluar_name }}
+                                                    </td>
+                                                    <td>{{ $item->warehouse_masuk_name ? $item->warehouse_masuk_name : $item->warehouse_keluar_name }}
+                                                    </td>
+                                                    </td>
+                                                    </td>
+                                                    <td>{{ $item->total_qty_masuk }}</td>
+                                                    <td>{{ $item->total_qty_keluar }}</td>
+                                                    <td>{{ $item->total_sisa }}</td>
+                                                    <td>
+                                                        @if (!is_null($item->harga_lembur_masuk) && $item->harga_lembur_masuk != 0)
+                                                            {{ number_format($item->harga_lembur_masuk, 0, ',', '.') }}
+                                                        @elseif(!is_null($item->harga_lembur_keluar) && $item->harga_lembur_keluar != 0)
+                                                            {{ number_format($item->harga_lembur_keluar, 0, ',', '.') }}
+                                                        @else
+                                                            {{ '' }}
+                                                        @endif
+                                                    </td>
+                                                    <td>{{ number_format($item->harga_kirim_barang, 0, ',', '.') }}
+                                                    <td>{{ number_format($item->total_harga_simpan, 0, ',', '.') }}
+                                                    </td>
+                                                    </td>
+                                                </tr>
                                             @endforeach
                                         </tbody>
 
                                         <tfoot>
                                             <tr>
-                                                <th colspan="8" style="text-align: right;">Total:</th>
-                                                <th id="totalHargaLembur"></th>
+                                                <th colspan="8" style="text-align: right;">Total:</th>                                                
                                                 <th id="totalMasuk"></th>
                                                 <th id="totalKeluar"></th>
                                                 <th id="totalSisa"></th>
-                                                <th id="totalHargaSimpan"></th>
+                                                <th id="totalHargaLembur"></th>                                                
                                                 <th id="totalHargaKirimBarang"></th>
+                                                <th id="totalHargaSimpan"></th>
                                             </tr>
-                                            <tr>
+                                            <tr class="no-export">
                                                 <th colspan="8" style="text-align: right;">Dari Total Harga Lembur +
                                                     Total Harga Simpan Barang + Total Harga Kirim Barang</th>
                                                 <th colspan="2" style="text-align: right;">Total Keseluruhan:</th>
@@ -185,122 +186,130 @@
 
     <!-- Page-specific script -->
     <script>
-    $(document).ready(function() {
-        // Initialize DataTable
-        var table = $('#barangMasukTable').DataTable();
-        
-        $('#selectAllCheckbox').prop('disabled', true);
-        $('.invoiceCheckbox').prop('disabled', true);
+        $(document).ready(function() {
+            // Initialize DataTable
+            var table = $('#barangMasukTable').DataTable();
 
-        $('#ownerNameFilter').on('change', function() {
-            var selectedOwner = $(this).val(); 
-            var filterValue = $(this).val();
+            $('#selectAllCheckbox').prop('disabled', true);
+            $('.invoiceCheckbox').prop('disabled', true);
 
-            if (selectedOwner && selectedOwner !== "") {
-                table.column(6).search(filterValue).draw();
-                calculateTotals(); // Hitung ulang total setelah filter diterapkan
-                $('#selectAllCheckbox').prop('disabled', false);
-                $('.invoiceCheckbox').prop('disabled', false);
-            } else {
-                table.column(6).search(filterValue).draw();
-                calculateTotals(); // Hitung ulang total meskipun filter direset
-                $('#selectAllCheckbox').prop('checked', false).prop('disabled', true);
-                $('.invoiceCheckbox').prop('checked', false).prop('disabled', true);
-                // Reset totals if necessary
-            }
-        });
+            $('#ownerNameFilter').on('change', function() {
+                var selectedOwner = $(this).val();
+                var filterValue = $(this).val();
 
-        $('#selectAllCheckbox').on('change', function() {
-            var isChecked = $(this).is(':checked');
-            $('.invoiceCheckbox').prop('checked', isChecked);
-        });
-
-        $('#updateStatusButton').on('click', function() {
-            var selectedIds = [];
-            $('.invoiceCheckbox:checked').each(function() {
-                selectedIds.push($(this).val());
+                if (selectedOwner && selectedOwner !== "") {
+                    table.column(6).search(filterValue).draw();
+                    calculateTotals(); // Hitung ulang total setelah filter diterapkan
+                    $('#selectAllCheckbox').prop('disabled', false);
+                    $('.invoiceCheckbox').prop('disabled', false);
+                } else {
+                    table.column(6).search(filterValue).draw();
+                    calculateTotals(); // Hitung ulang total meskipun filter direset
+                    $('#selectAllCheckbox').prop('checked', false).prop('disabled', true);
+                    $('.invoiceCheckbox').prop('checked', false).prop('disabled', true);
+                    // Reset totals if necessary
+                }
             });
 
-            if (selectedIds.length > 0) {
-                $.ajax({
-                    url: "{{ route('invoice.generate') }}",
-                    method: 'POST',
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        ids: selectedIds
-                    },
-                    success: function(response) {
-                        alert('Invoices generated successfully!');
-                        window.location.reload();
-                    },
-                    error: function(xhr) {
-                        alert('Failed to generate invoices. Please try again.');
-                        console.error(xhr.responseJSON);
-                    }
+            $('#selectAllCheckbox').on('change', function() {
+                var isChecked = $(this).is(':checked');
+                $('.invoiceCheckbox').prop('checked', isChecked);
+            });
+
+            $('#updateStatusButton').on('click', function() {
+                var selectedIds = [];
+                $('.invoiceCheckbox:checked').each(function() {
+                    selectedIds.push($(this).val());
                 });
-            } else {
-                alert('Please select at least one invoice.');
-            }
-        });
 
-        // Function to calculate totals for visible rows only
-        function calculateTotals() {
-            let totalHargaSimpan = 0;
-            let totalHargaLembur = 0;
-            let totalMasuk = 0;
-            let totalKeluar = 0;
-            let totalSisa = 0;
-            let totalHargaKirimBarang = 0;
-
-            // Loop through only the visible rows
-            table.rows({ search: 'applied' }).every(function() {
-                let data = this.data();
-
-                // Menggunakan unary plus untuk konversi
-                totalHargaSimpan += +data[12].replace(/\./g, '').replace(',',
-                    '.'); // Hapus titik dan ganti koma dengan titik
-
-                totalHargaLembur += +data[8].replace(/\./g, '').replace(',',
-                    '.'); // Jika data[9] adalah string yang valid
-
-                totalMasuk += +data[9] || 0; // Total QTY Masuk
-                totalKeluar += +data[10] || 0; // Total QTY Keluar
-                totalSisa += +data[11] || 0; // Total QTY Sisa
-                totalHargaKirimBarang += +data[13].replace(/\./g, '').replace(',',
-                    '.'); // Total Harga Kirim Barang
+                if (selectedIds.length > 0) {
+                    $.ajax({
+                        url: "{{ route('invoice.generate') }}",
+                        method: 'POST',
+                        data: {
+                            _token: '{{ csrf_token() }}',
+                            ids: selectedIds
+                        },
+                        success: function(response) {
+                            alert('Invoices generated successfully!');
+                            window.location.reload();
+                        },
+                        error: function(xhr) {
+                            alert('Failed to generate invoices. Please try again.');
+                            console.error(xhr.responseJSON);
+                        }
+                    });
+                } else {
+                    alert('Please select at least one invoice.');
+                }
             });
 
-            // Calculate total keseluruhan
-            const totalKeseluruhan = totalHargaSimpan + totalHargaLembur + totalHargaKirimBarang;
+            // Function to calculate totals for visible rows only
+            function calculateTotals() {
+                let totalHargaSimpan = 0;
+                let totalHargaLembur = 0;
+                let totalMasuk = 0;
+                let totalKeluar = 0;
+                let totalSisa = 0;
+                let totalHargaKirimBarang = 0;
 
-            // Update the footer with totals
-            $('#totalHargaSimpan').text(totalHargaSimpan.toLocaleString('id-ID', {
-                minimumFractionDigits: 0
-            }));
-            $('#totalHargaLembur').text(totalHargaLembur.toLocaleString('id-ID', {
-                minimumFractionDigits: 0
-            }));
-            $('#totalMasuk').text(totalMasuk.toLocaleString('id-ID', {
-                minimumFractionDigits: 0
-            }));
-            $('#totalKeluar').text(totalKeluar.toLocaleString('id-ID', {
-                minimumFractionDigits: 0
-            }));
-            $('#totalSisa').text(totalSisa.toLocaleString('id-ID', {
-                minimumFractionDigits: 0
-            }));
-            $('#totalHargaKirimBarang').text(totalHargaKirimBarang.toLocaleString('id-ID', {
-                minimumFractionDigits: 0
-            }));
-            $('#totalKeseluruhan').text(totalKeseluruhan.toLocaleString('id-ID', {
-                minimumFractionDigits: 0
-            }));
-        }
+                // Loop through only the visible rows
+                table.rows({
+                    search: 'applied'
+                }).every(function() {
+                    let data = this.data();
+                    totalMasuk += +data[8] || 0; // Total QTY Masuk
+                    totalKeluar += +data[9] || 0; // Total QTY Keluar
+                    totalSisa += +data[10] || 0; // Total QTY Sisa
+                    totalHargaLembur += +data[11].replace(/\./g, '').replace(',',
+                    '.'); 
+                    totalHargaKirimBarang += +data[12].replace(/\./g, '').replace(',',
+                    '.'); // Total Harga Kirim Barang
+                    totalHargaSimpan += +data[13].replace(/\./g, '').replace(',',
+                    '.');
+                });
 
-        // Calculate totals on page load
-        calculateTotals();
-    });
-</script>
+                // Calculate total keseluruhan
+                const totalKeseluruhan = totalHargaSimpan + totalHargaLembur + totalHargaKirimBarang;
+
+                // Update the footer with totals
+                $('#totalHargaSimpan').text(totalHargaSimpan.toLocaleString('id-ID', {
+                    minimumFractionDigits: 0
+                }));
+                $('#totalHargaLembur').text(totalHargaLembur.toLocaleString('id-ID', {
+                    minimumFractionDigits: 0
+                }));
+                $('#totalMasuk').text(totalMasuk.toLocaleString('id-ID', {
+                    minimumFractionDigits: 0
+                }));
+                $('#totalKeluar').text(totalKeluar.toLocaleString('id-ID', {
+                    minimumFractionDigits: 0
+                }));
+                $('#totalSisa').text(totalSisa.toLocaleString('id-ID', {
+                    minimumFractionDigits: 0
+                }));
+                $('#totalHargaKirimBarang').text(totalHargaKirimBarang.toLocaleString('id-ID', {
+                    minimumFractionDigits: 0
+                }));
+                $('#totalKeseluruhan').text(totalKeseluruhan.toLocaleString('id-ID', {
+                    minimumFractionDigits: 0
+                }));
+            }
+            
+            calculateTotals();
+        });
+        document.getElementById('exportButton').addEventListener('click', function() {
+            var table = document.getElementById('barangMasukTable');
+            var clonedTable = table.cloneNode(true);
+
+            var noExportRows = clonedTable.querySelectorAll('.no-export');
+
+            var workbook = XLSX.utils.table_to_book(clonedTable, {
+                sheet: "Data Barang Keluar"
+            });
+            XLSX.writeFile(workbook, 'DataInvoiceMaster.xlsx');
+        });
+    </script>
 
 
 </body>
