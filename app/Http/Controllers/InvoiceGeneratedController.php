@@ -40,15 +40,6 @@ class InvoiceGeneratedController extends Controller
 
         $barangKeluars = BarangKeluar::where('tanggal_tagihan_keluar', '<=', $currentDate)
             ->where('status_invoice', '<>', 'Invoice Barang Keluar')
-            // ->where(function ($query) {
-            //     $query->where(function ($subQuery) {
-            //         $subQuery->whereNotNull('harga_kirim_barang')
-            //             ->where('harga_kirim_barang', '!=', 0);
-            //     })->orWhere(function ($subQuery) {
-            //         $subQuery->whereNotNull('harga_lembur')
-            //             ->where('harga_lembur', '!=', 0);
-            //     });
-            // })
             ->get();
 
         foreach ($barangKeluars as $barangKeluar) {
