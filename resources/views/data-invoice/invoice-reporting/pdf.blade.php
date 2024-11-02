@@ -179,6 +179,10 @@
                 <br>
                 Telp:
                 {{ $invoiceMaster[0]->customer_no_hp ?? 'Nomor telepon pelanggan tidak tersedia' }}
+                <br>
+                Alamat:
+                {{ $invoiceMaster[0]->customer_address ?? 'Alamat pelanggan tidak tersedia' }}
+                
             </div>
         </div>
 
@@ -228,8 +232,13 @@
                         </td>
                         <td style="text-align: center;">
                             @if ($item->harga_lembur)
-                                CASH LEMBUR BONGKAR
+                                @if($item->barang_masuks_id && $item->harga_lembur)
+                                CAS LEMBUR BONGKAR
                                 {{ $item->joc_number ?? $item->nomer_surat_jalan }}
+                                @elseif ($item->barang_keluars_id && $item->harga_lembur)
+                                CAS LEMBUR MUAT
+                                {{ $item->joc_number ?? $item->nomer_surat_jalan }}
+                                @endif
                             @elseif ($item->harga_kirim_barang)
                                 Sewa Mobil
                                 <strong>{{ $item->warehouse_name ?? 'X' }}<br></strong>

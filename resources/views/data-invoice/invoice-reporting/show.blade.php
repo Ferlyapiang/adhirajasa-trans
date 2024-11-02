@@ -209,9 +209,13 @@
                                                             @if ($item->harga_lembur)
                                                                 X
                                                             @elseif ($item->harga_kirim_barang)
+                                                            <a href="{{ $item->joc_number ? route('data-gudang.barang-masuk.detail', $item->barang_masuks_id) : route('data-gudang.barang-keluar.showSuratJalan', $item->barang_keluars_id) }}">
                                                                 {{ $item->joc_number ?: $item->nomer_surat_jalan }}
+                                                            </a>
                                                             @else
+                                                            <a href="{{ $item->joc_number ? route('data-gudang.barang-masuk.detail', $item->barang_masuks_id) : route('data-gudang.barang-keluar.showSuratJalan', $item->barang_keluars_id) }}">
                                                                 {{ $item->joc_number ?: $item->nomer_surat_jalan }}
+                                                            </a>
                                                             @endif
                                                         </td>
                                                         <td>
@@ -234,8 +238,18 @@
                                                         </td>
                                                         <td style="text-align: center;">
                                                             @if ($item->harga_lembur)
-                                                                CASH LEMBUR BONGKAR
+                                                                @if($item->barang_masuks_id && $item->harga_lembur)
+                                                                CAS LEMBUR BONGKAR
+                                                                <a href="{{ $item->joc_number ? route('data-gudang.barang-masuk.detail', $item->barang_masuks_id) : route('data-gudang.barang-keluar.showSuratJalan', $item->barang_keluars_id) }}">
                                                                 {{ $item->joc_number ?? $item->nomer_surat_jalan }}
+                                                                </a>
+                                                                
+                                                                @elseif ($item->barang_keluars_id && $item->harga_lembur)
+                                                                CAS LEMBUR MUAT
+                                                                <a href="{{ $item->joc_number ? route('data-gudang.barang-masuk.detail', $item->barang_masuks_id) : route('data-gudang.barang-keluar.showSuratJalan', $item->barang_keluars_id) }}">
+                                                                {{ $item->joc_number ?? $item->nomer_surat_jalan }}
+                                                                </a>
+                                                                @endif
                                                             @elseif ($item->harga_kirim_barang)
                                                                 Sewa Mobil
                                                                 <strong>{{ $item->warehouse_name ?? 'X' }}<br></strong>
@@ -337,7 +351,7 @@
                                                     </tr>
                                                     <tr>
                                                         <td colspan="4" style="text-align: right;">PPH (2%)</td>
-                                                        <td>( - {{ number_format($pph) }} )</td>
+                                                        <td>( {{ number_format($pph) }} )</td>
                                                     </tr>
                                                     <tr>
                                                         <td colspan="4"
