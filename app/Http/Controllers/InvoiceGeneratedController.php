@@ -122,18 +122,31 @@ class InvoiceGeneratedController extends Controller
             ->leftJoin(
                 DB::raw('(
                     SELECT 
-                        bki.barang_masuk_id, 
-                        SUM(CASE 
-                                WHEN barang_keluars.tanggal_keluar < barang_masuks.tanggal_invoice_keluar
-                                THEN bki.qty 
-                                ELSE 0 
-                            END) AS total_qty
-                    FROM barang_keluar_items bki
-                    JOIN barang_keluars ON bki.barang_keluar_id = barang_keluars.id
-                    JOIN barang_masuks ON bki.barang_masuk_id = barang_masuks.id
-                    JOIN invoices ir ON barang_keluars.id = ir.barang_keluars_id
-                    GROUP BY bki.barang_masuk_id
-                ) AS total_keluar_invoices'),
+                            bki.barang_masuk_id, 
+                            SUM(
+                                CASE 
+                                    WHEN customers.type_payment_customer = "Akhir Bulan" THEN 
+                                        CASE 
+                                            WHEN barang_keluars.tanggal_keluar < barang_masuks.tanggal_invoice_keluar 
+                                            THEN bki.qty 
+                                            ELSE 0 
+                                        END
+                                    WHEN customers.type_payment_customer = "Pertanggal Masuk" THEN 
+                                        CASE 
+                                            WHEN barang_keluars.tanggal_keluar < barang_masuks.tanggal_invoice_masuk 
+                                            THEN bki.qty 
+                                            ELSE 0 
+                                        END
+                                    ELSE 0
+                                END
+                            ) AS total_qty
+                        FROM barang_keluar_items bki
+                        JOIN barang_keluars ON bki.barang_keluar_id = barang_keluars.id
+                        JOIN barang_masuks ON bki.barang_masuk_id = barang_masuks.id
+                        JOIN invoices ir ON barang_keluars.id = ir.barang_keluars_id
+                        JOIN customers ON barang_masuks.customer_id = customers.id
+                        GROUP BY bki.barang_masuk_id
+                    ) AS total_keluar_invoices'),
                 'barang_masuks.id',
                 '=',
                 'total_keluar_invoices.barang_masuk_id'
