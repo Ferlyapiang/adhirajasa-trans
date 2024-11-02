@@ -34,12 +34,6 @@
         .text-primary {
             color: #007bff;
         }
-
-        .invoice-header {
-            margin-bottom: 20px;
-            padding: 10px;
-        }
-
         .content {
             padding: 10px;
         }
@@ -140,20 +134,31 @@
 
 <body>
     <div class="content">
-        <img src="{{ public_path('ATSLogo.jpg') }}" alt="ATS Logo" style="height: 80px; margin-bottom: 20px;"> <br> <br>
+        <img src="{{ public_path('ATSLogo.jpg') }}" alt="ATS Logo" style="height: 80px;"> <br>
 
-        <div class="invoice-header">
-            <h4 style="font-size: 1.2em; margin-bottom: 5px;">Kantor Pusat:</h4>
-            <p style="font-size: 0.85em; margin: 2px 0;">Alamat: <br> <span
-                    class="text-primary">{{ $headOffice->address ?? 'Alamat tidak tersedia' }}</span>
-            </p>
-            <p style="font-size: 0.85em; margin: 2px 0;">Nomor Telepon: <br> <span
-                    class="text-primary">{{ $headOffice->phone_number ?? 'Nomor telepon tidak tersedia' }}</span>
-            </p>
-            <p style="font-size: 0.85em; margin: 2px 0;">Email: <br> <span
-                    class="text-primary">{{ $headOffice->email ?? 'Email tidak tersedia' }}</span>
-            </p>
+        <div style="margin-bottom: 20px;">
+            <div style="display: inline-block; width: 28%; vertical-align: top; margin-right: 2%;">
+                <h4 style="font-size: 1.2em; margin-bottom: 5px;">Kantor Pusat:</h4>
+                <p style="font-size: 0.85em; margin: 2px 0;">Alamat: <br> <span class="text-primary">{{ $headOffice->address ?? 'Alamat tidak tersedia' }}</span></p>
+                <p style="font-size: 0.85em; margin: 2px 0;">Nomor Telepon: <br> <span class="text-primary">{{ $headOffice->phone_number ?? 'Nomor telepon tidak tersedia' }}</span></p>
+                <p style="font-size: 0.85em; margin: 2px 0;">Email: <br> <span class="text-primary">{{ $headOffice->email ?? 'Email tidak tersedia' }}</span></p>
+            </div>
+            <div style="display: inline-block; width: 48%; vertical-align: top;">
+                <h4 style="font-size: 1.2em; margin-bottom: 5px;">Kantor Cabang:</h4>
+                @if ($branchOffices->isEmpty())
+                    <p style="color: #777; font-size: 0.85em;">Tidak ada kantor cabang tersedia.</p>
+                @else
+                    @foreach ($branchOffices as $branchOffice)
+                        <div>
+                            <h5 style="font-size: 0.95em; margin: 5px 0;">Kantor Cabang {{ $loop->iteration }}:</h5>
+                            <p style="font-size: 0.85em; margin: 2px 0;">Alamat: <span class="text-primary">{{ $branchOffice->address ?? 'Alamat tidak tersedia' }}</span></p>
+                            <p style="font-size: 0.85em; margin: 2px 0;">Nomor Telepon: <span class="text-primary">{{ $branchOffice->phone_number ?? 'Nomor telepon tidak tersedia' }}</span></p>
+                        </div>
+                    @endforeach
+                @endif
+            </div>
         </div>
+
 
         <h1>Invoice</h1>
         <table>
