@@ -186,24 +186,25 @@ class InvoiceReportingController extends Controller
         ) AS total_keluar ON barang_masuks.id = total_keluar.barang_masuk_id
         WHERE 
             invoices_reporting.nomer_invoice = ?
-            AND (COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0)) > 0 
-            OR (
-                COALESCE(barang_keluars.harga_lembur, 0) > 0
+            AND (
+                (COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0)) > 0 
                 OR (
-                    CASE 
-                        WHEN customers_masuks.type_payment_customer = 'Akhir Bulan' 
-                            AND YEAR(barang_masuks.tanggal_masuk) = YEAR(barang_masuks.tanggal_tagihan_masuk)
-                            AND MONTH(barang_masuks.tanggal_masuk) = MONTH(barang_masuks.tanggal_tagihan_masuk)
-                        THEN barang_masuks.harga_lembur
-                        WHEN customers_masuks.type_payment_customer = 'Pertanggal Masuk' 
-                            AND barang_masuks.tanggal_tagihan_masuk <= DATE_ADD(barang_masuks.tanggal_masuk, INTERVAL 1 MONTH)
-                        THEN barang_masuks.harga_lembur
-                        ELSE 0
-                    END
-                ) > 0
-            )
-            OR COALESCE(barang_keluars.harga_kirim_barang, 0) > 0
-            ";
+                    COALESCE(barang_keluars.harga_lembur, 0) > 0
+                    OR (
+                        CASE 
+                            WHEN customers_masuks.type_payment_customer = 'Akhir Bulan' 
+                                AND YEAR(barang_masuks.tanggal_masuk) = YEAR(barang_masuks.tanggal_tagihan_masuk)
+                                AND MONTH(barang_masuks.tanggal_masuk) = MONTH(barang_masuks.tanggal_tagihan_masuk)
+                            THEN barang_masuks.harga_lembur
+                            WHEN customers_masuks.type_payment_customer = 'Pertanggal Masuk' 
+                                AND barang_masuks.tanggal_tagihan_masuk <= DATE_ADD(barang_masuks.tanggal_masuk, INTERVAL 1 MONTH)
+                            THEN barang_masuks.harga_lembur
+                            ELSE 0
+                        END
+                    ) > 0
+                )
+                OR COALESCE(barang_keluars.harga_kirim_barang, 0) > 0
+            )";
 
         // Execute the SQL query with the provided invoice number
         $invoiceMaster = DB::select($sql, [$nomer_invoice]);

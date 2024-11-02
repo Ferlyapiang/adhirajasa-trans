@@ -118,8 +118,8 @@
                                                 </a>
                                             </td>
 
-                                            <td>{{ $item->tanggal_masuk_barang }}</td>
-                                            <td>{{ $item->tanggal_keluar }}</td>
+                                            <td>{{ $item->tanggal_invoice_masuk ?? $item->tanggal_masuk_barang }}</td>
+                                            <td>{{ $item->tanggal_invoice_keluar ?? $item->tanggal_keluar }}</td>
                                             <td>
                                                 {{ $item->customer_masuk_name ? $item->customer_masuk_name : $item->customer_keluar_name }}
                                             </td>

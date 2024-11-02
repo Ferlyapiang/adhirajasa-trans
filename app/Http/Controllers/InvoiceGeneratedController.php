@@ -58,6 +58,8 @@ class InvoiceGeneratedController extends Controller
                 'invoices.nomer_invoice',
                 'invoices.barang_masuks_id',
                 'barang_masuks.joc_number',
+                'barang_masuks.tanggal_invoice_masuk',
+                'barang_masuks.tanggal_invoice_keluar',
                 'barang_masuks.tanggal_tagihan_masuk',
                 'barang_keluars.tanggal_tagihan_keluar',
                 'barang_masuks.tanggal_masuk AS tanggal_masuk_barang',
