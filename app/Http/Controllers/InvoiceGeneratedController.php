@@ -200,6 +200,12 @@ class InvoiceGeneratedController extends Controller
             ->unique()
             ->values();
 
+        $tanggalTagihans = $invoiceMaster->map(function ($item) {
+            return $item->tanggal_tagihan_masuk??$item->tanggal_tagihan_keluar;
+        })
+            ->unique()
+            ->values();
+
         foreach ($invoiceMaster as $invoice) {
             $totalSisa = DB::table('invoices')
                 ->selectRaw('COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0) AS total_sisa')
@@ -234,7 +240,7 @@ class InvoiceGeneratedController extends Controller
         }
 
 
-        return view('data-invoice.invoice-master.index', compact('invoiceMaster', 'owners'));
+        return view('data-invoice.invoice-master.index', compact('invoiceMaster', 'owners', 'tanggalTagihans'));
     }
 
     public function generateInvoice(Request $request)

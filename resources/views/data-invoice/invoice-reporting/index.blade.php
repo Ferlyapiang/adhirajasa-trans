@@ -64,6 +64,15 @@
                                             @endforeach
                                         </select>
                                     </div>
+                                    <div class="col-md-3">
+                                        <label for="tanggalTagihanFilter">Tanggal Tagihan:</label>
+                                        <select id="tanggalTagihanFilter" class="form-control">
+                                            <option value="">Semua</option>
+                                            @foreach ($tanggalTagihans as $tanggalTagihan)
+                                                <option value="{{ $tanggalTagihan }}">{{ $tanggalTagihan }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
                                 </div>
 
                                 <div class="table-responsive">
@@ -162,6 +171,11 @@
                 var selectedOwner = $(this).val(); // Get selected value
                 // Custom search function to filter by customer_name
                 table.column(4).search(selectedOwner).draw();
+            });
+            $('#tanggalTagihanFilter').on('change', function() {
+                var selectedtanggalTagihan = $(this).val(); // Get selected value
+                // Custom search function to filter by customer_name
+                table.column(2).search(selectedtanggalTagihan).draw();
             });
 
         });

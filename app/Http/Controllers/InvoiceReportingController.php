@@ -98,8 +98,14 @@ class InvoiceReportingController extends Controller
             ->unique()
             ->values();
 
+        $tanggalTagihans = $invoiceMaster->map(function ($item) {
+            return $item->tanggal_tagihan;
+        })
+            ->unique()
+            ->values();
 
-        return view('data-invoice.invoice-reporting.index', compact('invoiceMaster', 'owners'));
+
+        return view('data-invoice.invoice-reporting.index', compact('invoiceMaster', 'owners', 'tanggalTagihans'));
     }
 
     public function show(Request $request)

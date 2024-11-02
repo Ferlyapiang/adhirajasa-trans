@@ -66,106 +66,116 @@
                                         <select id="ownerNameFilter" class="form-control">
                                             <option value="">Semua</option>
                                             @foreach ($owners as $owner)
-                                                <option value="{{ $owner }}">{{ $owner }}</option>
+                                            <option value="{{ $owner }}">{{ $owner }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="tanggalTagihanFilter">Tanggal Tagihan:</label>
+                                        <select id="tanggalTagihanFilter" class="form-control">
+                                            <option value="">Semua</option>
+                                            @foreach ($tanggalTagihans as $tanggalTagihan)
+                                            <option value="{{ $tanggalTagihan }}">{{ $tanggalTagihan }}</option>
                                             @endforeach
                                         </select>
                                     </div>
                                 </div>
-
-                                <div class="table-responsive">
-                                    <table id="barangMasukTable" class="table table-bordered table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th><input type="checkbox" id="selectAllCheckbox"></th>
-                                                <!-- Checkbox for select all -->
-                                                <th>No</th>
-                                                <th>Tanggal Penagihan</th>
-                                                <th>Nomer Referensi</th>
-                                                <th>Tanggal Masuk</th>
-                                                <th>Tanggal Keluar</th>
-                                                <th>Nama Pemilik</th>
-                                                <th>Gudang</th>
-                                                <th>Total QTY Masuk</th>
-                                                <th>Total QTY Keluar</th>
-                                                <th>Total QTY Sisa</th>
-                                                <th>Lemburan</th>                                                
-                                                <th>Harga Kirim Barang</th>
-                                                <th>Total Harga Simpan</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach ($invoiceMaster as $index => $item)
-                                                <tr>
-                                                    <td><input type="checkbox" class="invoiceCheckbox"
-                                                            value="{{ $item->id }}"></td>
-                                                    <!-- Individual checkbox -->
-                                                    <td>{{ $index + 1 }}</td>
-                                                    <td>{{ $item->tanggal_tagihan_masuk ?: $item->tanggal_tagihan_keluar ?: '' }}
-                                                    <td>
-                                                        <a
-                                                            href="{{ $item->joc_number ? route('data-gudang.barang-masuk.detail', $item->barang_masuks_id) : route('data-gudang.barang-keluar.showSuratJalan', $item->barang_keluars_id) }}">
-                                                            {{ $item->joc_number ? $item->joc_number : $item->nomer_surat_jalan }}
-                                                        </a>
-                                                    </td>
-
-                                                    <td>{{ $item->tanggal_masuk_barang }}</td>
-                                                    <td>{{ $item->tanggal_keluar }}</td>
-                                                    <td>
-                                                        {{ $item->customer_masuk_name ? $item->customer_masuk_name : $item->customer_keluar_name }}
-                                                    </td>
-                                                    <td>{{ $item->warehouse_masuk_name ? $item->warehouse_masuk_name : $item->warehouse_keluar_name }}
-                                                    </td>
-                                                    </td>
-                                                    </td>
-                                                    <td>{{ $item->total_qty_masuk }}</td>
-                                                    <td>{{ $item->total_qty_keluar }}</td>
-                                                    <td>{{ $item->total_sisa }}</td>
-                                                    <td>
-                                                        @if (!is_null($item->harga_lembur_masuk) && $item->harga_lembur_masuk != 0)
-                                                            {{ number_format($item->harga_lembur_masuk, 0, ',', '.') }}
-                                                        @elseif(!is_null($item->harga_lembur_keluar) && $item->harga_lembur_keluar != 0)
-                                                            {{ number_format($item->harga_lembur_keluar, 0, ',', '.') }}
-                                                        @else
-                                                            {{ '' }}
-                                                        @endif
-                                                    </td>
-                                                    <td>{{ number_format($item->harga_kirim_barang, 0, ',', '.') }}
-                                                    <td>{{ number_format($item->total_harga_simpan, 0, ',', '.') }}
-                                                    </td>
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-
-                                        <tfoot>
-                                            <tr>
-                                                <th colspan="8" style="text-align: right;">Total:</th>                                                
-                                                <th id="totalMasuk"></th>
-                                                <th id="totalKeluar"></th>
-                                                <th id="totalSisa"></th>
-                                                <th id="totalHargaLembur"></th>                                                
-                                                <th id="totalHargaKirimBarang"></th>
-                                                <th id="totalHargaSimpan"></th>
-                                            </tr>
-                                            <tr class="no-export">
-                                                <th colspan="8" style="text-align: right;">Dari Total Harga Lembur +
-                                                    Total Harga Simpan Barang + Total Harga Kirim Barang</th>
-                                                <th colspan="2" style="text-align: right;">Total Keseluruhan:</th>
-                                                <th id="totalKeseluruhan" colspan="5"></th>
-                                            </tr>
-                                        </tfoot>
-
-                                    </table>
-                                </div>
                             </div>
-                            <!-- /.card-body -->
+
+                            <div class="table-responsive">
+                                <table id="barangMasukTable" class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th><input type="checkbox" id="selectAllCheckbox"></th>
+                                            <!-- Checkbox for select all -->
+                                            <th>No</th>
+                                            <th>Tanggal Penagihan</th>
+                                            <th>Nomer Referensi</th>
+                                            <th>Tanggal Masuk</th>
+                                            <th>Tanggal Keluar</th>
+                                            <th>Nama Pemilik</th>
+                                            <th>Gudang</th>
+                                            <th>Total QTY Masuk</th>
+                                            <th>Total QTY Keluar</th>
+                                            <th>Total QTY Sisa</th>
+                                            <th>Lemburan</th>
+                                            <th>Harga Kirim Barang</th>
+                                            <th>Total Harga Simpan</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($invoiceMaster as $index => $item)
+                                        <tr>
+                                            <td><input type="checkbox" class="invoiceCheckbox"
+                                                    value="{{ $item->id }}"></td>
+                                            <!-- Individual checkbox -->
+                                            <td>{{ $index + 1 }}</td>
+                                            <td>{{ $item->tanggal_tagihan_masuk ?: $item->tanggal_tagihan_keluar ?: '' }}
+                                            <td>
+                                                <a
+                                                    href="{{ $item->joc_number ? route('data-gudang.barang-masuk.detail', $item->barang_masuks_id) : route('data-gudang.barang-keluar.showSuratJalan', $item->barang_keluars_id) }}">
+                                                    {{ $item->joc_number ? $item->joc_number : $item->nomer_surat_jalan }}
+                                                </a>
+                                            </td>
+
+                                            <td>{{ $item->tanggal_masuk_barang }}</td>
+                                            <td>{{ $item->tanggal_keluar }}</td>
+                                            <td>
+                                                {{ $item->customer_masuk_name ? $item->customer_masuk_name : $item->customer_keluar_name }}
+                                            </td>
+                                            <td>{{ $item->warehouse_masuk_name ? $item->warehouse_masuk_name : $item->warehouse_keluar_name }}
+                                            </td>
+                                            </td>
+                                            </td>
+                                            <td>{{ $item->total_qty_masuk }}</td>
+                                            <td>{{ $item->total_qty_keluar }}</td>
+                                            <td>{{ $item->total_sisa }}</td>
+                                            <td>
+                                                @if (!is_null($item->harga_lembur_masuk) && $item->harga_lembur_masuk != 0)
+                                                {{ number_format($item->harga_lembur_masuk, 0, ',', '.') }}
+                                                @elseif(!is_null($item->harga_lembur_keluar) && $item->harga_lembur_keluar != 0)
+                                                {{ number_format($item->harga_lembur_keluar, 0, ',', '.') }}
+                                                @else
+                                                {{ '' }}
+                                                @endif
+                                            </td>
+                                            <td>{{ number_format($item->harga_kirim_barang, 0, ',', '.') }}
+                                            <td>{{ number_format($item->total_harga_simpan, 0, ',', '.') }}
+                                            </td>
+                                            </td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+
+                                    <tfoot>
+                                        <tr>
+                                            <th colspan="8" style="text-align: right;">Total:</th>
+                                            <th id="totalMasuk"></th>
+                                            <th id="totalKeluar"></th>
+                                            <th id="totalSisa"></th>
+                                            <th id="totalHargaLembur"></th>
+                                            <th id="totalHargaKirimBarang"></th>
+                                            <th id="totalHargaSimpan"></th>
+                                        </tr>
+                                        <tr class="no-export">
+                                            <th colspan="8" style="text-align: right;">Dari Total Harga Lembur +
+                                                Total Harga Simpan Barang + Total Harga Kirim Barang</th>
+                                            <th colspan="2" style="text-align: right;">Total Keseluruhan:</th>
+                                            <th id="totalKeseluruhan" colspan="5"></th>
+                                        </tr>
+                                    </tfoot>
+
+                                </table>
+                            </div>
                         </div>
-                        <!-- /.card -->
+                        <!-- /.card-body -->
                     </div>
+                    <!-- /.card -->
                 </div>
             </div>
         </div>
-        <!-- /.content -->
+    </div>
+    <!-- /.content -->
     </div>
     <!-- /.content-wrapper -->
 
@@ -193,28 +203,38 @@
             $('#selectAllCheckbox').prop('disabled', true);
             $('.invoiceCheckbox').prop('disabled', true);
 
-            $('#ownerNameFilter').on('change', function() {
-                var selectedOwner = $(this).val();
-                var filterValue = $(this).val();
+            function updateSelectAllCheckboxState() {
+                var selectedOwner = $('#ownerNameFilter').val();
+                var selectedtanggalTagihan = $('#tanggalTagihanFilter').val();
 
-                if (selectedOwner && selectedOwner !== "") {
-                    table.column(6).search(filterValue).draw();
-                    calculateTotals(); // Hitung ulang total setelah filter diterapkan
+                // Aktifkan selectAllCheckbox hanya jika kedua filter sudah dipilih
+                if (selectedOwner && selectedtanggalTagihan) {
                     $('#selectAllCheckbox').prop('disabled', false);
                     $('.invoiceCheckbox').prop('disabled', false);
                 } else {
-                    table.column(6).search(filterValue).draw();
-                    calculateTotals(); // Hitung ulang total meskipun filter direset
                     $('#selectAllCheckbox').prop('checked', false).prop('disabled', true);
                     $('.invoiceCheckbox').prop('checked', false).prop('disabled', true);
-                    // Reset totals if necessary
                 }
+            }
+
+            $('#ownerNameFilter').on('change', function() {
+                var filterValue = $(this).val();
+                table.column(6).search(filterValue).draw();
+                calculateTotals(); // Hitung ulang total setelah filter diterapkan
+                updateSelectAllCheckboxState(); // Periksa ulang state checkbox
+            });
+
+            $('#tanggalTagihanFilter').on('change', function() {
+                var filterValue = $(this).val();
+                table.column(2).search(filterValue).draw();
+                updateSelectAllCheckboxState(); // Periksa ulang state checkbox
             });
 
             $('#selectAllCheckbox').on('change', function() {
                 var isChecked = $(this).is(':checked');
                 $('.invoiceCheckbox').prop('checked', isChecked);
             });
+
 
             $('#updateStatusButton').on('click', function() {
                 var selectedIds = [];
@@ -262,11 +282,11 @@
                     totalKeluar += +data[9] || 0; // Total QTY Keluar
                     totalSisa += +data[10] || 0; // Total QTY Sisa
                     totalHargaLembur += +data[11].replace(/\./g, '').replace(',',
-                    '.'); 
+                        '.');
                     totalHargaKirimBarang += +data[12].replace(/\./g, '').replace(',',
-                    '.'); // Total Harga Kirim Barang
+                        '.'); // Total Harga Kirim Barang
                     totalHargaSimpan += +data[13].replace(/\./g, '').replace(',',
-                    '.');
+                        '.');
                 });
 
                 // Calculate total keseluruhan
@@ -295,7 +315,7 @@
                     minimumFractionDigits: 0
                 }));
             }
-            
+
             calculateTotals();
         });
         document.getElementById('exportButton').addEventListener('click', function() {
