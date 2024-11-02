@@ -189,23 +189,31 @@ class BarangKeluarController extends Controller
 
         // Fetch barang masuk records
         $barangMasukRecords = BarangMasuk::whereIn('id', $barangMasukIDs)->get();
+        $customer = Customer::find($request->customer_id);
+        $tanggalKeluar = $request->tanggal_keluar ? Carbon::createFromFormat('Y-m-d', $request->tanggal_keluar) : null;
 
-        $tanggalKeluar = Carbon::createFromFormat('Y-m-d', $validated['tanggal_keluar']);
-        $tanggalTagihanKeluar = null;
+        if ($tanggalKeluar) {
+            // Fetch barang_masuk records associated with the customer
+            $barangMasukRecords = BarangMasuk::where('customer_id', $customer->id)->get();
 
-        foreach ($barangMasukRecords as $record) {
+            $tanggalTagihanKeluar = null;
 
-            if ($record->tanggal_tagihan_masuk) {
-                $tanggalTagihan = Carbon::createFromFormat('Y-m-d', $record->tanggal_tagihan_masuk);
+            foreach ($barangMasukRecords as $record) {
+                $tanggalTagihan = $record->tanggal_invoice_masuk
+                    ? Carbon::createFromFormat('Y-m-d', $record->tanggal_invoice_masuk)->copy()->addMonthsNoOverflow(1)
+                    : Carbon::createFromFormat('Y-m-d', $record->tanggal_penimbunan->copy()->addDays(1));
 
-                if ($tanggalKeluar < $tanggalTagihan) {
-                    $tanggalTagihanKeluar = $tanggalKeluar->copy()->addMonths(2)->startOfMonth()->addDays(2)->format('Y-m-d');
+                if ($tanggalKeluar->lessThan($tanggalTagihan)) {
+                    // If tanggal_keluar is less than tanggal_tagihan_masuk, add 2 months
+                    $tanggalTagihanKeluar = $tanggalKeluar->copy()->startOfMonth()->addDays(2)->addMonths(2)->format('Y-m-d');
+                    // dd($tanggalKeluar, $tanggalTagihan, "ASASASA " . $tanggalTagihanKeluar);
                 } else {
-                    $tanggalTagihanKeluar = $tanggalKeluar->copy()->addMonth()->startOfMonth()->addDays(2)->format('Y-m-d');
+                    // If tanggal_keluar is greater than or equal to tanggal_tagihan_masuk, add 1 month
+                    $tanggalTagihanKeluar = $tanggalKeluar->copy()->addMonthsNoOverflow(1)->startOfMonth()->addDays(2)->format('Y-m-d');
+                    // dd($tanggalKeluar, $tanggalTagihan, "KEDUAA " . $tanggalTagihanKeluar);
                 }
             }
         }
-
 
 
         // dd($tanggalTagihanKeluar, $tanggalKeluar, $barangMasukRecords);
@@ -422,22 +430,23 @@ class BarangKeluarController extends Controller
             $tanggalTagihanKeluar = null;
 
             foreach ($barangMasukRecords as $record) {
-                // Only check if tanggal_tagihan_masuk is available
-                if ($record->tanggal_tagihan_masuk) {
-                    $tanggalTagihan = Carbon::createFromFormat('Y-m-d', $record->tanggal_tagihan_masuk);
+                // Determine if tanggal_invoice_masuk or tanggal_masuk should be used for tanggalTagihan
+                $tanggalTagihan = $record->tanggal_invoice_masuk
+                    ? Carbon::createFromFormat('Y-m-d', $record->tanggal_invoice_masuk)->copy()->addMonthsNoOverflow(1)
+                    : Carbon::createFromFormat('Y-m-d', $record->tanggal_masuk);
 
-                    // Compare tanggal_keluar with tanggal_tagihan_masuk
-                    if ($tanggalKeluar < $tanggalTagihan) {
-                        // If tanggal_keluar is less than tanggal_tagihan_masuk, add 2 months
-                        $tanggalTagihanKeluar = $tanggalKeluar->copy()->addMonths(2)->startOfMonth()->addDays(2)->format('Y-m-d');
-                    } else {
-                        // If tanggal_keluar is greater than or equal to tanggal_tagihan_masuk, add 1 month
-                        $tanggalTagihanKeluar = $tanggalKeluar->copy()->addMonth()->startOfMonth()->addDays(2)->format('Y-m-d');
-                    }
+                if ($tanggalKeluar->lessThan($tanggalTagihan)) {
+                    // If tanggal_keluar is less than tanggal_tagihan_masuk, add 2 months
+                    $tanggalTagihanKeluar = $tanggalKeluar->copy()->startOfMonth()->addDays(2)->addMonths(2)->format('Y-m-d');
+
+                } else {
+                    // If tanggal_keluar is greater than or equal to tanggal_tagihan_masuk, add 1 month
+                    $tanggalTagihanKeluar = $tanggalKeluar->copy()->addMonthsNoOverflow(1)->startOfMonth()->addDays(2)->format('Y-m-d');
+
                 }
             }
         }
-        //  dd($tanggalTagihanKeluar, $tanggalKeluar, $barangMasukRecords, $customer);
+
 
 
         $barangKeluarData = [

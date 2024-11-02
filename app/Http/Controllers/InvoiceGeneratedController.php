@@ -66,9 +66,9 @@ class InvoiceGeneratedController extends Controller
                 'barang_masuks.customer_id',
                 'customers_masuks.name AS customer_masuk_name',
                 'customers_masuks.type_payment_customer AS type_payment_customer_masuk',
-                DB::raw('COALESCE(total_items.total_qty, 0) AS total_qty_masuk'),
-                DB::raw('COALESCE(total_keluar_invoices.total_qty, 0) + COALESCE(total_keluar_reporting.total_qty, 0) AS total_qty_keluar'),
-                DB::raw('COALESCE(total_items.total_qty, 0) - (COALESCE(total_keluar_invoices.total_qty, 0) + COALESCE(total_keluar_reporting.total_qty, 0)) AS total_sisa'),
+                DB::raw('COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar_reporting.total_qty, 0) AS total_qty_masuk'),
+                DB::raw('COALESCE(total_keluar_invoices.total_qty, 0) AS total_qty_keluar'),
+                DB::raw('(COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar_reporting.total_qty, 0)) -  COALESCE(total_keluar_invoices.total_qty, 0) AS total_sisa'),
                 DB::raw('
                             CASE
                                 WHEN COALESCE(total_items.total_qty, 0) = 
