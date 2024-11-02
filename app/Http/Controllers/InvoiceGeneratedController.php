@@ -387,18 +387,18 @@ class InvoiceGeneratedController extends Controller
 
                 $tanggalFinal = $tanggalMasuk ?? $tanggalKeluar ?? $invoice->tanggal_masuk ?? null;
 
-                $customer_initial = DB::table('customers')
-                    ->join('warehouses', 'customers.warehouse_id', '=', 'warehouses.id')
-                    ->where('customers.id', isset($barangMasuk) ? $barangMasuk->customer_id : (isset($barangKeluar) ? $barangKeluar->customer_id : null))
-                    ->value('warehouses.initial');
+                // $customer_initial = DB::table('customers')
+                //     ->join('warehouses', 'customers.warehouse_id', '=', 'warehouses.id')
+                //     ->where('customers.id', isset($barangMasuk) ? $barangMasuk->customer_id : (isset($barangKeluar) ? $barangKeluar->customer_id : null))
+                //     ->value('warehouses.initial');
 
-                $initial = $customer_initial ?? 'ACL';
+                // $initial = $customer_initial ?? 'ACL';
 
                 $currentTimestamp = now(); // Get the current timestamp
 
                 // Replace the latestJoc query to use the invoice number pattern
                 $latestJoc = DB::table('invoices_reporting')
-                    ->where('nomer_invoice', 'like', "ATS/INV/{$year}/{$monthRoman}/{$initial}/%")
+                    ->where('nomer_invoice', 'like', "ATS/INV/{$year}/{$monthRoman}/%")
                     ->orderBy('nomer_invoice', 'desc')
                     ->first();
 
@@ -414,11 +414,11 @@ class InvoiceGeneratedController extends Controller
                         // Generate a new invoice number
                         $lastNumber = (int)substr($latestJoc->nomer_invoice, -3);
                         $newNumber = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
-                        $nomerGenerad = "ATS/INV/{$year}/{$monthRoman}/{$initial}/{$newNumber}";
+                        $nomerGenerad = "ATS/INV/{$year}/{$monthRoman}/{$newNumber}";
                     }
                 } else {
                     // No previous invoice found, start with the first number
-                    $nomerGenerad = "ATS/INV/{$year}/{$monthRoman}/{$initial}/001";
+                    $nomerGenerad = "ATS/INV/{$year}/{$monthRoman}/001";
                 }
 
                 DB::table('invoices')->where('id', $invoiceId)->update([
