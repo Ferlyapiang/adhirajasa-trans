@@ -155,36 +155,44 @@ class InvoiceGeneratedController extends Controller
             ->leftJoin(
                 DB::raw('(
                     SELECT 
-                            bki.barang_masuk_id, 
-                            SUM(
-                                CASE 
-                                    WHEN customers.type_payment_customer = "Akhir Bulan" THEN 
-                                        CASE 
-                                            WHEN barang_keluars.tanggal_keluar < barang_masuks.tanggal_invoice_keluar 
-                                            THEN bki.qty 
-                                            ELSE 0 
-                                        END
-                                    WHEN customers.type_payment_customer = "Pertanggal Masuk" THEN 
-                                        CASE 
-                                            WHEN barang_keluars.tanggal_keluar > ir.tanggal_masuk_penimbunan 
-                                            THEN bki.qty 
-                                            ELSE 0 
-                                        END
-                                    ELSE 0
-                                END
-                            ) AS total_qty_reporting
-                        FROM barang_keluar_items bki
-                        JOIN barang_keluars ON bki.barang_keluar_id = barang_keluars.id
-                        JOIN barang_masuks ON bki.barang_masuk_id = barang_masuks.id
-                        JOIN invoices_reporting ir ON barang_keluars.id = ir.barang_keluars_id AND ir.job_number IS NOT NULL
-                        JOIN customers ON barang_masuks.customer_id = customers.id
-                        GROUP BY bki.barang_masuk_id
-
-                    ) AS total_keluar_invoices_reporting'),
+                        bki.barang_masuk_id, 
+                        SUM(
+                            CASE 
+                                WHEN customers.type_payment_customer = "Akhir Bulan" THEN 
+                                    CASE 
+                                        WHEN barang_keluars.tanggal_keluar < barang_masuks.tanggal_invoice_keluar 
+                                        THEN bki.qty 
+                                        ELSE 0 
+                                    END
+                                WHEN customers.type_payment_customer = "Pertanggal Masuk" THEN 
+                                    CASE 
+                                        WHEN barang_keluars.tanggal_keluar > ir.tanggal_masuk_penimbunan 
+                                        THEN bki.qty 
+                                        ELSE 0 
+                                    END
+                                ELSE 0
+                            END
+                        ) AS total_qty_reporting
+                    FROM 
+                        barang_keluar_items bki
+                    JOIN 
+                        barang_keluars ON bki.barang_keluar_id = barang_keluars.id
+                    JOIN 
+                        barang_masuks ON bki.barang_masuk_id = barang_masuks.id
+                    JOIN 
+                        invoices_reporting ir ON barang_keluars.id = ir.barang_keluars_id AND ir.job_number IS NOT NULL
+                    JOIN 
+                        customers ON barang_masuks.customer_id = customers.id
+                    WHERE 
+                        ir.tanggal_masuk_penimbunan >= DATE_SUB(barang_masuks.tanggal_invoice_keluar, INTERVAL 2 MONTH) 
+                    GROUP BY 
+                        bki.barang_masuk_id
+                ) AS total_keluar_invoices_reporting'),
                 'barang_masuks.id',
                 '=',
                 'total_keluar_invoices_reporting.barang_masuk_id'
             )
+            
             
             ->leftJoin(
                 DB::raw('(
@@ -412,7 +420,6 @@ class InvoiceGeneratedController extends Controller
                         ->where('barang_masuks.id', $invoice->barang_masuks_id)
                         ->first();
 
-                                    // dd($totalQtyKeluarBarang);
                         if ($totalQtyKeluarBarang) {
                             if ($totalQtyKeluarBarang->total_qty_masuk === $totalQtyKeluarBarang->total_sisa) {
                                 $hargaSimpanBarang = $barangMasuk->harga_simpan_barang;
@@ -442,6 +449,8 @@ class InvoiceGeneratedController extends Controller
                         $tanggalKeluar = $barangKeluar->tanggal_tagihan_keluar ?? null;
                         $jocNumber = $barangKeluar->nomer_surat_jalan ?? null;
                         $nomerContainer = $barangKeluar->nomer_container ?: ($barangKeluar->nomer_polisi ?? null);
+                        $tanggalMasukPenimbunanInvoiceData = $barangMasuk->tanggal_invoice_masuk ?? null;
+                        $tanggalKeluarPenimbunanInvoiceData = $barangMasuk->tanggal_invoice_keluar ?? null;
                         $typeMobil = DB::table('type_mobil')
                             ->where('id', $barangKeluar->type_mobil_id)
                             ->value('type') ?? null;
@@ -455,16 +464,8 @@ class InvoiceGeneratedController extends Controller
 
                 $tanggalFinal = $tanggalMasuk ?? $tanggalKeluar ?? $invoice->tanggal_masuk ?? null;
 
-                // $customer_initial = DB::table('customers')
-                //     ->join('warehouses', 'customers.warehouse_id', '=', 'warehouses.id')
-                //     ->where('customers.id', isset($barangMasuk) ? $barangMasuk->customer_id : (isset($barangKeluar) ? $barangKeluar->customer_id : null))
-                //     ->value('warehouses.initial');
+                $currentTimestamp = now();
 
-                // $initial = $customer_initial ?? 'ACL';
-
-                $currentTimestamp = now(); // Get the current timestamp
-
-                // Replace the latestJoc query to use the invoice number pattern
                 $latestJoc = DB::table('invoices_reporting')
                     ->where('nomer_invoice', 'like', "ATS/INV/{$year}/{$monthRoman}/%")
                     ->orderBy('nomer_invoice', 'desc')
@@ -473,19 +474,15 @@ class InvoiceGeneratedController extends Controller
                 if ($latestJoc) {
                     $lastInvoiceTime = \Carbon\Carbon::parse($latestJoc->created_at);
 
-                    // Check if the last invoice's timestamp is in the same minute and second
                     if ($lastInvoiceTime->isSameMinute($currentTimestamp) && $lastInvoiceTime->second === $currentTimestamp->second) {
-                        // Reuse the last invoice number
                         $nomerGenerad = $latestJoc->nomer_invoice;
                         $reuseInvoice = true;
                     } else {
-                        // Generate a new invoice number
                         $lastNumber = (int)substr($latestJoc->nomer_invoice, -3);
                         $newNumber = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
                         $nomerGenerad = "ATS/INV/{$year}/{$monthRoman}/{$newNumber}";
                     }
                 } else {
-                    // No previous invoice found, start with the first number
                     $nomerGenerad = "ATS/INV/{$year}/{$monthRoman}/001";
                 }
 
@@ -527,8 +524,6 @@ class InvoiceGeneratedController extends Controller
                         'created_at' => now(),
                         'updated_at' => now(),
                     ]);
-
-                    // dd($totalQtyKeluarBarang->total_sisa,  $hargaSimpanBarang);
 
                     if (!empty($hargaLembur) && $hargaLembur > 0) {
                         DB::table('invoices_reporting')->insert([
@@ -735,7 +730,6 @@ LEFT JOIN
         ORDER BY barang_keluars.tanggal_keluar DESC;
     ";
 
-        // Execute the SQL query with the provided invoice number
         $invoiceMaster = DB::select($sql, [$nomer_invoice]);
 
         if (empty($invoiceMaster)) {
@@ -746,7 +740,6 @@ LEFT JOIN
 
         session(['invoiceMaster' => $invoiceMaster]);
 
-        // return view('data-invoice.invoice-master.show', compact('invoiceMaster'));
         return redirect()->route('data-invoice.invoice-master.display');
     }
 
@@ -764,19 +757,17 @@ LEFT JOIN
                 return redirect()->route('data-invoice.invoice-master.index')->with('error', 'No invoice data available.');
             }
 
-            $warehouses = Warehouse::all(); // Get all warehouses
+            $warehouses = Warehouse::all();
             $headOffice = $warehouses->where('status_office', 'head_office')->first();
             $branchOffices = $warehouses->where('status_office', 'branch_office');
 
-
-            // Show the view with the invoice data
             return view('data-invoice.invoice-master.show', compact('invoiceMaster', 'headOffice', 'branchOffices'));
         }
     }
 
     public function download($id)
     {
-        $invoice = Invoice::find($id); // Replace with your actual model and logic
+        $invoice = Invoice::find($id);
 
         $invoiceMaster = session('invoiceMaster');
 
@@ -784,12 +775,10 @@ LEFT JOIN
             return redirect()->route('data-invoice.invoice-master.index')->with('error', 'No invoice data available.');
         }
 
-        $warehouses = Warehouse::all(); // Get all warehouses
+        $warehouses = Warehouse::all();
         $headOffice = $warehouses->where('status_office', 'head_office')->first();
         $branchOffices = $warehouses->where('status_office', 'branch_office');
 
-
-        // Generate PDF
         $pdf = PDF::loadView('data-invoice.invoice-master.pdf', compact('invoice', 'invoiceMaster', 'headOffice', 'branchOffices')); // Ensure the view exists
         return $pdf->download('invoice_' . $id . '.pdf');
     }
