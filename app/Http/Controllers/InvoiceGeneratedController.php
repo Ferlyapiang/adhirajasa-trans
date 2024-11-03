@@ -68,20 +68,66 @@ class InvoiceGeneratedController extends Controller
                 'barang_masuks.customer_id',
                 'customers_masuks.name AS customer_masuk_name',
                 'customers_masuks.type_payment_customer AS type_payment_customer_masuk',
-                DB::raw('COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar_reporting.total_qty, 0) AS total_qty_masuk'),
-                DB::raw('COALESCE(total_keluar_invoices.total_qty, 0) + COALESCE(total_keluar_invoices_reporting.total_qty_reporting, 0) AS total_qty_keluar'),
-                DB::raw('(COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar_reporting.total_qty, 0)) -  (COALESCE(total_keluar_invoices.total_qty, 0) + COALESCE(total_keluar_invoices_reporting.total_qty_reporting, 0)) AS total_sisa'),
+                // DB::raw('COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar_reporting.total_qty, 0) AS total_qty_masuk'),
                 DB::raw('
-                            CASE
-                                WHEN COALESCE(total_items.total_qty, 0) = 
-                                    (COALESCE(total_items.total_qty, 0) - 
-                                    (COALESCE(total_keluar_invoices.total_qty, 0) + COALESCE(total_keluar_invoices_reporting.total_qty_reporting, 0) + COALESCE(total_keluar_reporting.total_qty, 0)))
-                                THEN barang_masuks.harga_simpan_barang
-                                ELSE ((COALESCE(total_items.total_qty, 0) - 
-                                    (COALESCE(total_keluar_invoices.total_qty, 0) + COALESCE(total_keluar_invoices_reporting.total_qty_reporting, 0) + COALESCE(total_keluar_reporting.total_qty, 0))) 
-                                    / COALESCE(total_items.total_qty, 0)) * barang_masuks.harga_simpan_barang
-                            END AS total_harga_simpan
-                        '),
+                    COALESCE(
+                        (SELECT DISTINCT 
+                            ir.qty
+                        FROM 
+                            invoices_reporting ir
+                        WHERE 
+                            ir.qty = (
+                                SELECT MIN(qty) 
+                                FROM invoices_reporting
+                            )
+                        LIMIT 1), 
+                    COALESCE(total_items.total_qty, 0)
+                    ) AS total_qty_masuk
+                '),
+
+                DB::raw('COALESCE(total_keluar_invoices.total_qty, 0) + COALESCE(total_keluar_invoices_reporting.total_qty_reporting, 0) AS total_qty_keluar'),
+                // DB::raw('(COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar_reporting.total_qty, 0)) -  (COALESCE(total_keluar_invoices.total_qty, 0) + COALESCE(total_keluar_invoices_reporting.total_qty_reporting, 0)) AS total_sisa'),
+                DB::raw('COALESCE(
+                        (SELECT DISTINCT 
+                            ir.qty
+                        FROM 
+                            invoices_reporting ir
+                        WHERE 
+                            ir.qty = (
+                                SELECT MIN(qty) 
+                                FROM invoices_reporting
+                            )
+                        LIMIT 1), 
+                    COALESCE(total_items.total_qty, 0)
+                    )  -  (COALESCE(total_keluar_invoices.total_qty, 0) + COALESCE(total_keluar_invoices_reporting.total_qty_reporting, 0)) AS total_sisa'),
+                    DB::raw('
+                    CASE
+                        WHEN COALESCE(total_items.total_qty, 0) = 
+                            (COALESCE(total_items.total_qty, 0) - 
+                            (COALESCE(total_keluar_invoices.total_qty, 0) + 
+                             COALESCE(total_keluar_invoices_reporting.total_qty_reporting, 0) + 
+                             COALESCE(total_keluar_reporting.total_qty, 0)))
+                        THEN 
+                            barang_masuks.harga_simpan_barang
+                        ELSE 
+                            (
+                                COALESCE(
+                                    (SELECT DISTINCT 
+                                        ir.qty
+                                    FROM 
+                                        invoices_reporting ir
+                                    WHERE 
+                                        ir.qty = (
+                                            SELECT MIN(qty) 
+                                            FROM invoices_reporting
+                                        )
+                                    LIMIT 1), 
+                                0)  
+                            ) / COALESCE(total_items.total_qty, 1) * 
+                            barang_masuks.harga_simpan_barang
+                    END AS total_harga_simpan
+                '),
+                
                 DB::raw('
                             COALESCE(
                                     CASE 
