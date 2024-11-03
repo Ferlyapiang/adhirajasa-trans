@@ -510,14 +510,34 @@ class InvoiceGeneratedController extends Controller
                             'barang_masuks.id AS barang_masuk_id',
                             // Ini total masuk QTY
                             DB::raw('COALESCE(total_items.total_qty, 0) AS total_qty_masuk'),
-                            // Ini total keluar QTY Reporting
-                            DB::raw('COALESCE(total_keluar_reporting.total_qty, 0) AS total_qty_keluar_reporting'),
-                            // Ini total keluar QTY Master
-                            DB::raw('COALESCE(total_keluar_invoices.total_qty, 0) + COALESCE(total_keluar_invoices_reporting.total_qty_reporting, 0) AS total_qty_keluar_invoices'),
-                            // Ini total sisa di kurangin
-                            DB::raw('COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar_reporting.total_qty, 0) AS total_qty_masuk_total'),
+
+                            DB::raw('COALESCE(
+                                        (SELECT DISTINCT 
+                                            ir.qty
+                                        FROM 
+                                            invoices_reporting ir
+                                        WHERE 
+                                            ir.qty = (
+                                                SELECT MIN(qty) 
+                                                FROM invoices_reporting
+                                            )
+                                        LIMIT 1), 
+                                    COALESCE(total_items.total_qty, 0)
+                                    )  AS total_qty_masuk_total'),
                             // Ini total sisa SEMUA
-                            DB::raw('(COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar_reporting.total_qty, 0)) -  (COALESCE(total_keluar_invoices.total_qty, 0) + COALESCE(total_keluar_invoices_reporting.total_qty_reporting, 0)) AS total_sisa')
+                            DB::raw('COALESCE(
+                        (SELECT DISTINCT 
+                            ir.qty
+                        FROM 
+                            invoices_reporting ir
+                        WHERE 
+                            ir.qty = (
+                                SELECT MIN(qty) 
+                                FROM invoices_reporting
+                            )
+                        LIMIT 1), 
+                    COALESCE(total_items.total_qty, 0)
+                    )  -  (COALESCE(total_keluar_invoices.total_qty, 0) + COALESCE(total_keluar_invoices_reporting.total_qty_reporting, 0)) AS total_sisa')
                         )
                         ->where('barang_masuks.id', $invoice->barang_masuks_id)
                         ->first();
