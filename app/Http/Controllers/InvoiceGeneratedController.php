@@ -213,6 +213,8 @@ class InvoiceGeneratedController extends Controller
                 '=',
                 'total_keluar_reporting.barang_masuk_id'
             );
+
+           
             
 
         if (!$user) {

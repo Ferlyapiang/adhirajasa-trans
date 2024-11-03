@@ -447,14 +447,14 @@ class BarangKeluarController extends Controller
                     if ($tanggalKeluar->lessThan($tanggalTagihan)) {
                     
                         $tanggalTagihanKeluar = $tanggalKeluar->copy()->startOfMonth()->addDays(2)->addMonths(2)->format('Y-m-d');
-                        dd($tanggalKeluar, $tanggalTagihan, "Akhir Bulan - Case 1: " . $tanggalTagihanKeluar);
+                        //dd($tanggalKeluar, $tanggalTagihan, "Akhir Bulan - Case 1: " . $tanggalTagihanKeluar);
                     } else {
                         $tanggalTagihanKeluar = $tanggalKeluar->copy()->addMonthsNoOverflow(1)->startOfMonth()->addDays(2)->format('Y-m-d');
-                        dd($tanggalKeluar, $tanggalTagihan, "Akhir Bulan - Case 2: " . $tanggalTagihanKeluar);
+                        //dd($tanggalKeluar, $tanggalTagihan, "Akhir Bulan - Case 2: " . $tanggalTagihanKeluar);
                     }
                 } elseif ($customer->type_payment_customer === 'Pertanggal Masuk') {
                     $tanggalTagihanKeluar = $tanggalKeluar->copy()->addMonthsNoOverflow(1)->startOfMonth()->addDays(2)->format('Y-m-d');
-                    dd($tanggalKeluar, $tanggalTagihan, "Pertanggal Masuk: " . $tanggalTagihanKeluar);
+                    //dd($tanggalKeluar, $tanggalTagihan, "Pertanggal Masuk: " . $tanggalTagihanKeluar);
                 }
             }
         }
