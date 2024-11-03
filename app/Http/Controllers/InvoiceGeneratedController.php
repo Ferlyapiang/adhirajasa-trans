@@ -69,16 +69,16 @@ class InvoiceGeneratedController extends Controller
                 'customers_masuks.name AS customer_masuk_name',
                 'customers_masuks.type_payment_customer AS type_payment_customer_masuk',
                 DB::raw('COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar_reporting.total_qty, 0) AS total_qty_masuk'),
-                DB::raw('COALESCE(total_keluar_invoices.total_qty, 0) AS total_qty_keluar'),
-                DB::raw('(COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar_reporting.total_qty, 0)) -  COALESCE(total_keluar_invoices.total_qty, 0) AS total_sisa'),
+                DB::raw('COALESCE(total_keluar_invoices.total_qty, 0) + COALESCE(total_keluar_invoices_reporting.total_qty_reporting, 0) AS total_qty_keluar'),
+                DB::raw('(COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar_reporting.total_qty, 0)) -  (COALESCE(total_keluar_invoices.total_qty, 0) + COALESCE(total_keluar_invoices_reporting.total_qty_reporting, 0)) AS total_sisa'),
                 DB::raw('
                             CASE
                                 WHEN COALESCE(total_items.total_qty, 0) = 
                                     (COALESCE(total_items.total_qty, 0) - 
-                                    (COALESCE(total_keluar_invoices.total_qty, 0) + COALESCE(total_keluar_reporting.total_qty, 0)))
+                                    (COALESCE(total_keluar_invoices.total_qty, 0) + COALESCE(total_keluar_invoices_reporting.total_qty_reporting, 0) + COALESCE(total_keluar_reporting.total_qty, 0)))
                                 THEN barang_masuks.harga_simpan_barang
                                 ELSE ((COALESCE(total_items.total_qty, 0) - 
-                                    (COALESCE(total_keluar_invoices.total_qty, 0) + COALESCE(total_keluar_reporting.total_qty, 0))) 
+                                    (COALESCE(total_keluar_invoices.total_qty, 0) + COALESCE(total_keluar_invoices_reporting.total_qty_reporting, 0) + COALESCE(total_keluar_reporting.total_qty, 0))) 
                                     / COALESCE(total_items.total_qty, 0)) * barang_masuks.harga_simpan_barang
                             END AS total_harga_simpan
                         '),
@@ -151,6 +151,41 @@ class InvoiceGeneratedController extends Controller
                 '=',
                 'total_keluar_invoices.barang_masuk_id'
             )
+
+            ->leftJoin(
+                DB::raw('(
+                    SELECT 
+                            bki.barang_masuk_id, 
+                            SUM(
+                                CASE 
+                                    WHEN customers.type_payment_customer = "Akhir Bulan" THEN 
+                                        CASE 
+                                            WHEN barang_keluars.tanggal_keluar < barang_masuks.tanggal_invoice_keluar 
+                                            THEN bki.qty 
+                                            ELSE 0 
+                                        END
+                                    WHEN customers.type_payment_customer = "Pertanggal Masuk" THEN 
+                                        CASE 
+                                            WHEN barang_keluars.tanggal_keluar > ir.tanggal_masuk_penimbunan 
+                                            THEN bki.qty 
+                                            ELSE 0 
+                                        END
+                                    ELSE 0
+                                END
+                            ) AS total_qty_reporting
+                        FROM barang_keluar_items bki
+                        JOIN barang_keluars ON bki.barang_keluar_id = barang_keluars.id
+                        JOIN barang_masuks ON bki.barang_masuk_id = barang_masuks.id
+                        JOIN invoices_reporting ir ON barang_keluars.id = ir.barang_keluars_id AND ir.job_number IS NOT NULL
+                        JOIN customers ON barang_masuks.customer_id = customers.id
+                        GROUP BY bki.barang_masuk_id
+
+                    ) AS total_keluar_invoices_reporting'),
+                'barang_masuks.id',
+                '=',
+                'total_keluar_invoices_reporting.barang_masuk_id'
+            )
+            
             ->leftJoin(
                 DB::raw('(
                     SELECT 
@@ -181,7 +216,7 @@ class InvoiceGeneratedController extends Controller
         $invoiceMaster = $invoiceMaster
             ->whereNull('invoices.nomer_invoice')
             ->where('invoices.tanggal_masuk', '<=', DB::raw('LAST_DAY(CURDATE())'))
-            ->whereRaw('COALESCE(total_items.total_qty, 0) - (COALESCE(total_keluar_invoices.total_qty, 0) + COALESCE(total_keluar_reporting.total_qty, 0)) > 0
+            ->whereRaw('COALESCE(total_items.total_qty, 0) - (COALESCE(total_keluar_invoices.total_qty, 0) + COALESCE(total_keluar_invoices_reporting.total_qty_reporting, 0) + COALESCE(total_keluar_reporting.total_qty, 0)) > 0
         OR (
             (COALESCE(barang_keluars.harga_lembur, 0)) >= 0
             OR (CASE 
