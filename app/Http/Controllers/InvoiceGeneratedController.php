@@ -277,9 +277,21 @@ class InvoiceGeneratedController extends Controller
         $invoiceMaster = $invoiceMaster
             ->whereNull('invoices.nomer_invoice')
             ->where('invoices.tanggal_masuk', '<=', DB::raw('LAST_DAY(CURDATE())'))
-            ->whereRaw('COALESCE(total_items.total_qty, 0) - (COALESCE(total_keluar_invoices.total_qty, 0) + COALESCE(total_keluar_invoices_reporting.total_qty_reporting, 0) + COALESCE(total_keluar_reporting.total_qty, 0)) > 0
+            ->whereRaw('COALESCE(
+                        (SELECT min_qties.min_qty
+                        FROM invoices_reporting ir
+                        JOIN (
+                            SELECT barang_masuks_id, MIN(qty) AS min_qty
+                            FROM invoices_reporting
+                            GROUP BY barang_masuks_id
+                        ) AS min_qties 
+                        ON ir.barang_masuks_id = min_qties.barang_masuks_id
+                        WHERE ir.barang_masuks_id = invoices.barang_masuks_id
+                        LIMIT 1), 
+                    COALESCE(total_items.total_qty, 0)
+                    )  -  (COALESCE(total_keluar_invoices.total_qty, 0) + COALESCE(total_keluar_invoices_reporting.total_qty_reporting, 0)) > 0
         OR (
-            (COALESCE(barang_keluars.harga_lembur, 0)) >= 0
+            (COALESCE(barang_keluars.harga_lembur, 0)) > 0
             OR (CASE 
                 WHEN customers_masuks.type_payment_customer = "Akhir Bulan" 
                     AND YEAR(barang_masuks.tanggal_masuk) = YEAR(barang_masuks.tanggal_tagihan_masuk)
