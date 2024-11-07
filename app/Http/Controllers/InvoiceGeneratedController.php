@@ -248,35 +248,34 @@ class InvoiceGeneratedController extends Controller
                         LIMIT 1), 
                     COALESCE(total_items.total_qty, 0)
                     )  -  (COALESCE(total_keluar_invoices.total_qty, 0) + COALESCE(total_keluar_invoices_reporting.total_qty_reporting, 0)) > 0
-        OR (
-            (COALESCE(barang_keluars.harga_lembur, 0)) >= 0
-            OR (CASE 
-                WHEN customers_masuks.type_payment_customer = "Akhir Bulan" 
-                    AND YEAR(barang_masuks.tanggal_masuk) = YEAR(barang_masuks.tanggal_tagihan_masuk)
-                    AND MONTH(barang_masuks.tanggal_masuk) = MONTH(barang_masuks.tanggal_tagihan_masuk)
-                THEN barang_masuks.harga_lembur
-                WHEN customers_masuks.type_payment_customer = "Pertanggal Masuk" 
-                    AND barang_masuks.tanggal_tagihan_masuk <= DATE_ADD(barang_masuks.tanggal_masuk, INTERVAL 1 MONTH)
-                THEN barang_masuks.harga_lembur
-                ELSE 0
-            END) > 0
-        )
-        OR COALESCE(barang_keluars.harga_kirim_barang,0) > 0
+                OR (
+                    (COALESCE(barang_keluars.harga_lembur, 0)) > 0
+                    OR (CASE 
+                        WHEN customers_masuks.type_payment_customer = "Akhir Bulan" 
+                            AND YEAR(barang_masuks.tanggal_masuk) = YEAR(barang_masuks.tanggal_tagihan_masuk)
+                            AND MONTH(barang_masuks.tanggal_masuk) = MONTH(barang_masuks.tanggal_tagihan_masuk)
+                        THEN barang_masuks.harga_lembur
+                        WHEN customers_masuks.type_payment_customer = "Pertanggal Masuk" 
+                            AND barang_masuks.tanggal_tagihan_masuk <= DATE_ADD(barang_masuks.tanggal_masuk, INTERVAL 1 MONTH)
+                        THEN barang_masuks.harga_lembur
+                        ELSE 0
+                    END) > 0
+                    OR COALESCE(barang_keluars.harga_kirim_barang,0) > 0
+                )
+                OR invoices.barang_keluars_id IS NOT NULL
+        
     ');
 
         $invoiceMaster = $invoiceMaster->orderBy('barang_keluars.tanggal_keluar', 'asc')->get();
 
         $owners = $invoiceMaster->map(function ($item) {
             return $item->customer_masuk_name ?: $item->customer_keluar_name;
-        })
-            ->unique()
-            ->values();
-
+        })->unique()->values();
+        
+        // Mapping tanggalTagihans based on (potentially) filtered $invoiceMaster
         $tanggalTagihans = $invoiceMaster->map(function ($item) {
             return $item->tanggal_tagihan_masuk ?? $item->tanggal_tagihan_keluar;
-        })
-            ->unique()
-            ->values();
+        })->unique()->values();
 
         foreach ($invoiceMaster as $invoice) {
             $totalSisa = DB::table('invoices')
@@ -311,6 +310,7 @@ class InvoiceGeneratedController extends Controller
                 ->update(['total_qty' => $totalSisa ?? 0]); // Ensure null fallback is handled as 0 or appropriate value
         }
 
+        // dd($invoiceMaster);
 
         return view('data-invoice.invoice-master.index', compact('invoiceMaster', 'owners', 'tanggalTagihans'));
     }
@@ -382,6 +382,7 @@ class InvoiceGeneratedController extends Controller
 
                         $totalQtyKeluarBarang = DB::table('invoices')
                             ->select(
+                                'invoices.barang_keluars_id',
                                 DB::raw('COALESCE(total_items.total_qty, 0) AS total_qty_masuk'),
 
                 DB::raw('COALESCE(total_keluar_invoices_reporting.total_qty_reporting, 0) AS total_qty_keluar'),
@@ -606,7 +607,10 @@ class InvoiceGeneratedController extends Controller
                         'diskon' => $invoice->diskon ?? null,
                         'tanggal_masuk_penimbunan' => $tanggalMasukPenimbunanInvoiceData ?? $tanggalMasukPenimbunan ?? null,
                         'tanggal_keluar_penimbunan' => $tanggalKeluarPenimbunanInvoiceData ?? $tanggalKeluarPenimbunan ?? null,
-                        'harga_simpan_barang' => $totalQtyKeluarBarang->total_harga_simpan ?? null,
+                        'harga_simpan_barang' => $invoice->barang_keluars_id === null 
+                        ? ($totalQtyKeluarBarang->total_harga_simpan ?? null)
+                        : null,
+
                         'harga_kirim_barang' => $hargaKirimBarang ?? null,
                         'created_at' => now(),
                         'updated_at' => now(),

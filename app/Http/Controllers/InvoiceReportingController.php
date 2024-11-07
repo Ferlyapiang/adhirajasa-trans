@@ -191,7 +191,7 @@ class InvoiceReportingController extends Controller
         WHERE 
             invoices_reporting.nomer_invoice = ?
             AND (
-                (COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0)) > 0 
+                (COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0)) >= 0 
                 OR (
                     COALESCE(barang_keluars.harga_lembur, 0) > 0
                     OR (
@@ -208,7 +208,8 @@ class InvoiceReportingController extends Controller
                     ) > 0
                 )
                 OR COALESCE(barang_keluars.harga_kirim_barang, 0) > 0
-            )";
+            )
+            AND (invoices_reporting.harga_simpan_barang IS NOT NULL )";
 
         // Execute the SQL query with the provided invoice number
         $invoiceMaster = DB::select($sql, [$nomer_invoice]);

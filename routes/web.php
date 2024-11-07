@@ -191,8 +191,12 @@ Route::post('/invoices/generate', [InvoiceGeneratedController::class, 'generateI
 Route::post('/invoices', [InvoiceGeneratedController::class, 'show'])->name('invoices.show');
 Route::get('/data-invoice/invoice-master/display', [InvoiceGeneratedController::class, 'display'])->name('data-invoice.invoice-master.display');
 Route::get('/invoice/download/{id}', [InvoiceGeneratedController::class, 'download'])->name('invoice.download');
+Route::get('/filter-tanggal-tagihans', [InvoiceGeneratedController::class, 'filterTanggalTagihans']);
+
 
 Route::get('/data-reporting-invoice/invoice-reporting', [InvoiceReportingController::class, 'index'])->name('data-invoice.invoice-reporting.index');
 Route::post('/data-reporting-invoice', [InvoiceReportingController::class, 'show'])->name('invoices-report.show');
 Route::get('/data-reporting-invoice/invoice-reporting/display', [InvoiceReportingController::class, 'display'])->name('data-invoice.invoice-reporting.display');
 Route::get('/data-reporting-invoice/invoice-reporting/download/{id}', [InvoiceReportingController::class, 'download'])->name('invoice-report.download');
+
+

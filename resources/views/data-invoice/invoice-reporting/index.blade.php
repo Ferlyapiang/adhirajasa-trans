@@ -19,6 +19,20 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.3/css/jquery.dataTables.min.css">
 </head>
 
+    <style>
+        .select2-selection__rendered {
+            line-height: 2.5 !important;
+        }
+
+        .select2-container .select2-selection--single {
+            height: 50px !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 50px !important;
+        }
+    </style>
+
 <body class="hold-transition sidebar-mini">
     <div class="wrapper">
         <!-- Navbar -->
@@ -162,20 +176,32 @@
     <!-- xlxs library for exporting Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.6/xlsx.full.min.js"></script>
 
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
     <!-- Page-specific script -->
     <script>
         $(document).ready(function() {
             // Initialize DataTable
             var table = $('#barangMasukTable').DataTable();
-            $('#ownerNameFilter').on('change', function() {
-                var selectedOwner = $(this).val(); // Get selected value
-                // Custom search function to filter by customer_name
-                table.column(4).search(selectedOwner).draw();
+
+            $('#ownerNameFilter').select2({
+                placeholder: "Pilih Pemilik", // Optional placeholder
+                allowClear: true // Optional to allow clearing the selection
+            }).on('change', function() {
+                var filterValue = $(this).val();
+                table.column(4).search(filterValue).draw();
+                calculateTotals(); // Hitung ulang total setelah filter diterapkan
+                updateSelectAllCheckboxState(); // Periksa ulang state checkbox
             });
-            $('#tanggalTagihanFilter').on('change', function() {
-                var selectedtanggalTagihan = $(this).val(); // Get selected value
-                // Custom search function to filter by customer_name
-                table.column(2).search(selectedtanggalTagihan).draw();
+
+            $('#tanggalTagihanFilter').select2({
+                placeholder: "Pilih Tanggal Tagihan", // Optional placeholder
+                allowClear: true // Optional to allow clearing the selection
+            }).on('change', function() {
+                var filterValue = $(this).val();
+                table.column(2).search(filterValue).draw();
+                updateSelectAllCheckboxState(); // Periksa ulang state checkbox
             });
 
         });

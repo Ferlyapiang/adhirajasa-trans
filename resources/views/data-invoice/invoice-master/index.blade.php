@@ -20,9 +20,20 @@
 
     <!-- xlxs library for exporting Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.6/xlsx.full.min.js"></script>
+    <style>
+        .select2-selection__rendered {
+            line-height: 2.5 !important;
+        }
 
+        .select2-container .select2-selection--single {
+            height: 50px !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 50px !important;
+        }
+    </style>
 </head>
-
 <body class="hold-transition sidebar-mini">
     <div class="wrapper">
         <!-- Navbar -->
@@ -60,7 +71,7 @@
                                 </div>
                             </div>
                             <div class="card-body">
-                                <div class="row mb-3">
+                                <div class="row mb-">
                                     <div class="col-md-3">
                                         <label for="ownerNameFilter">Nama Pemilik:</label>
                                         <select id="ownerNameFilter" class="form-control">
@@ -194,6 +205,10 @@
     <!-- AdminLTE App -->
     <script src="{{ asset('lte/dist/js/adminlte.min.js') }}"></script>
 
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
+
     <!-- Page-specific script -->
     <script>
         $(document).ready(function() {
@@ -216,19 +231,25 @@
                     $('.invoiceCheckbox').prop('checked', false).prop('disabled', true);
                 }
             }
-
-            $('#ownerNameFilter').on('change', function() {
+            $('#ownerNameFilter').select2({
+                placeholder: "Pilih Pemilik",
+                allowClear: true 
+            }).on('change', function() {
                 var filterValue = $(this).val();
                 table.column(6).search(filterValue).draw();
-                calculateTotals(); // Hitung ulang total setelah filter diterapkan
-                updateSelectAllCheckboxState(); // Periksa ulang state checkbox
+                calculateTotals();
+                updateSelectAllCheckboxState();
             });
 
-            $('#tanggalTagihanFilter').on('change', function() {
+            $('#tanggalTagihanFilter').select2({
+                placeholder: "Pilih Tanggal Tagihan", // Optional placeholder
+                allowClear: true // Optional to allow clearing the selection
+            }).on('change', function() {
                 var filterValue = $(this).val();
                 table.column(2).search(filterValue).draw();
                 updateSelectAllCheckboxState(); // Periksa ulang state checkbox
             });
+
 
             $('#selectAllCheckbox').on('change', function() {
                 var isChecked = $(this).is(':checked');
