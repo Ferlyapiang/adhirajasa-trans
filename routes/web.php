@@ -68,7 +68,7 @@ Route::get('logs', [ReportLogController::class, 'index'])->name('logs.index');
 //     'index' => 'master-data.customers.index',
 // ]);
 
-Route::resource('master-data/customers', CustomerController::class)->names([
+Route::resource('public/master-data/customers', CustomerController::class)->names([
     'index' => 'master-data.customers.index',
     'create' => 'master-data.customers.create',
     'store' => 'master-data.customers.store',
@@ -196,6 +196,3 @@ Route::get('/data-reporting-invoice/invoice-reporting', [InvoiceReportingControl
 Route::post('/data-reporting-invoice', [InvoiceReportingController::class, 'show'])->name('invoices-report.show');
 Route::get('/data-reporting-invoice/invoice-reporting/display', [InvoiceReportingController::class, 'display'])->name('data-invoice.invoice-reporting.display');
 Route::get('/data-reporting-invoice/invoice-reporting/download/{id}', [InvoiceReportingController::class, 'download'])->name('invoice-report.download');
-
-
-
