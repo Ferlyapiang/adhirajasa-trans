@@ -15,98 +15,84 @@ class InvoiceReportingController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-    {
-        $user = Auth::user();
-        $currentDate = now();
-        $invoiceMaster = DB::table('invoices_reporting')
-            ->select(
-                'invoices_reporting.nomer_invoice',
-        DB::raw('MAX(invoices_reporting.tanggal_masuk) AS tanggal_tagihan'),
-        DB::raw('GROUP_CONCAT(DISTINCT barang_masuks.joc_number SEPARATOR ", ") AS joc_number'),
-        DB::raw('GROUP_CONCAT(DISTINCT barang_keluars.nomer_surat_jalan SEPARATOR ", ") AS nomer_surat_jalan'),
-        DB::raw('MAX(invoices_reporting.tanggal_masuk_penimbunan) AS tanggal_masuk_penimbunan'),
-        DB::raw('MAX(invoices_reporting.tanggal_keluar_penimbunan) AS tanggal_keluar_penimbunan'),
-        DB::raw('MAX(invoices_reporting.tanggal_masuk) AS tanggal_masuk'),
-        DB::raw('COALESCE(MAX(barang_masuks.gudang_id), MAX(barang_keluars.gudang_id)) AS gudang_id'),
-        DB::raw('COALESCE(MAX(warehouses_masuks.name), MAX(warehouses_keluars.name)) AS warehouse_name'),
-        DB::raw('COALESCE(MAX(barang_masuks.customer_id), MAX(barang_keluars.customer_id)) AS customer_id'),
-        DB::raw('COALESCE(MAX(customers_masuks.name), MAX(customers_keluars.name)) AS customer_name'),
-        DB::raw('COALESCE(MAX(customers_masuks.type_payment_customer), MAX(customers_keluars.type_payment_customer)) AS type_payment_customer'),
-        DB::raw('COALESCE(MAX(total_items.total_qty), 0) AS total_qty_masuk'),
-        DB::raw('COALESCE(MAX(invoices_reporting.qty), 0) AS total_sisa'),
-        DB::raw('SUM(invoices_reporting.harga_lembur) AS harga_lembur'),
-        DB::raw('MAX(invoices_reporting.harga_simpan_barang) AS harga_simpan_barang'),
-        DB::raw('MAX(invoices_reporting.harga_kirim_barang) AS harga_kirim_barang')
-    )
-    ->leftJoin('barang_masuks', 'invoices_reporting.barang_masuks_id', '=', 'barang_masuks.id')
-    ->leftJoin('barang_keluars', 'invoices_reporting.barang_keluars_id', '=', 'barang_keluars.id')
-    ->leftJoin('warehouses AS warehouses_masuks', 'barang_masuks.gudang_id', '=', 'warehouses_masuks.id')
-    ->leftJoin('customers AS customers_masuks', 'barang_masuks.customer_id', '=', 'customers_masuks.id')
-    ->leftJoin('warehouses AS warehouses_keluars', 'barang_keluars.gudang_id', '=', 'warehouses_keluars.id')
-    ->leftJoin('customers AS customers_keluars', 'barang_keluars.customer_id', '=', 'customers_keluars.id')
-    ->leftJoin(
-        DB::raw('(SELECT barang_masuk_id, SUM(qty) AS total_qty FROM barang_masuk_items GROUP BY barang_masuk_id) AS total_items'),
-        'barang_masuks.id',
-        '=',
-        'total_items.barang_masuk_id'
-    )
-    ->leftJoin(
-        DB::raw('(SELECT bki.barang_masuk_id, SUM(bki.qty) AS total_qty
-                  FROM barang_keluar_items bki
-                  JOIN barang_keluars ON bki.barang_keluar_id = barang_keluars.id
-                  WHERE barang_keluars.tanggal_tagihan_keluar < CURDATE()
-                  GROUP BY bki.barang_masuk_id) AS total_keluar'),
-        'barang_masuks.id',
-        '=',
-        'total_keluar.barang_masuk_id'
-    );
+{
+    $user = Auth::user();
+    $currentDate = now();
+    
+    $invoiceMaster = DB::table('invoices_reporting')
+        ->select(
+            'invoices_reporting.nomer_invoice',
+            DB::raw('MAX(invoices_reporting.tanggal_masuk) AS tanggal_tagihan'),
+            DB::raw('GROUP_CONCAT(DISTINCT barang_masuks.joc_number SEPARATOR ", ") AS joc_number'),
+            DB::raw('GROUP_CONCAT(DISTINCT barang_keluars.nomer_surat_jalan SEPARATOR ", ") AS nomer_surat_jalan'),
+            DB::raw('MAX(invoices_reporting.tanggal_masuk_penimbunan) AS tanggal_masuk_penimbunan'),
+            DB::raw('MAX(invoices_reporting.tanggal_keluar_penimbunan) AS tanggal_keluar_penimbunan'),
+            DB::raw('MAX(invoices_reporting.tanggal_masuk) AS tanggal_masuk'),
+            DB::raw('COALESCE(MAX(barang_masuks.gudang_id), MAX(barang_keluars.gudang_id)) AS gudang_id'),
+            DB::raw('COALESCE(MAX(warehouses_masuks.name), MAX(warehouses_keluars.name)) AS warehouse_name'),
+            DB::raw('COALESCE(MAX(barang_masuks.customer_id), MAX(barang_keluars.customer_id)) AS customer_id'),
+            DB::raw('COALESCE(MAX(customers_masuks.name), MAX(customers_keluars.name)) AS customer_name'),
+            DB::raw('COALESCE(MAX(customers_masuks.type_payment_customer), MAX(customers_keluars.type_payment_customer)) AS type_payment_customer'),
+            DB::raw('COALESCE(MAX(total_items.total_qty), 0) AS total_qty_masuk'),
+            DB::raw('COALESCE(MAX(invoices_reporting.qty), 0) AS total_sisa'),
+            DB::raw('SUM(CASE WHEN invoices_reporting.harga_lembur IS NOT NULL THEN invoices_reporting.harga_lembur ELSE 0 END) AS harga_lembur'),  // Perubahan disini
+            DB::raw('MAX(invoices_reporting.harga_simpan_barang) AS harga_simpan_barang'),
+            DB::raw('MAX(invoices_reporting.harga_kirim_barang) AS harga_kirim_barang')
+        )
+        ->leftJoin('barang_masuks', 'invoices_reporting.barang_masuks_id', '=', 'barang_masuks.id')
+        ->leftJoin('barang_keluars', 'invoices_reporting.barang_keluars_id', '=', 'barang_keluars.id')
+        ->leftJoin('warehouses AS warehouses_masuks', 'barang_masuks.gudang_id', '=', 'warehouses_masuks.id')
+        ->leftJoin('customers AS customers_masuks', 'barang_masuks.customer_id', '=', 'customers_masuks.id')
+        ->leftJoin('warehouses AS warehouses_keluars', 'barang_keluars.gudang_id', '=', 'warehouses_keluars.id')
+        ->leftJoin('customers AS customers_keluars', 'barang_keluars.customer_id', '=', 'customers_keluars.id')
+        ->leftJoin(
+            DB::raw('(SELECT barang_masuk_id, SUM(qty) AS total_qty FROM barang_masuk_items GROUP BY barang_masuk_id) AS total_items'),
+            'barang_masuks.id',
+            '=',
+            'total_items.barang_masuk_id'
+        )
+        ->leftJoin(
+            DB::raw('(SELECT bki.barang_masuk_id, SUM(bki.qty) AS total_qty
+                        FROM barang_keluar_items bki
+                        JOIN barang_keluars ON bki.barang_keluar_id = barang_keluars.id
+                        WHERE barang_keluars.tanggal_tagihan_keluar < CURDATE()
+                        GROUP BY bki.barang_masuk_id) AS total_keluar'),
+            'barang_masuks.id',
+            '=',
+            'total_keluar.barang_masuk_id'
+        );
 
-        if (!$user) {
-            return redirect()->route('login')->with('alert', 'Waktu login Anda telah habis, silakan login ulang.');
-        } else {
-            $invoiceMaster = $invoiceMaster->where('barang_keluars.gudang_id', $user->warehouse_id);
-        }
-
-
-        $invoiceMaster = $invoiceMaster->whereRaw('
-                COALESCE(invoices_reporting.qty, 0) > 0
-            ');
-        
-        
-        // $invoiceMaster = $invoiceMaster->whereRaw('COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0) > 0 
-        //         OR (
-        //             (COALESCE(barang_keluars.harga_lembur, 0)) > 0
-        //             OR (CASE 
-        //                 WHEN customers_masuks.type_payment_customer = "Akhir Bulan" 
-        //                     AND YEAR(barang_masuks.tanggal_masuk) = YEAR(barang_masuks.tanggal_tagihan_masuk)
-        //                     AND MONTH(barang_masuks.tanggal_masuk) = MONTH(barang_masuks.tanggal_tagihan_masuk)
-        //                 THEN barang_masuks.harga_lembur
-        //                 WHEN customers_masuks.type_payment_customer = "Pertanggal Masuk" 
-        //                     AND barang_masuks.tanggal_tagihan_masuk <= DATE_ADD(barang_masuks.tanggal_masuk, INTERVAL 1 MONTH)
-        //                 THEN barang_masuks.harga_lembur
-        //                 ELSE 0
-        //             END) > 0
-        //         )
-        //         OR COALESCE(barang_keluars.harga_kirim_barang,0) > 0
-        //     ');
-        $invoiceMaster = $invoiceMaster->groupBy('invoices_reporting.nomer_invoice');
-        $invoiceMaster = $invoiceMaster->orderBy('invoices_reporting.nomer_invoice', 'desc')->get();
-        // dd($invoiceMaster);
-        $owners = $invoiceMaster->map(function ($item) {
-            return $item->customer_name;
-        })
-            ->unique()
-            ->values();
-
-        $tanggalTagihans = $invoiceMaster->map(function ($item) {
-            return $item->tanggal_tagihan;
-        })
-            ->unique()
-            ->values();
-
-
-        return view('data-invoice.invoice-reporting.index', compact('invoiceMaster', 'owners', 'tanggalTagihans'));
+    if (!$user) {
+        return redirect()->route('login')->with('alert', 'Waktu login Anda telah habis, silakan login ulang.');
+    } else {
+        $invoiceMaster = $invoiceMaster->where('barang_keluars.gudang_id', $user->warehouse_id);
     }
+
+    // Menambahkan kondisi untuk hanya menampilkan harga lembur yang relevan
+    $invoiceMaster = $invoiceMaster->whereRaw('
+        COALESCE(invoices_reporting.harga_lembur, 0) > 0 
+        OR COALESCE(invoices_reporting.qty, 0) > 0
+    ');
+
+    $invoiceMaster = $invoiceMaster->groupBy('invoices_reporting.nomer_invoice');
+    $invoiceMaster = $invoiceMaster->orderBy('invoices_reporting.nomer_invoice', 'desc')->get();
+    dd($invoiceMaster);
+    // Mendapatkan daftar unik customer_name dan tanggal_tagihan
+    $owners = $invoiceMaster->map(function ($item) {
+        return $item->customer_name;
+    })
+        ->unique()
+        ->values();
+
+    $tanggalTagihans = $invoiceMaster->map(function ($item) {
+        return $item->tanggal_tagihan;
+    })
+        ->unique()
+        ->values();
+    
+    return view('data-invoice.invoice-reporting.index', compact('invoiceMaster', 'owners', 'tanggalTagihans'));
+}
+
 
     public function show(Request $request)
     {
@@ -190,26 +176,11 @@ class InvoiceReportingController extends Controller
         ) AS total_keluar ON barang_masuks.id = total_keluar.barang_masuk_id
         WHERE 
             invoices_reporting.nomer_invoice = ?
-            AND (
-                (COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar.total_qty, 0)) >= 0 
-                OR (
-                    COALESCE(barang_keluars.harga_lembur, 0) > 0
-                    OR (
-                        CASE 
-                            WHEN customers_masuks.type_payment_customer = 'Akhir Bulan' 
-                                AND YEAR(barang_masuks.tanggal_masuk) = YEAR(barang_masuks.tanggal_tagihan_masuk)
-                                AND MONTH(barang_masuks.tanggal_masuk) = MONTH(barang_masuks.tanggal_tagihan_masuk)
-                            THEN barang_masuks.harga_lembur
-                            WHEN customers_masuks.type_payment_customer = 'Pertanggal Masuk' 
-                                AND barang_masuks.tanggal_tagihan_masuk <= DATE_ADD(barang_masuks.tanggal_masuk, INTERVAL 1 MONTH)
-                            THEN barang_masuks.harga_lembur
-                            ELSE 0
-                        END
-                    ) > 0
-                )
-                OR COALESCE(barang_keluars.harga_kirim_barang, 0) > 0
-            )
-            AND (invoices_reporting.harga_simpan_barang IS NOT NULL )";
+           AND (
+                COALESCE(invoices_reporting.harga_lembur, 0) > 0
+                OR COALESCE(invoices_reporting.harga_simpan_barang, 0) > 0
+                OR COALESCE(invoices_reporting.harga_kirim_barang, 0) > 0
+            )";
 
         // Execute the SQL query with the provided invoice number
         $invoiceMaster = DB::select($sql, [$nomer_invoice]);
