@@ -68,7 +68,7 @@ Route::get('logs', [ReportLogController::class, 'index'])->name('logs.index');
 //     'index' => 'master-data.customers.index',
 // ]);
 
-Route::resource('public/master-data/customers', CustomerController::class)->names([
+Route::resource('/master-data/customers', CustomerController::class)->names([
     'index' => 'master-data.customers.index',
     'create' => 'master-data.customers.create',
     'store' => 'master-data.customers.store',
