@@ -17,7 +17,7 @@
     # Serve static files from the public directory if they exist
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^(css|js|images|fonts|ats|adminlte)/(.*)$ public/$1/$2 [L]
+    RewriteRule ^(css|js|images|fonts|ats|lte)/(.*)$ public/$1/$2 [L]
 
     # Send All Other Requests To The Front Controller
     RewriteCond %{REQUEST_FILENAME} !-f
