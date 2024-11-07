@@ -86,7 +86,7 @@
                         <div class="text-center mb-4">
                             <h2>Selamat Datang di <span style="color:#4169E1;">ATS Digital</span></h2>
                             <p>Masukkan Email dan password Adhirajasa Trans Sejahtera Digital untuk masuk.</p>
-                            <p>testinh</p>
+                            <p>update apiang ciyuh</p>
                         </div>
                         @if (session('alert'))
                             <div class="alert alert-warning">
