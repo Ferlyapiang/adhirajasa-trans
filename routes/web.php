@@ -13,6 +13,7 @@ use App\Http\Controllers\WarehouseController;
 use App\Http\Controllers\BarangController;
 use App\Http\Controllers\BarangMasukController;
 use App\Http\Controllers\BarangKeluarController;
+use App\Http\Controllers\BongkarMuatController;
 use App\Http\Controllers\PDFController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\GroupMenuController;
@@ -199,4 +200,7 @@ Route::post('/data-reporting-invoice', [InvoiceReportingController::class, 'show
 Route::get('/data-reporting-invoice/invoice-reporting/display', [InvoiceReportingController::class, 'display'])->name('data-invoice.invoice-reporting.display');
 Route::get('/data-reporting-invoice/invoice-reporting/download/{id}', [InvoiceReportingController::class, 'download'])->name('invoice-report.download');
 
+
+// Route::get('/data-bongkar-muat/reporting', [BongkarMuatController::class, 'index'])->name('data-bongkar-muat.bongkar-muat.index');
+Route::get('/data-bongkar-muat/reporting-data', [BongkarMuatController::class, 'index'])->name('data-bongkar-muat.getData');
 

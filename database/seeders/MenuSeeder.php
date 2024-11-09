@@ -83,7 +83,7 @@ class MenuSeeder extends Seeder
             'router' => null,
             'icon' => 'fa fa-university',
             'is_active' => 1,
-            'priority' => 5, // Priority
+            'priority' => 6, // Priority
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -91,9 +91,20 @@ class MenuSeeder extends Seeder
             'name' => 'Reporting Invoice',
             'url' => '/data-reporting-invoice/*',
             'router' => null,
-            'icon' => 'fa fa-university',
+            'icon' => 'fas fa-archway',
             'is_active' => 1,
-            'priority' => 5, // Priority
+            'priority' => 7, // Priority
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $dataBongkarMuat = DB::table('menus')->insertGetId([
+            'name' => 'Data Bongkar Muat',
+            'url' => '/data-bongkar-muat/*',
+            'router' => null,
+            'icon' => 'fas fa-chalkboard-teacher',
+            'is_active' => 1,
+            'priority' => 8, // Priority
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -293,6 +304,33 @@ class MenuSeeder extends Seeder
                 'name' => 'Reporting Invoice',
                 'url' => '/data-reporting-invoice/invoice-reporting',
                 'router' => 'data-invoice.invoice-reporting.index',
+                'icon' => 'far fa-circle',
+                'is_active' => 1,
+                'priority' => 1, // Priority untuk submenu
+                'parent_id' => $dataReportingId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        ]);
+
+        DB::table('menus')->insert([
+            [
+                'name' => 'Reporting Invoice',
+                'url' => '/data-reporting-invoice/invoice-reporting',
+                'router' => 'data-invoice.invoice-reporting.index',
+                'icon' => 'far fa-circle',
+                'is_active' => 1,
+                'priority' => 1, // Priority untuk submenu
+                'parent_id' => $dataReportingId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        ]);
+        DB::table('menus')->insert([
+            [
+                'name' => 'Report Bongkar Muat',
+                'url' => '/data-bongkar-muat/reporting-data',
+                'router' => 'data-bongkar-muat.getData',
                 'icon' => 'far fa-circle',
                 'is_active' => 1,
                 'priority' => 1, // Priority untuk submenu
