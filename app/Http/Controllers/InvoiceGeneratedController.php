@@ -229,7 +229,7 @@ class InvoiceGeneratedController extends Controller
         if (!$user) {
             return redirect()->route('login')->with('alert', 'Waktu login Anda telah habis, silakan login ulang.');
         } else {
-            $invoiceMaster = $invoiceMaster->where('barang_keluars.gudang_id', $user->warehouse_id);
+            $invoiceMaster = $invoiceMaster->where('barang_masuks.gudang_id', $user->warehouse_id);
         }
 
         $invoiceMaster = $invoiceMaster
