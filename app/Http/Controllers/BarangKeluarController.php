@@ -48,10 +48,11 @@ class BarangKeluarController extends Controller
                 ->join('barangs', 'barang_keluar_items.barang_id', '=', 'barangs.id')
                 ->join('warehouses', 'barang_keluars.gudang_id', '=', 'warehouses.id')
                 ->join('customers', 'barang_keluars.customer_id', '=', 'customers.id')
-                ->leftJoin('type_mobil', 'barang_keluars.type_mobil_id', '=', 'type_mobil.id')
-                // ->where('barang_keluars.status_invoice', 'Barang Keluar')
-                ->orderBy('barang_keluars.nomer_invoice', 'desc')
-                ->get();
+                ->leftJoin('type_mobil', 'barang_keluars.type_mobil_id', '=', 'type_mobil.id');
+                if ($user->warehouse_id !== null) {
+                    $barangKeluars = $barangKeluars->where('barang_keluars.gudang_id', $user->warehouse_id);
+                }
+                $barangKeluars = $barangKeluars->orderBy('barang_keluars.nomer_invoice', 'desc')->get();
         }
         $typeMobilOptions = JenisMobil::all();
 
@@ -447,14 +448,11 @@ class BarangKeluarController extends Controller
                     if ($tanggalKeluar->lessThan($tanggalTagihan)) {
                     
                         $tanggalTagihanKeluar = $tanggalKeluar->copy()->startOfMonth()->addDays(2)->addMonths(2)->format('Y-m-d');
-                        //dd($tanggalKeluar, $tanggalTagihan, "Akhir Bulan - Case 1: " . $tanggalTagihanKeluar);
                     } else {
                         $tanggalTagihanKeluar = $tanggalKeluar->copy()->addMonthsNoOverflow(1)->startOfMonth()->addDays(2)->format('Y-m-d');
-                        //dd($tanggalKeluar, $tanggalTagihan, "Akhir Bulan - Case 2: " . $tanggalTagihanKeluar);
                     }
                 } elseif ($customer->type_payment_customer === 'Pertanggal Masuk') {
                     $tanggalTagihanKeluar = $tanggalKeluar->copy()->addMonthsNoOverflow(1)->startOfMonth()->addDays(2)->format('Y-m-d');
-                    //dd($tanggalKeluar, $tanggalTagihan, "Pertanggal Masuk: " . $tanggalTagihanKeluar);
                 }
             }
         }

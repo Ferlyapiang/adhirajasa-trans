@@ -50,9 +50,11 @@ class BarangMasukController extends Controller
                 ->leftJoin('barang_keluar_items as bki', function ($join) {
                     $join->on('bmi.barang_masuk_id', '=', 'bki.barang_masuk_id')
                          ->whereColumn('bmi.barang_id', '=', 'bki.barang_id');
-                })
-                // ->where('bm.status_invoice', 'Barang Masuk')
-                ->groupBy(
+                });
+                if ($user->warehouse_id !== null) {
+                    $barangMasuks = $barangMasuks->where('bm.gudang_id', $user->warehouse_id);
+                }
+                $barangMasuks = $barangMasuks->groupBy(
                     'bm.id',
                     'bm.tanggal_masuk',
                     'bm.joc_number',
