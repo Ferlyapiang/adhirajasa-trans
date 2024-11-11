@@ -46,7 +46,7 @@ class CustomerController extends Controller
             'no_hp' => 'required|string',
             'type_payment_customer' => 'required|string',
             'warehouse_id' => 'required|string',
-            'email' => 'required|string|email|unique:customers',
+            'email' => 'nullable|string',
             'address' => 'required|string',
             'status' => 'required|in:active,inactive',
         ]);
@@ -87,7 +87,7 @@ class CustomerController extends Controller
             'no_hp' => 'required|string',
             'type_payment_customer' => 'required|string',
             'warehouse_id' => 'required|string',
-            'email' => 'required|string|email|unique:customers,email,' . $customer->id,
+            'email' => 'nullable|string',
             'address' => 'required|string',
             'status' => 'required|in:active,inactive',
         ]);

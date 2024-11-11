@@ -63,6 +63,27 @@
                                     <input type="text" id="no_npwp" name="no_npwp" class="form-control" value="{{ $customer->no_npwp }}">
                                 </div>
                             @endif
+
+                            @if(empty($customer->no_ktp) && empty($customer->no_npwp))
+                                <div class="mb-3">
+                                    <label for="id_selection" class="form-label">Choose Identification Type:</label>
+                                    <select id="id_selection" class="form-select" onchange="toggleFields()" required>
+                                        <option value="">-- Select --</option>
+                                        <option value="npwp">NPWP</option>
+                                        <option value="ktp">KTP</option>
+                                    </select>
+                                </div>
+
+                                <div id="npwp_field" class="mb-3" style="display:none;">
+                                    <label for="no_npwp" class="form-label">No NPWP:</label>
+                                    <input type="text" id="no_npwp" name="no_npwp" class="form-control">
+                                </div>
+
+                                <div id="ktp_field" class="mb-3" style="display:none;">
+                                    <label for="no_ktp" class="form-label">No KTP:</label>
+                                    <input type="text" id="no_ktp" name="no_ktp" class="form-control">
+                                </div>
+                            @endif
                             
                             <div class="mb-3">
                                 <label for="no_hp" class="form-label">No HP:</label>
@@ -70,7 +91,7 @@
                             </div>
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email:</label>
-                                <input type="email" id="email" name="email" class="form-control" value="{{ $customer->email }}" required>
+                                <input type="email" id="email" name="email" class="form-control" value="{{ $customer->email }}">
                             </div>
                             <div class="mb-3">
                                 <label for="address" class="form-label">Address:</label>
@@ -127,4 +148,11 @@
     <script src="{{ asset('lte/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('lte/dist/js/adminlte.min.js') }}"></script>
 </body>
+<script>
+    function toggleFields() {
+        const selection = document.getElementById('id_selection').value;
+        document.getElementById('npwp_field').style.display = selection === 'npwp' ? 'block' : 'none';
+        document.getElementById('ktp_field').style.display = selection === 'ktp' ? 'block' : 'none';
+    }
+</script>
 </html>

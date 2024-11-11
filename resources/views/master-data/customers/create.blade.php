@@ -59,7 +59,7 @@
                             </div>
                             <div class="mb-3">
                                 <label for="selection" class="form-label">Choose Identification Type:</label>
-                                <select id="id_selection" class="form-select" onchange="toggleFields()">
+                                <select id="id_selection" class="form-select" onchange="toggleFields()" required>
                                     <option value="">-- Select --</option>
                                     <option value="npwp">NPWP</option>
                                     <option value="ktp">KTP</option>
@@ -82,7 +82,7 @@
                             </div>
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email:</label>
-                                <input type="email" id="email" name="email" class="form-control" required>
+                                <input type="email" id="email" name="email" class="form-control">
                             </div>
                             <div class="mb-3">
                                 <label for="address" class="form-label">Address:</label>
