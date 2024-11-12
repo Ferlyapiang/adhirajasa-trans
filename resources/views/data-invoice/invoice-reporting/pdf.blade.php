@@ -327,48 +327,103 @@
             @endphp
 
             <tfoot>
-                @php
-                    $ppn = 0.011 * $subtotal; // 11% PPN
-                    $pph = 0.02 * $subtotal; // 2% PPH
-                    $total = $subtotal + $ppn - $pph;
-                @endphp
+            @php
+        $ppn = 0.11 * $subtotal; // 11% PPN
+        $pph = 0.02 * $subtotal; // 2% PPH
+        $total = $subtotal + $ppn - $pph - ($totalDiscount ?? 0); // Total after discount, PPN, and PPH
+    @endphp
 
-                @if (!empty($invoiceMaster[0]->customer_no_npwp))
-                    <tr>
-                        <td colspan="4" style="text-align: right;">Subtotal</td>
-                        <td>{{ number_format($subtotal) }}</td>
-                    </tr>
-                    <tr>
-                        <td colspan="4" style="text-align: right;">PPN (1.1%)</td>
-                        <td>{{ number_format($ppn) }}</td>
-                    </tr>
-                    <tr>
-                        <td colspan="4" style="text-align: right;">PPH (2%)</td>
-                        <td> - {{ number_format($pph) }} </td>
-                    </tr>
-                    <tr>
-                        <td colspan="4"
-                            style="text-align: right; font-weight: bold;">Total</td>
-                        <td style="font-weight: bold;">{{ number_format($total) }}</td>
-                    </tr>
-                    <tr>
-                        <td colspan="5"
-                            style="text-align: right; font-style: italic;">Total:
-                            {{ convertToWordsWithCurrency($total) }}</td>
-                    </tr>
-                @elseif (!empty($invoiceMaster[0]->customer_no_ktp))
-                    <tr>
-                        <td colspan="4"
-                            style="text-align: right; font-weight: bold;">Total</td>
-                        <td style="font-weight: bold;">{{ number_format($subtotal) }}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="5"
-                            style="text-align: right; font-style: italic;">Total:
-                            {{ convertToWordsWithCurrency($subtotal) }}</td>
-                    </tr>
-                @endif
+    
+        @csrf
+
+        <!-- Hidden Nomer Invoice Field -->
+        <input type="hidden" name="nomer_invoice" value="{{ $invoiceMaster[0]->nomer_invoice }}">
+
+        @if (!empty($invoiceMaster[0]->customer_no_npwp))
+
+            <!-- Display Subtotal -->
+            <tr>
+                <td colspan="4" style="text-align: right;">Sub total :</td>
+                <td>{{ number_format($subtotal) }}</td>
+            </tr>
+
+            <!-- Display Total Discount if set and not 0 -->
+            @if ($invoiceSummary && $invoiceSummary->total_diskon > 0)
+                <tr>
+                    <td colspan="4" style="text-align: right;">Total Diskon :</td>
+                    <td>{{ number_format($invoiceSummary->total_diskon) }}</td>
+                </tr>
+                <tr>
+                    <td colspan="4" style="text-align: right;">Noted</td>
+                    <td>{{ $invoiceSummary->concatenated_noted }}</td>
+                </tr>
+                <tr>
+                    <td colspan="4" style="text-align: right;">TOTAL SEBELUM PAJAK :</td>
+                    <td>{{ number_format($subtotal - $invoiceSummary->total_diskon) }}</td>
+                </tr>
+            @endif
+
+            <!-- Display PPN and PPH -->
+            <tr>
+                <td colspan="4" style="text-align: right;">PPN (11%)</td>
+                <td>{{ number_format($ppn) }}</td>
+            </tr>
+            <tr>
+                <td colspan="4" style="text-align: right;">PPH (2%)</td>
+                <td>( {{ number_format($pph) }} )</td>
+            </tr>
+            @if ($invoiceSummary && $invoiceSummary->total_diskon > 0)
+            <tr>
+                <td colspan="4" style="text-align: right;">TOTAL SETELAH PAJAK :</td>
+                <td>{{ number_format($subtotal - $invoiceSummary->total_diskon + $ppn - $pph) }}</td>
+            </tr>
+            <tr>
+                <td colspan="5" style="text-align: right; font-style: italic;">
+                    Total: {{ convertToWordsWithCurrency($subtotal - $invoiceSummary->total_diskon + $ppn - $pph) }}
+                </td>
+            </tr>
+            @else
+            <tr>
+                <td colspan="4" style="text-align: right;">TOTAL SETELAH PAJAK :</td>
+                <td>{{ number_format($subtotal  + $ppn - $pph) }}</td>
+            </tr>
+            <tr>
+                <td colspan="5" style="text-align: right; font-style: italic;">
+                    Total: {{ convertToWordsWithCurrency($subtotal  + $ppn - $pph) }}
+                </td>
+            </tr>
+            @endif
+
+        @elseif (!empty($invoiceMaster[0]->customer_no_ktp))
+            
+            @if ($invoiceSummary && $invoiceSummary->total_diskon > 0)
+                
+                <tr>
+                    <td colspan="4" style="text-align: right;">Sub Total</td>
+                    <td>{{ number_format($subtotal) }}</td>
+                </tr>
+                <tr>
+                    <td colspan="4" style="text-align: right;">Total Diskon :</td>
+                    <td>{{ number_format($invoiceSummary->total_diskon) }}</td>
+                </tr>
+                <tr>
+                    <td colspan="4" style="text-align: right;">Noted</td>
+                    <td>{{ $invoiceSummary->concatenated_noted }}</td>
+                </tr>
+            @endif
+            <tr>
+                <td colspan="4" style="text-align: right; font-weight: bold;">Total</td>
+                <td style="font-weight: bold;">{{ number_format($subtotal  - $invoiceSummary->total_diskon) }}</td>
+            </tr>
+            <tr>
+                <td colspan="5" style="text-align: right; font-style: italic;">
+                    Total: {{ convertToWordsWithCurrency($subtotal - $invoiceSummary->total_diskon) }}
+                </td>
+            </tr>
+
+        @endif
+
+
             </tfoot>
 
         </table>

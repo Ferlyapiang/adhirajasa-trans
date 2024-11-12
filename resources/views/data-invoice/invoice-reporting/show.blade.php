@@ -333,56 +333,156 @@
                                             @endphp
 
                                             <tfoot>
-                                                @php
-                                                    $ppn = 0.011 * $subtotal; // 11% PPN
-                                                    $pph = 0.02 * $subtotal; // 2% PPH
-                                                    $total = $subtotal + $ppn - $pph;
-                                                @endphp
+    @php
+        $ppn = 0.11 * $subtotal; // 11% PPN
+        $pph = 0.02 * $subtotal; // 2% PPH
+        $total = $subtotal + $ppn - $pph - ($totalDiscount ?? 0); // Total after discount, PPN, and PPH
+    @endphp
 
-                                                @if (!empty($invoiceMaster[0]->customer_no_npwp))
-                                                    <tr>
-                                                        <td colspan="4" style="text-align: right;">Subtotal</td>
-                                                        <td>{{ number_format($subtotal) }}</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td colspan="4" style="text-align: right;">PPN (1.1%)
-                                                        </td>
-                                                        <td>{{ number_format($ppn) }}</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td colspan="4" style="text-align: right;">PPH (2%)</td>
-                                                        <td>( {{ number_format($pph) }} )</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td colspan="4"
-                                                            style="text-align: right; font-weight: bold;">
-                                                            Total</td>
-                                                        <td style="font-weight: bold;">{{ number_format($total) }}
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td colspan="5"
-                                                            style="text-align: right; font-style: italic;">
-                                                            Total:
-                                                            {{ convertToWordsWithCurrency($total) }}</td>
-                                                    </tr>
-                                                @elseif (!empty($invoiceMaster[0]->customer_no_ktp))
-                                                    <tr>
-                                                        <td colspan="4"
-                                                            style="text-align: right; font-weight: bold;">
-                                                            Total</td>
-                                                        <td style="font-weight: bold;">
-                                                            {{ number_format($subtotal) }}
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td colspan="5"
-                                                            style="text-align: right; font-style: italic;">
-                                                            Total:
-                                                            {{ convertToWordsWithCurrency($subtotal) }}</td>
-                                                    </tr>
-                                                @endif
-                                            </tfoot>
+    <form action="{{ route('data-invoice.invoice-reporting.addDiscountAndNote') }}" method="POST">
+        @csrf
+
+        <!-- Hidden Nomer Invoice Field -->
+        <input type="hidden" name="nomer_invoice" value="{{ $invoiceMaster[0]->nomer_invoice }}">
+
+        @if (!empty($invoiceMaster[0]->customer_no_npwp))
+
+            <!-- Display Subtotal -->
+            <tr>
+                <td colspan="4" style="text-align: right;">Sub total :</td>
+                <td>{{ number_format($subtotal) }}</td>
+            </tr>
+
+            <!-- Display Total Discount if set and not 0 -->
+            @if ($invoiceSummary && $invoiceSummary->total_diskon > 0)
+                <tr>
+                    <td colspan="4" style="text-align: right;">Total Diskon :</td>
+                    <td>{{ number_format($invoiceSummary->total_diskon) }}</td>
+                </tr>
+                <tr>
+                    <td colspan="4" style="text-align: right;">Noted</td>
+                    <td>{{ $invoiceSummary->concatenated_noted }}</td>
+                </tr>
+                <tr>
+                    <td colspan="4" style="text-align: right;">TOTAL SEBELUM PAJAK :</td>
+                    <td>{{ number_format($subtotal - $invoiceSummary->total_diskon) }}</td>
+                </tr>
+            @endif
+
+            <!-- Display PPN and PPH -->
+            <tr>
+                <td colspan="4" style="text-align: right;">PPN (11%)</td>
+                <td>{{ number_format($ppn) }}</td>
+            </tr>
+            <tr>
+                <td colspan="4" style="text-align: right;">PPH (2%)</td>
+                <td>( {{ number_format($pph) }} )</td>
+            </tr>
+            @if ($invoiceSummary && $invoiceSummary->total_diskon > 0)
+            <tr>
+                <td colspan="4" style="text-align: right;">TOTAL SETELAH PAJAK :</td>
+                <td>{{ number_format($subtotal - $invoiceSummary->total_diskon + $ppn - $pph) }}</td>
+            </tr>
+            <tr>
+                <td colspan="5" style="text-align: right; font-style: italic;">
+                    Total: {{ convertToWordsWithCurrency($subtotal - $invoiceSummary->total_diskon + $ppn - $pph) }}
+                </td>
+            </tr>
+            @else
+            <tr>
+                <td colspan="4" style="text-align: right;">TOTAL SETELAH PAJAK :</td>
+                <td>{{ number_format($subtotal  + $ppn - $pph) }}</td>
+            </tr>
+            <tr>
+                <td colspan="5" style="text-align: right; font-style: italic;">
+                    Total: {{ convertToWordsWithCurrency($subtotal  + $ppn - $pph) }}
+                </td>
+            </tr>
+            @endif
+
+        @elseif (!empty($invoiceMaster[0]->customer_no_ktp))
+            
+            @if ($invoiceSummary && $invoiceSummary->total_diskon > 0)
+                
+                <tr>
+                    <td colspan="4" style="text-align: right;">Sub Total</td>
+                    <td>{{ number_format($subtotal) }}</td>
+                </tr>
+                <tr>
+                    <td colspan="4" style="text-align: right;">Total Diskon :</td>
+                    <td>{{ number_format($invoiceSummary->total_diskon) }}</td>
+                </tr>
+                <tr>
+                    <td colspan="4" style="text-align: right;">Noted</td>
+                    <td>{{ $invoiceSummary->concatenated_noted }}</td>
+                </tr>
+            @endif
+            <tr>
+                <td colspan="4" style="text-align: right; font-weight: bold;">Total</td>
+                <td style="font-weight: bold;">{{ number_format($subtotal  - $invoiceSummary->total_diskon) }}</td>
+            </tr>
+            <tr>
+                <td colspan="5" style="text-align: right; font-style: italic;">
+                    Total: {{ convertToWordsWithCurrency($subtotal - $invoiceSummary->total_diskon) }}
+                </td>
+            </tr>
+
+        @endif
+
+
+    </form>
+
+    @if (!$totalDiscount && !$reportNoted)
+        <tr>
+            <td colspan="5" style="text-align: right;">
+                <button type="button" class="btn btn-secondary" id="addDiscountAndNoteButton">Tambah Diskon dan Noted</button>
+            </td>
+        </tr>
+    @endif
+
+    <!-- Delete Button if Discount or Noted exists -->
+    @if ($totalDiscount || $reportNoted)
+        <tr>
+            <td colspan="5" style="text-align: right;">
+                <!-- The delete form should use the correct invoice id -->
+                <form action="{{ route('data-invoice.invoice-reporting.deleteDiscount', ['id' => $invoiceSummary->id]) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete the discount and note?');">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger">Hapus Diskon dan Noted</button>
+                </form>
+            </td>
+        </tr>
+    @endif
+
+    <!-- Hidden Form for Adding Discount and Noted -->
+    <tr id="addDiscountAndNoteForm" style="display: none;">
+        <form action="{{ route('data-invoice.invoice-reporting.addDiscountAndNote') }}" method="POST">
+            @csrf
+            <input type="hidden" name="nomer_invoice" value="{{ $invoiceMaster[0]->nomer_invoice }}">
+
+            <!-- Input for Diskon -->
+            <td colspan="1" style="text-align: right;">Diskon</td>
+            <td colspan="1"><input type="number" name="diskon" class="form-control" value="0"></td>
+
+            <!-- Input for Noted -->
+            <td colspan="1" style="text-align: right;">Noted</td>
+            <td colspan="1"><textarea type="text" name="noted" class="form-control" value=""></textarea></td>
+
+            <!-- Submit Button for Discount and Note -->
+            <td colspan="2" style="text-align: right;">
+                <button type="submit" class="btn btn-primary">Simpan Diskon dan Noted</button>
+            </td>
+        </form>
+    </tr>
+
+    </tfoot>
+
+
+
+
+
+
+
 
 
                                         </table>
@@ -468,5 +568,10 @@
     <script src="{{ asset('lte/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('lte/dist/js/adminlte.min.js') }}"></script>
 </body>
-
+<script>
+    document.getElementById('addDiscountAndNoteButton').addEventListener('click', function() {
+        document.getElementById('addDiscountAndNoteForm').style.display = 'table-row';
+        this.style.display = 'none'; // Hide the "Tambah Diskon dan Noted" button
+    });
+</script>
 </html>

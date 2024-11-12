@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\Invoice;
+use App\Models\InvoiceReporting;
 use App\Models\Warehouse;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -136,7 +137,9 @@ class InvoiceReportingController extends Controller
             COALESCE(type_mobil_masuk.type, type_mobil_keluar.type) AS type_mobil,
             COALESCE(bank_datas_masuk.bank_name, bank_datas_keluar.bank_name) AS bank_name,
             COALESCE(bank_datas_masuk.account_number, bank_datas_keluar.account_number) AS account_number,
-            COALESCE(bank_datas_masuk.account_name, bank_datas_keluar.account_name) AS account_name
+            COALESCE(bank_datas_masuk.account_name, bank_datas_keluar.account_name) AS account_name,
+            invoices_reporting.diskon,
+            invoices_reporting.noted
 
 
         FROM 
@@ -198,29 +201,7 @@ class InvoiceReportingController extends Controller
         return redirect()->route('data-invoice.invoice-reporting.display');
     }
 
-    public function display()
-    {
-        // Get data from session
-        $user = Auth::user();
-
-        if (!$user) {
-            return redirect()->route('login')->with('alert', 'Waktu login Anda telah habis, silakan login ulang.');
-        } else {
-            $invoiceMaster = session('invoiceMaster');
-
-            if (empty($invoiceMaster)) {
-                return redirect()->route('data-invoice.invoice-reporting.index')->with('error', 'No invoice data available.');
-            }
-
-            // dd($invoiceMaster);
-
-            $warehouses = Warehouse::all(); // Get all warehouses
-            $headOffice = $warehouses->where('status_office', 'head_office')->first();
-            $branchOffices = $warehouses->where('status_office', 'branch_office');
-            // Show the view with the invoice data
-            return view('data-invoice.invoice-reporting.show', compact('invoiceMaster', 'headOffice', 'branchOffices'));
-        }
-    }
+  
 
     public function download($id)
     {
@@ -235,10 +216,115 @@ class InvoiceReportingController extends Controller
         $warehouses = Warehouse::all(); // Get all warehouses
         $headOffice = $warehouses->where('status_office', 'head_office')->first();
         $branchOffices = $warehouses->where('status_office', 'branch_office');
+        $nomer_invoice = $invoiceMaster[0]->nomer_invoice;
+        
+        // Retrieve both total discount and concatenated noted
+        $invoiceSummary = $this->getInvoiceSummary($nomer_invoice);
 
 
         // Generate PDF
-        $pdf = PDF::loadView('data-invoice.invoice-reporting.pdf', compact('invoice', 'invoiceMaster', 'headOffice', 'branchOffices')); // Ensure the view exists
+        $pdf = PDF::loadView('data-invoice.invoice-reporting.pdf', compact('invoice', 'invoiceMaster', 'headOffice', 'branchOffices', 'invoiceSummary')); // Ensure the view exists
         return $pdf->download('invoice_' . $id . '.pdf');
     }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'diskon' => 'nullable|integer|min:0',
+            'noted' => 'nullable|string',
+        ]);
+
+        $invoice = InvoiceReporting::findOrFail($id);
+        $invoice->diskon = $request->input('diskon');
+        $invoice->noted = $request->input('noted');
+        $invoice->save();
+
+        return redirect()->route('data-invoice.invoice-reporting.display')
+                        ->with('success', 'Invoice updated successfully.');
+    }
+    public function display()
+    {
+        $user = Auth::user();
+        
+        if (!$user) {
+            return redirect()->route('login')->with('alert', 'Waktu login Anda telah habis, silakan login ulang.');
+        }
+
+        $invoiceMaster = session('invoiceMaster');
+
+        if (empty($invoiceMaster)) {
+            return redirect()->route('data-invoice.invoice-reporting.index')->with('error', 'No invoice data available.');
+        }
+
+        $nomer_invoice = $invoiceMaster[0]->nomer_invoice;
+        
+        // Retrieve both total discount and concatenated noted
+        $invoiceSummary = $this->getInvoiceSummary($nomer_invoice);
+        $warehouses = Warehouse::all();
+        $headOffice = $warehouses->where('status_office', 'head_office')->first();
+        $branchOffices = $warehouses->where('status_office', 'branch_office');
+
+        // Pass the data to the view, including invoiceSummary
+        return view('data-invoice.invoice-reporting.show', [
+            'invoiceMaster' => $invoiceMaster,
+            'headOffice' => $headOffice,
+            'branchOffices' => $branchOffices,
+            'totalDiscount' => $invoiceSummary->total_diskon,
+            'reportNoted' => $invoiceSummary->concatenated_noted,
+            'invoiceSummary' => $invoiceSummary,
+        ]);
+    }
+    
+
+public function addDiscountAndNote(Request $request)
+{
+    $request->validate([
+        'nomer_invoice' => 'required|string|exists:invoices_reporting,nomer_invoice',
+        'diskon' => 'nullable|integer',
+        'noted' => 'nullable|string',
+    ]);
+
+    DB::table('invoices_reporting')->insert([
+        'nomer_invoice' => $request->nomer_invoice,
+        'diskon' => $request->diskon ?? 0,
+        'noted' => $request->noted,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    return redirect()->route('data-invoice.invoice-reporting.display')
+                     ->with('success', 'Diskon dan noted berhasil ditambahkan.');
+}
+
+public function deleteDiscount($id)
+{
+    DB::table('invoices_reporting')->where('id', $id)->delete();
+    // dd($id);
+    return redirect()->route('data-invoice.invoice-reporting.display')
+                     ->with('success', 'Diskon dan noted berhasil dihapus.');
+                     
+}
+
+public function getInvoiceSummary($nomer_invoice)
+{
+    // Query to calculate total discount and concatenate noted, grouped by 'id', ordered by the highest 'id'
+    $summary = DB::table('invoices_reporting')
+        ->select(
+            'id',
+            DB::raw('SUM(diskon) AS total_diskon'),
+            DB::raw('GROUP_CONCAT(noted SEPARATOR ", ") AS concatenated_noted')
+        )
+        ->where('nomer_invoice', $nomer_invoice)
+        ->groupBy('id')  // Group by 'id' or another relevant column
+        ->orderByDesc('id')  // Sort by 'id' in descending order
+        ->limit(1)  // Limit to 1 result
+        ->first(); // Use first() to return a single record
+
+    return $summary;
+}
+
+
+
+
+
 }
