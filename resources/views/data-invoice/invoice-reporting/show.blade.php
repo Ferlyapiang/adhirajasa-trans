@@ -116,33 +116,35 @@
                                         <div class="col-auto">
                                             <div class="branch-offices">
                                                 @if ($branchOffices->isEmpty())
-                                                    <p style="color: #777; font-size: 0.85em;">Tidak ada kantor cabang
-                                                        tersedia.
-                                                    </p>
+                                                <p style="color: #777; font-size: 0.85em;">Tidak ada kantor cabang
+                                                    tersedia.
+                                                </p>
                                                 @else
-                                                    @foreach ($branchOffices as $branchOffice)
-                                                        <div>
-                                                            <h5 style="font-size: 0.95em; margin: 5px 0;">Kantor Cabang
-                                                                {{ $loop->iteration }}:</h5>
-                                                            <p style="font-size: 0.85em; margin: 2px 0;">Alamat: <span
-                                                                    class="text-primary">{{ $branchOffice->address ?? 'Alamat tidak tersedia' }}</span>
-                                                            </p>
-                                                            <p style="font-size: 0.85em; margin: 2px 0;">Nomor Telepon:
-                                                                <span
-                                                                    class="text-primary">{{ $branchOffice->phone_number ?? 'Nomor telepon tidak tersedia' }}</span>
-                                                            </p>
-                                                        </div>
-                                                    @endforeach
+                                                @foreach ($branchOffices as $branchOffice)
+                                                <div>
+                                                    <h5 style="font-size: 0.95em; margin: 5px 0;">Kantor Cabang
+                                                        {{ $loop->iteration }}:
+                                                    </h5>
+                                                    <p style="font-size: 0.85em; margin: 2px 0;">Alamat: <span
+                                                            class="text-primary">{{ $branchOffice->address ?? 'Alamat tidak tersedia' }}</span>
+                                                    </p>
+                                                    <p style="font-size: 0.85em; margin: 2px 0;">Nomor Telepon:
+                                                        <span
+                                                            class="text-primary">{{ $branchOffice->phone_number ?? 'Nomor telepon tidak tersedia' }}</span>
+                                                    </p>
+                                                </div>
+                                                @endforeach
                                                 @endif
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <!-- <div class="col-lg-12">
+                            <div class="col-lg-12">
                                 <div class="card">
                                     <div class="card-header">
                                         <h1>Invoice</h1>
+                                        <button class="btn btn-primary" onclick="toggleEdit()">Edit</button>
                                     </div>
                                     <div class="card-body">
                                         <table class="table table-bordered">
@@ -154,54 +156,29 @@
                                             </thead>
                                             <tbody>
                                                 <tr>
-                                                    <td>{{ $invoiceMaster[0]->nomer_invoice }}</td>
-                                                    <td>{{ $invoiceMaster[0]->tanggal_masuk ?? 'Tanggal transaksi tidak tersedia' }}
-                                                    </td>
+                                                    <td id="invoiceNo">{{ $invoiceMaster[0]->nomer_invoice }}</td>
+                                                    <td id="tanggalMasuk">{{ $invoiceMaster[0]->tanggal_masuk ?? 'Tanggal transaksi tidak tersedia' }}</td>
                                                 </tr>
                                             </tbody>
                                         </table>
+
+                                        <!-- Edit Form (hidden by default) -->
+                                        <form id="editForm" action="{{ route('data-invoice.invoice-reporting.updateInvoice') }}" method="POST" style="display: none;">
+                                            @csrf
+                                            <input type="hidden" name="nomer_invoice" value="{{ $invoiceMaster[0]->nomer_invoice }}">
+                                            <div class="form-group">
+                                                <label for="new_nomer_invoice">New Invoice No</label>
+                                                <input type="text" name="new_nomer_invoice" id="new_nomer_invoice" class="form-control" value="{{ $invoiceMaster[0]->nomer_invoice }}" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="new_tanggal_masuk">New Tanggal</label>
+                                                <input type="date" name="new_tanggal_masuk" id="new_tanggal_masuk" class="form-control" value="{{ $invoiceMaster[0]->tanggal_masuk }}" required>
+                                            </div>
+                                            <button type="submit" class="btn btn-success">Save Changes</button>
+                                        </form>
                                     </div>
                                 </div>
-                            </div> -->
-                            <div class="col-lg-12">
-    <div class="card">
-        <div class="card-header">
-            <h1>Invoice</h1>
-            <button class="btn btn-primary" onclick="toggleEdit()">Edit</button>
-        </div>
-        <div class="card-body">
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Invoice No</th>
-                        <th>Tanggal</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td id="invoiceNo">{{ $invoiceMaster[0]->nomer_invoice }}</td>
-                        <td id="tanggalMasuk">{{ $invoiceMaster[0]->tanggal_masuk ?? 'Tanggal transaksi tidak tersedia' }}</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <!-- Edit Form (hidden by default) -->
-            <form id="editForm" action="{{ route('data-invoice.invoice-reporting.updateInvoice') }}" method="POST" style="display: none;">
-                @csrf
-                <input type="hidden" name="nomer_invoice" value="{{ $invoiceMaster[0]->nomer_invoice }}">
-                <div class="form-group">
-                    <label for="new_nomer_invoice">New Invoice No</label>
-                    <input type="text" name="new_nomer_invoice" id="new_nomer_invoice" class="form-control" value="{{ $invoiceMaster[0]->nomer_invoice }}" required>
-                </div>
-                <div class="form-group">
-                    <label for="new_tanggal_masuk">New Tanggal</label>
-                    <input type="date" name="new_tanggal_masuk" id="new_tanggal_masuk" class="form-control" value="{{ $invoiceMaster[0]->tanggal_masuk }}" required>
-                </div>
-                <button type="submit" class="btn btn-success">Save Changes</button>
-            </form>
-        </div>
-    </div>
-</div>
+                            </div>
                             <div class="col-lg-12">
                                 <div class="row mb-4">
                                     <div class="col-lg-12">
@@ -240,290 +217,273 @@
                                             </thead>
                                             <tbody>
                                                 @php
-                                                    $subtotal = 0;
+                                                $subtotal = 0;
                                                 @endphp
                                                 @foreach ($invoiceMaster as $item)
-                                                    <tr>
-                                                        <td>
-                                                            @if ($item->harga_lembur)
-                                                                X
-                                                            @elseif ($item->harga_kirim_barang)
-                                                            <a href="{{ $item->joc_number ? route('data-gudang.barang-masuk.detail', $item->barang_masuks_id) : route('data-gudang.barang-keluar.showSuratJalan', $item->barang_keluars_id) }}">
-                                                                {{ $item->joc_number ?: $item->nomer_surat_jalan }}
-                                                            </a>
-                                                            @else
-                                                            <a href="{{ $item->joc_number ? route('data-gudang.barang-masuk.detail', $item->barang_masuks_id) : route('data-gudang.barang-keluar.showSuratJalan', $item->barang_keluars_id) }}">
-                                                                {{ $item->joc_number ?: $item->nomer_surat_jalan }}
-                                                            </a>
-                                                            @endif
-                                                        </td>
-                                                        <td>
-                                                            @if ($item->harga_lembur)
-                                                                X
-                                                            @elseif ($item->harga_kirim_barang)
-                                                                X
-                                                            @else
-                                                                {{ $item->nomer_polisi ?: $item->nomer_container ?: 'X' }}
-                                                            @endif
-                                                        </td>
-                                                        <td>
-                                                            @if ($item->harga_lembur)
-                                                                X
-                                                            @elseif ($item->harga_kirim_barang)
-                                                                1X Engkel
-                                                            @else
-                                                                {{ $item->total_sisa ?? 'X' }}
-                                                            @endif
-                                                        </td>
-                                                        <td style="text-align: center;">
-                                                            @if ($item->harga_lembur)
-                                                                @if($item->barang_masuks_id && $item->harga_lembur)
-                                                                CAS LEMBUR BONGKAR
-                                                                <a href="{{ $item->joc_number ? route('data-gudang.barang-masuk.detail', $item->barang_masuks_id) : route('data-gudang.barang-keluar.showSuratJalan', $item->barang_keluars_id) }}">
-                                                                {{ $item->joc_number ?? $item->nomer_surat_jalan }}
-                                                                </a>
-                                                                
-                                                                @elseif ($item->barang_keluars_id && $item->harga_lembur)
-                                                                CAS LEMBUR MUAT
-                                                                <a href="{{ $item->joc_number ? route('data-gudang.barang-masuk.detail', $item->barang_masuks_id) : route('data-gudang.barang-keluar.showSuratJalan', $item->barang_keluars_id) }}">
-                                                                {{ $item->joc_number ?? $item->nomer_surat_jalan }}
-                                                                </a>
-                                                                @endif
-                                                            @elseif ($item->harga_kirim_barang)
-                                                                Sewa Mobil
-                                                                <strong>{{ $item->warehouse_name ?? 'X' }}<br></strong>
-                                                                {{ $item->address ?? 'X' }}<br>
-                                                                Nomer Container:
-                                                                <strong>{{ $item->nomer_container ?? ($item->nomer_polisi ?? 'X') }}</strong>
-                                                            @else
-                                                                Kontainer
-                                                                <strong>{{ $item->type_mobil ?? '' }}</strong><br>
-                                                                Masa Penimbunan:
-                                                                <strong>{{ $item->tanggal_masuk_penimbunan ? \Carbon\Carbon::parse($item->tanggal_masuk_penimbunan)->format('d/m/Y') : '' }}</strong>
-                                                                -
-                                                                <strong>{{ $item->tanggal_keluar_penimbunan ? \Carbon\Carbon::parse($item->tanggal_keluar_penimbunan)->format('d/m/Y') : '' }}</strong>
-                                                            @endif
-                                                        </td>
-                                                        <td>
-                                                            @php
-                                                                $unitPrice =
-                                                                    $item->harga_lembur ??
-                                                                    ($item->harga_kirim_barang ??
-                                                                        ($item->harga_simpan_barang ?? 0));
-                                                                $subtotal += $unitPrice;
-                                                            @endphp
-                                                            {{ number_format($unitPrice) }}
-                                                        </td>
-                                                    </tr>
+                                                <tr>
+                                                    <td>
+                                                        @if ($item->harga_lembur)
+                                                        X
+                                                        @elseif ($item->harga_kirim_barang)
+                                                        <a href="{{ $item->joc_number ? route('data-gudang.barang-masuk.detail', $item->barang_masuks_id) : route('data-gudang.barang-keluar.showSuratJalan', $item->barang_keluars_id) }}">
+                                                            {{ $item->joc_number ?: $item->nomer_surat_jalan }}
+                                                        </a>
+                                                        @else
+                                                        <a href="{{ $item->joc_number ? route('data-gudang.barang-masuk.detail', $item->barang_masuks_id) : route('data-gudang.barang-keluar.showSuratJalan', $item->barang_keluars_id) }}">
+                                                            {{ $item->joc_number ?: $item->nomer_surat_jalan }}
+                                                        </a>
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        @if ($item->harga_lembur)
+                                                        X
+                                                        @elseif ($item->harga_kirim_barang)
+                                                        X
+                                                        @else
+                                                        {{ $item->nomer_polisi ?: $item->nomer_container ?: 'X' }}
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        @if ($item->harga_lembur)
+                                                        X
+                                                        @elseif ($item->harga_kirim_barang)
+                                                        1X Engkel
+                                                        @else
+                                                        {{ $item->total_sisa ?? 'X' }}
+                                                        @endif
+                                                    </td>
+                                                    <td style="text-align: center;">
+                                                        @if ($item->harga_lembur)
+                                                        @if($item->barang_masuks_id && $item->harga_lembur)
+                                                        CAS LEMBUR BONGKAR
+                                                        <a href="{{ $item->joc_number ? route('data-gudang.barang-masuk.detail', $item->barang_masuks_id) : route('data-gudang.barang-keluar.showSuratJalan', $item->barang_keluars_id) }}">
+                                                            {{ $item->joc_number ?? $item->nomer_surat_jalan }}
+                                                        </a>
+
+                                                        @elseif ($item->barang_keluars_id && $item->harga_lembur)
+                                                        CAS LEMBUR MUAT
+                                                        <a href="{{ $item->joc_number ? route('data-gudang.barang-masuk.detail', $item->barang_masuks_id) : route('data-gudang.barang-keluar.showSuratJalan', $item->barang_keluars_id) }}">
+                                                            {{ $item->joc_number ?? $item->nomer_surat_jalan }}
+                                                        </a>
+                                                        @endif
+                                                        @elseif ($item->harga_kirim_barang)
+                                                        Sewa Mobil
+                                                        <strong>{{ $item->warehouse_name ?? 'X' }}<br></strong>
+                                                        {{ $item->address ?? 'X' }}<br>
+                                                        Nomer Container:
+                                                        <strong>{{ $item->nomer_container ?? ($item->nomer_polisi ?? 'X') }}</strong>
+                                                        @else
+                                                        Kontainer
+                                                        <strong>{{ $item->type_mobil ?? '' }}</strong><br>
+                                                        Masa Penimbunan:
+                                                        <strong>{{ $item->tanggal_masuk_penimbunan ? \Carbon\Carbon::parse($item->tanggal_masuk_penimbunan)->format('d/m/Y') : '' }}</strong>
+                                                        -
+                                                        <strong>{{ $item->tanggal_keluar_penimbunan ? \Carbon\Carbon::parse($item->tanggal_keluar_penimbunan)->format('d/m/Y') : '' }}</strong>
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        @php
+                                                        $unitPrice =
+                                                        $item->harga_lembur ??
+                                                        ($item->harga_kirim_barang ??
+                                                        ($item->harga_simpan_barang ?? 0));
+                                                        $subtotal += $unitPrice;
+                                                        @endphp
+                                                        {{ number_format($unitPrice) }}
+                                                    </td>
+                                                </tr>
                                                 @endforeach
                                             </tbody>
                                             @php
-                                                function convertToWords($number)
-                                                {
-                                                    $units = [
-                                                        '',
-                                                        'Satu',
-                                                        'Dua',
-                                                        'Tiga',
-                                                        'Empat',
-                                                        'Lima',
-                                                        'Enam',
-                                                        'Tujuh',
-                                                        'Delapan',
-                                                        'Sembilan',
-                                                    ];
-                                                    $words = '';
+                                            function convertToWords($number)
+                                            {
+                                            $units = [
+                                            '',
+                                            'Satu',
+                                            'Dua',
+                                            'Tiga',
+                                            'Empat',
+                                            'Lima',
+                                            'Enam',
+                                            'Tujuh',
+                                            'Delapan',
+                                            'Sembilan',
+                                            ];
+                                            $words = '';
 
-                                                    if ($number < 10) {
-                                                        $words = $units[$number];
-                                                    } elseif ($number < 20) {
-                                                        $words = $units[$number - 10] . ' Belas';
-                                                    } elseif ($number < 100) {
-                                                        $words =
-                                                            $units[intval($number / 10)] .
-                                                            ' Puluh ' .
-                                                            $units[$number % 10];
-                                                    } elseif ($number < 1000) {
-                                                        $words =
-                                                            $units[intval($number / 100)] .
-                                                            ' Ratus ' .
-                                                            convertToWords($number % 100);
-                                                    } elseif ($number < 1000000) {
-                                                        $words =
-                                                            convertToWords(intval($number / 1000)) .
-                                                            ' Ribu ' .
-                                                            convertToWords($number % 1000);
-                                                    } elseif ($number < 1000000000) {
-                                                        $words =
-                                                            convertToWords(intval($number / 1000000)) .
-                                                            ' Juta ' .
-                                                            convertToWords($number % 1000000);
-                                                    }
+                                            if ($number < 10) {
+                                                $words=$units[$number];
+                                                } elseif ($number < 20) {
+                                                $words=$units[$number - 10] . ' Belas' ;
+                                                } elseif ($number < 100) {
+                                                $words=$units[intval($number / 10)] . ' Puluh ' .
+                                                $units[$number % 10];
+                                                } elseif ($number < 1000) {
+                                                $words=$units[intval($number / 100)] . ' Ratus ' .
+                                                convertToWords($number % 100);
+                                                } elseif ($number < 1000000) {
+                                                $words=convertToWords(intval($number / 1000)) . ' Ribu ' .
+                                                convertToWords($number % 1000);
+                                                } elseif ($number < 1000000000) {
+                                                $words=convertToWords(intval($number / 1000000)) . ' Juta ' .
+                                                convertToWords($number % 1000000);
+                                                }
 
-                                                    return trim($words);
+                                                return trim($words);
                                                 }
 
                                                 // Wrap the function call to add "Rupiah" only once
                                                 function convertToWordsWithCurrency($number)
                                                 {
-                                                    return convertToWords($number) . ' Rupiah';
+                                                return convertToWords($number) . ' Rupiah' ;
                                                 }
 
-                                            @endphp
+                                                @endphp
 
-                                            <tfoot>
-    @php
-        $ppn = 0.11 * $subtotal; // 11% PPN
-        $pph = 0.02 * $subtotal; // 2% PPH
-        $total = $subtotal + $ppn - $pph - ($totalDiscount ?? 0); // Total after discount, PPN, and PPH
-    @endphp
+                                                <tfoot>
+                                                @php
+                                                $ppn = 0.11 * $subtotal; // 11% PPN
+                                                $pph = 0.02 * $subtotal; // 2% PPH
+                                                $total = $subtotal + $ppn - $pph - ($totalDiscount ?? 0); // Total after discount, PPN, and PPH
+                                                @endphp
 
-    <form action="{{ route('data-invoice.invoice-reporting.addDiscountAndNote') }}" method="POST">
-        @csrf
+                                                <form action="{{ route('data-invoice.invoice-reporting.addDiscountAndNote') }}" method="POST">
+                                                    @csrf
 
-        <!-- Hidden Nomer Invoice Field -->
-        <input type="hidden" name="nomer_invoice" value="{{ $invoiceMaster[0]->nomer_invoice }}">
+                                                    <!-- Hidden Nomer Invoice Field -->
+                                                    <input type="hidden" name="nomer_invoice" value="{{ $invoiceMaster[0]->nomer_invoice }}">
 
-        @if (!empty($invoiceMaster[0]->customer_no_npwp))
+                                                    @if (!empty($invoiceMaster[0]->customer_no_npwp))
 
-            <!-- Display Subtotal -->
-            <tr>
-                <td colspan="4" style="text-align: right;">Sub total :</td>
-                <td>{{ number_format($subtotal) }}</td>
-            </tr>
+                                                    <!-- Display Subtotal -->
+                                                    <tr>
+                                                        <td colspan="4" style="text-align: right;">Sub total :</td>
+                                                        <td>{{ number_format($subtotal) }}</td>
+                                                    </tr>
 
-            <!-- Display Total Discount if set and not 0 -->
-            @if ($invoiceSummary && $invoiceSummary->total_diskon > 0)
-                <tr>
-                    <td colspan="4" style="text-align: right;">Total Diskon :</td>
-                    <td>{{ number_format($invoiceSummary->total_diskon) }}</td>
-                </tr>
-                <tr>
-                    <td colspan="4" style="text-align: right;">Noted</td>
-                    <td>{{ $invoiceSummary->concatenated_noted }}</td>
-                </tr>
-                <tr>
-                    <td colspan="4" style="text-align: right;">TOTAL SEBELUM PAJAK :</td>
-                    <td>{{ number_format($subtotal - $invoiceSummary->total_diskon) }}</td>
-                </tr>
-            @endif
+                                                    <!-- Display Total Discount if set and not 0 -->
+                                                    @if ($invoiceSummary && $invoiceSummary->total_diskon > 0)
+                                                    <tr>
+                                                        <td colspan="4" style="text-align: right;">Total Diskon :</td>
+                                                        <td>{{ number_format($invoiceSummary->total_diskon) }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="4" style="text-align: right;">Noted</td>
+                                                        <td>{{ $invoiceSummary->concatenated_noted }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="4" style="text-align: right;">TOTAL SEBELUM PAJAK :</td>
+                                                        <td>{{ number_format($subtotal - $invoiceSummary->total_diskon) }}</td>
+                                                    </tr>
+                                                    @endif
 
-            <!-- Display PPN and PPH -->
-            <tr>
-                <td colspan="4" style="text-align: right;">PPN (11%)</td>
-                <td>{{ number_format($ppn) }}</td>
-            </tr>
-            <tr>
-                <td colspan="4" style="text-align: right;">PPH (2%)</td>
-                <td>( {{ number_format($pph) }} )</td>
-            </tr>
-            @if ($invoiceSummary && $invoiceSummary->total_diskon > 0)
-            <tr>
-                <td colspan="4" style="text-align: right;">TOTAL SETELAH PAJAK :</td>
-                <td>{{ number_format($subtotal - $invoiceSummary->total_diskon + $ppn - $pph) }}</td>
-            </tr>
-            <tr>
-                <td colspan="5" style="text-align: right; font-style: italic;">
-                    Total: {{ convertToWordsWithCurrency($subtotal - $invoiceSummary->total_diskon + $ppn - $pph) }}
-                </td>
-            </tr>
-            @else
-            <tr>
-                <td colspan="4" style="text-align: right;">TOTAL SETELAH PAJAK :</td>
-                <td>{{ number_format($subtotal  + $ppn - $pph) }}</td>
-            </tr>
-            <tr>
-                <td colspan="5" style="text-align: right; font-style: italic;">
-                    Total: {{ convertToWordsWithCurrency($subtotal  + $ppn - $pph) }}
-                </td>
-            </tr>
-            @endif
+                                                    <!-- Display PPN and PPH -->
+                                                    <tr>
+                                                        <td colspan="4" style="text-align: right;">PPN (11%)</td>
+                                                        <td>{{ number_format($ppn) }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="4" style="text-align: right;">PPH (2%)</td>
+                                                        <td>( {{ number_format($pph) }} )</td>
+                                                    </tr>
+                                                    @if ($invoiceSummary && $invoiceSummary->total_diskon > 0)
+                                                    <tr>
+                                                        <td colspan="4" style="text-align: right;">TOTAL SETELAH PAJAK :</td>
+                                                        <td>{{ number_format($subtotal - $invoiceSummary->total_diskon + $ppn - $pph) }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="5" style="text-align: right; font-style: italic;">
+                                                            Total: {{ convertToWordsWithCurrency($subtotal - $invoiceSummary->total_diskon + $ppn - $pph) }}
+                                                        </td>
+                                                    </tr>
+                                                    @else
+                                                    <tr>
+                                                        <td colspan="4" style="text-align: right;">TOTAL SETELAH PAJAK :</td>
+                                                        <td>{{ number_format($subtotal  + $ppn - $pph) }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="5" style="text-align: right; font-style: italic;">
+                                                            Total: {{ convertToWordsWithCurrency($subtotal  + $ppn - $pph) }}
+                                                        </td>
+                                                    </tr>
+                                                    @endif
 
-        @elseif (!empty($invoiceMaster[0]->customer_no_ktp))
-            
-            @if ($invoiceSummary && $invoiceSummary->total_diskon > 0)
-                
-                <tr>
-                    <td colspan="4" style="text-align: right;">Sub Total</td>
-                    <td>{{ number_format($subtotal) }}</td>
-                </tr>
-                <tr>
-                    <td colspan="4" style="text-align: right;">Total Diskon :</td>
-                    <td>{{ number_format($invoiceSummary->total_diskon) }}</td>
-                </tr>
-                <tr>
-                    <td colspan="4" style="text-align: right;">Noted</td>
-                    <td>{{ $invoiceSummary->concatenated_noted }}</td>
-                </tr>
-            @endif
-            <tr>
-                <td colspan="4" style="text-align: right; font-weight: bold;">Total</td>
-                <td style="font-weight: bold;">{{ number_format($subtotal  - $invoiceSummary->total_diskon) }}</td>
-            </tr>
-            <tr>
-                <td colspan="5" style="text-align: right; font-style: italic;">
-                    Total: {{ convertToWordsWithCurrency($subtotal - $invoiceSummary->total_diskon) }}
-                </td>
-            </tr>
+                                                    @elseif (!empty($invoiceMaster[0]->customer_no_ktp))
 
-        @endif
+                                                    @if ($invoiceSummary && $invoiceSummary->total_diskon > 0)
 
+                                                    <tr>
+                                                        <td colspan="4" style="text-align: right;">Sub Total</td>
+                                                        <td>{{ number_format($subtotal) }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="4" style="text-align: right;">Total Diskon :</td>
+                                                        <td>{{ number_format($invoiceSummary->total_diskon) }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="4" style="text-align: right;">Noted</td>
+                                                        <td>{{ $invoiceSummary->concatenated_noted }}</td>
+                                                    </tr>
+                                                    @endif
+                                                    <tr>
+                                                        <td colspan="4" style="text-align: right; font-weight: bold;">Total</td>
+                                                        <td style="font-weight: bold;">{{ number_format($subtotal  - $invoiceSummary->total_diskon) }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="5" style="text-align: right; font-style: italic;">
+                                                            Total: {{ convertToWordsWithCurrency($subtotal - $invoiceSummary->total_diskon) }}
+                                                        </td>
+                                                    </tr>
 
-    </form>
-
-    @if (!$totalDiscount && !$reportNoted)
-        <tr>
-            <td colspan="5" style="text-align: right;">
-                <button type="button" class="btn btn-secondary" id="addDiscountAndNoteButton">Tambah Diskon dan Noted</button>
-            </td>
-        </tr>
-    @endif
-
-    <!-- Delete Button if Discount or Noted exists -->
-    @if ($totalDiscount || $reportNoted)
-        <tr>
-            <td colspan="5" style="text-align: right;">
-                <!-- The delete form should use the correct invoice id -->
-                <form action="{{ route('data-invoice.invoice-reporting.deleteDiscount', ['id' => $invoiceSummary->id]) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete the discount and note?');">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger">Hapus Diskon dan Noted</button>
-                </form>
-            </td>
-        </tr>
-    @endif
-
-    <!-- Hidden Form for Adding Discount and Noted -->
-    <tr id="addDiscountAndNoteForm" style="display: none;">
-        <form action="{{ route('data-invoice.invoice-reporting.addDiscountAndNote') }}" method="POST">
-            @csrf
-            <input type="hidden" name="nomer_invoice" value="{{ $invoiceMaster[0]->nomer_invoice }}">
-
-            <!-- Input for Diskon -->
-            <td colspan="1" style="text-align: right;">Diskon</td>
-            <td colspan="1"><input type="number" name="diskon" class="form-control" value="0"></td>
-
-            <!-- Input for Noted -->
-            <td colspan="1" style="text-align: right;">Noted</td>
-            <td colspan="1"><textarea type="text" name="noted" class="form-control" value=""></textarea></td>
-
-            <!-- Submit Button for Discount and Note -->
-            <td colspan="2" style="text-align: right;">
-                <button type="submit" class="btn btn-primary">Simpan Diskon dan Noted</button>
-            </td>
-        </form>
-    </tr>
-
-    </tfoot>
+                                                    @endif
 
 
+                                                </form>
 
+                                                @if (!$totalDiscount && !$reportNoted)
+                                                <tr>
+                                                    <td colspan="5" style="text-align: right;">
+                                                        <button type="button" class="btn btn-secondary" id="addDiscountAndNoteButton">Tambah Diskon dan Noted</button>
+                                                    </td>
+                                                </tr>
+                                                @endif
 
+                                                <!-- Delete Button if Discount or Noted exists -->
+                                                @if ($totalDiscount || $reportNoted)
+                                                <tr>
+                                                    <td colspan="5" style="text-align: right;">
+                                                        <!-- The delete form should use the correct invoice id -->
+                                                        <form action="{{ route('data-invoice.invoice-reporting.deleteDiscount', ['id' => $invoiceSummary->id]) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete the discount and note?');">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="btn btn-danger">Hapus Diskon dan Noted</button>
+                                                        </form>
+                                                    </td>
+                                                </tr>
+                                                @endif
 
+                                                <!-- Hidden Form for Adding Discount and Noted -->
+                                                <tr id="addDiscountAndNoteForm" style="display: none;">
+                                                    <form action="{{ route('data-invoice.invoice-reporting.addDiscountAndNote') }}" method="POST">
+                                                        @csrf
+                                                        <input type="hidden" name="nomer_invoice" value="{{ $invoiceMaster[0]->nomer_invoice }}">
 
+                                                        <!-- Input for Diskon -->
+                                                        <td colspan="1" style="text-align: right;">Diskon</td>
+                                                        <td colspan="1"><input type="number" name="diskon" class="form-control" value="0"></td>
 
+                                                        <!-- Input for Noted -->
+                                                        <td colspan="1" style="text-align: right;">Noted</td>
+                                                        <td colspan="1"><textarea type="text" name="noted" class="form-control" value=""></textarea></td>
 
+                                                        <!-- Submit Button for Discount and Note -->
+                                                        <td colspan="2" style="text-align: right;">
+                                                            <button type="submit" class="btn btn-primary">Simpan Diskon dan Noted</button>
+                                                        </td>
+                                                    </form>
+                                                </tr>
 
+                                            </tfoot>
                                         </table>
                                         <div class="container">
                                             <div class="row">
@@ -612,9 +572,11 @@
         document.getElementById('addDiscountAndNoteForm').style.display = 'table-row';
         this.style.display = 'none'; // Hide the "Tambah Diskon dan Noted" button
     });
+
     function toggleEdit() {
-    const editForm = document.getElementById('editForm');
-    editForm.style.display = editForm.style.display === 'none' ? 'block' : 'none';
-}
+        const editForm = document.getElementById('editForm');
+        editForm.style.display = editForm.style.display === 'none' ? 'block' : 'none';
+    }
 </script>
+
 </html>
