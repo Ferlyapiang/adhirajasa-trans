@@ -202,7 +202,7 @@ Route::get('/data-reporting-invoice/invoice-reporting/download/{id}', [InvoiceRe
 Route::put('/data-invoice/invoice-reporting/{id}', [InvoiceReportingController::class, 'update'])->name('data-invoice.invoice-reporting.update');
 Route::post('/data-invoice/invoice-reporting/add-discount-and-note', [InvoiceReportingController::class, 'addDiscountAndNote'])->name('data-invoice.invoice-reporting.addDiscountAndNote');
 Route::delete('/data-invoice/invoice-reporting/delete/{id}', [InvoiceReportingController::class, 'deleteDiscount'])->name('data-invoice.invoice-reporting.deleteDiscount');
-
+Route::post('/invoice-reporting/update-invoice', [InvoiceReportingController::class, 'updateInvoice'])->name('data-invoice.invoice-reporting.updateInvoice');
 
 
 // Route::get('/data-bongkar-muat/reporting', [BongkarMuatController::class, 'index'])->name('data-bongkar-muat.bongkar-muat.index');

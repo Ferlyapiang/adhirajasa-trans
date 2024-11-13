@@ -201,6 +201,32 @@ class InvoiceReportingController extends Controller
         return redirect()->route('data-invoice.invoice-reporting.display');
     }
 
+    public function updateInvoice(Request $request)
+{
+    $request->validate([
+        'nomer_invoice' => 'required',
+        'new_nomer_invoice' => 'required',
+        'new_tanggal_masuk' => 'required|date',
+    ]);
+
+    $nomer_invoice = $request->input('nomer_invoice'); // current invoice number
+    $new_nomer_invoice = $request->input('new_nomer_invoice'); // new invoice number
+    $new_tanggal_masuk = $request->input('new_tanggal_masuk'); // new transaction date
+
+    // Update the record with the new values
+    DB::table('invoices_reporting')
+        ->where('nomer_invoice', $nomer_invoice)
+        ->update([
+            'nomer_invoice' => $new_nomer_invoice,
+            'tanggal_masuk' => $new_tanggal_masuk,
+        ]);
+
+    return redirect()->route('data-invoice.invoice-reporting.index')
+        ->with('success', 'Invoice updated successfully.');
+}
+
+
+
   
 
     public function download($id)

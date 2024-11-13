@@ -139,7 +139,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-lg-12">
+                            <!-- <div class="col-lg-12">
                                 <div class="card">
                                     <div class="card-header">
                                         <h1>Invoice</h1>
@@ -162,7 +162,46 @@
                                         </table>
                                     </div>
                                 </div>
-                            </div>
+                            </div> -->
+                            <div class="col-lg-12">
+    <div class="card">
+        <div class="card-header">
+            <h1>Invoice</h1>
+            <button class="btn btn-primary" onclick="toggleEdit()">Edit</button>
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Invoice No</th>
+                        <th>Tanggal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td id="invoiceNo">{{ $invoiceMaster[0]->nomer_invoice }}</td>
+                        <td id="tanggalMasuk">{{ $invoiceMaster[0]->tanggal_masuk ?? 'Tanggal transaksi tidak tersedia' }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Edit Form (hidden by default) -->
+            <form id="editForm" action="{{ route('data-invoice.invoice-reporting.updateInvoice') }}" method="POST" style="display: none;">
+                @csrf
+                <input type="hidden" name="nomer_invoice" value="{{ $invoiceMaster[0]->nomer_invoice }}">
+                <div class="form-group">
+                    <label for="new_nomer_invoice">New Invoice No</label>
+                    <input type="text" name="new_nomer_invoice" id="new_nomer_invoice" class="form-control" value="{{ $invoiceMaster[0]->nomer_invoice }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="new_tanggal_masuk">New Tanggal</label>
+                    <input type="date" name="new_tanggal_masuk" id="new_tanggal_masuk" class="form-control" value="{{ $invoiceMaster[0]->tanggal_masuk }}" required>
+                </div>
+                <button type="submit" class="btn btn-success">Save Changes</button>
+            </form>
+        </div>
+    </div>
+</div>
                             <div class="col-lg-12">
                                 <div class="row mb-4">
                                     <div class="col-lg-12">
@@ -573,5 +612,9 @@
         document.getElementById('addDiscountAndNoteForm').style.display = 'table-row';
         this.style.display = 'none'; // Hide the "Tambah Diskon dan Noted" button
     });
+    function toggleEdit() {
+    const editForm = document.getElementById('editForm');
+    editForm.style.display = editForm.style.display === 'none' ? 'block' : 'none';
+}
 </script>
 </html>
