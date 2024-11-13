@@ -271,38 +271,77 @@ class InvoiceReportingController extends Controller
         return redirect()->route('data-invoice.invoice-reporting.display')
                         ->with('success', 'Invoice updated successfully.');
     }
+    // public function display()
+    // {
+    //     $user = Auth::user();
+        
+    //     if (!$user) {
+    //         return redirect()->route('login')->with('alert', 'Waktu login Anda telah habis, silakan login ulang.');
+    //     }
+
+    //     $invoiceMaster = session('invoiceMaster');
+
+    //     if (empty($invoiceMaster)) {
+    //         return redirect()->route('data-invoice.invoice-reporting.index')->with('error', 'No invoice data available.');
+    //     }
+
+    //     $nomer_invoice = $invoiceMaster[0]->nomer_invoice;
+        
+    //     // Retrieve both total discount and concatenated noted
+    //     $invoiceSummary = $this->getInvoiceSummary($nomer_invoice);
+    //     $warehouses = Warehouse::all();
+    //     $headOffice = $warehouses->where('status_office', 'head_office')->first();
+    //     $branchOffices = $warehouses->where('status_office', 'branch_office');
+
+    //     // Pass the data to the view, including invoiceSummary
+    //     return view('data-invoice.invoice-reporting.show', [
+    //         'invoiceMaster' => $invoiceMaster,
+    //         'headOffice' => $headOffice,
+    //         'branchOffices' => $branchOffices,
+    //         'totalDiscount' => $invoiceSummary->total_diskon,
+    //         'reportNoted' => $invoiceSummary->concatenated_noted,
+    //         'invoiceSummary' => $invoiceSummary,
+    //     ]);
+    // }
     public function display()
-    {
-        $user = Auth::user();
-        
-        if (!$user) {
-            return redirect()->route('login')->with('alert', 'Waktu login Anda telah habis, silakan login ulang.');
-        }
-
-        $invoiceMaster = session('invoiceMaster');
-
-        if (empty($invoiceMaster)) {
-            return redirect()->route('data-invoice.invoice-reporting.index')->with('error', 'No invoice data available.');
-        }
-
-        $nomer_invoice = $invoiceMaster[0]->nomer_invoice;
-        
-        // Retrieve both total discount and concatenated noted
-        $invoiceSummary = $this->getInvoiceSummary($nomer_invoice);
-        $warehouses = Warehouse::all();
-        $headOffice = $warehouses->where('status_office', 'head_office')->first();
-        $branchOffices = $warehouses->where('status_office', 'branch_office');
-
-        // Pass the data to the view, including invoiceSummary
-        return view('data-invoice.invoice-reporting.show', [
-            'invoiceMaster' => $invoiceMaster,
-            'headOffice' => $headOffice,
-            'branchOffices' => $branchOffices,
-            'totalDiscount' => $invoiceSummary->total_diskon,
-            'reportNoted' => $invoiceSummary->concatenated_noted,
-            'invoiceSummary' => $invoiceSummary,
-        ]);
+{
+    $user = Auth::user();
+    
+    if (!$user) {
+        return redirect()->route('login')->with('alert', 'Waktu login Anda telah habis, silakan login ulang.');
     }
+
+    $invoiceMaster = session('invoiceMaster');
+
+    if (empty($invoiceMaster)) {
+        return redirect()->route('data-invoice.invoice-reporting.index')->with('error', 'No invoice data available.');
+    }
+
+    $nomer_invoice = $invoiceMaster[0]->nomer_invoice;
+    
+    // Retrieve both total discount and concatenated noted
+    $invoiceSummary = $this->getInvoiceSummary($nomer_invoice);
+    $warehouses = Warehouse::all();
+    $headOffice = $warehouses->where('status_office', 'head_office')->first();
+    $branchOffices = $warehouses->where('status_office', 'branch_office');
+
+    // Retrieve the data for 'rokok' and 'notedRokok' from the invoices_reporting table
+    $invoiceDetails = DB::table('invoices_reporting')
+                        ->where('nomer_invoice', $nomer_invoice)
+                        ->first();
+
+    // Pass the data to the view, including invoiceSummary and the invoiceDetails
+    return view('data-invoice.invoice-reporting.show', [
+        'invoiceMaster' => $invoiceMaster,
+        'headOffice' => $headOffice,
+        'branchOffices' => $branchOffices,
+        'totalDiscount' => $invoiceSummary->total_diskon,
+        'reportNoted' => $invoiceSummary->concatenated_noted,
+        'invoiceSummary' => $invoiceSummary,
+        'invoiceDetails' => $invoiceDetails, // Include the invoice details
+    ]);
+}
+
     
 
 public function addDiscountAndNote(Request $request)
@@ -344,10 +383,10 @@ public function getInvoiceSummary($nomer_invoice)
             DB::raw('GROUP_CONCAT(noted SEPARATOR ", ") AS concatenated_noted')
         )
         ->where('nomer_invoice', $nomer_invoice)
-        ->groupBy('id')  // Group by 'id' or another relevant column
-        ->orderByDesc('id')  // Sort by 'id' in descending order
-        ->limit(1)  // Limit to 1 result
-        ->first(); // Use first() to return a single record
+        ->groupBy('id') 
+        ->orderByDesc('id')  
+        ->limit(1) 
+        ->first(); 
 
     return $summary;
 }
@@ -369,8 +408,49 @@ public function addRokokAndNote(Request $request)
         'updated_at' => now(),
     ]);
 
-    return redirect()->route('data-invoice.invoice-reporting.display')
+    return redirect()->route('data-invoice.invoice-reporting.index')
                      ->with('success', 'Rokok dan notedRokok berhasil ditambahkan.');
+}
+// Delete ALL
+public function deleteAllRokokAndNote(Request $request)
+{
+    $request->validate([
+        'nomer_invoice' => 'required|string|exists:invoices_reporting,nomer_invoice',
+    ]);
+
+    // Check if 'rokok' and 'notedRokok' are not null
+    DB::table('invoices_reporting')
+        ->where('nomer_invoice', $request->nomer_invoice)
+        ->whereNotNull('rokok')
+        ->whereNotNull('notedRokok')
+        ->delete(); // Delete only the row with non-null 'rokok' and 'notedRokok'
+
+    return redirect()->route('data-invoice.invoice-reporting.index')
+                     ->with('success', 'Rokok dan notedRokok berhasil dihapus.');
+}
+
+// delete 1 1
+public function deleteRokokAndNote(Request $request)
+{
+    $request->validate([
+        'nomer_invoice' => 'required|string|exists:invoices_reporting,nomer_invoice',
+    ]);
+
+    // Get the most recent record (the latest one)
+    $latestRecord = DB::table('invoices_reporting')
+        ->where('nomer_invoice', $request->nomer_invoice)
+        ->orderBy('updated_at', 'desc') // Order by latest updated_at
+        ->first(); // Get the most recent row
+
+    if ($latestRecord) {
+        // Delete that specific record
+        DB::table('invoices_reporting')
+            ->where('id', $latestRecord->id)
+            ->delete();
+    }
+
+    return redirect()->route('data-invoice.invoice-reporting.index')
+                     ->with('success', 'Rokok dan notedRokok berhasil dihapus.');
 }
 
 

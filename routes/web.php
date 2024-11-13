@@ -204,6 +204,8 @@ Route::post('/data-invoice/invoice-reporting/add-discount-and-note', [InvoiceRep
 Route::delete('/data-invoice/invoice-reporting/delete/{id}', [InvoiceReportingController::class, 'deleteDiscount'])->name('data-invoice.invoice-reporting.deleteDiscount');
 Route::post('/invoice-reporting/update-invoice', [InvoiceReportingController::class, 'updateInvoice'])->name('data-invoice.invoice-reporting.updateInvoice');
 Route::post('/data-invoice/invoice-reporting/add-rokok-and-note', [InvoiceReportingController::class, 'addRokokAndNote'])->name('data-invoice.invoice-reporting.addRokokAndNote');
+Route::post('/data-invoice/invoice-reporting/deleteRokokAndNote', [InvoiceReportingController::class, 'deleteRokokAndNote'])->name('data-invoice.invoice-reporting.deleteRokokAndNote');
+Route::post('/data-invoice/invoice-reporting/deleteAllRokokAndNote', [InvoiceReportingController::class, 'deleteAllRokokAndNote'])->name('data-invoice.invoice-reporting.deleteAllRokokAndNote');
 
 // Route::get('/data-bongkar-muat/reporting', [BongkarMuatController::class, 'index'])->name('data-bongkar-muat.bongkar-muat.index');
 Route::get('/data-bongkar-muat/reporting-data', [BongkarMuatController::class, 'index'])->name('data-bongkar-muat.getData');

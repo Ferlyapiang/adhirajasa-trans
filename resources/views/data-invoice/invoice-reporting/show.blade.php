@@ -206,6 +206,18 @@
                                         <!-- Add Rokok Button -->
                                         <button id="addRokokButton" class="btn btn-primary" onclick="toggleRokokForm()">Add Cas</button>
 
+                                        <!-- Delete Rokok Button -->
+                                        <form action="{{ route('data-invoice.invoice-reporting.deleteRokokAndNote') }}" method="POST" style="display: inline;">
+                                            @csrf
+                                            <input type="hidden" name="nomer_invoice" value="{{ $invoiceMaster[0]->nomer_invoice }}">
+                                            <button type="submit" class="btn btn-danger">Delete Last</button>
+                                        </form>
+                                        <form action="{{ route('data-invoice.invoice-reporting.deleteRokokAndNote') }}" method="POST" style="display: inline;">
+                                            @csrf
+                                            <input type="hidden" name="nomer_invoice" value="{{ $invoiceMaster[0]->nomer_invoice }}">
+                                            <button type="submit" class="btn btn-danger">Delete All Cas</button>
+                                        </form>
+
                                         <!-- Rokok and Noted Form (Initially Hidden) -->
                                         <div id="rokokForm" style="display: none; margin-top: 20px;">
                                             <form action="{{ route('data-invoice.invoice-reporting.addRokokAndNote') }}" method="POST">
