@@ -139,7 +139,9 @@ class InvoiceReportingController extends Controller
             COALESCE(bank_datas_masuk.account_number, bank_datas_keluar.account_number) AS account_number,
             COALESCE(bank_datas_masuk.account_name, bank_datas_keluar.account_name) AS account_name,
             invoices_reporting.diskon,
-            invoices_reporting.noted
+            invoices_reporting.noted,
+            invoices_reporting.rokok,
+            invoices_reporting.notedRokok
 
 
         FROM 
@@ -181,6 +183,7 @@ class InvoiceReportingController extends Controller
                 COALESCE(invoices_reporting.harga_lembur, 0) > 0
                 OR COALESCE(invoices_reporting.harga_simpan_barang, 0) > 0
                 OR COALESCE(invoices_reporting.harga_kirim_barang, 0) > 0
+                OR COALESCE(invoices_reporting.rokok, 0) > 0
             )";
 
         // Execute the SQL query with the provided invoice number
@@ -350,6 +353,25 @@ public function getInvoiceSummary($nomer_invoice)
 }
 
 
+public function addRokokAndNote(Request $request)
+{
+    $request->validate([
+        'nomer_invoice' => 'required|string|exists:invoices_reporting,nomer_invoice',
+        'rokok' => 'nullable|integer',
+        'notedRokok' => 'nullable|string',
+    ]);
+
+    DB::table('invoices_reporting')->insert([
+        'nomer_invoice' => $request->nomer_invoice,
+        'rokok' => $request->rokok ?? 0,
+        'notedRokok' => $request->notedRokok,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    return redirect()->route('data-invoice.invoice-reporting.display')
+                     ->with('success', 'Rokok dan notedRokok berhasil ditambahkan.');
+}
 
 
 

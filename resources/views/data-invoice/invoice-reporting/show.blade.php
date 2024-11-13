@@ -202,6 +202,30 @@
                             <div class="col-lg-12">
                                 <div class="card-header">
                                     <h1>Detail Barang</h1>
+                                    <div class="col-lg-12">
+                                        <!-- Add Rokok Button -->
+                                        <button id="addRokokButton" class="btn btn-primary" onclick="toggleRokokForm()">Add Cas</button>
+
+                                        <!-- Rokok and Noted Form (Initially Hidden) -->
+                                        <div id="rokokForm" style="display: none; margin-top: 20px;">
+                                            <form action="{{ route('data-invoice.invoice-reporting.addRokokAndNote') }}" method="POST">
+                                                @csrf
+                                                <div class="form-group" hidden>
+                                                    <label for="nomer_invoice">Nomer Invoice</label>
+                                                    <input type="text" name="nomer_invoice" id="nomer_invoice" value="{{ $invoiceMaster[0]->nomer_invoice }}" class="form-control" required>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="notedRokok">Noted</label>
+                                                    <input type="text" name="notedRokok" id="notedRokok" class="form-control">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="rokok">Harga</label>
+                                                    <input type="number" name="rokok" id="rokok" class="form-control">
+                                                </div>
+                                                <button type="submit" class="btn btn-success">Submit</button>
+                                            </form>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="card-body">
                                     <div class="table-responsive">
@@ -225,15 +249,32 @@
                                                         @if ($item->harga_lembur)
                                                         X
                                                         @elseif ($item->harga_kirim_barang)
-                                                        <a href="{{ $item->joc_number ? route('data-gudang.barang-masuk.detail', $item->barang_masuks_id) : route('data-gudang.barang-keluar.showSuratJalan', $item->barang_keluars_id) }}">
-                                                            {{ $item->joc_number ?: $item->nomer_surat_jalan }}
+                                                        @if ($item->joc_number)
+                                                        <a href="{{ route('data-gudang.barang-masuk.detail', $item->barang_masuks_id) }}">
+                                                            {{ $item->joc_number }}
+                                                        </a>
+                                                        @elseif (isset($item->barang_keluars_id))
+                                                        <a href="{{ route('data-gudang.barang-keluar.showSuratJalan', $item->barang_keluars_id) }}">
+                                                            {{ $item->nomer_surat_jalan }}
                                                         </a>
                                                         @else
-                                                        <a href="{{ $item->joc_number ? route('data-gudang.barang-masuk.detail', $item->barang_masuks_id) : route('data-gudang.barang-keluar.showSuratJalan', $item->barang_keluars_id) }}">
-                                                            {{ $item->joc_number ?: $item->nomer_surat_jalan }}
+                                                        X
+                                                        @endif
+                                                        @else
+                                                        @if ($item->joc_number)
+                                                        <a href="{{ route('data-gudang.barang-masuk.detail', $item->barang_masuks_id) }}">
+                                                            {{ $item->joc_number }}
                                                         </a>
+                                                        @elseif (isset($item->barang_keluars_id))
+                                                        <a href="{{ route('data-gudang.barang-keluar.showSuratJalan', $item->barang_keluars_id) }}">
+                                                            {{ $item->nomer_surat_jalan }}
+                                                        </a>
+                                                        @else
+                                                        X
+                                                        @endif
                                                         @endif
                                                     </td>
+
                                                     <td>
                                                         @if ($item->harga_lembur)
                                                         X
@@ -243,54 +284,62 @@
                                                         {{ $item->nomer_polisi ?: $item->nomer_container ?: 'X' }}
                                                         @endif
                                                     </td>
+
                                                     <td>
                                                         @if ($item->harga_lembur)
-                                                        X
+                                                            X
                                                         @elseif ($item->harga_kirim_barang)
-                                                        1X Engkel
+                                                            1X Engkel
+                                                        @elseif ($item->notedRokok)
+                                                            X
                                                         @else
-                                                        {{ $item->total_sisa ?? 'X' }}
+                                                            {{ $item->total_sisa ?? 'X' }}
                                                         @endif
                                                     </td>
+
                                                     <td style="text-align: center;">
                                                         @if ($item->harga_lembur)
-                                                        @if($item->barang_masuks_id && $item->harga_lembur)
-                                                        CAS LEMBUR BONGKAR
-                                                        <a href="{{ $item->joc_number ? route('data-gudang.barang-masuk.detail', $item->barang_masuks_id) : route('data-gudang.barang-keluar.showSuratJalan', $item->barang_keluars_id) }}">
-                                                            {{ $item->joc_number ?? $item->nomer_surat_jalan }}
-                                                        </a>
-
-                                                        @elseif ($item->barang_keluars_id && $item->harga_lembur)
-                                                        CAS LEMBUR MUAT
-                                                        <a href="{{ $item->joc_number ? route('data-gudang.barang-masuk.detail', $item->barang_masuks_id) : route('data-gudang.barang-keluar.showSuratJalan', $item->barang_keluars_id) }}">
-                                                            {{ $item->joc_number ?? $item->nomer_surat_jalan }}
-                                                        </a>
-                                                        @endif
+                                                            @if ($item->barang_masuks_id && $item->harga_lembur)
+                                                                CAS LEMBUR BONGKAR
+                                                                <a href="{{ $item->joc_number ? route('data-gudang.barang-masuk.detail', $item->barang_masuks_id) : route('data-gudang.barang-keluar.showSuratJalan', $item->barang_keluars_id) }}">
+                                                                    {{ $item->joc_number ?? $item->nomer_surat_jalan }}
+                                                                </a>
+                                                            @elseif ($item->barang_keluars_id && $item->harga_lembur)
+                                                                CAS LEMBUR MUAT
+                                                                <a href="{{ $item->joc_number ? route('data-gudang.barang-masuk.detail', $item->barang_masuks_id) : route('data-gudang.barang-keluar.showSuratJalan', $item->barang_keluars_id) }}">
+                                                                    {{ $item->joc_number ?? $item->nomer_surat_jalan }}
+                                                                </a>
+                                                            @endif
                                                         @elseif ($item->harga_kirim_barang)
-                                                        Sewa Mobil
-                                                        <strong>{{ $item->warehouse_name ?? 'X' }}<br></strong>
-                                                        {{ $item->address ?? 'X' }}<br>
-                                                        Nomer Container:
-                                                        <strong>{{ $item->nomer_container ?? ($item->nomer_polisi ?? 'X') }}</strong>
+                                                            Sewa Mobil
+                                                            <strong>{{ $item->warehouse_name ?? 'X' }}<br></strong>
+                                                            {{ $item->address ?? 'X' }}<br>
+                                                            Nomer Container:
+                                                            <strong>{{ $item->nomer_container ?? ($item->nomer_polisi ?? 'X') }}</strong>
+                                                        @elseif ($item->notedRokok)
+                                                            <strong>{{ $item->notedRokok }}</strong>
                                                         @else
-                                                        Kontainer
-                                                        <strong>{{ $item->type_mobil ?? '' }}</strong><br>
-                                                        Masa Penimbunan:
-                                                        <strong>{{ $item->tanggal_masuk_penimbunan ? \Carbon\Carbon::parse($item->tanggal_masuk_penimbunan)->format('d/m/Y') : '' }}</strong>
-                                                        -
-                                                        <strong>{{ $item->tanggal_keluar_penimbunan ? \Carbon\Carbon::parse($item->tanggal_keluar_penimbunan)->format('d/m/Y') : '' }}</strong>
+                                                            Kontainer
+                                                            <strong>{{ $item->type_mobil ?? '' }}</strong><br>
+                                                            Masa Penimbunan:
+                                                            <strong>{{ $item->tanggal_masuk_penimbunan ? \Carbon\Carbon::parse($item->tanggal_masuk_penimbunan)->format('d/m/Y') : '' }}</strong>
+                                                            -
+                                                            <strong>{{ $item->tanggal_keluar_penimbunan ? \Carbon\Carbon::parse($item->tanggal_keluar_penimbunan)->format('d/m/Y') : '' }}</strong>
                                                         @endif
                                                     </td>
+
                                                     <td>
                                                         @php
                                                         $unitPrice =
-                                                        $item->harga_lembur ??
+                                                        ($item->harga_lembur ??
                                                         ($item->harga_kirim_barang ??
-                                                        ($item->harga_simpan_barang ?? 0));
+                                                        ($item->harga_simpan_barang ?? 0))) +
+                                                        ($item->rokok ?? 0); // Include Rokok if not null
                                                         $subtotal += $unitPrice;
                                                         @endphp
                                                         {{ number_format($unitPrice) }}
                                                     </td>
+
                                                 </tr>
                                                 @endforeach
                                             </tbody>
@@ -350,18 +399,15 @@
                                                 <form action="{{ route('data-invoice.invoice-reporting.addDiscountAndNote') }}" method="POST">
                                                     @csrf
 
-                                                    <!-- Hidden Nomer Invoice Field -->
                                                     <input type="hidden" name="nomer_invoice" value="{{ $invoiceMaster[0]->nomer_invoice }}">
 
                                                     @if (!empty($invoiceMaster[0]->customer_no_npwp))
 
-                                                    <!-- Display Subtotal -->
                                                     <tr>
                                                         <td colspan="4" style="text-align: right;">Sub total :</td>
                                                         <td>{{ number_format($subtotal) }}</td>
                                                     </tr>
 
-                                                    <!-- Display Total Discount if set and not 0 -->
                                                     @if ($invoiceSummary && $invoiceSummary->total_diskon > 0)
                                                     <tr>
                                                         <td colspan="4" style="text-align: right;">Total Diskon :</td>
@@ -377,7 +423,6 @@
                                                     </tr>
                                                     @endif
 
-                                                    <!-- Display PPN and PPH -->
                                                     <tr>
                                                         <td colspan="4" style="text-align: right;">PPN (11%)</td>
                                                         <td>{{ number_format($ppn) }}</td>
@@ -483,7 +528,7 @@
                                                     </form>
                                                 </tr>
 
-                                            </tfoot>
+                                                </tfoot>
                                         </table>
                                         <div class="container">
                                             <div class="row">
@@ -576,6 +621,20 @@
     function toggleEdit() {
         const editForm = document.getElementById('editForm');
         editForm.style.display = editForm.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function toggleRokokForm() {
+        var form = document.getElementById("rokokForm");
+        var button = document.getElementById("addRokokButton");
+
+        // Toggle display
+        if (form.style.display === "none") {
+            form.style.display = "block";
+            button.style.display = "none"; // Hide the button after showing the form
+        } else {
+            form.style.display = "none";
+            button.style.display = "inline-block"; // Show the button again if needed
+        }
     }
 </script>
 
