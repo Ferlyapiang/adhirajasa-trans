@@ -72,7 +72,7 @@
                             </div>
                             <div class="mb-3">
                                 <label for="status_office" class="form-label">Status Office:</label>
-                                <select id="status_office" name="status" class="form-select" required>
+                                <select id="status_office" name="status_office" class="form-select" required>
                                     <option value="head_office">Kantor Pusat</option>
                                     <option value="branch_office">Kantor Cabang</option>
                                 </select>
