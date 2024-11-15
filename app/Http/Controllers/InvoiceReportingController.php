@@ -135,9 +135,19 @@ class InvoiceReportingController extends Controller
             COALESCE(barang_masuks.nomer_polisi, barang_keluars.nomer_polisi) AS nomer_polisi,
             COALESCE(barang_masuks.nomer_container, barang_keluars.nomer_container) AS nomer_container, 
             COALESCE(type_mobil_masuk.type, type_mobil_keluar.type) AS type_mobil,
-            COALESCE(bank_datas_masuk.bank_name, bank_datas_keluar.bank_name) AS bank_name,
+             CASE 
+                WHEN COALESCE(customers_masuks.no_npwp, customers_keluars.no_npwp) IS NOT NULL 
+                AND bank_datas_masuk.status_bank = 'PT' THEN bank_datas_masuk.bank_name
+                WHEN COALESCE(customers_masuks.no_ktp, customers_keluars.no_ktp) IS NOT NULL 
+                AND bank_datas_masuk.status_bank = 'Pribadi' THEN bank_datas_masuk.bank_name
+                WHEN COALESCE(customers_masuks.no_npwp, customers_keluars.no_npwp) IS NOT NULL 
+                AND bank_datas_keluar.status_bank = 'PT' THEN bank_datas_keluar.bank_name
+                WHEN COALESCE(customers_masuks.no_ktp, customers_keluars.no_ktp) IS NOT NULL 
+                AND bank_datas_keluar.status_bank = 'Pribadi' THEN bank_datas_keluar.bank_name
+                ELSE NULL
+            END AS bank_name,
             COALESCE(bank_datas_masuk.account_number, bank_datas_keluar.account_number) AS account_number,
-            COALESCE(bank_datas_masuk.account_name, bank_datas_keluar.account_name) AS account_name,
+    COALESCE(bank_datas_masuk.account_name, bank_datas_keluar.account_name) AS account_name,
             invoices_reporting.diskon,
             invoices_reporting.noted,
             invoices_reporting.rokok,
@@ -158,8 +168,19 @@ class InvoiceReportingController extends Controller
             warehouses AS warehouses_keluars ON barang_keluars.gudang_id = warehouses_keluars.id
         LEFT JOIN 
             customers AS customers_keluars ON barang_keluars.customer_id = customers_keluars.id
-        LEFT JOIN bank_datas AS bank_datas_masuk ON warehouses_masuks.id = bank_datas_masuk.id
-        LEFT JOIN bank_datas AS bank_datas_keluar ON warehouses_keluars.id = bank_datas_keluar.id
+        LEFT JOIN 
+            bank_datas AS bank_datas_masuk ON warehouses_masuks.id = bank_datas_masuk.warehouse_id 
+            AND (
+                (COALESCE(customers_masuks.no_npwp, customers_keluars.no_npwp) IS NOT NULL AND bank_datas_masuk.status_bank = 'PT') OR
+                (COALESCE(customers_masuks.no_ktp, customers_keluars.no_ktp) IS NOT NULL AND bank_datas_masuk.status_bank = 'Pribadi')
+            )
+
+        LEFT JOIN 
+            bank_datas AS bank_datas_keluar ON warehouses_keluars.id = bank_datas_keluar.warehouse_id 
+            AND (
+                (COALESCE(customers_masuks.no_npwp, customers_keluars.no_npwp) IS NOT NULL AND bank_datas_keluar.status_bank = 'PT') OR
+                (COALESCE(customers_masuks.no_ktp, customers_keluars.no_ktp) IS NOT NULL AND bank_datas_keluar.status_bank = 'Pribadi')
+            )
         LEFT JOIN (
             SELECT 
                 barang_masuk_id, SUM(qty) AS total_qty 
