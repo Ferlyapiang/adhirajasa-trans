@@ -13,7 +13,6 @@ class BarangsTableSeeder extends Seeder
             [
                 'nama_barang' => 'JELLY DUS',
                 'jenis' => 'DUS',
-                'sku' => 'KAKAKA',
                 'pemilik' => '2',
                 'status' => 'active',
                 'created_at' => now(),
@@ -22,7 +21,6 @@ class BarangsTableSeeder extends Seeder
             [
                 'nama_barang' => 'Permata Hijau PCS',
                 'jenis' => 'PCS',
-                'sku' => 'ITEMA123',
                 'pemilik' => '3',
                 'status' => 'active',
                 'created_at' => now(),
@@ -31,7 +29,6 @@ class BarangsTableSeeder extends Seeder
             [
                 'nama_barang' => 'Jelly CON',
                 'jenis' => 'CON',
-                'sku' => 'ITEMB234',
                 'pemilik' => '4',
                 'status' => 'inactive',
                 'created_at' => now(),
@@ -40,7 +37,6 @@ class BarangsTableSeeder extends Seeder
             [
                 'nama_barang' => 'Indomie DUS',
                 'jenis' => 'DUS',
-                'sku' => 'ITEMC345',
                 'pemilik' => '2',
                 'status' => 'active',
                 'created_at' => now(),
@@ -49,7 +45,6 @@ class BarangsTableSeeder extends Seeder
             [
                 'nama_barang' => 'Bizsco PCS',
                 'jenis' => 'PCS',
-                'sku' => 'ITEMD456',
                 'pemilik' => '2',
                 'status' => 'inactive',
                 'created_at' => now(),

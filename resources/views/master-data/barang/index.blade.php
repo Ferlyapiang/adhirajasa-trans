@@ -130,7 +130,6 @@
                         <tr>
                             <th>Nama Barang</th>
                             <th>Jenis</th>
-                            <th>SKU</th>
                             <th>Pemilik</th>
                             <th>Status</th>
                             <th>Action</th>
@@ -141,7 +140,6 @@
                         <tr>
                             <td>{{ $barang->nama_barang }}</td>
                             <td>{{ $barang->jenis }}</td>
-                            <td>{{ $barang->sku }}</td>
                             <td>{{ $barang->customer ? $barang->customer->name : 'N/A' }}</td> <!-- Display customer name -->
                             <td class="{{ $barang->status == 'active' ? 'status-active' : 'status-inactive' }} text-center">
                                 {{ ucfirst($barang->status) }}

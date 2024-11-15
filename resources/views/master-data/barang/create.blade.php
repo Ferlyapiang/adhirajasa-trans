@@ -94,16 +94,6 @@
                             <span class="text-danger">{{ $message }}</span>
                         @enderror
                     </div>
-
-                
-                    <div class="form-group">
-                        <label for="sku">SKU</label>
-                        <input type="text" name="sku" class="form-control" id="sku" oninput="this.value = this.value.toUpperCase();" required>
-                        @error('sku')
-                            <span class="text-danger">{{ $message }}</span>
-                        @enderror
-                    </div>
-                
                     <div class="form-group">
                         <label for="status">Status</label>
                         <select name="status" class="form-control select2" id="status" required>

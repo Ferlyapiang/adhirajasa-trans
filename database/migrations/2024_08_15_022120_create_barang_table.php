@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->string('nama_barang');
             $table->string('jenis');
-            $table->string('sku');
             $table->string('pemilik');
             $table->string('status');
             $table->timestamps();

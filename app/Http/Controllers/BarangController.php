@@ -56,7 +56,6 @@ class BarangController extends Controller
         $request->validate([
             'nama_barang' => 'required',
             'jenis' => 'required',
-            'sku' => 'required',
             'pemilik' => 'required',
             'status' => 'required',
         ]);
@@ -92,7 +91,6 @@ class BarangController extends Controller
         $request->validate([
             'nama_barang' => 'required',
             'jenis' => 'required',
-            'sku' => 'required',
             'pemilik' => 'required',
             'status' => 'required',
         ]);
