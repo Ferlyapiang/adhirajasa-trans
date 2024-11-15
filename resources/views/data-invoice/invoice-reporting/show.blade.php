@@ -227,13 +227,15 @@
                                                     <input type="text" name="nomer_invoice" id="nomer_invoice" value="{{ $invoiceMaster[0]->nomer_invoice }}" class="form-control" required>
                                                 </div>
                                                 <div class="form-group">
-                                                    <label for="notedRokok">Noted</label>
-                                                    <input type="text" name="notedRokok" id="notedRokok" class="form-control">
+                                                    <label for="notedRokok">Description</label>
+                                                    <textarea name="notedRokok" cols="20" rows="5" name="notedRokok" class="form-control"></textarea>
                                                 </div>
                                                 <div class="form-group">
                                                     <label for="rokok">Harga</label>
-                                                    <input type="number" name="rokok" id="rokok" class="form-control">
+                                                    <input type="text" name="rokok_display" id="rokok_display" class="form-control" oninput="formatRupiah(this)">
+                                                    <input type="hidden" name="rokok" id="rokok" />
                                                 </div>
+                                                
                                                 <button type="submit" class="btn btn-success">Submit</button>
                                             </form>
                                         </div>
@@ -257,6 +259,7 @@
                                                 @endphp
                                                 @foreach ($invoiceMaster as $item)
                                                 <tr>
+                                                    {{-- tahap 1 --}}
                                                     <td>
                                                         @if ($item->harga_lembur)
                                                         X
@@ -286,7 +289,7 @@
                                                         @endif
                                                         @endif
                                                     </td>
-
+                                                    {{-- tahap 2 --}}
                                                     <td>
                                                         @if ($item->harga_lembur)
                                                         X
@@ -297,6 +300,7 @@
                                                         @endif
                                                     </td>
 
+                                                    {{-- tahap 3 --}}
                                                     <td>
                                                         @if ($item->harga_lembur)
                                                             X
@@ -305,10 +309,12 @@
                                                         @elseif ($item->notedRokok)
                                                             X
                                                         @else
-                                                            {{ $item->total_sisa ?? 'X' }}
+                                                            {{ $item->total_sisa ?? 'X' }} PKGS
                                                         @endif
                                                     </td>
 
+                                                    {{-- tabel 4 --}}
+                                                    @if ($invoiceMaster[0]->customer_no_ktp)
                                                     <td style="text-align: center;">
                                                         @if ($item->harga_lembur)
                                                             @if ($item->barang_masuks_id && $item->harga_lembur)
@@ -339,7 +345,45 @@
                                                             <strong>{{ $item->tanggal_keluar_penimbunan ? \Carbon\Carbon::parse($item->tanggal_keluar_penimbunan)->format('d/m/Y') : '' }}</strong>
                                                         @endif
                                                     </td>
+                                                    {{-- tabel 4 --}}
+                                                    @elseif ($invoiceMaster[0]->customer_no_npwp)
+                                                    <td style="text-align: center;">
+                                                        @if ($item->harga_lembur)
 
+                                                            @if ($item->barang_masuks_id && $item->harga_lembur)
+                                                                CAS LEMBUR BONGKAR
+                                                                <a href="{{ $item->joc_number ? route('data-gudang.barang-masuk.detail', $item->barang_masuks_id) : route('data-gudang.barang-keluar.showSuratJalan', $item->barang_keluars_id) }}">
+                                                                    {{ $item->joc_number ?? $item->nomer_surat_jalan }}
+                                                                </a>
+                                                            @elseif ($item->barang_keluars_id && $item->harga_lembur)
+                                                                CAS LEMBUR MUAT
+                                                                <a href="{{ $item->joc_number ? route('data-gudang.barang-masuk.detail', $item->barang_masuks_id) : route('data-gudang.barang-keluar.showSuratJalan', $item->barang_keluars_id) }}">
+                                                                    {{ $item->joc_number ?? $item->nomer_surat_jalan }}
+                                                                </a>
+                                                            @endif
+
+                                                        @elseif ($item->harga_kirim_barang)
+
+                                                            Sewa Mobil
+                                                            <strong>{{ $item->warehouse_name ?? 'X' }}<br></strong>
+                                                            {{ $item->address ?? 'X' }}<br>
+                                                            Nomer Container:
+                                                            <strong>{{ $item->nomer_container ?? ($item->nomer_polisi ?? 'X') }}</strong>
+                                                            
+                                                        @elseif ($item->notedRokok)
+                                                            <strong>{{ $item->notedRokok }}</strong>
+                                                        @else
+                                                            {{-- Kontainer
+                                                            <strong>{{ $item->type_mobil ?? '' }}</strong><br>
+                                                            Masa Penimbunan:
+                                                            <strong>{{ $item->tanggal_masuk_penimbunan ? \Carbon\Carbon::parse($item->tanggal_masuk_penimbunan)->format('d/m/Y') : '' }}</strong>
+                                                            -
+                                                            <strong>{{ $item->tanggal_keluar_penimbunan ? \Carbon\Carbon::parse($item->tanggal_keluar_penimbunan)->format('d/m/Y') : '' }}</strong> --}}
+                                                            <strong>JASA BONGKAR MUAT</strong>
+                                                        @endif
+                                                    </td>
+                                                    @endif
+                                                    {{-- tabel 5 --}}
                                                     <td>
                                                         @php
                                                         $unitPrice =
@@ -526,9 +570,13 @@
                                                         <input type="hidden" name="nomer_invoice" value="{{ $invoiceMaster[0]->nomer_invoice }}">
 
                                                         <!-- Input for Diskon -->
-                                                        <td colspan="1" style="text-align: right;">Diskon</td>
-                                                        <td colspan="1"><input type="number" name="diskon" class="form-control" value="0"></td>
-
+                                                        <td colspan="1" style="text-align: right;">
+                                                            Diskon
+                                                        </td>
+                                                        <td colspan="1">
+                                                            <input type="text" name="diskon_display" id="diskon_display" class="form-control" oninput="formatRupiah(this)">
+                                                            <input type="hidden" name="diskon" id="diskon" />
+                                                        </td>
                                                         <!-- Input for Noted -->
                                                         <td colspan="1" style="text-align: right;">Noted</td>
                                                         <td colspan="1"><textarea type="text" name="noted" class="form-control" value=""></textarea></td>
@@ -648,6 +696,15 @@
             button.style.display = "inline-block"; // Show the button again if needed
         }
     }
+    function formatRupiah(input) {
+        const angka = input.value.replace(/[^,\d]/g, ''); // Menghapus karakter selain angka
+        const formatted = new Intl.NumberFormat('id-ID').format(angka); // Memformat dalam format Rupiah
+
+        input.value = formatted; // Tampilkan dengan format Rupiah
+        document.getElementById('rokok').value = angka; // Masukkan nilai numerik tanpa pemformatan ke input hidden
+        document.getElementById('diskon').value = angka; // Masukkan nilai numerik tanpa pemformatan ke input hidden
+    }
+
 </script>
 
 </html>
