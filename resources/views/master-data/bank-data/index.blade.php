@@ -107,6 +107,7 @@
                                 <th>Nomor Rekening</th>
                                 <th>Nama Rekening</th>
                                 <th>Nama Gudang</th>
+                                <th>Status Bank</th>
                                 <th>Status</th>
                                 <th>Actions</th>
                             </tr>
@@ -119,6 +120,7 @@
                                 <td>{{ $bankData->account_number }}</td>
                                 <td>{{ $bankData->account_name }}</td>
                                 <td>{{ $bankData->warehouse->name ?? 'N/A' }}</td>
+                                <td>{{ $bankData->status_bank }}</td>
                                 <td
                                     class="{{ $bankData->status == 'active' ? 'status-active' : 'status-inactive' }} text-center">
                                     {{ ucfirst($bankData->status) }}

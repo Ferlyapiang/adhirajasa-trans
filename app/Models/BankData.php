@@ -17,6 +17,7 @@ class BankData extends Model
         'account_number',
         'account_name',
         'warehouse_id',
+        'status_bank',
         'status'
     ];
 

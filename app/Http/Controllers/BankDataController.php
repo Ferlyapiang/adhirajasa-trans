@@ -36,7 +36,8 @@ class BankDataController extends Controller
 {
     $user = Auth::user();
     $warehouses = Warehouse::where('status', 'active')->get();
-    return view('master-data.bank-data.create', compact('warehouses', 'user'));
+    $existingBankData = BankData::where('warehouse_id', $user->warehouse_id)->pluck('status_bank')->toArray();
+    return view('master-data.bank-data.create', compact('warehouses', 'user', 'existingBankData'));
 }
 
 
@@ -49,20 +50,45 @@ public function store(Request $request)
         'account_number' => 'required|string|max:255',
         'account_name' => 'required|string|max:255',
         'warehouse_id' => 'required|exists:warehouses,id',
+        'status_bank' => 'required|string|max:50',
         'status' => 'required|in:active,inactive',
     ]);
     
     if ($user->warehouse_id) {
-        if ($user->warehouse_id != $request->warehouse_id) {
-            return redirect()->back()->withErrors(['warehouse_id' => 'You can only use your assigned warehouse.']);
-        }
+    if ($user->warehouse_id != $request->warehouse_id) {
+        return redirect()->back()->withErrors(['warehouse_id' => 'Anda hanya dapat menggunakan gudang yang telah ditentukan untuk Anda.']);
     }
+}
+
+$existingBankData = BankData::where('warehouse_id', $request->warehouse_id)->pluck('status_bank')->toArray();
+
+if (in_array('PT', $existingBankData) && in_array('Pribadi', $existingBankData)) {
+    return redirect()->back()->withErrors([
+        'status_bank' => 'Gudang ini sudah memiliki data bank dengan status PT dan Pribadi. ' .
+                         'Data Keseluruhan: ' .
+                         'Nama Bank: ' . $request->bank_name . ', ' .
+                         'Nomor Rekening: ' . $request->account_number . ', ' .
+                         'Nama Rekening: ' . $request->account_name . '.'
+    ])->withInput();
+}
+
+if (in_array($request->status_bank, $existingBankData)) {
+    return redirect()->back()->withErrors([
+        'status_bank' => 'Data Keseluruhan: ' .
+                         'Nama Bank: ' . $request->bank_name . ', ' .
+                         'Nomor Rekening: ' . $request->account_number . ', ' .
+                         'Nama Rekening: ' . $request->account_name . '. ' .
+                         'Gudang ini sudah memiliki data bank dengan status: ' . $request->status_bank
+    ])->withInput();
+}
+
 
     $bankData = BankData::create([
         'bank_name' => $request->bank_name,
         'account_number' => $request->account_number,
         'account_name' => $request->account_name,
         'warehouse_id' => $request->warehouse_id,
+        'status_bank' => $request->status_bank,
         'status' => $request->status,
     ]);
 
@@ -92,20 +118,16 @@ public function edit(BankData $bankData)
         'account_number' => 'required|string|max:255',
         'account_name' => 'required|string|max:255',
         'warehouse_id' => 'required|exists:warehouses,id',
+        'status_bank' => 'required|string|max:50',
         'status' => 'required|in:active,inactive',
     ]);
-    // dd($request->all());
-
-    // Find the warehouse ID based on the name
-    // $warehouse = Warehouse::where('name', $request->warehouse_name)->firstOrFail();
-    // $warehouse_id = $warehouse->id;
-
-    // Update bank data with warehouse_id
+    
     $bankData->update([
         'bank_name' => $request->bank_name,
         'account_number' => $request->account_number,
         'account_name' => $request->account_name,
-        'warehouse_id' => $request->warehouse_id,  // Use warehouse_id here
+        'warehouse_id' => $request->warehouse_id, 
+        'status_bank' => $request->status_bank,
         'status' => $request->status,
     ]);
 

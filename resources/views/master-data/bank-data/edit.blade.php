@@ -70,6 +70,14 @@
                             @endforeach
                         </select>
                     </div>
+                    <div class="form-group mt-2">
+                        <label for="status_bank">Status Bank</label>
+                        <select id="status_bank" name="status_bank" class="form-control" required>
+                            <option value="" disabled selected>Pilih Status Bank</option>
+                            <option value="PT" {{ $bankData->status_bank == 'PT' ? 'selected' : '' }}>PT</option>
+                            <option value="Pribadi" {{ $bankData->status_bank == 'Pribadi' ? 'selected' : '' }}>Pribadi</option>
+                        </select>
+                    </div>
                     
                     <div class="form-group mt-2">
                         <label for="status">Status</label>
