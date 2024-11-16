@@ -300,7 +300,7 @@
                         <input type="text" id="item_joc_number" class="form-control" placeholder="Auto-generated" readonly>
                     </div>
                     <div class="form-group">
-                        <label for="item_name">Nama Barang</label>
+                        <label for="item_name">Nama Barang || JO Number</label>
                         <select id="item_name" class="form-control" required>
                             <option value="" disabled selected>Pilih Nama Barang</option>
                             <!-- Option barang akan ditambahkan di sini -->
@@ -354,7 +354,7 @@
                         <input type="text" id="edit_item_joc_number" class="form-control" readonly>
                     </div>
                     <div class="form-group">
-                        <label for="edit_item_name">Nama Barang</label>
+                        <label for="edit_item_name">Nama Barang || JO Number</label>
                         <select id="edit_item_name" class="form-control" required disabled>
                             <option value="" disabled selected>Pilih Nama Barang</option>
                             <!-- Option barang akan ditambahkan di sini -->
@@ -561,7 +561,7 @@
 
                             response.items.forEach(item => {
                                 itemsDropdown.append(
-                                    `<option value="${item.barang_id}" data-unit="${item.unit}" data-joc-number="${item.joc_number}" data-barang-masuk-id="${item.barang_masuk_id}" data-sisa-barang="${item.qty}">${item.barang_name}</option>`
+                                    `<option value="${item.barang_id}" data-unit="${item.unit}" data-joc-number="${item.joc_number}" data-barang-masuk-id="${item.barang_masuk_id}" data-sisa-barang="${item.qty}">${item.barang_name} || ${item.joc_number}</option>`
                                 );
                             });
 

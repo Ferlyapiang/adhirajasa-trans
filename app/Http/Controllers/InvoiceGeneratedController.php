@@ -226,11 +226,6 @@ class InvoiceGeneratedController extends Controller
 
 
 
-        if (!$user) {
-            return redirect()->route('login')->with('alert', 'Waktu login Anda telah habis, silakan login ulang.');
-        } else {
-            $invoiceMaster = $invoiceMaster->where('barang_masuks.gudang_id', $user->warehouse_id);
-        }
 
         $invoiceMaster = $invoiceMaster
             ->whereNull('invoices.nomer_invoice')
@@ -264,9 +259,15 @@ class InvoiceGeneratedController extends Controller
                 )
                 OR invoices.barang_keluars_id IS NOT NULL
         
-    ');
+        ');
 
         $invoiceMaster = $invoiceMaster->orderBy('barang_keluars.tanggal_keluar', 'asc')->get();
+        
+        if (!$user) {
+            return redirect()->route('login')->with('alert', 'Waktu login Anda telah habis, silakan login ulang.');
+        } else {
+            $invoiceMaster = $invoiceMaster->where('barang_masuks.gudang_id', $user->warehouse_id);
+        }
 
         $owners = $invoiceMaster->map(function ($item) {
             return $item->customer_masuk_name ?: $item->customer_keluar_name;
