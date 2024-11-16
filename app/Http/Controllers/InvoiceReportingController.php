@@ -73,10 +73,10 @@ class InvoiceReportingController extends Controller
                 COALESCE(invoices_reporting.harga_lembur, 0) > 0 
                 OR COALESCE(invoices_reporting.qty, 0) > 0
             ');
-        
+
         $invoiceMaster = $invoiceMaster->groupBy('invoices_reporting.nomer_invoice');
         $invoiceMaster = $invoiceMaster->orderBy('invoices_reporting.nomer_invoice', 'desc')->get();
-        
+
         $owners = $invoiceMaster->map(function ($item) {
             return $item->customer_name;
         })
@@ -92,6 +92,26 @@ class InvoiceReportingController extends Controller
 
         return view('data-invoice.invoice-reporting.index', compact('invoiceMaster', 'owners', 'tanggalTagihans'));
     }
+
+    public function destroy(Request $request)
+    {
+        $request->validate([
+            'nomer_invoice' => 'required|string',
+        ]);
+
+        try {
+            // Hapus data berdasarkan nomor invoice
+            DB::table('invoices_reporting')->where('nomer_invoice', $request->nomer_invoice)->delete();
+
+            // Redirect dengan pesan sukses
+            return redirect()->route('data-invoice.invoice-reporting.index')->with('success', 'Data berhasil dihapus.');
+        } catch (\Exception $e) {
+            // Redirect dengan pesan error jika ada masalah
+            return redirect()->route('data-invoice.invoice-reporting.index')->with('error', 'Terjadi kesalahan saat menghapus data.');
+        }
+    }
+
+
 
     public function show(Request $request)
     {
@@ -226,32 +246,28 @@ class InvoiceReportingController extends Controller
     }
 
     public function updateInvoice(Request $request)
-{
-    $request->validate([
-        'nomer_invoice' => 'required',
-        'new_nomer_invoice' => 'required',
-        'new_tanggal_masuk' => 'required|date',
-    ]);
-
-    $nomer_invoice = $request->input('nomer_invoice'); // current invoice number
-    $new_nomer_invoice = $request->input('new_nomer_invoice'); // new invoice number
-    $new_tanggal_masuk = $request->input('new_tanggal_masuk'); // new transaction date
-
-    // Update the record with the new values
-    DB::table('invoices_reporting')
-        ->where('nomer_invoice', $nomer_invoice)
-        ->update([
-            'nomer_invoice' => $new_nomer_invoice,
-            'tanggal_masuk' => $new_tanggal_masuk,
+    {
+        $request->validate([
+            'nomer_invoice' => 'required',
+            'new_nomer_invoice' => 'required',
+            'new_tanggal_masuk' => 'required|date',
         ]);
 
-    return redirect()->route('data-invoice.invoice-reporting.index')
-        ->with('success', 'Invoice updated successfully.');
-}
+        $nomer_invoice = $request->input('nomer_invoice'); // current invoice number
+        $new_nomer_invoice = $request->input('new_nomer_invoice'); // new invoice number
+        $new_tanggal_masuk = $request->input('new_tanggal_masuk'); // new transaction date
 
+        // Update the record with the new values
+        DB::table('invoices_reporting')
+            ->where('nomer_invoice', $nomer_invoice)
+            ->update([
+                'nomer_invoice' => $new_nomer_invoice,
+                'tanggal_masuk' => $new_tanggal_masuk,
+            ]);
 
-
-  
+        return redirect()->route('data-invoice.invoice-reporting.index')
+            ->with('success', 'Invoice updated successfully.');
+    }
 
     public function download($id)
     {
@@ -267,7 +283,7 @@ class InvoiceReportingController extends Controller
         $headOffice = $warehouses->where('status_office', 'head_office')->first();
         $branchOffices = $warehouses->where('status_office', 'branch_office');
         $nomer_invoice = $invoiceMaster[0]->nomer_invoice;
-        
+
         // Retrieve both total discount and concatenated noted
         $invoiceSummary = $this->getInvoiceSummary($nomer_invoice);
 
@@ -290,190 +306,154 @@ class InvoiceReportingController extends Controller
         $invoice->save();
 
         return redirect()->route('data-invoice.invoice-reporting.display')
-                        ->with('success', 'Invoice updated successfully.');
+            ->with('success', 'Invoice updated successfully.');
     }
-    // public function display()
-    // {
-    //     $user = Auth::user();
-        
-    //     if (!$user) {
-    //         return redirect()->route('login')->with('alert', 'Waktu login Anda telah habis, silakan login ulang.');
-    //     }
-
-    //     $invoiceMaster = session('invoiceMaster');
-
-    //     if (empty($invoiceMaster)) {
-    //         return redirect()->route('data-invoice.invoice-reporting.index')->with('error', 'No invoice data available.');
-    //     }
-
-    //     $nomer_invoice = $invoiceMaster[0]->nomer_invoice;
-        
-    //     // Retrieve both total discount and concatenated noted
-    //     $invoiceSummary = $this->getInvoiceSummary($nomer_invoice);
-    //     $warehouses = Warehouse::all();
-    //     $headOffice = $warehouses->where('status_office', 'head_office')->first();
-    //     $branchOffices = $warehouses->where('status_office', 'branch_office');
-
-    //     // Pass the data to the view, including invoiceSummary
-    //     return view('data-invoice.invoice-reporting.show', [
-    //         'invoiceMaster' => $invoiceMaster,
-    //         'headOffice' => $headOffice,
-    //         'branchOffices' => $branchOffices,
-    //         'totalDiscount' => $invoiceSummary->total_diskon,
-    //         'reportNoted' => $invoiceSummary->concatenated_noted,
-    //         'invoiceSummary' => $invoiceSummary,
-    //     ]);
-    // }
     public function display()
-{
-    $user = Auth::user();
-    
-    if (!$user) {
-        return redirect()->route('login')->with('alert', 'Waktu login Anda telah habis, silakan login ulang.');
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return redirect()->route('login')->with('alert', 'Waktu login Anda telah habis, silakan login ulang.');
+        }
+
+        $invoiceMaster = session('invoiceMaster');
+
+        if (empty($invoiceMaster)) {
+            return redirect()->route('data-invoice.invoice-reporting.index')->with('error', 'No invoice data available.');
+        }
+
+        $nomer_invoice = $invoiceMaster[0]->nomer_invoice;
+
+        // Retrieve both total discount and concatenated noted
+        $invoiceSummary = $this->getInvoiceSummary($nomer_invoice);
+        $warehouses = Warehouse::all();
+        $headOffice = $warehouses->where('status_office', 'head_office')->first();
+        $branchOffices = $warehouses->where('status_office', 'branch_office');
+
+        // Retrieve the data for 'rokok' and 'notedRokok' from the invoices_reporting table
+        $invoiceDetails = DB::table('invoices_reporting')
+            ->where('nomer_invoice', $nomer_invoice)
+            ->first();
+
+        // Pass the data to the view, including invoiceSummary and the invoiceDetails
+        return view('data-invoice.invoice-reporting.show', [
+            'invoiceMaster' => $invoiceMaster,
+            'headOffice' => $headOffice,
+            'branchOffices' => $branchOffices,
+            'totalDiscount' => $invoiceSummary->total_diskon,
+            'reportNoted' => $invoiceSummary->concatenated_noted,
+            'invoiceSummary' => $invoiceSummary,
+            'invoiceDetails' => $invoiceDetails, // Include the invoice details
+        ]);
     }
 
-    $invoiceMaster = session('invoiceMaster');
 
-    if (empty($invoiceMaster)) {
-        return redirect()->route('data-invoice.invoice-reporting.index')->with('error', 'No invoice data available.');
+
+    public function addDiscountAndNote(Request $request)
+    {
+        $request->validate([
+            'nomer_invoice' => 'required|string|exists:invoices_reporting,nomer_invoice',
+            'diskon' => 'nullable|integer',
+            'noted' => 'nullable|string',
+        ]);
+
+        DB::table('invoices_reporting')->insert([
+            'nomer_invoice' => $request->nomer_invoice,
+            'diskon' => $request->diskon ?? 0,
+            'noted' => $request->noted,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return redirect()->route('data-invoice.invoice-reporting.display')
+            ->with('success', 'Diskon dan noted berhasil ditambahkan.');
     }
 
-    $nomer_invoice = $invoiceMaster[0]->nomer_invoice;
-    
-    // Retrieve both total discount and concatenated noted
-    $invoiceSummary = $this->getInvoiceSummary($nomer_invoice);
-    $warehouses = Warehouse::all();
-    $headOffice = $warehouses->where('status_office', 'head_office')->first();
-    $branchOffices = $warehouses->where('status_office', 'branch_office');
+    public function deleteDiscount($id)
+    {
+        DB::table('invoices_reporting')->where('id', $id)->delete();
+        // dd($id);
+        return redirect()->route('data-invoice.invoice-reporting.display')
+            ->with('success', 'Diskon dan noted berhasil dihapus.');
+    }
 
-    // Retrieve the data for 'rokok' and 'notedRokok' from the invoices_reporting table
-    $invoiceDetails = DB::table('invoices_reporting')
-                        ->where('nomer_invoice', $nomer_invoice)
-                        ->first();
+    public function getInvoiceSummary($nomer_invoice)
+    {
+        // Query to calculate total discount and concatenate noted, grouped by 'id', ordered by the highest 'id'
+        $summary = DB::table('invoices_reporting')
+            ->select(
+                'id',
+                DB::raw('SUM(diskon) AS total_diskon'),
+                DB::raw('GROUP_CONCAT(noted SEPARATOR ", ") AS concatenated_noted')
+            )
+            ->where('nomer_invoice', $nomer_invoice)
+            ->groupBy('id')
+            ->orderByDesc('id')
+            ->limit(1)
+            ->first();
 
-    // Pass the data to the view, including invoiceSummary and the invoiceDetails
-    return view('data-invoice.invoice-reporting.show', [
-        'invoiceMaster' => $invoiceMaster,
-        'headOffice' => $headOffice,
-        'branchOffices' => $branchOffices,
-        'totalDiscount' => $invoiceSummary->total_diskon,
-        'reportNoted' => $invoiceSummary->concatenated_noted,
-        'invoiceSummary' => $invoiceSummary,
-        'invoiceDetails' => $invoiceDetails, // Include the invoice details
-    ]);
-}
-
-    
-
-public function addDiscountAndNote(Request $request)
-{
-    $request->validate([
-        'nomer_invoice' => 'required|string|exists:invoices_reporting,nomer_invoice',
-        'diskon' => 'nullable|integer',
-        'noted' => 'nullable|string',
-    ]);
-
-    DB::table('invoices_reporting')->insert([
-        'nomer_invoice' => $request->nomer_invoice,
-        'diskon' => $request->diskon ?? 0,
-        'noted' => $request->noted,
-        'created_at' => now(),
-        'updated_at' => now(),
-    ]);
-
-    return redirect()->route('data-invoice.invoice-reporting.display')
-                     ->with('success', 'Diskon dan noted berhasil ditambahkan.');
-}
-
-public function deleteDiscount($id)
-{
-    DB::table('invoices_reporting')->where('id', $id)->delete();
-    // dd($id);
-    return redirect()->route('data-invoice.invoice-reporting.display')
-                     ->with('success', 'Diskon dan noted berhasil dihapus.');
-                     
-}
-
-public function getInvoiceSummary($nomer_invoice)
-{
-    // Query to calculate total discount and concatenate noted, grouped by 'id', ordered by the highest 'id'
-    $summary = DB::table('invoices_reporting')
-        ->select(
-            'id',
-            DB::raw('SUM(diskon) AS total_diskon'),
-            DB::raw('GROUP_CONCAT(noted SEPARATOR ", ") AS concatenated_noted')
-        )
-        ->where('nomer_invoice', $nomer_invoice)
-        ->groupBy('id') 
-        ->orderByDesc('id')  
-        ->limit(1) 
-        ->first(); 
-
-    return $summary;
-}
+        return $summary;
+    }
 
 
-public function addRokokAndNote(Request $request)
-{
-    $request->validate([
-        'nomer_invoice' => 'required|string|exists:invoices_reporting,nomer_invoice',
-        'rokok' => 'nullable|integer',
-        'notedRokok' => 'nullable|string',
-    ]);
+    public function addRokokAndNote(Request $request)
+    {
+        $request->validate([
+            'nomer_invoice' => 'required|string|exists:invoices_reporting,nomer_invoice',
+            'rokok' => 'nullable|integer',
+            'notedRokok' => 'nullable|string',
+        ]);
 
-    DB::table('invoices_reporting')->insert([
-        'nomer_invoice' => $request->nomer_invoice,
-        'rokok' => $request->rokok ?? 0,
-        'notedRokok' => $request->notedRokok,
-        'created_at' => now(),
-        'updated_at' => now(),
-    ]);
+        DB::table('invoices_reporting')->insert([
+            'nomer_invoice' => $request->nomer_invoice,
+            'rokok' => $request->rokok ?? 0,
+            'notedRokok' => $request->notedRokok,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
 
-    return redirect()->route('data-invoice.invoice-reporting.index')
-                     ->with('success', 'Rokok dan notedRokok berhasil ditambahkan.');
-}
-// Delete ALL
-public function deleteAllRokokAndNote(Request $request)
-{
-    $request->validate([
-        'nomer_invoice' => 'required|string|exists:invoices_reporting,nomer_invoice',
-    ]);
+        return redirect()->route('data-invoice.invoice-reporting.index')
+            ->with('success', 'Rokok dan notedRokok berhasil ditambahkan.');
+    }
+    // Delete ALL
+    public function deleteAllRokokAndNote(Request $request)
+    {
+        $request->validate([
+            'nomer_invoice' => 'required|string|exists:invoices_reporting,nomer_invoice',
+        ]);
 
-    // Check if 'rokok' and 'notedRokok' are not null
-    DB::table('invoices_reporting')
-        ->where('nomer_invoice', $request->nomer_invoice)
-        ->whereNotNull('rokok')
-        ->whereNotNull('notedRokok')
-        ->delete(); // Delete only the row with non-null 'rokok' and 'notedRokok'
-
-    return redirect()->route('data-invoice.invoice-reporting.index')
-                     ->with('success', 'Rokok dan notedRokok berhasil dihapus.');
-}
-
-// delete 1 1
-public function deleteRokokAndNote(Request $request)
-{
-    $request->validate([
-        'nomer_invoice' => 'required|string|exists:invoices_reporting,nomer_invoice',
-    ]);
-
-    // Get the most recent record (the latest one)
-    $latestRecord = DB::table('invoices_reporting')
-        ->where('nomer_invoice', $request->nomer_invoice)
-        ->orderBy('updated_at', 'desc') // Order by latest updated_at
-        ->first(); // Get the most recent row
-
-    if ($latestRecord) {
-        // Delete that specific record
+        // Check if 'rokok' and 'notedRokok' are not null
         DB::table('invoices_reporting')
-            ->where('id', $latestRecord->id)
-            ->delete();
+            ->where('nomer_invoice', $request->nomer_invoice)
+            ->whereNotNull('rokok')
+            ->whereNotNull('notedRokok')
+            ->delete(); // Delete only the row with non-null 'rokok' and 'notedRokok'
+
+        return redirect()->route('data-invoice.invoice-reporting.index')
+            ->with('success', 'Rokok dan notedRokok berhasil dihapus.');
     }
 
-    return redirect()->route('data-invoice.invoice-reporting.index')
-                     ->with('success', 'Rokok dan notedRokok berhasil dihapus.');
-}
+    // delete 1 1
+    public function deleteRokokAndNote(Request $request)
+    {
+        $request->validate([
+            'nomer_invoice' => 'required|string|exists:invoices_reporting,nomer_invoice',
+        ]);
 
+        // Get the most recent record (the latest one)
+        $latestRecord = DB::table('invoices_reporting')
+            ->where('nomer_invoice', $request->nomer_invoice)
+            ->orderBy('updated_at', 'desc') // Order by latest updated_at
+            ->first(); // Get the most recent row
 
+        if ($latestRecord) {
+            // Delete that specific record
+            DB::table('invoices_reporting')
+                ->where('id', $latestRecord->id)
+                ->delete();
+        }
 
+        return redirect()->route('data-invoice.invoice-reporting.index')
+            ->with('success', 'Rokok dan notedRokok berhasil dihapus.');
+    }
 }

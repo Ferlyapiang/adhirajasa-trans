@@ -88,6 +88,17 @@
                                         </select>
                                     </div>
                                 </div>
+                                @if(session('success'))
+                                    <div class="alert alert-success">
+                                        {{ session('success') }}
+                                    </div>
+                                @endif
+
+                                @if(session('error'))
+                                    <div class="alert alert-danger">
+                                        {{ session('error') }}
+                                    </div>
+                                @endif
 
                                 <div class="table-responsive">
                                     <table id="barangMasukTable" class="table table-bordered table-striped">
@@ -105,6 +116,7 @@
                                                 <th>Lemburan</th>
                                                 <th>Harga Kirim Barang</th>
                                                 <th>Total Harga Simpan</th>
+                                                <th>Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -141,6 +153,15 @@
                                                     <td>
                                                         {{ number_format($item->harga_simpan_barang) ?? 'X' }}
                                                     </td>
+                                                    <td>
+                                                        <form action="{{ route('data-invoice.invoice-reporting.delete') }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus data ini?');">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <input type="hidden" name="nomer_invoice" value="{{ $item->nomer_invoice }}">
+                                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                                        </form>
+                                                    </td>
+
                                                 </tr>
                                             @endforeach
                                         </tbody>

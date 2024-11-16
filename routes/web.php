@@ -206,6 +206,11 @@ Route::post('/invoice-reporting/update-invoice', [InvoiceReportingController::cl
 Route::post('/data-invoice/invoice-reporting/add-rokok-and-note', [InvoiceReportingController::class, 'addRokokAndNote'])->name('data-invoice.invoice-reporting.addRokokAndNote');
 Route::post('/data-invoice/invoice-reporting/deleteRokokAndNote', [InvoiceReportingController::class, 'deleteRokokAndNote'])->name('data-invoice.invoice-reporting.deleteRokokAndNote');
 Route::post('/data-invoice/invoice-reporting/deleteAllRokokAndNote', [InvoiceReportingController::class, 'deleteAllRokokAndNote'])->name('data-invoice.invoice-reporting.deleteAllRokokAndNote');
+Route::delete('/data-invoice/invoice-reporting', [InvoiceReportingController::class, 'destroy'])
+    ->middleware('auth')
+    ->name('data-invoice.invoice-reporting.delete');
+
+
 
 // Route::get('/data-bongkar-muat/reporting', [BongkarMuatController::class, 'index'])->name('data-bongkar-muat.bongkar-muat.index');
 Route::get('/data-bongkar-muat/reporting-data', [BongkarMuatController::class, 'index'])->name('data-bongkar-muat.getData');
