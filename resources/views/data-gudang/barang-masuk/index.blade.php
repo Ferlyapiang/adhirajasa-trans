@@ -95,7 +95,16 @@
                                                         <td>{{ $barangMasuk->fifo_out }}</td>
                                                         <td style="font-weight: bold">{{ $barangMasuk->fifo_sisa }}</td>
                                                         <td>
-                                                            <a href="{{ route('data-gudang.barang-masuk.edit', $barangMasuk->barang_masuk_id) }}" class="btn btn-warning btn-sm">Edit</a>
+                                                            <!-- <a href="{{ route('data-gudang.barang-masuk.edit', $barangMasuk->barang_masuk_id) }}" class="btn btn-warning btn-sm">Edit</a> -->
+                                                            @if ($barangMasuk->is_reported == 0)
+                                                                <a href="{{ route('data-gudang.barang-masuk.edit', $barangMasuk->barang_masuk_id) }}" class="btn btn-warning btn-sm">
+                                                                    <i class="fas fa-edit"></i> Edit
+                                                                </a>
+                                                            @else
+                                                                <button class="btn btn-warning btn-sm" disabled>
+                                                                    <i class="fas fa-edit"></i> Edit
+                                                                </button>
+                                                            @endif
                                                             <form action="{{ route('data-gudang.barang-masuk.destroy', $barangMasuk->barang_masuk_id) }}" method="POST" style="display:inline;">
                                                                 @csrf
                                                                 @method('DELETE')

@@ -142,9 +142,17 @@
                                                     <td>{{ $barangKeluar->nomer_polisi }}</td>
                                                     <td>{{ $barangKeluar->nomer_container }}</td>
                                                     <td>
-                                                        <a href="{{ route('data-gudang.barang-keluar.edit', $barangKeluar->barang_keluar_id) }}" class="btn btn-warning btn-sm">
-                                                            <i class="fas fa-edit"></i> Edit
-                                                        </a>
+                                                        @if ($barangKeluar->is_edit_hidden == 0)  <!-- Jika is_edit_hidden = 0, tombol edit aktif -->
+                                                            <a href="{{ route('data-gudang.barang-keluar.edit', $barangKeluar->barang_keluar_id) }}" class="btn btn-warning btn-sm">
+                                                                <i class="fas fa-edit"></i> Edit
+                                                            </a>
+                                                        @else  <!-- Jika is_edit_hidden = 1, tombol edit dinonaktifkan -->
+                                                            <button class="btn btn-warning btn-sm" disabled>
+                                                                <i class="fas fa-edit"></i> Edit
+                                                            </button>
+                                                        @endif
+
+                                                        <!-- Tombol Delete -->
                                                         <form action="{{ route('data-gudang.barang-keluar.destroy', $barangKeluar->barang_keluar_id) }}" method="POST" style="display:inline;">
                                                             @csrf
                                                             @method('DELETE')
@@ -153,6 +161,7 @@
                                                             </button>
                                                         </form>
                                                     </td>
+
                                                 </tr>
                                             @endforeach
                                         </tbody>

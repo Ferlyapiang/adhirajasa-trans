@@ -27,7 +27,7 @@ class BarangMasukController extends Controller
             $barangMasuks = DB::table('barang_masuks as bm')
                 ->select(
                     'bm.id AS barang_masuk_id',
-                    DB::raw('MAX(bki.id) AS barang_keluar_id'),  // Menggunakan MAX untuk mendapatkan satu id dari barang keluar
+                    DB::raw('MAX(bki.id) AS barang_keluar_id'),
                     'bm.tanggal_masuk',
                     'bm.joc_number',
                     'b.nama_barang AS nama_barang',
@@ -37,10 +37,11 @@ class BarangMasukController extends Controller
                     'bm.nomer_polisi',
                     'bm.nomer_container',
                     'bmi.notes',
-                    DB::raw('MIN(bmi.qty) AS fifo_in'),  // Mengambil nilai qty pertama dari barang masuk
-                    DB::raw('COALESCE(SUM(bki.qty), 0) AS fifo_out'),  // Menghitung total fifo_out, default ke 0 jika tidak ada
+                    DB::raw('MIN(bmi.qty) AS fifo_in'),
+                    DB::raw('COALESCE(SUM(bki.qty), 0) AS fifo_out'),
                     'bmi.unit',
-                    DB::raw('(MIN(bmi.qty) - COALESCE(SUM(bki.qty), 0)) AS fifo_sisa')  // Menghitung fifo_sisa
+                    DB::raw('(MIN(bmi.qty) - COALESCE(SUM(bki.qty), 0)) AS fifo_sisa'),
+                    DB::raw('IF(ir.barang_masuks_id IS NOT NULL, 1, 0) AS is_reported')  // Check if exists in invoices_reporting
                 )
                 ->join('barang_masuk_items as bmi', 'bm.id', '=', 'bmi.barang_masuk_id')
                 ->join('barangs as b', 'bmi.barang_id', '=', 'b.id')
@@ -50,29 +51,34 @@ class BarangMasukController extends Controller
                 ->leftJoin('barang_keluar_items as bki', function ($join) {
                     $join->on('bmi.barang_masuk_id', '=', 'bki.barang_masuk_id')
                          ->whereColumn('bmi.barang_id', '=', 'bki.barang_id');
-                });
-                if ($user->warehouse_id !== null) {
-                    $barangMasuks = $barangMasuks->where('bm.gudang_id', $user->warehouse_id);
-                }
-                $barangMasuks = $barangMasuks->groupBy(
-                    'bm.id',
-                    'bm.tanggal_masuk',
-                    'bm.joc_number',
-                    'b.nama_barang',
-                    'c.name',
-                    'w.name',
-                    'tm.type',
-                    'bm.nomer_polisi',
-                    'bm.nomer_container',
-                    'bmi.notes',
-                    'bmi.unit'
-                )
-                ->orderBy('bm.tanggal_masuk', 'desc')
-                ->get();
+                })
+                ->leftJoin('invoices_reporting as ir', 'bm.id', '=', 'ir.barang_masuks_id');  // Join with invoices_reporting
+    
+            if ($user->warehouse_id !== null) {
+                $barangMasuks = $barangMasuks->where('bm.gudang_id', $user->warehouse_id);
+            }
+    
+            $barangMasuks = $barangMasuks->groupBy(
+                'bm.id',
+                'bm.tanggal_masuk',
+                'bm.joc_number',
+                'b.nama_barang',
+                'c.name',
+                'w.name',
+                'tm.type',
+                'bm.nomer_polisi',
+                'bm.nomer_container',
+                'bmi.notes',
+                'bmi.unit',
+                'ir.barang_masuks_id'
+            )
+            ->orderBy('bm.tanggal_masuk', 'desc')
+            ->get();
         }
     
         return view('data-gudang.barang-masuk.index', compact('barangMasuks'));
     }
+    
     
     
     

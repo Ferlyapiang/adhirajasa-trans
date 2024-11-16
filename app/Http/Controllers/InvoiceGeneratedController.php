@@ -27,13 +27,15 @@ class InvoiceGeneratedController extends Controller
             ->get();
 
         foreach ($barangMasuks as $barangMasuk) {
-            // Create a new Invoice for each BarangMasuk
-            $invoice = new Invoice();
-            $invoice->barang_masuks_id = $barangMasuk->id;
-            $invoice->tanggal_masuk = $barangMasuk->tanggal_tagihan_masuk;
-            $invoice->save();
+            $existingInvoice = Invoice::where('barang_masuks_id', $barangMasuk->id)->first();
 
-            // Update the status_invoice
+            if (!$existingInvoice) {
+                $invoice = new Invoice();
+                $invoice->barang_masuks_id = $barangMasuk->id;
+                $invoice->tanggal_masuk = $barangMasuk->tanggal_tagihan_masuk;
+                $invoice->save();
+            }
+
             $barangMasuk->status_invoice = 'Invoice Barang Masuk';
             $barangMasuk->save();
         }
@@ -43,14 +45,19 @@ class InvoiceGeneratedController extends Controller
             ->get();
 
         foreach ($barangKeluars as $barangKeluar) {
-            $invoice = new Invoice();
-            $invoice->barang_keluars_id = $barangKeluar->id;
-            $invoice->tanggal_masuk = $barangKeluar->tanggal_tagihan_keluar;
-            $invoice->save();
+            $existingInvoice = Invoice::where('barang_keluars_id', $barangKeluar->id)->first();
+
+            if (!$existingInvoice) {
+                $invoice = new Invoice();
+                $invoice->barang_keluars_id = $barangKeluar->id;
+                $invoice->tanggal_masuk = $barangKeluar->tanggal_tagihan_keluar;
+                $invoice->save();
+            }
 
             $barangKeluar->status_invoice = 'Invoice Barang Keluar';
             $barangKeluar->save();
         }
+
 
         $invoiceMaster = DB::table('invoices')
             ->select(
