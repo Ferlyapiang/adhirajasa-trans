@@ -382,6 +382,10 @@
                                                             <strong>JASA BONGKAR MUAT</strong>
                                                         @endif
                                                     </td>
+                                                    @elseif ($invoiceMaster[0]->customer_no_npwp === null && $invoiceMaster[0]->customer_no_ktp === null)
+                                                    <td style="text-align: center;">
+                                                        <strong>PASTIKAN DATA NPWP ATAU KTP TERISI</strong>
+                                                    </td>
                                                     @endif
                                                     {{-- tabel 5 --}}
                                                     <td>
