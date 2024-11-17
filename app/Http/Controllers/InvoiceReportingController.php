@@ -100,16 +100,73 @@ class InvoiceReportingController extends Controller
         ]);
 
         try {
-            // Hapus data berdasarkan nomor invoice
-            DB::table('invoices_reporting')->where('nomer_invoice', $request->nomer_invoice)->delete();
+            // Ambil semua data dengan nomer_invoice yang sama
+            $invoices = DB::table('invoices_reporting')
+                ->where('nomer_invoice', $request->nomer_invoice)
+                ->get();
 
-            // Redirect dengan pesan sukses
-            return redirect()->route('data-invoice.invoice-reporting.index')->with('success', 'Data berhasil dihapus.');
+            if ($invoices->isEmpty()) {
+                return redirect()->route('data-invoice.invoice-reporting.index')
+                    ->with('error', 'Data tidak ditemukan.');
+            }
+
+            foreach ($invoices as $invoice) {
+                if ($invoice->barang_masuks_id) {
+                    $barangMasuksIds = explode(',', $invoice->barang_masuks_id);
+                    foreach ($barangMasuksIds as $id) {
+                        $barangMasuk = DB::table('barang_masuks')->where('id', $id)->first();
+                
+                        if ($barangMasuk) {
+                            $tanggalInvoiceMasuk = ($invoice->tanggal_masuk_penimbunan === $barangMasuk->tanggal_masuk)
+                                ? null
+                                : $invoice->tanggal_masuk_penimbunan;
+                
+                            $tanggalInvoiceKeluar = ($invoice->tanggal_masuk_penimbunan === $barangMasuk->tanggal_masuk)
+                                ? null
+                                : $invoice->tanggal_keluar_penimbunan;
+                
+                            // Perbarui data barang_masuks
+                            DB::table('barang_masuks')
+                                ->where('id', $id)
+                                ->update([
+                                    'tanggal_invoice_masuk' => $tanggalInvoiceMasuk,
+                                    'tanggal_invoice_keluar' => $tanggalInvoiceKeluar,
+                                    'tanggal_tagihan_masuk' => $invoice->tanggal_masuk,
+                                    'status_invoice' => 'Barang Masuk',
+                                ]);
+                        }
+                    }
+                }
+                
+
+                // Tangani barang_keluars_id jika berisi lebih dari satu nilai
+                if ($invoice->barang_keluars_id) {
+                    $barangKeluarsIds = explode(',', $invoice->barang_keluars_id); // Pecah menjadi array
+                    foreach ($barangKeluarsIds as $id) {
+                        DB::table('barang_masuks')
+                            ->where('id', $id)
+                            ->update([
+                                'status_invoice' => 'Barang Keluar',
+                            ]);
+                    }
+                }
+            }
+
+            // Hapus semua data di invoices_reporting dengan nomer_invoice yang sama
+            DB::table('invoices_reporting')
+                ->where('nomer_invoice', $request->nomer_invoice)
+                ->delete();
+
+            return redirect()->route('data-invoice.invoice-reporting.index')
+                ->with('success', 'Semua data berhasil dihapus dan barang_masuks diperbarui.');
         } catch (\Exception $e) {
-            // Redirect dengan pesan error jika ada masalah
-            return redirect()->route('data-invoice.invoice-reporting.index')->with('error', 'Terjadi kesalahan saat menghapus data.');
+            return redirect()->route('data-invoice.invoice-reporting.index')
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
+
+
+
 
 
 
