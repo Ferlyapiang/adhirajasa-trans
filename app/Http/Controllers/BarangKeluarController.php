@@ -590,12 +590,13 @@ class BarangKeluarController extends Controller
     {
         // Fetch Barang Masuk records for the specified customer and warehouse
         $barangMasuk = BarangMasuk::where('customer_id', $customerId)
-            ->where('gudang_id', $warehouseId)
-            ->with('items.barang')
-            ->orderBy('joc_number', 'asc')
-            ->get();
+        ->where('gudang_id', $warehouseId)
+        ->whereNotNull('nomer_container') 
+        ->where('nomer_container', '!=', '')
+        ->with('items.barang')
+        ->orderBy('joc_number', 'asc')
+        ->get();
 
-        // Summarize Barang Keluar to get total quantities keluar by barang_id and no_ref
         $barangKeluarSummary = BarangKeluarItem::select('barang_id', 'no_ref', DB::raw('SUM(qty) as total_qty_keluar'))
             ->join('barang_keluars', 'barang_keluar_items.barang_keluar_id', '=', 'barang_keluars.id')
             ->where('barang_keluars.customer_id', $customerId)
