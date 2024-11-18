@@ -228,14 +228,13 @@
                                         </div>
 
                                         <h2>Items</h2>
-                                        <button type="button" class="btn btn-primary" data-toggle="modal"
-                                            data-target="#itemModal">
+                                        <button id="btn-jo-number" type="button" class="btn btn-primary" data-toggle="modal" data-target="#itemModal">
                                             Add Item JO Number
                                         </button>
-                                        <button type="button" class="btn btn-primary" data-toggle="modal"
-                                            data-target="#itemModalNomerContainer">
+                                        <button id="btn-nomer-container" type="button" class="btn btn-primary" data-toggle="modal" data-target="#itemModalNomerContainer">
                                             Add Item Nomer Container
                                         </button>
+                                        
                                         <input type="hidden" name="items" id="items-input" value="[]">
                                         <div class="table-responsive">
                                             <table id="items-table">
@@ -476,21 +475,21 @@
             let nextJocNumber = 1;
 
             function validateQuantity() {
-                let qty = parseFloat($('#item_qty').val()) || 0;
-                let sisa = parseFloat($('#item_sisa_barang').val()) || 0;
+                const qty = parseFloat($('#item_qty').val()) || 0;
+                const sisa = parseFloat($('#item_sisa_barang').val()) || 0;
 
                 if (qty > sisa) {
                     $('#quantity-warning').show();
+                    $('#add-item-btn').prop('disabled', true);
                 } else {
                     $('#quantity-warning').hide();
+                    $('#add-item-btn').prop('disabled', false);
                 }
             }
 
-            $('#item_qty, #item_sisa_barang').on('input', function() {
-                validateQuantity();
-            });
-
+            $('#item_qty, #item_sisa_barang').on('input', validateQuantity);
             validateQuantity();
+
 
             function parseCurrency(value) {
                 return parseFloat(value.replace(/[^0-9,]/g, '').replace(',', '.')) || 0;
@@ -527,9 +526,9 @@
                 const itemQty = parseFloat($('#item_qty').val()) || 0;
                 const itemUnit = $('#item_unit').val();
                 const itemJocNumber = $('#item_joc_number').val();
-                const itemNoContainer = $('#item_no_container').val();
                 const itemSisaBarang = $('#item_sisa_barang').val();
                 const itemBarangMasukID = $('#item_barang_masuk_id').val();
+                const itemNoContainer = $('#item_no_container').val();
 
                 if (!itemId) {
                     alert('Please select a valid item.');
@@ -606,73 +605,78 @@
                 }
             });
 
+            let isContainer = false;
 
-            $('#customer_id').change(function() {
-                const customerId = $(this).val();
-                const warehouseId = $('#gudang_id').val();
-
-                if (customerId && warehouseId) {
-                    $.ajax({
-                        url: `/api/items/${customerId}/${warehouseId}`,
-                        method: 'GET',
-                        success: function(response) {
-                            const itemsDropdown = $('#item_name, #edit_item_name');
-                            itemsDropdown.empty(); // Clear existing options
-                            itemsDropdown.append('<option value="" disabled selected>Pilih Nama Barang</option>');
-
-                            response.items.forEach(item => {
-                                itemsDropdown.append(
-                                    `<option value="${item.barang_id}" data-unit="${item.unit}" data-joc-number="${item.joc_number}" data-barang-masuk-id="${item.barang_masuk_id}" data-sisa-barang="${item.qty}">${item.barang_name} || ${item.joc_number}</option>`
-                                );
-                            });
-
-                            // Refresh the Select2 dropdown to reflect new options
-                            itemsDropdown.trigger('change');
-
-                            // Reset other input fields
-                            $('#item_unit').val('').prop('readonly', true);
-                            $('#item_joc_number').val('Auto-generated');
-                            $('#item_barang_masuk_id').val('');
-                            $('#item_sisa_barang').val('');
-                        }
-                    });
-                }
+            $('#btn-jo-number').click(function () {
+                isContainer = false; 
+                callApi(); 
             });
 
-            $('#customer_id').change(function() {
-                const customerId = $(this).val();
-                const warehouseId = $('#gudang_id').val();
-
-                if (customerId && warehouseId) {
-                    $.ajax({
-                        url: `/api/items/container/${customerId}/${warehouseId}`,
-                        method: 'GET',
-                        success: function(response) {
-                            const itemsDropdown = $('#item_name, #edit_item_name');
-                            itemsDropdown.empty(); // Clear existing options
-                            itemsDropdown.append('<option value="" disabled selected>Pilih Nama Barang</option>');
-
-                            response.items.forEach(item => {
-                                itemsDropdown.append(
-                                    `<option value="${item.barang_id}" data-unit="${item.unit}" data-joc-number="${item.joc_number}" data-barang-masuk-id="${item.barang_masuk_id}" data-sisa-barang="${item.qty}">${item.barang_name} || ${item.nomer_container}</option>`
-                                );
-                            });
-
-                            // Refresh the Select2 dropdown to reflect new options
-                            itemsDropdown.trigger('change');
-
-                            // Reset other input fields
-                            $('#item_unit').val('').prop('readonly', true);
-                            $('#item_joc_number').val('Auto-generated');
-                            $('#item_barang_masuk_id').val('');
-                            $('#item_sisa_barang').val('');
-                        }
-                    });
-                }
+            // Event untuk tombol "Add Item Nomer Container"
+            $('#btn-nomer-container').click(function () {
+                isContainer = true;
+                callApi(); 
             });
 
+            // Fungsi untuk memanggil API berdasarkan pilihan
+            function callApi() {
+                const customerId = $('#customer_id').val();
+                const warehouseId = $('#gudang_id').val();
 
-            $('#item_name').change(function() {
+                // Validasi input
+                if (!customerId || !warehouseId) {
+                    alert('Mohon pilih Pemilik Barang dan Gudang terlebih dahulu.');
+                    return;
+                }
+
+                // Tentukan URL API berdasarkan nilai isContainer
+                const url = isContainer
+                    ? `/api/items/container/${customerId}/${warehouseId}`
+                    : `/api/items/${customerId}/${warehouseId}`;
+
+                console.log('Request URL:', url);
+
+                // Lakukan AJAX request
+                $.ajax({
+                    url: url,
+                    method: 'GET',
+                    success: function (response) {
+                        console.log('Response:', response);
+
+                        const itemsDropdown = $('#item_name, #edit_item_name');
+                        itemsDropdown.empty(); // Kosongkan dropdown sebelumnya
+                        itemsDropdown.append('<option value="" disabled selected>Pilih Nama Barang</option>');
+
+                        response.items.forEach(item => {
+                            const displayText = isContainer
+                                ? `${item.barang_name} || ${item.nomer_container}`
+                                : `${item.barang_name} || ${item.joc_number}`;
+
+                            itemsDropdown.append(
+                                `<option value="${item.barang_id}" 
+                                        data-unit="${item.unit}" 
+                                        data-joc-number="${item.joc_number}" 
+                                        data-barang-masuk-id="${item.barang_masuk_id}" 
+                                        data-sisa-barang="${item.qty}">
+                                    ${displayText}
+                                </option>`
+                            );
+                        });
+
+                        // Reset input terkait
+                        $('#item_unit').val('').prop('readonly', true);
+                        $('#item_joc_number').val('Auto-generated');
+                        $('#item_barang_masuk_id').val('');
+                        $('#item_sisa_barang').val('');
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error:', status, error);
+                        console.error('Response:', xhr.responseText);
+                    },
+                });
+            }
+
+            $('#item_name').change(function () {
                 const selectedOption = $(this).find('option:selected');
                 const unit = selectedOption.data('unit');
                 const jocNumber = selectedOption.data('joc-number');
@@ -683,7 +687,10 @@
                 $('#item_joc_number').val(jocNumber);
                 $('#item_barang_masuk_id').val(barangMasukId);
                 $('#item_sisa_barang').val(sisaBarang);
+
+                validateQuantity();
             });
+
 
             $('#barang-keluar-form').submit(function() {
                 $('#items-input').val(JSON.stringify(items));
