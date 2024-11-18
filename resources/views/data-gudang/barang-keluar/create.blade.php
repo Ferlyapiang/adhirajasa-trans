@@ -677,19 +677,24 @@
             }
 
             $('#item_name').change(function () {
-                const selectedOption = $(this).find('option:selected');
-                const unit = selectedOption.data('unit');
-                const jocNumber = selectedOption.data('joc-number');
-                const barangMasukId = selectedOption.data('barang-masuk-id');
-                const sisaBarang = selectedOption.data('sisa-barang');
+    const selectedOption = $(this).find('option:selected');
 
-                $('#item_unit').val(unit).prop('readonly', true);
-                $('#item_joc_number').val(jocNumber);
-                $('#item_barang_masuk_id').val(barangMasukId);
-                $('#item_sisa_barang').val(sisaBarang);
+    const unit = selectedOption.data('unit');
+    const jocNumber = selectedOption.data('joc-number');
+    const barangMasukId = selectedOption.data('barang-masuk-id');
+    const sisaBarang = selectedOption.data('sisa-barang');
 
-                validateQuantity();
-            });
+    console.log('Selected Option:', selectedOption); // Debug
+    console.log('Unit:', unit, 'Sisa Barang:', sisaBarang); // Debug
+
+    $('#item_unit').val(unit).prop('readonly', true);
+    $('#item_joc_number').val(jocNumber);
+    $('#item_barang_masuk_id').val(barangMasukId);
+    $('#item_sisa_barang').val(sisaBarang);
+
+    validateQuantity();
+});
+
 
 
             $('#barang-keluar-form').submit(function() {
