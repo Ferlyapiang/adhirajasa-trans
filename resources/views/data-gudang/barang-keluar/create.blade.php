@@ -228,10 +228,10 @@
                                         </div>
 
                                         <h2>Items</h2>
-                                        <button id="btn-jo-number" type="button" class="btn btn-primary" data-toggle="modal" data-target="#itemModalJO">
+                                        <button id="btn-jo-number" type="button" class="btn btn-primary" data-toggle="modal" data-target="#item_barang_masuk_id_jo">
                                             Add Item JO Number
                                         </button>
-                                        <button id="btn-nomer-container" type="button" class="btn btn-primary" data-toggle="modal" data-target="#itemModalContainer">
+                                        <button id="btn-nomer-container" type="button" class="btn btn-primary" data-toggle="modal" data-target="#nomerContainerModal">
                                             Add Item Nomer Container
                                         </button>
 
@@ -289,11 +289,11 @@
     <script src="{{ asset('lte/dist/js/adminlte.min.js') }}"></script>
 
     <!-- Modal JO -->
-    <div class="modal fade" id="itemModalJO" tabindex="-1" role="dialog" aria-labelledby="itemModalJOLabel" aria-hidden="true">
+    <div class="modal fade" id="item_barang_masuk_id_jo" tabindex="-1" role="dialog" aria-labelledby="item_barang_masuk_id_joLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="itemModalJOLabel">Add Item (Job Order)</h5>
+                    <h5 class="modal-title" id="item_barang_masuk_id_joLabel">Add Item (Job Order)</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -343,11 +343,11 @@
     </div>
 
     <!-- Modal Container -->
-    <div class="modal fade" id="itemModalContainer" tabindex="-1" role="dialog" aria-labelledby="itemModalContainerLabel" aria-hidden="true">
+    <div class="modal fade" id="nomerContainerModal" tabindex="-1" role="dialog" aria-labelledby="nomerContainerModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="itemModalContainerLabel">Add Item (Container)</h5>
+                    <h5 class="modal-title" id="nomerContainerModalLabel">Add Item (Container)</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -497,10 +497,10 @@
             }
 
             function updateItemsTable() {
-                let itemsTableBody = $('#items-table tbody');
-                itemsTableBody.empty();
-                items.forEach((item, index) => {
-                    itemsTableBody.append(`
+    let itemsTableBody = $('#items-table tbody');
+    itemsTableBody.empty(); // Hapus semua baris sebelumnya
+    items.forEach((item, index) => {
+        itemsTableBody.append(`
             <tr>
                 <td>${item.no_ref}</td>
                 <td>${item.name}</td>
@@ -512,9 +512,12 @@
                 </td>
             </tr>
         `);
-                });
-                $('#items-input').val(JSON.stringify(items));
-            }
+    });
+
+    // Simpan data ke input hidden untuk pengiriman
+    $('#items-input').val(JSON.stringify(items));
+}
+
 
             window.removeItem = function(index) {
                 items.splice(index, 1);
@@ -707,6 +710,66 @@
             });
 
 
+            $('#item_barang_masuk_id_jo').on('shown.bs.modal', function() {
+            const itemQtyInput = document.getElementById('item_qty_jo');
+            const itemSisaBarangInput = document.getElementById('item_sisa_barang_jo');
+            const quantityWarning = document.getElementById('quantity-warning-jo');
+            const addItemButton = document.getElementById('add-item-btn-jo');
+
+            function checkQuantity() {
+                const qty = parseInt(itemQtyInput.value, 10) || 0;
+                const sisa = parseInt(itemSisaBarangInput.value, 10) || 0;
+
+                if (qty > sisa || qty <= 0) {
+                    quantityWarning.style.display = 'block';
+                    addItemButton.disabled = true;
+                } else {
+                    quantityWarning.style.display = 'none';
+                    addItemButton.disabled = false;
+                }
+            }
+
+
+            if (itemQtyInput) {
+                itemQtyInput.addEventListener('input', checkQuantity);
+            }
+
+            if (itemSisaBarangInput) {
+                itemSisaBarangInput.addEventListener('input', checkQuantity);
+            }
+        });
+
+        $('#nomerContainerModal').on('shown.bs.modal', function() {
+            const itemQtyInput = document.getElementById('item_qty_container');
+            const itemSisaBarangInput = document.getElementById('item_sisa_barang_container');
+            const quantityWarning = document.getElementById('quantity-warning-container');
+            const addItemButton = document.getElementById('add-item-btn-container');
+
+            function checkQuantity() {
+                const qty = parseInt(itemQtyInput.value, 10) || 0;
+                const sisa = parseInt(itemSisaBarangInput.value, 10) || 0;
+
+                if (qty > sisa) {
+                    quantityWarning.style.display = 'block';
+                    addItemButton.disabled = true;
+                } else {
+                    quantityWarning.style.display = 'none';
+                    addItemButton.disabled = false;
+                }
+            }
+
+            if (itemQtyInput) {
+                itemQtyInput.addEventListener('input', checkQuantity);
+                addItem();
+            }
+
+            if (itemSisaBarangInput) {
+                itemSisaBarangInput.addEventListener('input', checkQuantity);
+                addItem();
+            }
+        });
+
+
 
 
             $('#barang-keluar-form').submit(function() {
@@ -884,97 +947,7 @@
             document.getElementById(hiddenInputId).value = angka;
         }
 
-        document.addEventListener("DOMContentLoaded", function() {
-            const itemQtyInput = document.getElementById('item_qty');
-            const itemSisaBarangInput = document.getElementById('item_sisa_barang');
-            const quantityWarning = document.getElementById('quantity-warning');
-            const addItemButton = document.getElementById('add-item-btn');
-
-            // Fungsi untuk memeriksa jumlah dan mengatur tombol
-            function checkQuantity() {
-                if (!itemQtyInput || !itemSisaBarangInput || !quantityWarning || !addItemButton) {
-                    console.warn('One or more elements not found in DOM');
-                    return;
-                }
-
-                const qty = parseInt(itemQtyInput.value, 10) || 0;
-                const sisa = parseInt(itemSisaBarangInput.value, 10) || 0;
-
-                if (qty > sisa) {
-                    quantityWarning.style.display = 'block';
-                    addItemButton.disabled = true; // Nonaktifkan tombol jika quantity lebih besar
-                } else {
-                    quantityWarning.style.display = 'none';
-                    addItemButton.disabled = false; // Aktifkan tombol jika valid
-                }
-            }
-
-            // Tambahkan event listener hanya jika elemen ditemukan
-            if (itemQtyInput) {
-                itemQtyInput.addEventListener('input', checkQuantity);
-            }
-
-            if (itemSisaBarangInput) {
-                itemSisaBarangInput.addEventListener('input', checkQuantity);
-            }
-        });
-
-        $('#itemModalJO').on('shown.bs.modal', function() {
-            const itemQtyInput = document.getElementById('item_qty_jo');
-            const itemSisaBarangInput = document.getElementById('item_sisa_barang_jo');
-            const quantityWarning = document.getElementById('quantity-warning-jo');
-            const addItemButton = document.getElementById('add-item-btn-jo');
-
-            function checkQuantity() {
-                const qty = parseInt(itemQtyInput.value, 10) || 0;
-                const sisa = parseInt(itemSisaBarangInput.value, 10) || 0;
-
-                if (qty > sisa) {
-                    quantityWarning.style.display = 'block';
-                    addItemButton.disabled = true;
-                } else {
-                    quantityWarning.style.display = 'none';
-                    addItemButton.disabled = false;
-                }
-            }
-
-            if (itemQtyInput) {
-                itemQtyInput.addEventListener('input', checkQuantity);
-            }
-
-            if (itemSisaBarangInput) {
-                itemSisaBarangInput.addEventListener('input', checkQuantity);
-            }
-        });
-
-        $('#nomerContainerModal').on('shown.bs.modal', function() {
-            const itemQtyInput = document.getElementById('item_qty_container');
-            const itemSisaBarangInput = document.getElementById('item_sisa_barang_container');
-            const quantityWarning = document.getElementById('quantity-warning-container');
-            const addItemButton = document.getElementById('add-item-btn-container');
-
-            function checkQuantity() {
-                const qty = parseInt(itemQtyInput.value, 10) || 0;
-                const sisa = parseInt(itemSisaBarangInput.value, 10) || 0;
-
-                if (qty > sisa) {
-                    quantityWarning.style.display = 'block';
-                    addItemButton.disabled = true;
-                } else {
-                    quantityWarning.style.display = 'none';
-                    addItemButton.disabled = false;
-                }
-            }
-
-            if (itemQtyInput) {
-                itemQtyInput.addEventListener('input', checkQuantity);
-            }
-
-            if (itemSisaBarangInput) {
-                itemSisaBarangInput.addEventListener('input', checkQuantity);
-            }
-        });
-
+        
         document.addEventListener("DOMContentLoaded", function() {
             const editItemQtyInput = document.getElementById('edit_item_qty');
             const editItemSisaBarangInput = document.getElementById('edit_item_sisa_barang');
@@ -997,6 +970,40 @@
             editItemQtyInput.addEventListener('input', checkEditQuantity);
             editItemSisaBarangInput.addEventListener('input', checkEditQuantity);
         });
+
+        let items = []; // Array global untuk menyimpan item
+
+function addItem() {
+    const itemNoRef = document.getElementById('item_no_container').value || 'Auto-generated';
+    const itemName = document.getElementById('item_name_container').value;
+    const itemQty = parseInt(document.getElementById('item_qty_container').value, 10) || 0;
+    const itemUnit = document.getElementById('item_unit_container').value;
+
+    if (itemName && itemQty > 0) {
+        // Tambahkan item ke array
+        items.push({
+            no_ref: itemNoRef,
+            name: itemName,
+            qty: itemQty,
+            unit: itemUnit,
+        });
+
+        // Perbarui tabel
+        updateItemsTable();
+
+        // Tutup modal dan reset form
+        $('#itemModalContainer').modal('hide');
+        resetModalForm();
+    }
+}
+
+function resetModalForm() {
+    document.getElementById('item_name_container').value = '';
+    document.getElementById('item_qty_container').value = '';
+    document.getElementById('item_unit_container').value = '';
+    document.getElementById('item_sisa_barang_container').value = '';
+}
+
 
         function updateTotalQuantity() {
             let totalQuantity = 0;
