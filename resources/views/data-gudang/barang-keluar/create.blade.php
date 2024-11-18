@@ -229,8 +229,13 @@
 
                                         <h2>Items</h2>
                                         <button type="button" class="btn btn-primary" data-toggle="modal"
-                                            data-target="#itemModal">Add
-                                            Item</button>
+                                            data-target="#itemModal">
+                                            Add Item JO Number
+                                        </button>
+                                        <button type="button" class="btn btn-primary" data-toggle="modal"
+                                            data-target="#itemModalNomerContainer">
+                                            Add Item Nomer Container
+                                        </button>
                                         <input type="hidden" name="items" id="items-input" value="[]">
                                         <div class="table-responsive">
                                             <table id="items-table">
@@ -301,6 +306,60 @@
                     </div>
                     <div class="form-group">
                         <label for="item_name">Nama Barang || JO Number</label>
+                        <select id="item_name" class="form-control" required>
+                            <option value="" disabled selected>Pilih Nama Barang</option>
+                            <!-- Option barang akan ditambahkan di sini -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="item_qty">Quantity</label>
+                                <input type="number" id="item_qty" class="form-control" required>
+                                <span id="quantity-warning" class="text-danger" style="display: none;">Hati-hati Quantity lebih besar dari Sisa Barang.</span>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="item_unit">Unit</label>
+                                    <input type="text" id="item_unit" class="form-control" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label for="item_sisa_barang">Sisa Barang</label>
+                                    <input type="number" id="item_sisa_barang" class="form-control" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group" style="display: none;">
+                        <label for="item_barang_masuk_id">Barang Masuk ID</label>
+                        <input type="text" id="item_barang_masuk_id" class="form-control" readonly>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="add-item-btn" disabled>Add Item</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Nomer Container -->
+    <div class="modal fade" id="itemModalNomerContainer" tabindex="-1" role="dialog" aria-labelledby="itemModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="itemModalLabel">Add Item</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="item_no_container">Nomer Container</label>
+                        <input type="text" id="item_no_container" class="form-control" placeholder="Auto-generated" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="item_name">Nama Barang || Nomer Container</label>
                         <select id="item_name" class="form-control" required>
                             <option value="" disabled selected>Pilih Nama Barang</option>
                             <!-- Option barang akan ditambahkan di sini -->
@@ -468,6 +527,7 @@
                 const itemQty = parseFloat($('#item_qty').val()) || 0;
                 const itemUnit = $('#item_unit').val();
                 const itemJocNumber = $('#item_joc_number').val();
+                const itemNoContainer = $('#item_no_container').val();
                 const itemSisaBarang = $('#item_sisa_barang').val();
                 const itemBarangMasukID = $('#item_barang_masuk_id').val();
 
@@ -512,6 +572,7 @@
                 $('#item_unit').val('');
                 $('#item_joc_number').val('');
                 $('#item_sisa_barang').val('');
+                $('#item_no_container').val('');
             });
 
 
@@ -562,6 +623,38 @@
                             response.items.forEach(item => {
                                 itemsDropdown.append(
                                     `<option value="${item.barang_id}" data-unit="${item.unit}" data-joc-number="${item.joc_number}" data-barang-masuk-id="${item.barang_masuk_id}" data-sisa-barang="${item.qty}">${item.barang_name} || ${item.joc_number}</option>`
+                                );
+                            });
+
+                            // Refresh the Select2 dropdown to reflect new options
+                            itemsDropdown.trigger('change');
+
+                            // Reset other input fields
+                            $('#item_unit').val('').prop('readonly', true);
+                            $('#item_joc_number').val('Auto-generated');
+                            $('#item_barang_masuk_id').val('');
+                            $('#item_sisa_barang').val('');
+                        }
+                    });
+                }
+            });
+
+            $('#customer_id').change(function() {
+                const customerId = $(this).val();
+                const warehouseId = $('#gudang_id').val();
+
+                if (customerId && warehouseId) {
+                    $.ajax({
+                        url: `/api/items/container/${customerId}/${warehouseId}`,
+                        method: 'GET',
+                        success: function(response) {
+                            const itemsDropdown = $('#item_name, #edit_item_name');
+                            itemsDropdown.empty(); // Clear existing options
+                            itemsDropdown.append('<option value="" disabled selected>Pilih Nama Barang</option>');
+
+                            response.items.forEach(item => {
+                                itemsDropdown.append(
+                                    `<option value="${item.barang_id}" data-unit="${item.unit}" data-joc-number="${item.joc_number}" data-barang-masuk-id="${item.barang_masuk_id}" data-sisa-barang="${item.qty}">${item.barang_name} || ${item.nomer_container}</option>`
                                 );
                             });
 

@@ -586,6 +586,55 @@ class BarangKeluarController extends Controller
         return response()->json(['items' => $items]);
     }
 
+    public function getItemsByCustomerByContainer($customerId, $warehouseId)
+    {
+        // Fetch Barang Masuk records for the specified customer and warehouse
+        $barangMasuk = BarangMasuk::where('customer_id', $customerId)
+            ->where('gudang_id', $warehouseId)
+            ->with('items.barang')
+            ->orderBy('nomer_container', 'asc')
+            ->get();
+
+        // Summarize Barang Keluar to get total quantities keluar by barang_id and no_ref
+        $barangKeluarSummary = BarangKeluarItem::select('barang_id', 'nomer_container', DB::raw('SUM(qty) as total_qty_keluar'))
+            ->join('barang_keluars', 'barang_keluar_items.barang_keluar_id', '=', 'barang_keluars.id')
+            ->where('barang_keluars.customer_id', $customerId)
+            ->where('barang_keluars.gudang_id', $warehouseId)
+            ->groupBy('barang_id', 'nomer_container')
+            ->get()
+            ->keyBy(function ($item) {
+                return $item->barang_id . '-' . $item->nomer_container;
+            });
+
+        $items = $barangMasuk->flatMap(function ($barangMasuk) use ($barangKeluarSummary) {
+            return $barangMasuk->items->map(function ($item) use ($barangMasuk, $barangKeluarSummary) {
+                $key = $item->barang_id . '-' . $barangMasuk->nomer_container;
+                $totalQtyKeluar = $barangKeluarSummary->get($key, (object) ['total_qty_keluar' => 0])->total_qty_keluar;
+                $qtyMasuk = $item->qty;
+
+                $remainingStock = $qtyMasuk - $totalQtyKeluar;
+
+                if ($remainingStock > 0) {
+                    return [
+                        'id' => $item->id,
+                        'barang_masuk_id' => $item->barang_masuk_id,
+                        'barang_id' => $item->barang_id,
+                        'barang_name' => $item->barang->nama_barang,
+                        'qty' => $remainingStock,
+                        'unit' => $item->unit,
+                        'nomer_container' => $barangMasuk->nomer_container,
+                        'created_at' => $item->created_at,
+                        'updated_at' => $item->updated_at,
+                    ];
+                }
+
+                return null;
+            })->filter();
+        });
+
+        return response()->json(['items' => $items]);
+    }
+
 
 
     public function getCustomersByWarehouse($warehouse_id)

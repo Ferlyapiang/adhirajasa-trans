@@ -141,6 +141,7 @@ Route::get('data-gudang/barang-keluar/showSuratJalan/{barangKeluar}', [BarangKel
 
 
 Route::get('/api/items/{customerId}/{warehouseId}', [BarangKeluarController::class, 'getItemsByCustomer']);
+Route::get('/api/items/container/{customerId}/{warehouseId}', [BarangKeluarController::class, 'getItemsByCustomerByContainer']);
 Route::get('/api/customers/{warehouseId}', [BarangKeluarController::class, 'getCustomersByWarehouse']);
 
 Route::get('/download-pdf/{id}', [PDFController::class, 'BarangKeluar_download_pdf'])->name('pdf.invoice-barang-keluar');
