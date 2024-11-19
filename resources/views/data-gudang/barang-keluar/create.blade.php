@@ -229,10 +229,10 @@
 
                                         <h2>Items</h2>
                                         <button id="btn-jo-number" type="button" class="btn btn-primary" data-toggle="modal" data-target="#item_barang_masuk_id_jo">
-                                            Add Item JO Number
+                                            Add Item Fifo
                                         </button>
                                         <button id="btn-nomer-container" type="button" class="btn btn-primary" data-toggle="modal" data-target="#nomerContainerModal">
-                                            Add Item Nomer Container
+                                            Add Item Partai
                                         </button>
 
                                         <input type="hidden" name="items" id="items-input" value="[]">
@@ -1060,18 +1060,27 @@ function resetModalForm() {
 }
 
 
-        function updateTotalQuantity() {
-            let totalQuantity = 0;
+function updateTotalQuantity() {
+    let totalQuantity = 0;
 
-            // Loop melalui semua baris yang ada di tabel secara manual
-            $('#items-table tbody tr').each(function() {
-                var itemQty = parseFloat($(this).find('td:nth-child(4)').text()) || 0;
-                totalQuantity += itemQty;
-            });
+    // Loop melalui semua baris yang ada di tabel secara manual
+    $('#items-table tbody tr').each(function() {
+        var itemQty = parseFloat($(this).find('td:nth-child(4)').text()) || 0;
+        totalQuantity += itemQty;
+    });
 
-            // Update total Quantity di footer
-            $('#totalQuantity').text(totalQuantity);
-        }
+    // Update total Quantity di footer
+    $('#totalQuantity').text(totalQuantity);
+}
+
+document.getElementById('btn-jo-number').addEventListener('click', function () {
+    this.style.display = 'none'; // Sembunyikan tombol yang diklik
+});
+
+document.getElementById('btn-nomer-container').addEventListener('click', function () {
+    this.style.display = 'none'; // Sembunyikan tombol yang diklik
+});
+
     </script>
 
 
