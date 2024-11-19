@@ -237,18 +237,12 @@
 
                                         <input type="hidden" name="items" id="items-input" value="[]">
                                         <div class="table-responsive">
-                                            <table id="items-table">
+                                            <table id="items-table" class="table">
                                                 <thead>
-                                                    <tr>
-                                                        <th>Nomer JO</th>
-                                                        <th>Nomer Container</th>
-                                                        <th>Nama Barang</th>
-                                                        <th>Quantity</th>
-                                                        <th>Unit</th>
-                                                        <th>Actions</th>
-                                                    </tr>
+                                                    <!-- Header tabel akan diupdate -->
                                                 </thead>
                                                 <tbody>
+                                                    <!-- Data tabel akan diupdate -->
                                                 </tbody>
                                                 <tfoot>
                                                     <tr>
@@ -259,7 +253,6 @@
                                                 </tfoot>
                                             </table>
                                         </div>
-
                                         <br><br>
                                         <div class="card-footer">
                                             <button type="submit" class="btn btn-success">Save</button>
@@ -494,28 +487,79 @@
                 return parseFloat(value.replace(/[^0-9,]/g, '').replace(',', '.')) || 0;
             }
 
+            let currentMode = '';
+
+            function updateTableHeader() {
+                let tableHead = $('#items-table thead');
+                tableHead.empty(); // Kosongkan header tabel
+
+                if (currentMode === 'fifo') {
+                    tableHead.append(`
+            <tr>
+                <th>Nomer JO</th>
+                <th>Nama Barang</th>
+                <th>Quantity</th>
+                <th>Unit</th>
+                <th>Actions</th>
+            </tr>
+        `);
+                } else if (currentMode === 'partai') {
+                    tableHead.append(`
+            <tr>
+                <th>Nomer JO</th>
+                <th>Nomer Container</th>
+                <th>Nama Barang</th>
+                <th>Quantity</th>
+                <th>Unit</th>
+                <th>Actions</th>
+            </tr>
+        `);
+                }
+            }
+
             function updateItemsTable() {
                 let itemsTableBody = $('#items-table tbody');
                 itemsTableBody.empty(); // Hapus semua baris sebelumnya
+
                 items.forEach((item, index) => {
-                    itemsTableBody.append(`
-                        <tr>
-                            <td>${item.no_ref}</td>
-                            <td>${item.nomer_container}</td>
-                            <td>${item.name}</td>
-                            <td>${item.qty}</td>
-                            <td>${item.unit}</td>
-                            <td>
-                                <button type="button" class="btn btn-warning btn-sm" onclick="editItem(${index})">Edit</button>
-                                <button type="button" class="btn btn-danger btn-sm" onclick="removeItem(${index})">Remove</button>
-                            </td>
-                        </tr>
-                    `);
+                    let row = `
+            <tr>
+                <td>${item.no_ref}</td>
+        `;
+
+                    if (currentMode === 'partai') {
+                        row += `<td>${item.nomer_container || '-'}</td>`;
+                    }
+
+                    row += `
+                <td>${item.name}</td>
+                <td>${item.qty}</td>
+                <td>${item.unit}</td>
+                <td>
+                    <button type="button" class="btn btn-warning btn-sm" onclick="editItem(${index})">Edit</button>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="removeItem(${index})">Remove</button>
+                </td>
+            </tr>
+        `;
+
+                    itemsTableBody.append(row);
                 });
 
                 // Simpan data ke input hidden untuk pengiriman
                 $('#items-input').val(JSON.stringify(items));
             }
+
+            $('#btn-jo-number').on('click', function() {
+                currentMode = 'fifo';
+                updateTableHeader();
+                updateItemsTable();
+            });
+
+            $('#btn-nomer-container').on('click', function() {
+                currentMode = 'partai';
+                updateTableHeader();
+                updateItemsTable();
+            });
 
 
             window.removeItem = function(index) {
@@ -766,63 +810,63 @@
 
 
             $('#item_barang_masuk_id_jo').on('shown.bs.modal', function() {
-            const itemQtyInput = document.getElementById('item_qty_jo');
-            const itemSisaBarangInput = document.getElementById('item_sisa_barang_jo');
-            const quantityWarning = document.getElementById('quantity-warning-jo');
-            const addItemButton = document.getElementById('add-item-btn-jo');
+                const itemQtyInput = document.getElementById('item_qty_jo');
+                const itemSisaBarangInput = document.getElementById('item_sisa_barang_jo');
+                const quantityWarning = document.getElementById('quantity-warning-jo');
+                const addItemButton = document.getElementById('add-item-btn-jo');
 
-            function checkQuantity() {
-                const qty = parseInt(itemQtyInput.value, 10) || 0;
-                const sisa = parseInt(itemSisaBarangInput.value, 10) || 0;
+                function checkQuantity() {
+                    const qty = parseInt(itemQtyInput.value, 10) || 0;
+                    const sisa = parseInt(itemSisaBarangInput.value, 10) || 0;
 
-                if (qty > sisa || qty <= 0) {
-                    quantityWarning.style.display = 'block';
-                    addItemButton.disabled = true;
-                } else {
-                    quantityWarning.style.display = 'none';
-                    addItemButton.disabled = false;
+                    if (qty > sisa || qty <= 0) {
+                        quantityWarning.style.display = 'block';
+                        addItemButton.disabled = true;
+                    } else {
+                        quantityWarning.style.display = 'none';
+                        addItemButton.disabled = false;
+                    }
                 }
-            }
 
 
-            if (itemQtyInput) {
-                itemQtyInput.addEventListener('input', checkQuantity);
-            }
-
-            if (itemSisaBarangInput) {
-                itemSisaBarangInput.addEventListener('input', checkQuantity);
-            }
-        });
-
-        $('#nomerContainerModal').on('shown.bs.modal', function() {
-            const itemQtyInput = document.getElementById('item_qty_container');
-            const itemSisaBarangInput = document.getElementById('item_sisa_barang_container');
-            const quantityWarning = document.getElementById('quantity-warning-container');
-            const addItemButton = document.getElementById('add-item-btn-container');
-
-            function checkQuantity() {
-                const qty = parseInt(itemQtyInput.value, 10) || 0;
-                const sisa = parseInt(itemSisaBarangInput.value, 10) || 0;
-
-                if (qty > sisa) {
-                    quantityWarning.style.display = 'block';
-                    addItemButton.disabled = true;
-                } else {
-                    quantityWarning.style.display = 'none';
-                    addItemButton.disabled = false;
+                if (itemQtyInput) {
+                    itemQtyInput.addEventListener('input', checkQuantity);
                 }
-            }
 
-            if (itemQtyInput) {
-                itemQtyInput.addEventListener('input', checkQuantity);
-                addItem();
-            }
+                if (itemSisaBarangInput) {
+                    itemSisaBarangInput.addEventListener('input', checkQuantity);
+                }
+            });
 
-            if (itemSisaBarangInput) {
-                itemSisaBarangInput.addEventListener('input', checkQuantity);
-                addItem();
-            }
-        });
+            $('#nomerContainerModal').on('shown.bs.modal', function() {
+                const itemQtyInput = document.getElementById('item_qty_container');
+                const itemSisaBarangInput = document.getElementById('item_sisa_barang_container');
+                const quantityWarning = document.getElementById('quantity-warning-container');
+                const addItemButton = document.getElementById('add-item-btn-container');
+
+                function checkQuantity() {
+                    const qty = parseInt(itemQtyInput.value, 10) || 0;
+                    const sisa = parseInt(itemSisaBarangInput.value, 10) || 0;
+
+                    if (qty > sisa) {
+                        quantityWarning.style.display = 'block';
+                        addItemButton.disabled = true;
+                    } else {
+                        quantityWarning.style.display = 'none';
+                        addItemButton.disabled = false;
+                    }
+                }
+
+                if (itemQtyInput) {
+                    itemQtyInput.addEventListener('input', checkQuantity);
+                    addItem();
+                }
+
+                if (itemSisaBarangInput) {
+                    itemSisaBarangInput.addEventListener('input', checkQuantity);
+                    addItem();
+                }
+            });
 
 
 
@@ -1002,7 +1046,7 @@
             document.getElementById(hiddenInputId).value = angka;
         }
 
-        
+
         document.addEventListener("DOMContentLoaded", function() {
             const editItemQtyInput = document.getElementById('edit_item_qty');
             const editItemSisaBarangInput = document.getElementById('edit_item_sisa_barang');
@@ -1028,59 +1072,69 @@
 
         let items = []; // Array global untuk menyimpan item
 
-function addItem() {
-    const itemNoRef = document.getElementById('item_no_container').value || 'Auto-generated';
-    const itemName = document.getElementById('item_name_container').value;
-    const itemQty = parseInt(document.getElementById('item_qty_container').value, 10) || 0;
-    const itemUnit = document.getElementById('item_unit_container').value;
+        function addItem() {
+            const itemNoRef = document.getElementById('item_no_container').value || 'Auto-generated';
+            const itemName = document.getElementById('item_name_container').value;
+            const itemQty = parseInt(document.getElementById('item_qty_container').value, 10) || 0;
+            const itemUnit = document.getElementById('item_unit_container').value;
 
-    if (itemName && itemQty > 0) {
-        // Tambahkan item ke array
-        items.push({
-            no_ref: itemNoRef,
-            name: itemName,
-            qty: itemQty,
-            unit: itemUnit,
+            if (itemName && itemQty > 0) {
+                // Tambahkan item ke array
+                items.push({
+                    no_ref: itemNoRef,
+                    name: itemName,
+                    qty: itemQty,
+                    unit: itemUnit,
+                });
+
+                // Perbarui tabel
+                updateItemsTable();
+
+                // Tutup modal dan reset form
+                $('#itemModalContainer').modal('hide');
+                resetModalForm();
+            }
+        }
+
+        function resetModalForm() {
+            document.getElementById('item_name_container').value = '';
+            document.getElementById('item_qty_container').value = '';
+            document.getElementById('item_unit_container').value = '';
+            document.getElementById('item_sisa_barang_container').value = '';
+        }
+
+
+        let quantityColumnIndex = 4; // Default untuk btn-nomer-container
+
+        function updateTotalQuantity() {
+            let totalQuantity = 0;
+
+            $('#items-table tbody tr').each(function() {
+                var itemQty = parseFloat($(this).find(`td:nth-child(${quantityColumnIndex})`).text()) || 0;
+                totalQuantity += itemQty;
+            });
+
+            $('#totalQuantity').text(totalQuantity);
+        }
+
+        $('#btn-jo-number').on('click', function() {
+            quantityColumnIndex = 3;
+            updateTotalQuantity();
         });
 
-        // Perbarui tabel
-        updateItemsTable();
-
-        // Tutup modal dan reset form
-        $('#itemModalContainer').modal('hide');
-        resetModalForm();
-    }
-}
-
-function resetModalForm() {
-    document.getElementById('item_name_container').value = '';
-    document.getElementById('item_qty_container').value = '';
-    document.getElementById('item_unit_container').value = '';
-    document.getElementById('item_sisa_barang_container').value = '';
-}
+        $('#btn-nomer-container').on('click', function() {
+            quantityColumnIndex = 4;
+            updateTotalQuantity();
+        });
 
 
-function updateTotalQuantity() {
-    let totalQuantity = 0;
+        document.getElementById('btn-jo-number').addEventListener('click', function() {
+            this.style.display = 'none';
+        });
 
-    // Loop melalui semua baris yang ada di tabel secara manual
-    $('#items-table tbody tr').each(function() {
-        var itemQty = parseFloat($(this).find('td:nth-child(4)').text()) || 0;
-        totalQuantity += itemQty;
-    });
-
-    // Update total Quantity di footer
-    $('#totalQuantity').text(totalQuantity);
-}
-
-document.getElementById('btn-jo-number').addEventListener('click', function () {
-    this.style.display = 'none'; // Sembunyikan tombol yang diklik
-});
-
-document.getElementById('btn-nomer-container').addEventListener('click', function () {
-    this.style.display = 'none'; // Sembunyikan tombol yang diklik
-});
-
+        document.getElementById('btn-nomer-container').addEventListener('click', function() {
+            this.style.display = 'none';
+        });
     </script>
 
 
