@@ -240,7 +240,7 @@
                                             <table id="items-table">
                                                 <thead>
                                                     <tr>
-                                                        <th>Nomer Ref</th>
+                                                        <th>Nomer JO</th>
                                                         <th>Nama Barang</th>
                                                         <th>Quantity</th>
                                                         <th>Unit</th>
@@ -354,7 +354,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label for="item_no_container">Nomer Container</label>
+                        <label for="item_no_container">Nomer JO</label>
                         <input type="text" id="item_no_container" class="form-control" placeholder="Auto-generated" readonly>
                     </div>
                     <div class="form-group">
@@ -414,10 +414,7 @@
                     </div>
                     <div class="form-group">
                         <label for="edit_item_name">Nama Barang || JO Number</label>
-                        <select id="edit_item_name" class="form-control" required disabled>
-                            <option value="" disabled selected>Pilih Nama Barang</option>
-                            <!-- Option barang akan ditambahkan di sini -->
-                        </select>
+                        <input type="text" id="edit_item_name" class="form-control" readonly>
                     </div>
                     <div class="form-group">
                         <div class="row">
@@ -464,7 +461,7 @@
 
     <script>
         $(document).ready(function() {
-            $('#item_name, #edit_item_name').select2({
+            $('#item_name').select2({
                 placeholder: 'Pilih Nama Barang',
                 allowClear: true
             });
@@ -525,14 +522,13 @@
                 updateTotalQuantity();
             };
 
-            $('#add-item-btn').click(function() {
-                const itemId = $('#item_name').val();
-                const itemQty = parseFloat($('#item_qty').val()) || 0;
+            $('#add-item-btn-jo').click(function() {
+                const itemId = $('#item_name_jo').val();
+                const itemQty = parseFloat($('#item_qty_jo').val()) || 0;
                 const itemUnit = $('#item_unit_jo').val();
                 const itemJocNumber = $('#item_joc_number_jo').val();
-                const itemSisaBarang = $('#item_sisa_barang').val();
+                const itemSisaBarang = $('#item_sisa_barang_jo').val();
                 const itemBarangMasukID = $('#item_barang_masuk_id_jo').val();
-                const itemNoContainer = $('#item_no_container').val();
 
                 if (!itemId) {
                     alert('Please select a valid item.');
@@ -562,7 +558,7 @@
                     sisa_barang: itemSisaBarang
                 });
 
-                $('#item_name option:selected').remove();
+                $('#item_name_jo option:selected').remove();
 
                 nextJocNumber++;
 
@@ -570,13 +566,67 @@
 
                 updateTotalQuantity();
 
-                $('#item_name').val('');
-                $('#item_qty').val('');
-                $('#item_unit_jo').val('');
                 $('#item_joc_number_jo').val('');
-                $('#item_sisa_barang').val('');
-                $('#item_no_container').val('');
+                $('#item_name_jo').val('');
+                $('#item_qty_jo').val('');
+                $('#item_unit_jo').val('');
+                $('#item_sisa_barang_jo').val('');
+                $('#item_barang_masuk_id_joLabel').val('');
             });
+
+            $('#add-item-btn-container').click(function() {
+                const itemId = $('#item_name_container').val();
+                const itemQty = parseFloat($('#item_qty_container').val()) || 0;
+                const itemUnit = $('#item_unit_container').val();
+                const itemJocNumber = $('#item_no_container').val();
+                const itemSisaBarang = $('#item_sisa_barang_container').val();
+                const itemBarangMasukID = $('#item_barang_masuk_id_container').val();
+
+                if (!itemId) {
+                    alert('Please select a valid item.');
+                    return;
+                }
+
+                const itemName = $('#item_name_container option:selected').text();
+
+                const itemExists = items.some(item =>
+                    item.barang_id === parseInt(itemId, 10) &&
+                    item.name === itemName &&
+                    item.no_ref === itemJocNumber
+                );
+
+                if (itemExists) {
+                    alert('Barang telah ada dalam daftar!');
+                    return;
+                }
+
+                items.push({
+                    barang_id: parseInt(itemId, 10),
+                    no_ref: itemJocNumber,
+                    qty: itemQty,
+                    unit: itemUnit,
+                    barang_masuk_id: parseInt(itemBarangMasukID, 10),
+                    name: itemName,
+                    sisa_barang: itemSisaBarang
+                });
+
+                $('#item_name_container option:selected').remove();
+
+                nextJocNumber++;
+
+                updateItemsTable();
+
+                updateTotalQuantity();
+
+                $('#item_joc_number_jo').val('');
+                $('#item_no_container').val('');
+                $('#item_name_container').val('');
+                $('#item_qty_container').val('');
+                $('#item_unit_container').val('');
+                $('#item_sisa_barang_container').val('');
+                $('#item_barang_masuk_id_container').val('');
+            });
+
 
 
 
@@ -620,7 +670,7 @@
             // Event untuk tombol "Add Item Container"
             $('#btn-nomer-container').click(function() {
                 isContainer = true;
-                callApi('#item_name_container', '#item_unit_container', '#item_no_container', '#item_barang_masuk_id_container', '#item_sisa_barang_container');
+                callApi('#item_name_container', '#item_unit_container', '#item_no_container', '#item_joc_number_jo', '#item_barang_masuk_id_container', '#item_sisa_barang_container');
             });
 
             // Fungsi untuk memanggil API berdasarkan pilihan
@@ -785,7 +835,7 @@
                 $('#edit_item_sisa_barang').val(item.sisa_barang);
                 $('#edit_item_barang_masuk_id_jo').val(item.barang_masuk_id);
 
-                $('#edit_item_name').val(item.barang_id).trigger('change');
+                $('#edit_item_name').val(item.name)
 
                 $('#save-edit-item-btn').data('index', index);
 
