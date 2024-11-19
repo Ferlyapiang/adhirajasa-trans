@@ -241,6 +241,7 @@
                                                 <thead>
                                                     <tr>
                                                         <th>Nomer JO</th>
+                                                        <th>Nomer Container</th>
                                                         <th>Nama Barang</th>
                                                         <th>Quantity</th>
                                                         <th>Unit</th>
@@ -251,7 +252,7 @@
                                                 </tbody>
                                                 <tfoot>
                                                     <tr>
-                                                        <th colspan="2" style="text-align:right;">Total:</th>
+                                                        <th colspan="3" style="text-align:right;">Total:</th>
                                                         <th id="totalQuantity"></th>
                                                         <th colspan="4"></th>
                                                     </tr>
@@ -494,26 +495,27 @@
             }
 
             function updateItemsTable() {
-    let itemsTableBody = $('#items-table tbody');
-    itemsTableBody.empty(); // Hapus semua baris sebelumnya
-    items.forEach((item, index) => {
-        itemsTableBody.append(`
-            <tr>
-                <td>${item.no_ref}</td>
-                <td>${item.name}</td>
-                <td>${item.qty}</td>
-                <td>${item.unit}</td>
-                <td>
-                    <button type="button" class="btn btn-warning btn-sm" onclick="editItem(${index})">Edit</button>
-                    <button type="button" class="btn btn-danger btn-sm" onclick="removeItem(${index})">Remove</button>
-                </td>
-            </tr>
-        `);
-    });
+                let itemsTableBody = $('#items-table tbody');
+                itemsTableBody.empty(); // Hapus semua baris sebelumnya
+                items.forEach((item, index) => {
+                    itemsTableBody.append(`
+                        <tr>
+                            <td>${item.no_ref}</td>
+                            <td>${item.nomer_container}</td>
+                            <td>${item.name}</td>
+                            <td>${item.qty}</td>
+                            <td>${item.unit}</td>
+                            <td>
+                                <button type="button" class="btn btn-warning btn-sm" onclick="editItem(${index})">Edit</button>
+                                <button type="button" class="btn btn-danger btn-sm" onclick="removeItem(${index})">Remove</button>
+                            </td>
+                        </tr>
+                    `);
+                });
 
-    // Simpan data ke input hidden untuk pengiriman
-    $('#items-input').val(JSON.stringify(items));
-}
+                // Simpan data ke input hidden untuk pengiriman
+                $('#items-input').val(JSON.stringify(items));
+            }
 
 
             window.removeItem = function(index) {
@@ -535,7 +537,7 @@
                     return;
                 }
 
-                const itemName = $('#item_name option:selected').text();
+                const itemName = $('#item_name_jo option:selected').text();
 
                 const itemExists = items.some(item =>
                     item.barang_id === parseInt(itemId, 10) &&
@@ -551,6 +553,7 @@
                 items.push({
                     barang_id: parseInt(itemId, 10),
                     no_ref: itemJocNumber,
+                    nomer_container: '',
                     qty: itemQty,
                     unit: itemUnit,
                     barang_masuk_id: parseInt(itemBarangMasukID, 10),
@@ -588,6 +591,7 @@
                 }
 
                 const itemName = $('#item_name_container option:selected').text();
+                const extractedName = itemName.split('||')[1]?.trim();
 
                 const itemExists = items.some(item =>
                     item.barang_id === parseInt(itemId, 10) &&
@@ -603,6 +607,7 @@
                 items.push({
                     barang_id: parseInt(itemId, 10),
                     no_ref: itemJocNumber,
+                    nomer_container: extractedName,
                     qty: itemQty,
                     unit: itemUnit,
                     barang_masuk_id: parseInt(itemBarangMasukID, 10),
@@ -1060,7 +1065,7 @@ function resetModalForm() {
 
             // Loop melalui semua baris yang ada di tabel secara manual
             $('#items-table tbody tr').each(function() {
-                var itemQty = parseFloat($(this).find('td:nth-child(3)').text()) || 0;
+                var itemQty = parseFloat($(this).find('td:nth-child(4)').text()) || 0;
                 totalQuantity += itemQty;
             });
 
