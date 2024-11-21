@@ -22,7 +22,6 @@ class InvoiceGeneratedController extends Controller
         $user = Auth::user();
         $currentDate = now();
         $nextMonth = $currentDate->addMonth();
-        
         if (!$user) {
             return redirect()->route('login')->with('alert', 'You must be logged in to access this page.');
         }
@@ -238,10 +237,6 @@ class InvoiceGeneratedController extends Controller
                 'total_keluar_reporting.barang_masuk_id'
             );
 
-
-
-
-
         $invoiceMaster = $invoiceMaster
             ->whereNull('invoices.nomer_invoice')
             ->where('invoices.tanggal_masuk', '<=', DB::raw('LAST_DAY(DATE_ADD(CURDATE(), INTERVAL 1 MONTH))'))
@@ -276,11 +271,11 @@ class InvoiceGeneratedController extends Controller
         
         ');
 
-        if (!$user) {
-            return redirect()->route('login')->with('alert', 'Waktu login Anda telah habis, silakan login ulang.');
-        } else {
+        if ($user->warehouse_id !== null) {
             $invoiceMaster = $invoiceMaster->where('barang_masuks.gudang_id', $user->warehouse_id);
         }
+
+        
 
         $invoiceMaster = $invoiceMaster->orderBy('barang_keluars.tanggal_keluar', 'asc')->get();
         
@@ -319,6 +314,7 @@ class InvoiceGeneratedController extends Controller
                     'total_keluar.barang_masuk_id'
                 )
                 ->where('invoices.id', $invoice->id)
+                ->where('barang_masuks.gudang_id', $user->warehouse_id)
                 ->value('total_sisa');
 
             DB::table('invoices')
