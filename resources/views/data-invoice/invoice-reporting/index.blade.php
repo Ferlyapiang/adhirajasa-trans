@@ -100,73 +100,77 @@
                                     </div>
                                 @endif
 
-                                <div class="table-responsive">
-                                    <table id="barangMasukTable" class="table table-bordered table-striped">
-                                        <thead>
+                                @php
+                                    $latestEntries = [];
+                                
+                                    foreach ($invoiceMaster as $item) {
+                                        $key = $item->customer_name;
+                                
+                                        if (!isset($latestEntries[$key]) || $item->tanggal_tagihan > $latestEntries[$key]->tanggal_tagihan) {
+                                            $latestEntries[$key] = $item;
+                                        }
+                                    }
+                                @endphp
+                            
+                            <div class="table-responsive">
+                                <table id="barangMasukTable" class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>No</th>
+                                            <th>Nomer Invoice</th>
+                                            <th>Tanggal Penagihan</th>
+                                            <th>Nomer Referensi</th>
+                                            <th>Nama Pemilik</th>
+                                            <th>Gudang</th>
+                                            <th>Tanggal Masuk Penimbunan</th>
+                                            <th>Tanggal Keluar Penimbunan</th>
+                                            <th>Total QTY Sisa</th>
+                                            <th>Lemburan</th>
+                                            <th>Harga Kirim Barang</th>
+                                            <th>Total Harga Simpan</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($invoiceMaster as $index => $item)
                                             <tr>
-                                                <th>No</th>
-                                                <th>Nomer Invoice</th>
-                                                <th>Tanggal Penagihan</th>
-                                                <th>Nomer Referensi</th>
-                                                <th>Nama Pemilik</th>
-                                                <th>Gudang</th>
-                                                <th>Tanggal Masuk Penimbunan</th>
-                                                <th>Tanggal Keluar Penimbunan</th>                                                
-                                                <th>Total QTY Sisa</th>
-                                                <th>Lemburan</th>
-                                                <th>Harga Kirim Barang</th>
-                                                <th>Total Harga Simpan</th>
-                                                <th>Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach ($invoiceMaster as $index => $item)
-                                                <tr>
-                                                    <!-- Individual checkbox -->
-                                                    <td>{{ $index + 1 }}</td>
-                                                    <td>
-                                                        <form action="{{ route('invoices-report.show') }}"
-                                                            method="POST" style="display:inline;">
-                                                            @csrf
-                                                            <input type="hidden" name="nomer_invoice"
-                                                                value="{{ $item->nomer_invoice }}">
-                                                            <button type="submit"
-                                                                style="background: none; border: none; color: blue; text-decoration: underline; cursor: pointer;">
-                                                                {{ $item->nomer_invoice ?? 'X' }}
-                                                            </button>
-                                                        </form>
-                                                    </td>
-
-                                                    <td>
-                                                        {{ $item->tanggal_tagihan ?? ($item->tanggal_tagihan ?? 'X') }}
-                                                    </td>
-                                                    <td>{{ $item->joc_number ?? ($item->nomer_surat_jalan ?? 'X') }}</td>
-                                                    <td>{{ $item->customer_name ?? 'X' }}
-                                                    <td>
-                                                        {{ $item->warehouse_name ?? 'X' }}
-                                                    </td>
-                                                    <td>{{ $item->tanggal_masuk_penimbunan ?? 'X' }}</td>
-                                                    <td>{{ $item->tanggal_keluar_penimbunan ?? 'X' }}</td>
-                                                    <td>{{ $item->total_sisa ?? 'X' }}</td>
-                                                    <td>{{ number_format($item->harga_lembur) ?? 'X' }}</td>
-                                                    <td>{{ number_format($item->harga_kirim_barang) ?? 'X' }}</td>
-                                                    <td>
-                                                        {{ number_format($item->harga_simpan_barang) ?? 'X' }}
-                                                    </td>
-                                                    <td>
+                                                <td>{{ $index + 1 }}</td>
+                                                <td>
+                                                    <form action="{{ route('invoices-report.show') }}" method="POST" style="display:inline;">
+                                                        @csrf
+                                                        <input type="hidden" name="nomer_invoice" value="{{ $item->nomer_invoice }}">
+                                                        <button type="submit"
+                                                            style="background: none; border: none; color: blue; text-decoration: underline; cursor: pointer;">
+                                                            {{ $item->nomer_invoice ?? 'X' }}
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                                <td>{{ $item->tanggal_tagihan ?? 'X' }}</td>
+                                                <td>{{ $item->joc_number ?? $item->nomer_surat_jalan ?? 'X' }}</td>
+                                                <td>{{ $item->customer_name ?? 'X' }}</td>
+                                                <td>{{ $item->warehouse_name ?? 'X' }}</td>
+                                                <td>{{ $item->tanggal_masuk_penimbunan ?? 'X' }}</td>
+                                                <td>{{ $item->tanggal_keluar_penimbunan ?? 'X' }}</td>
+                                                <td>{{ $item->total_sisa ?? 'X' }}</td>
+                                                <td>{{ number_format($item->harga_lembur) ?? 'X' }}</td>
+                                                <td>{{ number_format($item->harga_kirim_barang) ?? 'X' }}</td>
+                                                <td>{{ number_format($item->harga_simpan_barang) ?? 'X' }}</td>
+                                                <td>
+                                                    @if (isset($latestEntries[$item->customer_name]) && $latestEntries[$item->customer_name]->nomer_invoice === $item->nomer_invoice)
                                                         <form action="{{ route('data-invoice.invoice-reporting.delete') }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus data ini?');">
                                                             @csrf
                                                             @method('DELETE')
                                                             <input type="hidden" name="nomer_invoice" value="{{ $item->nomer_invoice }}">
                                                             <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                                                         </form>
-                                                    </td>
-
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                            
                             </div>
                             <!-- /.card-body -->
                         </div>
