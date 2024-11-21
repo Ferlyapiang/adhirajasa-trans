@@ -137,20 +137,24 @@ class InvoiceBarangMasukController extends Controller
     public function updateStatus(Request $request) {
         $request->validate([
             'ids' => 'required|array',
-            'ids.*' => 'exists:barang_masuks,id', 
+            'ids.*' => 'exists:barang_masuks,id',
+            'tanggal_tagihan_masuk' => 'required'
         ]);
-        // dd($request->ids);
     
+        $tanggal_tagihan_masuk = $request->tanggal_tagihan_masuk;
+        
         foreach ($request->ids as $id) {
             $invoice = new Invoice();
-            $invoice->barang_masuks_id = $id; 
+            $invoice->barang_masuks_id = $id;
+            $invoice->tanggal_masuk = $tanggal_tagihan_masuk; 
             $invoice->save();
         }
     
         BarangMasuk::whereIn('id', $request->ids)->update(['status_invoice' => 'Invoice Barang Masuk']);
-        
+    
         return response()->json(['message' => 'Status updated successfully']);
     }
+    
     
     
 }

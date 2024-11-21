@@ -316,13 +316,11 @@ class InvoiceGeneratedController extends Controller
                 ->where('invoices.id', $invoice->id)
                 ->value('total_sisa');
 
-            // Update the specific invoice's total_qty with the calculated total_sisa
             DB::table('invoices')
                 ->where('id', $invoice->id)
                 ->update(['total_qty' => $totalSisa ?? 0]); // Ensure null fallback is handled as 0 or appropriate value
         }
 
-        // dd($invoiceMaster);
 
         return view('data-invoice.invoice-master.index', compact('invoiceMaster', 'owners', 'tanggalTagihans'));
     }

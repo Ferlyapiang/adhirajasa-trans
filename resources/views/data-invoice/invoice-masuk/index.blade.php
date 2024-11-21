@@ -95,7 +95,11 @@
                                             <tbody>
                                                 @foreach ($invoiceMasuk as $index => $item)
                                                 <tr>
-                                                    <td><input type="checkbox" class="invoiceCheckbox" value="{{ $item->invoice_id }}"></td> <!-- Individual checkbox -->
+                                                    <td>
+                                                        <input type="checkbox" class="invoiceCheckbox" 
+                                                               value="{{ json_encode(['invoice_id' => $item->invoice_id, 'tanggal_tagihan_masuk' => $item->tanggal_tagihan_masuk]) }}">
+                                                    </td>
+                                                    
                                                     <td>{{ $index + 1 }}</td>
                                                     <td>{{ $item->tanggal_tagihan_masuk }}</td>
                                                     <td>
@@ -194,32 +198,35 @@
             });
 
             $('#updateStatusButton').on('click', function() {
-                var selectedIds = [];
-                $('.invoiceCheckbox:checked').each(function() {
-                    selectedIds.push($(this).val());
-                });
+    var selectedIds = [];
+    $('.invoiceCheckbox:checked').each(function() {
+        // Parse the value of each selected checkbox
+        selectedIds.push(JSON.parse($(this).val()));
+    });
 
-                if (selectedIds.length > 0) {
-                    $.ajax({
-                        url: '{{ route("invoice.barang.masuk.update.status") }}',
-                        method: 'POST',
-                        data: {
-                            _token: '{{ csrf_token() }}',
-                            ids: selectedIds
-                        },
-                        success: function(response) {
-                            alert('Status updated successfully!');
-                            window.location.reload();
-                        },
-                        error: function(xhr) {
-                            alert('Failed to update status. Please try again.');
-                            console.error(xhr.responseJSON);
-                        }
-                    });
-                } else {
-                    alert('Please select at least one invoice.');
-                }
-            });
+    if (selectedIds.length > 0) {
+        $.ajax({
+            url: '{{ route("invoice.barang.masuk.update.status") }}',
+            method: 'POST',
+            data: {
+                _token: '{{ csrf_token() }}',
+                ids: selectedIds.map(item => item.invoice_id), // Only send invoice_id
+                tanggal_tagihan_masuk: selectedIds[0].tanggal_tagihan_masuk // You can send the first one, assuming all have the same value
+            },
+            success: function(response) {
+                alert('Status updated successfully!');
+                window.location.reload();
+            },
+            error: function(xhr) {
+                alert('Failed to update status. Please try again.');
+                console.error(xhr.responseJSON);
+            }
+        });
+    } else {
+        alert('Please select at least one invoice.');
+    }
+});
+
 
             // Format Rupiah function
             function formatRupiah(value) {
