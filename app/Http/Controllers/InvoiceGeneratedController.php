@@ -21,46 +21,50 @@ class InvoiceGeneratedController extends Controller
     {
         $user = Auth::user();
         $currentDate = now();
+        $nextMonth = $currentDate->addMonth();
         
         if (!$user) {
             return redirect()->route('login')->with('alert', 'You must be logged in to access this page.');
         }
 
-        $barangMasuks = BarangMasuk::where('tanggal_tagihan_masuk', '<=', $currentDate)
+        $barangMasuks = BarangMasuk::where('tanggal_tagihan_masuk', '<=', $nextMonth)
             ->where('status_invoice', '<>', 'Invoice Barang Masuk')
             ->get();
 
         foreach ($barangMasuks as $barangMasuk) {
             $existingInvoice = Invoice::where('barang_masuks_id', $barangMasuk->id)->first();
 
-            if (!$existingInvoice) {
-                $invoice = new Invoice();
-                $invoice->barang_masuks_id = $barangMasuk->id;
-                $invoice->tanggal_masuk = $barangMasuk->tanggal_tagihan_masuk;
-                $invoice->save();
+            if ($existingInvoice) {
+                $existingInvoice->delete();
             }
-
+            $invoice = new Invoice();
+            $invoice->barang_masuks_id = $barangMasuk->id;
+            $invoice->tanggal_masuk = $barangMasuk->tanggal_tagihan_masuk;
+            $invoice->save();
             $barangMasuk->status_invoice = 'Invoice Barang Masuk';
-            $barangMasuk->save();
+            $barangMasuk->save(); 
         }
 
-        $barangKeluars = BarangKeluar::where('tanggal_tagihan_keluar', '<=', $currentDate)
+        $barangKeluars = BarangKeluar::where('tanggal_tagihan_keluar', '<=', $nextMonth)
             ->where('status_invoice', '<>', 'Invoice Barang Keluar')
             ->get();
 
         foreach ($barangKeluars as $barangKeluar) {
             $existingInvoice = Invoice::where('barang_keluars_id', $barangKeluar->id)->first();
 
-            if (!$existingInvoice) {
-                $invoice = new Invoice();
-                $invoice->barang_keluars_id = $barangKeluar->id;
-                $invoice->tanggal_masuk = $barangKeluar->tanggal_tagihan_keluar;
-                $invoice->save();
+            if ($existingInvoice) {
+                $existingInvoice->delete();
             }
+
+            $invoice = new Invoice();
+            $invoice->barang_keluars_id = $barangKeluar->id;
+            $invoice->tanggal_masuk = $barangKeluar->tanggal_tagihan_keluar;
+            $invoice->save();
 
             $barangKeluar->status_invoice = 'Invoice Barang Keluar';
             $barangKeluar->save();
         }
+
 
 
         $invoiceMaster = DB::table('invoices')
@@ -240,7 +244,7 @@ class InvoiceGeneratedController extends Controller
 
         $invoiceMaster = $invoiceMaster
             ->whereNull('invoices.nomer_invoice')
-            ->where('invoices.tanggal_masuk', '<=', DB::raw('LAST_DAY(CURDATE())'))
+            ->where('invoices.tanggal_masuk', '<=', DB::raw('LAST_DAY(DATE_ADD(CURDATE(), INTERVAL 1 MONTH))'))
             ->whereRaw('COALESCE(
                         (SELECT min_qties.min_qty
                         FROM invoices_reporting ir
@@ -272,19 +276,20 @@ class InvoiceGeneratedController extends Controller
         
         ');
 
-        $invoiceMaster = $invoiceMaster->orderBy('barang_keluars.tanggal_keluar', 'asc')->get();
-        
         if (!$user) {
             return redirect()->route('login')->with('alert', 'Waktu login Anda telah habis, silakan login ulang.');
         } else {
             $invoiceMaster = $invoiceMaster->where('barang_masuks.gudang_id', $user->warehouse_id);
         }
 
+        $invoiceMaster = $invoiceMaster->orderBy('barang_keluars.tanggal_keluar', 'asc')->get();
+        
+        
+
         $owners = $invoiceMaster->map(function ($item) {
             return $item->customer_masuk_name ?: $item->customer_keluar_name;
         })->unique()->values();
         
-        // Mapping tanggalTagihans based on (potentially) filtered $invoiceMaster
         $tanggalTagihans = $invoiceMaster->map(function ($item) {
             return $item->tanggal_tagihan_masuk ?? $item->tanggal_tagihan_keluar;
         })->unique()->values();
@@ -318,7 +323,7 @@ class InvoiceGeneratedController extends Controller
 
             DB::table('invoices')
                 ->where('id', $invoice->id)
-                ->update(['total_qty' => $totalSisa ?? 0]); // Ensure null fallback is handled as 0 or appropriate value
+                ->update(['total_qty' => $totalSisa ?? 0]);
         }
 
 
