@@ -18,7 +18,7 @@ class InvoiceReportingController extends Controller
     public function index()
     {
         $user = Auth::user();
-
+        
         if (!$user) {
             return redirect()->route('login')->with('alert', 'You must be logged in to access this page.');
         }
@@ -67,17 +67,15 @@ class InvoiceReportingController extends Controller
                 'total_keluar.barang_masuk_id'
             );
 
-        if (!$user) {
-            return redirect()->route('login')->with('alert', 'Waktu login Anda telah habis, silakan login ulang.');
-        } else {
-            $invoiceMaster = $invoiceMaster->where('barang_keluars.gudang_id', $user->warehouse_id);
-        }
-
-
         $invoiceMaster = $invoiceMaster->whereRaw('
                 COALESCE(invoices_reporting.harga_lembur, 0) > 0 
                 OR COALESCE(invoices_reporting.qty, 0) > 0
             ');
+
+        if ($user->warehouse_id !== null) {
+            $invoiceMaster = $invoiceMaster->where('barang_masuks.gudang_id', $user->warehouse_id);
+        }
+
 
         $invoiceMaster = $invoiceMaster->groupBy('invoices_reporting.nomer_invoice');
         $invoiceMaster = $invoiceMaster->orderBy('invoices_reporting.nomer_invoice', 'desc')->get();
