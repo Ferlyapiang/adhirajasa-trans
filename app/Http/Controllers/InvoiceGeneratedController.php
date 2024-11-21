@@ -44,7 +44,7 @@ class InvoiceGeneratedController extends Controller
             $barangMasuk->save();
         }
 
-        $barangKeluars = BarangKeluar::where('tanggal_tagihan_keluar', '<=', $nextMonth)
+        $barangKeluars = BarangKeluar::where('tanggal_tagihan_keluar', '<=', $nextMonth->addMonth())
             ->where('status_invoice', '<>', 'Invoice Barang Keluar')
             ->get();
 
@@ -226,7 +226,7 @@ class InvoiceGeneratedController extends Controller
             ->when($user->warehouse_id, function ($query) use ($user) {
                 return $query->where('barang_masuks.gudang_id', $user->warehouse_id);
             })
-            ->where('invoices.tanggal_masuk', '<=', DB::raw('LAST_DAY(DATE_ADD(CURDATE(), INTERVAL 1 MONTH))'))
+            ->where('invoices.tanggal_masuk', '<=', DB::raw('LAST_DAY(DATE_ADD(CURDATE(), INTERVAL 2 MONTH))'))
             ->whereRaw('COALESCE(
                     (SELECT min_qties.min_qty
                     FROM invoices_reporting ir
