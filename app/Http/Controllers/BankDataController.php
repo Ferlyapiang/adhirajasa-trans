@@ -35,6 +35,11 @@ class BankDataController extends Controller
     public function create()
 {
     $user = Auth::user();
+
+    if (!$user) {
+        return redirect()->route('login')->with('alert', 'You must be logged in to access this page.');
+    }
+
     $warehouses = Warehouse::where('status', 'active')->get();
     $existingBankData = BankData::where('warehouse_id', $user->warehouse_id)->pluck('status_bank')->toArray();
     return view('master-data.bank-data.create', compact('warehouses', 'user', 'existingBankData'));
@@ -105,7 +110,11 @@ if (in_array($request->status_bank, $existingBankData)) {
 public function edit(BankData $bankData)
 {
     $user = Auth::user();
-    // Fetch only the warehouse assigned to the user, or all if no specific warehouse is assigned
+
+    if (!$user) {
+        return redirect()->route('login')->with('alert', 'You must be logged in to access this page.');
+    }
+    
     $warehouses = $user->warehouse_id ? Warehouse::where('id', $user->warehouse_id)->get() : Warehouse::all();
     
     return view('master-data.bank-data.edit', compact('bankData', 'warehouses', 'user'));

@@ -76,34 +76,6 @@ class UserController extends Controller
         $warehouses = Warehouse::all();
         return view('admin.management-user.users.create', compact('groups'));
     }
-
-    // public function store(Request $request)
-    // {
-    //     $request->validate([
-    //         'name' => 'required|string|max:255',
-    //         'email' => 'required|string|email|max:191|unique:users',
-    //         'password' => 'required|string|min:8|confirmed',
-    //         'status' => 'required|in:active,inactive',
-    //         'group_id' => 'nullable|exists:groups,id',
-    //         'warehouse_id' => 'nullable|exists:warehouses,id'
-    //     ]);
-    //     $user = User::create([
-    //         'name' => $request->name,
-    //         'email' => $request->email,
-    //         'password' => bcrypt($request->password),
-    //         'status' => $request->status,
-    //         'group_id' => $request->group_id,
-    //         'warehouse_id' => $request->warehouse_id
-    //     ]);
-
-    //     LogData::create([
-    //         'user_id' => Auth::id(),
-    //         'name' => Auth::user()->name,
-    //         'action' => 'insert',
-    //         'details' => 'Created user ID: ' . $user->id . ' with data: ' . json_encode($request->only('name', 'email', 'password', 'status', 'group_id'))
-    //     ]);
-    //     return redirect()->route('management-user.users.index')->with('success', 'User added successfully.');
-    // }
     public function store(Request $request)
 {
     // Validate the request data

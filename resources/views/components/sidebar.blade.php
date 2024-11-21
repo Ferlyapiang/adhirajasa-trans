@@ -23,28 +23,35 @@
     <!-- Sidebar Menu -->
     <nav class="mt-2 sidebar-scroll">
       <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-        @foreach ($menus as $menu)
-          <li class="nav-item">
-            <a href="{{ $menu->url }}" 
-               class="nav-link {{ request()->is(trim($menu->url, '/')) ? 'active-menu' : '' }}">
-              <i class="nav-icon {{ $menu->icon }}"></i>
-              <p>{{ $menu->name }}<i class="right fas fa-angle-left"></i></p>
-            </a>
-            @if ($menu->children->isNotEmpty())
-              <ul class="nav nav-treeview">
-                @foreach ($menu->children as $child)
-                  <li class="nav-item">
-                    <a href="{{ $child->url }}" 
-                       class="nav-link {{ request()->is(trim($child->url, '/')) ? 'active-menu' : '' }}">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>{{ $child->name }}</p>
-                    </a>
-                  </li>
-                @endforeach
-              </ul>
-            @endif
-          </li>
-        @endforeach
+        @if ($menus && $menus->isNotEmpty())
+    @foreach ($menus as $menu)
+      <li class="nav-item">
+        <a href="{{ $menu->url }}" 
+           class="nav-link {{ request()->is(trim($menu->url, '/')) ? 'active-menu' : '' }}">
+          <i class="nav-icon {{ $menu->icon }}"></i>
+          <p>{{ $menu->name }}<i class="right fas fa-angle-left"></i></p>
+        </a>
+        @if ($menu->children->isNotEmpty())
+          <ul class="nav nav-treeview">
+            @foreach ($menu->children as $child)
+              <li class="nav-item">
+                <a href="{{ $child->url }}" 
+                   class="nav-link {{ request()->is(trim($child->url, '/')) ? 'active-menu' : '' }}">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>{{ $child->name }}</p>
+                </a>
+              </li>
+            @endforeach
+          </ul>
+        @endif
+      </li>
+    @endforeach
+@else
+    <script>
+        window.location.href = "{{ route('login') }}";
+    </script>
+@endif
+
       </ul>
     </nav>
 

@@ -100,9 +100,15 @@
                                 <label for="warehouse_id">Warehouse</label>
 
                                 @php
-                                $loggedInUser = Auth::user();
-                                $userWarehouseId = $loggedInUser->warehouse_id;
+                                    $loggedInUser = Auth::user();
+                                    if (!$loggedInUser) {
+                                        header('Location: ' . route('login'));
+                                        exit;
+                                    }
+
+                                    $userWarehouseId = $loggedInUser->warehouse_id;
                                 @endphp
+
 
                                 @if ($userWarehouseId)
                                 <select id="warehouse_id" name="warehouse_id" class="form-control" readonly>

@@ -78,6 +78,11 @@ class BarangKeluarController extends Controller
     public function create()
     {
         $user = Auth::user();
+
+        if (!$user) {
+            return redirect()->route('login')->with('alert', 'You must be logged in to access this page.');
+        }
+
         $warehouses = Warehouse::all();
         if ($user->warehouse_id) {
             $customers = Customer::where('status', 'active')
@@ -302,6 +307,11 @@ class BarangKeluarController extends Controller
     public function show($id)
     {
         $user = Auth::user();
+
+        if (!$user) {
+            return redirect()->route('login')->with('alert', 'You must be logged in to access this page.');
+        }
+
         $barangKeluar = BarangKeluar::with('items')->findOrFail($id);
 
         $warehouses = Warehouse::all();
@@ -363,6 +373,11 @@ class BarangKeluarController extends Controller
     public function edit($id)
     {
         $user = Auth::user();
+
+        if (!$user) {
+            return redirect()->route('login')->with('alert', 'You must be logged in to access this page.');
+        }
+        
         $barangKeluar = BarangKeluar::with('items')->findOrFail($id);
 
         $warehouses = Warehouse::all();

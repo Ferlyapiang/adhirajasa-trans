@@ -116,8 +116,15 @@
 
                         @php
                         $loggedInUser = Auth::user();
-                        $userWarehouseId = $loggedInUser->warehouse_id;
+                    
+                        // Redirect to login if the user is not authenticated
+                        if (!$loggedInUser) {
+                            return redirect()->route('login')->with('alert', 'You must be logged in to access this page.');
+                        }
+                    
+                            $userWarehouseId = $loggedInUser->warehouse_id;
                         @endphp
+                    
 
                         @if ($userWarehouseId)
                         <select id="warehouse_id" name="warehouse_id" class="form-control" readonly>

@@ -34,8 +34,11 @@ class BarangController extends Controller
 {
     $itemTypes = ItemType::where('status', 'active')->get();
 
-    // Fetch only active customers related to the user's warehouse_id
     $user = Auth::user();
+
+    if (!$user) {
+        return redirect()->route('login')->with('alert', 'You must be logged in to access this page.');
+    }
     
     if ($user->warehouse_id) {
         // Fetch only active customers whose warehouse_id matches the user's
@@ -73,6 +76,10 @@ class BarangController extends Controller
     public function edit(Barang $barang)
 {
     $user = Auth::user();
+
+    if (!$user) {
+        return redirect()->route('login')->with('alert', 'You must be logged in to access this page.');
+    }
 
     if ($user->warehouse_id) {
         $customers = Customer::where('status', 'active')

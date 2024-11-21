@@ -21,6 +21,10 @@ class InvoiceGeneratedController extends Controller
     {
         $user = Auth::user();
         $currentDate = now();
+        
+        if (!$user) {
+            return redirect()->route('login')->with('alert', 'You must be logged in to access this page.');
+        }
 
         $barangMasuks = BarangMasuk::where('tanggal_tagihan_masuk', '<=', $currentDate)
             ->where('status_invoice', '<>', 'Invoice Barang Masuk')

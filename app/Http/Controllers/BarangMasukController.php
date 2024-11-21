@@ -99,6 +99,9 @@ class BarangMasukController extends Controller
     public function create()
     {
         $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('login')->with('alert', 'You must be logged in to access this page.');
+        }
         $gudangs = Warehouse::all();
         if ($user->warehouse_id) {
             $pemilik = Customer::where('status', 'active')
@@ -118,6 +121,10 @@ class BarangMasukController extends Controller
     {
         try {
             $user = Auth::user();
+
+            if (!$user) {
+                return redirect()->route('login')->with('alert', 'You must be logged in to access this page.');
+            }
 
             if (is_null($user->warehouse_id)) {
                 $request->validate([
@@ -241,6 +248,11 @@ class BarangMasukController extends Controller
     public function edit($id)
     {
         $user = Auth::user();
+
+        if (!$user) {
+            return redirect()->route('login')->with('alert', 'You must be logged in to access this page.');
+        }
+
         $barangMasuk = BarangMasuk::findOrFail($id);
         $barangs = Barang::all();
         if ($user->warehouse_id) {

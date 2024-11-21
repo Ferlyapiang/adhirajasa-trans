@@ -18,6 +18,11 @@ class InvoiceReportingController extends Controller
     public function index()
     {
         $user = Auth::user();
+
+        if (!$user) {
+            return redirect()->route('login')->with('alert', 'You must be logged in to access this page.');
+        }
+
         $currentDate = now();
         $invoiceMaster = DB::table('invoices_reporting')
             ->select(
@@ -173,6 +178,11 @@ class InvoiceReportingController extends Controller
     public function show(Request $request)
     {
         $user = Auth::user();
+
+        if (!$user) {
+            return redirect()->route('login')->with('alert', 'You must be logged in to access this page.');
+        }
+        
         $nomer_invoice = $request->input('nomer_invoice');
 
         // Prepare the SQL query

@@ -60,9 +60,16 @@
                                     $greeting = 'Selamat Malam';
                                 }
                                 @endphp
+                            @if (Auth::check())
                                 <div style="font-size:28px; font-weight: 450;">
-                                    {{ $greeting }}, {{ Auth::user()->name ?? 'User' }}
+                                    {{ $greeting }}, {{ Auth::user()->name }}
                                 </div>
+                            @else
+                                <script>
+                                    window.location.href = "{{ route('login') }}";
+                                </script>
+                            @endif
+                          
                             </div>
 
                             <!-- Welcome Section -->
