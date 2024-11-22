@@ -28,45 +28,58 @@ class BarangKeluarController extends Controller
     $user = Auth::user();
     if (!$user) {
         return redirect()->route('login')->with('alert', 'Waktu login Anda telah habis, silakan login ulang.');
-    } else {
-        // Ambil data barang keluar
-        $barangKeluars = DB::table('barang_keluars')
-            ->select(
-                'barang_keluars.id AS barang_keluar_id',
-                'barang_keluars.tanggal_keluar',
-                'barang_keluars.nomer_surat_jalan',
-                'barang_keluars.nomer_invoice',
-                'barang_keluar_items.no_ref',
-                'barangs.nama_barang AS nama_barang',
-                'warehouses.name AS nama_gudang',
-                'customers.name AS nama_customer',
-                'barang_keluar_items.qty',
-                'type_mobil.type AS jenis_mobil_type',
-                'barang_keluars.nomer_polisi',
-                'barang_keluars.nomer_container',
-                DB::raw('IF(invoices_reporting.barang_keluars_id IS NOT NULL, 1, 0) AS is_edit_hidden')
-            )
-            ->join('barang_keluar_items', 'barang_keluars.id', '=', 'barang_keluar_items.barang_keluar_id')
-            ->join('barangs', 'barang_keluar_items.barang_id', '=', 'barangs.id')
-            ->join('warehouses', 'barang_keluars.gudang_id', '=', 'warehouses.id')
-            ->join('customers', 'barang_keluars.customer_id', '=', 'customers.id')
-            ->leftJoin('type_mobil', 'barang_keluars.type_mobil_id', '=', 'type_mobil.id')
-            ->leftJoin('invoices_reporting', 'barang_keluars.id', '=', 'invoices_reporting.barang_keluars_id'); // Left join dengan invoices_reporting untuk pengecekan
-
-        // Filter berdasarkan gudang jika ada
-        if ($user->warehouse_id !== null) {
-            $barangKeluars = $barangKeluars->where('barang_keluars.gudang_id', $user->warehouse_id);
-        }
-
-        // Urutkan berdasarkan nomor invoice
-        $barangKeluars = $barangKeluars->orderBy('barang_keluars.nomer_invoice', 'desc')->get();
     }
 
-    // Ambil data pilihan jenis mobil
+    $this->deleteUnusedBarangKeluars();
+
+    $barangKeluars = DB::table('barang_keluars')
+        ->select(
+            'barang_keluars.id AS barang_keluar_id',
+            'barang_keluars.tanggal_keluar',
+            'barang_keluars.nomer_surat_jalan',
+            'barang_keluars.nomer_invoice',
+            'barang_keluar_items.no_ref',
+            'barangs.nama_barang AS nama_barang',
+            'warehouses.name AS nama_gudang',
+            'customers.name AS nama_customer',
+            'barang_keluar_items.qty',
+            'type_mobil.type AS jenis_mobil_type',
+            'barang_keluars.nomer_polisi',
+            'barang_keluars.nomer_container',
+            DB::raw('IF(invoices_reporting.barang_keluars_id IS NOT NULL, 1, 0) AS is_edit_hidden')
+        )
+        ->join('barang_keluar_items', 'barang_keluars.id', '=', 'barang_keluar_items.barang_keluar_id')
+        ->join('barangs', 'barang_keluar_items.barang_id', '=', 'barangs.id')
+        ->join('warehouses', 'barang_keluars.gudang_id', '=', 'warehouses.id')
+        ->join('customers', 'barang_keluars.customer_id', '=', 'customers.id')
+        ->leftJoin('type_mobil', 'barang_keluars.type_mobil_id', '=', 'type_mobil.id')
+        ->leftJoin('invoices_reporting', 'barang_keluars.id', '=', 'invoices_reporting.barang_keluars_id');
+
+    if ($user->warehouse_id !== null) {
+        $barangKeluars = $barangKeluars->where('barang_keluars.gudang_id', $user->warehouse_id);
+    }
+
+    $barangKeluars = $barangKeluars->orderBy('barang_keluars.nomer_invoice', 'desc')->get();
+
     $typeMobilOptions = JenisMobil::all();
 
     // Kirim data ke view
     return view('data-gudang.barang-keluar.index', compact('barangKeluars', 'typeMobilOptions'));
+}
+
+
+
+private function deleteUnusedBarangKeluars()
+{
+    DB::transaction(function () {
+        DB::table('barang_keluars')
+            ->whereNotExists(function ($query) {
+                $query->select(DB::raw(1))
+                    ->from('barang_keluar_items')
+                    ->whereColumn('barang_keluar_items.barang_keluar_id', 'barang_keluars.id');
+            })
+            ->delete();
+    });
 }
 
 

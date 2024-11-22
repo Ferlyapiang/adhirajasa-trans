@@ -227,36 +227,11 @@ class InvoiceGeneratedController extends Controller
                 return $query->whereRaw('COALESCE(barang_masuks.gudang_id, barang_keluars.gudang_id) = ?', [$user->warehouse_id]);
             })
             
-            ->where('invoices.tanggal_masuk', '<=', DB::raw('LAST_DAY(DATE_ADD(CURDATE(), INTERVAL 2 MONTH))'))
-            ->whereRaw('COALESCE(
-                    (SELECT min_qties.min_qty
-                    FROM invoices_reporting ir
-                    JOIN (
-                        SELECT barang_masuks_id, MIN(qty) AS min_qty
-                        FROM invoices_reporting
-                        GROUP BY barang_masuks_id
-                    ) AS min_qties 
-                    ON ir.barang_masuks_id = min_qties.barang_masuks_id
-                    WHERE ir.barang_masuks_id = invoices.barang_masuks_id
-                    LIMIT 1), 
-                COALESCE(total_items.total_qty, 0)
-            )  -  (COALESCE(total_keluar_invoices.total_qty, 0) + COALESCE(total_keluar_invoices_reporting.total_qty_reporting, 0)) > 0
-        OR (
-            (COALESCE(barang_keluars.harga_lembur, 0)) > 0
-            OR (CASE 
-                WHEN customers_masuks.type_payment_customer = "Akhir Bulan" 
-                    AND YEAR(barang_masuks.tanggal_masuk) = YEAR(barang_masuks.tanggal_tagihan_masuk)
-                    AND MONTH(barang_masuks.tanggal_masuk) = MONTH(barang_masuks.tanggal_tagihan_masuk)
-                THEN barang_masuks.harga_lembur
-                WHEN customers_masuks.type_payment_customer = "Pertanggal Masuk" 
-                    AND barang_masuks.tanggal_tagihan_masuk = CURRENT_DATE
-                THEN barang_masuks.harga_lembur
-                ELSE 0
-            END) > 0
-        )')
             ->get();
-
+        
         // dd($invoiceMaster);
+
+        $this->deleteUnusedInvoicesAndBarangKeluars();
 
         $owners = $invoiceMaster->map(function ($item) {
             return $item->customer_masuk_name ?: $item->customer_keluar_name;
@@ -301,6 +276,22 @@ class InvoiceGeneratedController extends Controller
 
         return view('data-invoice.invoice-master.index', compact('invoiceMaster', 'owners', 'tanggalTagihans'));
     }
+
+    private function deleteUnusedInvoicesAndBarangKeluars()
+{
+    DB::transaction(function () {
+        
+        // Hapus barang_keluars yang tidak memiliki barang_keluar_items terkait
+        DB::table('barang_keluars')
+            ->whereNotExists(function ($query) {
+                $query->select(DB::raw(1))
+                    ->from('barang_keluar_items')
+                    ->whereColumn('barang_keluar_items.barang_keluar_id', 'barang_keluars.id');
+            })
+            ->delete();
+    });
+}
+
 
     public function generateInvoice(Request $request)
     {
