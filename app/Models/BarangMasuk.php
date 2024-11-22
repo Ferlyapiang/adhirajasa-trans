@@ -19,6 +19,7 @@ class BarangMasuk extends Model
         'status_invoice',
         'tanggal_tagihan_masuk',
         'tanggal_penimbunan',
+        'status_ngepok'
     ];
 
     public function items()

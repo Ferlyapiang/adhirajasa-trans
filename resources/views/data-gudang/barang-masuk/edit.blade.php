@@ -168,6 +168,14 @@
                             value="{{ $barangMasuk->harga_lembur }}">
                     </div>
 
+                    <div class="form-group">
+                        <label for="status_ngepok">Apakah Ini Barang Transit ?</label>
+                        <select id="status_ngepok" class="form-control" name="status_ngepok">
+                            <option value="" {{ $barangMasuk->status_ngepok ? 'selected' : '' }}>Tidak</option>
+                            <option value="Transit" {{ $barangMasuk->status_ngepok ? 'selected' : '' }}>Ya</option>
+                        </select>
+                    </div>
+
                     <h2>Items</h2>
                     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#itemModal">Add
                         Item</button>

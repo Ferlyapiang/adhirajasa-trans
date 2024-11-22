@@ -41,7 +41,8 @@ class BarangMasukController extends Controller
                     DB::raw('COALESCE(SUM(bki.qty), 0) AS fifo_out'),
                     'bmi.unit',
                     DB::raw('(MIN(bmi.qty) - COALESCE(SUM(bki.qty), 0)) AS fifo_sisa'),
-                    DB::raw('IF(ir.barang_masuks_id IS NOT NULL, 1, 0) AS is_reported')  // Check if exists in invoices_reporting
+                    DB::raw('IF(ir.barang_masuks_id IS NOT NULL, 1, 0) AS is_reported'),
+                    DB::raw('COALESCE(bm.status_ngepok, c.type_payment_customer) AS status_ngepok')
                 )
                 ->join('barang_masuk_items as bmi', 'bm.id', '=', 'bmi.barang_masuk_id')
                 ->join('barangs as b', 'bmi.barang_id', '=', 'b.id')
@@ -70,7 +71,9 @@ class BarangMasukController extends Controller
                 'bm.nomer_container',
                 'bmi.notes',
                 'bmi.unit',
-                'ir.barang_masuks_id'
+                'ir.barang_masuks_id',
+                'bm.status_ngepok',
+                'c.type_payment_customer'
             )
             ->orderBy('bm.tanggal_masuk', 'desc')
             ->get();
@@ -144,6 +147,7 @@ class BarangMasukController extends Controller
                 'nomer_container' => 'nullable|string',
                 'harga_simpan_barang' => 'nullable|numeric',
                 'harga_lembur' => 'nullable|numeric',
+                'status_ngepok' => 'nullable|string',
                 'items.*.barang_id' => 'required|exists:barangs,id',
                 'items.*.qty' => 'required|numeric',
                 'items.*.unit' => 'required|string',
@@ -203,12 +207,13 @@ class BarangMasukController extends Controller
                 'customer_id' => $request->customer_id,
                 'type_mobil_id' => $request->type_mobil_id, 
                 'nomer_polisi' => $request->nomer_polisi ?? "",
-                'nomer_container' => $request->nomer_container ?? "", 
+                'nomer_container' => $request->nomer_container ?? "",
                 'status_invoice' => "Barang Masuk",
                 'harga_simpan_barang' => $request->harga_simpan_barang ?? 0,
                 'harga_lembur' => $request->harga_lembur ?? 0,
                 'tanggal_tagihan_masuk' => $tanggalTagihanMasuk,
-                'tanggal_penimbunan' => $tanggalPenimbunanMasuk
+                'tanggal_penimbunan' => $tanggalPenimbunanMasuk,
+                'status_ngepok' => $request->status_ngepok ?? null,
             ]);
             // dd($barangMasuk);
 
@@ -281,6 +286,7 @@ class BarangMasukController extends Controller
                 'nomer_container' => 'nullable|string',
                 'harga_simpan_barang' => 'nullable|numeric',
                 'harga_lembur' => 'nullable|numeric',
+                'status_ngepok' => 'nullable|string',
                 'items.*.barang_id' => 'required|exists:barangs,id',
                 'items.*.qty' => 'required|numeric',
                 'items.*.unit' => 'required|string',
@@ -306,7 +312,7 @@ class BarangMasukController extends Controller
                 $tanggalPenimbunanMasuk = $tanggalMasuk ? $tanggalMasuk->copy()->addMonth()->subDay()->format('Y-m-d') : null;
             }
 
-            // $tanggalTagihanMasuk = $tanggalMasuk->copy()->addMonthsNoOverflow(1)->startOfMonth()->addDays(2)->format('Y-m-d');
+            
             if ($tanggalMasuk) {
                 $tanggalMasukNormal = $request->tanggal_masuk ? Carbon::parse($request->tanggal_masuk) : null;
                 if ($tanggalMasukNormal->day <= 2) {
@@ -331,6 +337,7 @@ class BarangMasukController extends Controller
                 'harga_lembur' => $request->harga_lembur ?? 0,
                 'tanggal_tagihan_masuk' => $tanggalTagihanMasuk,
                 'tanggal_penimbunan' => $tanggalPenimbunanMasuk,
+                'status_ngepok' => $request->status_ngepok ?? null,
             ]);
 
             $items = json_decode($request->items, true);

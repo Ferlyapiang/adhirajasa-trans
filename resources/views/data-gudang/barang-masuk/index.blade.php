@@ -67,6 +67,7 @@
                                                     <th>Jenis Mobil</th>
                                                     <th>Nomer Polisi</th>
                                                     <th>Nomer Container</th>
+                                                    <th>Status</th>
                                                     <th>Notes</th>
                                                     <th>FIFO IN</th>
                                                     <th>FIFO OUT</th>
@@ -90,6 +91,7 @@
                                                         <td>{{ $barangMasuk->nama_type_mobil }}</td>
                                                         <td>{{ $barangMasuk->nomer_polisi }}</td>
                                                         <td>{{ $barangMasuk->nomer_container }}</td>
+                                                        <td>{{ $barangMasuk->status_ngepok }}</td>
                                                         <td>{{ $barangMasuk->notes }}</td>
                                                         <td>{{ $barangMasuk->fifo_in }}</td>
                                                         <td>{{ $barangMasuk->fifo_out }}</td>
@@ -169,9 +171,9 @@
 
                 table.rows({ filter: 'applied' }).every(function() {
                     var data = this.data();
-                    totalFifoIn += parseFloat(data[10]) || 0;
-                    totalFifoOut += parseFloat(data[11]) || 0;
-                    totalFifoSisa += parseFloat(data[12]) || 0;
+                    totalFifoIn += parseFloat(data[11]) || 0;
+                    totalFifoOut += parseFloat(data[12]) || 0;
+                    totalFifoSisa += parseFloat(data[13]) || 0;
                 });
 
                 $('#totalFifoIn').text(totalFifoIn);

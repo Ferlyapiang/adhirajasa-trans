@@ -224,8 +224,9 @@ class InvoiceGeneratedController extends Controller
             )
             ->whereNull('invoices.nomer_invoice')
             ->when($user->warehouse_id, function ($query) use ($user) {
-                return $query->where('barang_masuks.gudang_id', $user->warehouse_id);
+                return $query->whereRaw('COALESCE(barang_masuks.gudang_id, barang_keluars.gudang_id) = ?', [$user->warehouse_id]);
             })
+            
             ->where('invoices.tanggal_masuk', '<=', DB::raw('LAST_DAY(DATE_ADD(CURDATE(), INTERVAL 2 MONTH))'))
             ->whereRaw('COALESCE(
                     (SELECT min_qties.min_qty
