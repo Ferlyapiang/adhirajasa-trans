@@ -230,7 +230,16 @@ class InvoiceGeneratedController extends Controller
         if (!$user) {
             return redirect()->route('login')->with('alert', 'Waktu login Anda telah habis, silakan login ulang.');
         } else {
-            $invoiceMaster = $invoiceMaster->where('barang_masuks.gudang_id', $user->warehouse_id);
+            $gudangId = $user->warehouse_id;
+            $invoiceMaster = $invoiceMaster
+                ->where(function ($query) use ($gudangId) {
+                    $query->where('barang_masuks.gudang_id', $gudangId)
+                        ->orWhereNull('barang_masuks.gudang_id');
+                })
+                ->where(function ($query) use ($gudangId) {
+                    $query->where('barang_keluars.gudang_id', $gudangId)
+                        ->orWhereNull('barang_keluars.gudang_id');
+                });
         }
 
         $invoiceMaster = $invoiceMaster
@@ -305,7 +314,7 @@ class InvoiceGeneratedController extends Controller
                 ->where('invoices.id', $invoice->id)
                 ->value('total_sisa');
 
-            // Update the specific invoice's total_qty with the calculated total_sisa
+            
             DB::table('invoices')
                 ->where('id', $invoice->id)
                 ->update(['total_qty' => $totalSisa ?? 0]); // Ensure null fallback is handled as 0 or appropriate value
