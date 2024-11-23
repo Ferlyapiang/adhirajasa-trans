@@ -28,7 +28,7 @@ class InvoiceGeneratedController extends Controller
             ->get();
 
         foreach ($barangMasuks as $barangMasuk) {
-            Invoice::where('barang_keluars_id', $barangMasuk->id)->delete();
+            Invoice::where('barang_masuks_id', $barangMasuk->id)->delete();
 
             $invoice = new Invoice();
             $invoice->barang_masuks_id = $barangMasuk->id;
@@ -252,6 +252,7 @@ class InvoiceGeneratedController extends Controller
             
 
         $invoiceMaster = $invoiceMaster->orderBy('invoices.tanggal_masuk', 'asc')->get();
+        
 
         $owners = $invoiceMaster->map(function ($item) {
             return $item->customer_masuk_name ?: $item->customer_keluar_name;
