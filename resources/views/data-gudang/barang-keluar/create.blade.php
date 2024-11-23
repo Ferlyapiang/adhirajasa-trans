@@ -1127,14 +1127,25 @@
             updateTotalQuantity();
         });
 
+            document.getElementById('btn-jo-number').addEventListener('click', function() {
+                if (this.disabled) {
+                    alert('ANDA TELAH MEMILIH ADD ITEM WITH CONTAINER');
+                } else {
+                    document.getElementById('btn-nomer-container').disabled = true;
+                }
 
-        document.getElementById('btn-jo-number').addEventListener('click', function() {
-            this.style.display = 'none';
-        });
+            });
 
-        document.getElementById('btn-nomer-container').addEventListener('click', function() {
-            this.style.display = 'none';
-        });
+            // Ketika tombol Add Item Partai diklik
+            document.getElementById('btn-nomer-container').addEventListener('click', function() {
+                if (this.disabled) {
+                    alert('ANDA TELAH MEMILIH ADD ITEM FIFO');
+                } else {
+                document.getElementById('btn-jo-number').disabled = true;
+
+                }
+            });
+
     </script>
 
 

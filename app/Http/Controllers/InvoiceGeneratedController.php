@@ -384,139 +384,175 @@ class InvoiceGeneratedController extends Controller
                         $hargaLembur = $barangMasuk->harga_lembur ?? null;
 
                         $totalQtyKeluarBarang = DB::table('invoices')
-                            ->select(
-                                'invoices.barang_keluars_id',
-                                DB::raw('COALESCE(total_items.total_qty, 0) AS total_qty_masuk'),
-
-                                DB::raw('COALESCE(total_keluar_invoices_reporting.total_qty_reporting, 0) AS total_qty_keluar'),
-
-                                DB::raw('COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar_invoices_reporting.total_qty_reporting, 0) AS total_sisa'),
-                                DB::raw('
-                                CASE
-                                    WHEN COALESCE(total_items.total_qty, 0) = 
-                                        (COALESCE(total_items.total_qty, 0) - 
-                                        (COALESCE(total_keluar_invoices.total_qty, 0) + 
-                                        COALESCE(total_keluar_invoices_reporting.total_qty_reporting, 0) + 
-                                        COALESCE(total_keluar_reporting.total_qty, 0)))
-                                    THEN 
-                                        barang_masuks.harga_simpan_barang
-                                    ELSE 
-                                        (
-                                            COALESCE(total_items.total_qty, 0) - 
-                                            COALESCE(total_keluar_invoices_reporting.total_qty_reporting, 0)
-                                        ) / NULLIF(COALESCE(total_items.total_qty, 1), 0) * 
-                                        barang_masuks.harga_simpan_barang
-                                END AS total_harga_simpan
-                            '),
-                            )
-                            ->leftJoin('barang_masuks', 'invoices.barang_masuks_id', '=', 'barang_masuks.id')
-                            ->leftJoin('barang_keluars', 'invoices.barang_keluars_id', '=', 'barang_keluars.id')
-                            ->leftJoin('warehouses AS warehouses_masuks', 'barang_masuks.gudang_id', '=', 'warehouses_masuks.id')
-                            ->leftJoin('customers AS customers_masuks', 'barang_masuks.customer_id', '=', 'customers_masuks.id')
-                            ->leftJoin('warehouses AS warehouses_keluars', 'barang_keluars.gudang_id', '=', 'warehouses_keluars.id')
-                            ->leftJoin('customers AS customers_keluars', 'barang_keluars.customer_id', '=', 'customers_keluars.id')
-                            ->leftJoin(
-                                DB::raw('(
-                                    SELECT barang_masuk_id, SUM(qty) AS total_qty 
-                                    FROM barang_masuk_items 
-                                    GROUP BY barang_masuk_id
-                                ) AS total_items'),
-                                'barang_masuks.id',
-                                '=',
-                                'total_items.barang_masuk_id'
-                            )
-                            ->leftJoin(
-                                DB::raw('(
-                                    SELECT 
-                                            bki.barang_masuk_id, 
-                                            SUM(
+                        ->select(
+                            'invoices.id',
+                            'invoices.nomer_invoice',
+                            'invoices.barang_masuks_id',
+                            'barang_masuks.joc_number',
+                            'barang_masuks.tanggal_invoice_masuk',
+                            'barang_masuks.tanggal_invoice_keluar',
+                            'barang_masuks.tanggal_tagihan_masuk',
+                            'barang_keluars.tanggal_tagihan_keluar',
+                            'barang_masuks.tanggal_masuk AS tanggal_masuk_barang',
+                            'barang_masuks.gudang_id',
+                            'warehouses_masuks.name AS warehouse_masuk_name',
+                            'barang_masuks.customer_id',
+                            'customers_masuks.name AS customer_masuk_name',
+                            'customers_masuks.type_payment_customer AS type_payment_customer_masuk',
+            
+                            DB::raw('COALESCE(total_items.total_qty, 0) AS total_qty_masuk'),
+            
+                            DB::raw('COALESCE(total_keluar_invoices_reporting.total_qty_reporting, 0) AS total_qty_keluar'),
+                        
+                            DB::raw('COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar_invoices_reporting.total_qty_reporting, 0) AS total_sisa'),
+                            DB::raw('
+                                            CASE
+                                                WHEN COALESCE(total_items.total_qty, 0) = 
+                                                    (COALESCE(total_items.total_qty, 0) - 
+                                                    (COALESCE(total_keluar_invoices.total_qty, 0) + 
+                                                    COALESCE(total_keluar_invoices_reporting.total_qty_reporting, 0) + 
+                                                    COALESCE(total_keluar_reporting.total_qty, 0)))
+                                                THEN 
+                                                    barang_masuks.harga_simpan_barang
+                                                ELSE 
+                                                    (
+                                                        COALESCE(total_items.total_qty, 0) - 
+                                                        COALESCE(total_keluar_invoices_reporting.total_qty_reporting, 0)
+                                                    ) / NULLIF(COALESCE(total_items.total_qty, 1), 0) * 
+                                                    barang_masuks.harga_simpan_barang
+                                            END AS total_harga_simpan
+                                        '),
+            
+            
+                            DB::raw('
+                                        COALESCE(
                                                 CASE 
-                                                    WHEN customers.type_payment_customer = "Akhir Bulan" THEN 
-                                                        CASE 
-                                                            WHEN barang_keluars.tanggal_keluar < barang_masuks.tanggal_invoice_masuk 
-                                                            THEN bki.qty 
-                                                            ELSE 0 
-                                                        END
-                                                    WHEN customers.type_payment_customer = "Pertanggal Masuk" THEN 
-                                                        CASE 
-                                                            WHEN barang_keluars.tanggal_keluar < barang_masuks.tanggal_invoice_masuk 
-                                                            THEN bki.qty 
-                                                            ELSE 0 
-                                                        END
+                                                    WHEN DATEDIFF(barang_masuks.tanggal_tagihan_masuk, barang_masuks.tanggal_masuk) <= 60
+                                                        AND (invoices.nomer_invoice IS NULL OR invoices.nomer_invoice = "")
+                                                    THEN barang_masuks.harga_lembur
                                                     ELSE 0
-                                                END
-                                            ) AS total_qty
-                                        FROM barang_keluar_items bki
-                                        JOIN barang_keluars ON bki.barang_keluar_id = barang_keluars.id
-                                        JOIN barang_masuks ON bki.barang_masuk_id = barang_masuks.id
-                                        JOIN invoices ir ON barang_keluars.id = ir.barang_keluars_id
-                                        JOIN customers ON barang_masuks.customer_id = customers.id
-                                        GROUP BY bki.barang_masuk_id
-                                    ) AS total_keluar_invoices'),
-                                'barang_masuks.id',
-                                '=',
-                                'total_keluar_invoices.barang_masuk_id'
-                            )
-
-                            ->leftJoin(
-                                DB::raw('(
-                                    SELECT 
+                                                END, 
+                                            0) AS harga_lembur_masuk
+                                    '),
+                            'invoices.barang_keluars_id',
+                            'barang_keluars.tanggal_keluar',
+                            'barang_keluars.nomer_surat_jalan',
+                            'barang_keluars.gudang_id',
+                            'warehouses_keluars.name AS warehouse_keluar_name',
+                            'barang_keluars.customer_id',
+                            'customers_keluars.name AS customer_keluar_name',
+                            'customers_keluars.type_payment_customer AS type_payment_customer_keluar',
+                            'barang_keluars.harga_lembur AS harga_lembur_keluar',
+                            'barang_keluars.harga_kirim_barang'
+                        )
+                        ->leftJoin('barang_masuks', 'invoices.barang_masuks_id', '=', 'barang_masuks.id')
+                        ->leftJoin('barang_keluars', 'invoices.barang_keluars_id', '=', 'barang_keluars.id')
+                        ->leftJoin('warehouses AS warehouses_masuks', 'barang_masuks.gudang_id', '=', 'warehouses_masuks.id')
+                        ->leftJoin('customers AS customers_masuks', 'barang_masuks.customer_id', '=', 'customers_masuks.id')
+                        ->leftJoin('warehouses AS warehouses_keluars', 'barang_keluars.gudang_id', '=', 'warehouses_keluars.id')
+                        ->leftJoin('customers AS customers_keluars', 'barang_keluars.customer_id', '=', 'customers_keluars.id')
+                        ->leftJoin(
+                            DB::raw('(
+                                SELECT barang_masuk_id, SUM(qty) AS total_qty 
+                                FROM barang_masuk_items 
+                                GROUP BY barang_masuk_id
+                            ) AS total_items'),
+                            'barang_masuks.id',
+                            '=',
+                            'total_items.barang_masuk_id'
+                        )
+                        ->leftJoin(
+                            DB::raw('(
+                                SELECT 
                                         bki.barang_masuk_id, 
-                                        
                                         SUM(
                                             CASE 
                                                 WHEN customers.type_payment_customer = "Akhir Bulan" THEN 
                                                     CASE 
-                                                        WHEN barang_keluars.tanggal_keluar <= barang_masuks.tanggal_invoice_masuk 
+                                                        WHEN barang_keluars.tanggal_keluar < barang_masuks.tanggal_invoice_masuk 
                                                         THEN bki.qty 
                                                         ELSE 0 
                                                     END
                                                 WHEN customers.type_payment_customer = "Pertanggal Masuk" THEN 
                                                     CASE 
-                                                        WHEN barang_keluars.tanggal_keluar <= barang_masuks.tanggal_invoice_masuk 
+                                                        WHEN barang_keluars.tanggal_keluar < barang_masuks.tanggal_invoice_masuk 
                                                         THEN bki.qty 
                                                         ELSE 0 
                                                     END
                                                 ELSE 0
                                             END
-                                        ) AS total_qty_reporting
-                                    FROM 
-                                        barang_keluar_items bki
-                                    JOIN 
-                                        barang_keluars ON bki.barang_keluar_id = barang_keluars.id
-                                    JOIN 
-                                        barang_masuks ON bki.barang_masuk_id = barang_masuks.id
-                                    JOIN 
-                                        customers ON barang_masuks.customer_id = customers.id
-                                    GROUP BY 
-                                        bki.barang_masuk_id
-                                ) AS total_keluar_invoices_reporting'),
-                                'barang_masuks.id',
-                                '=',
-                                'total_keluar_invoices_reporting.barang_masuk_id'
-                            )
-
-
-
-                            ->leftJoin(
-                                DB::raw('(
-                                    SELECT 	
-                                        bki.barang_masuk_id, 
-                                        SUM(CASE 
-                                                WHEN barang_keluars.tanggal_keluar < ir.tanggal_masuk_penimbunan
-                                                THEN bki.qty 
-                                                ELSE 0 
-                                            END) AS total_qty
+                                        ) AS total_qty
                                     FROM barang_keluar_items bki
                                     JOIN barang_keluars ON bki.barang_keluar_id = barang_keluars.id
                                     JOIN barang_masuks ON bki.barang_masuk_id = barang_masuks.id
-                                    JOIN invoices_reporting ir ON barang_keluars.id = ir.barang_keluars_id
+                                    JOIN invoices ir ON barang_keluars.id = ir.barang_keluars_id
+                                    JOIN customers ON barang_masuks.customer_id = customers.id
                                     GROUP BY bki.barang_masuk_id
-                                ) AS total_keluar_reporting'),
-                                'barang_masuks.id',
-                                '=',
-                                'total_keluar_reporting.barang_masuk_id'
-                            )
+                                ) AS total_keluar_invoices'),
+                            'barang_masuks.id',
+                            '=',
+                            'total_keluar_invoices.barang_masuk_id'
+                        )
+            
+                        ->leftJoin(
+                            DB::raw('(
+                                SELECT 
+                                    bki.barang_masuk_id, 
+                                    
+                                    SUM(
+                                        CASE 
+                                            WHEN customers.type_payment_customer = "Akhir Bulan" THEN 
+                                                CASE 
+                                                    WHEN barang_keluars.tanggal_keluar <= barang_masuks.tanggal_invoice_masuk 
+                                                    THEN bki.qty 
+                                                    ELSE 0 
+                                                END
+                                            WHEN customers.type_payment_customer = "Pertanggal Masuk" THEN 
+                                                CASE 
+                                                    WHEN barang_keluars.tanggal_keluar <= barang_masuks.tanggal_invoice_masuk 
+                                                    THEN bki.qty 
+                                                    ELSE 0 
+                                                END
+                                            ELSE 0
+                                        END
+                                    ) AS total_qty_reporting
+                                FROM 
+                                    barang_keluar_items bki
+                                JOIN 
+                                    barang_keluars ON bki.barang_keluar_id = barang_keluars.id
+                                JOIN 
+                                    barang_masuks ON bki.barang_masuk_id = barang_masuks.id
+                                JOIN 
+                                    customers ON barang_masuks.customer_id = customers.id
+                                GROUP BY 
+                                    bki.barang_masuk_id
+                            ) AS total_keluar_invoices_reporting'),
+                            'barang_masuks.id',
+                            '=',
+                            'total_keluar_invoices_reporting.barang_masuk_id'
+                        )
+            
+            
+            
+                        ->leftJoin(
+                            DB::raw('(
+                                SELECT 	
+                                    bki.barang_masuk_id, 
+                                    SUM(CASE 
+                                            WHEN barang_keluars.tanggal_keluar < ir.tanggal_masuk_penimbunan
+                                            THEN bki.qty 
+                                            ELSE 0 
+                                        END) AS total_qty
+                                FROM barang_keluar_items bki
+                                JOIN barang_keluars ON bki.barang_keluar_id = barang_keluars.id
+                                JOIN barang_masuks ON bki.barang_masuk_id = barang_masuks.id
+                                JOIN invoices_reporting ir ON barang_keluars.id = ir.barang_keluars_id
+                                GROUP BY bki.barang_masuk_id
+                            ) AS total_keluar_reporting'),
+                            'barang_masuks.id',
+                            '=',
+                            'total_keluar_reporting.barang_masuk_id'
+                        )
 
                             ->where('barang_masuks.id', $invoice->barang_masuks_id)
                             ->first();
