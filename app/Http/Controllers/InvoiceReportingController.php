@@ -127,8 +127,7 @@ class InvoiceReportingController extends Controller
                             $tanggalInvoiceKeluar = ($invoice->tanggal_masuk_penimbunan === $barangMasuk->tanggal_masuk)
                                 ? null
                                 : $invoice->tanggal_keluar_penimbunan;
-                
-                            // Perbarui data barang_masuks
+
                             DB::table('barang_masuks')
                                 ->where('id', $id)
                                 ->update([
@@ -140,13 +139,10 @@ class InvoiceReportingController extends Controller
                         }
                     }
                 }
-                
-
-                // Tangani barang_keluars_id jika berisi lebih dari satu nilai
                 if ($invoice->barang_keluars_id) {
-                    $barangKeluarsIds = explode(',', $invoice->barang_keluars_id); // Pecah menjadi array
+                    $barangKeluarsIds = explode(',', $invoice->barang_keluars_id);
                     foreach ($barangKeluarsIds as $id) {
-                        DB::table('barang_masuks')
+                        DB::table('barang_keluars')
                             ->where('id', $id)
                             ->update([
                                 'status_invoice' => 'Barang Keluar',
@@ -155,7 +151,6 @@ class InvoiceReportingController extends Controller
                 }
             }
 
-            // Hapus semua data di invoices_reporting dengan nomer_invoice yang sama
             DB::table('invoices_reporting')
                 ->where('nomer_invoice', $request->nomer_invoice)
                 ->delete();

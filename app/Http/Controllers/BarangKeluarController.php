@@ -112,22 +112,19 @@ private function deleteUnusedBarangKeluars()
 
     function generateWarehouseCode($name)
     {
-        // Remove non-alphanumeric characters
         $cleanName = preg_replace('/[^a-zA-Z0-9\s]/', '', $name);
 
-        // Split the name into words
         $words = explode(' ', $cleanName);
 
-        // If it's a single word, take the first three letters
         if (count($words) == 1) {
             $abbreviation = strtoupper(substr($cleanName, 0, 3));
         } else {
-            // Take the first letter of each word
+
             $abbreviation = '';
             foreach ($words as $word) {
                 $abbreviation .= strtoupper(substr($word, 0, 1));
             }
-            // Return the first 3 characters, or the whole abbreviation if it's shorter
+
             $abbreviation = substr($abbreviation, 0, 3);
         }
 
@@ -197,7 +194,6 @@ private function deleteUnusedBarangKeluars()
             ->latest('id')
             ->first();
 
-        // Generate the next number for the invoice
         if ($lastInvoice) {
             $lastInvoiceNumber = $lastInvoice->nomer_invoice;
             $lastNumber = (int) substr($lastInvoiceNumber, -3);
@@ -208,10 +204,6 @@ private function deleteUnusedBarangKeluars()
 
         $formattedNumber = sprintf('%03d', $nextNumber);
         $nomer_invoice = "ATS/INV/{$year}/{$romanMonth}/{$warehouseCode}/{$formattedNumber}";
-
-        // $tanggalKeluar = $request->tanggal_keluar ? Carbon::createFromFormat('Y-m-d', $request->tanggal_keluar) : null;
-        // $barangMasukID = $validated['items'][0]['barang_masuk_id'];
-        // $tanggalTagihanKeluar = $tanggalKeluar ? $tanggalKeluar->copy()->addMonth()->startOfMonth()->addDays(2)->format('Y-m-d') : null;
 
         $tanggalKeluar = $request->tanggal_keluar ? Carbon::createFromFormat('Y-m-d', $request->tanggal_keluar) : null;
 
@@ -227,32 +219,24 @@ private function deleteUnusedBarangKeluars()
             $tanggalTagihanKeluar = null;
 
             foreach ($barangMasukRecords as $record) {
-                $tanggalTagihan = $record->tanggal_invoice_masuk
-                    ? Carbon::createFromFormat('Y-m-d', $record->tanggal_invoice_masuk)->copy()->addMonthsNoOverflow(1)
-                    : Carbon::createFromFormat('Y-m-d', $record->tanggal_penimbunan);
-
                 if ($customer->type_payment_customer === 'Akhir Bulan') {
+                    $tanggalKeluarCopy = $tanggalKeluar->copy();
+                
+                    if ($tanggalKeluar->day <= 3) {
 
-                    if ($tanggalKeluar->lessThan($tanggalTagihan)) {
-                    
-                        $tanggalTagihanKeluar = $tanggalKeluar->copy()->startOfMonth()->addDays(2)->addMonths(2)->format('Y-m-d');
-                        // dd($tanggalKeluar, $tanggalTagihan, "Akhir Bulan - Case 1: " . $tanggalTagihanKeluar);
+                        $tanggalTagihanKeluar = $tanggalKeluarCopy->startOfMonth()->addDays(2)->format('Y-m-d');
                     } else {
-                        $tanggalTagihanKeluar = $tanggalKeluar->copy()->addMonthsNoOverflow(1)->startOfMonth()->addDays(2)->format('Y-m-d');
-                        // dd($tanggalKeluar, $tanggalTagihan, "Akhir Bulan - Case 2: " . $tanggalTagihanKeluar);
+
+                        $tanggalTagihanKeluar = $tanggalKeluarCopy->addMonthNoOverflow()->startOfMonth()->addDays(2)->format('Y-m-d');
                     }
-                } elseif ($customer->type_payment_customer === 'Pertanggal Masuk') {
+                }elseif ($customer->type_payment_customer === 'Pertanggal Masuk') {
                     $tanggalTagihanKeluar = $tanggalKeluar->copy()->addMonthsNoOverflow(1)->startOfMonth()->addDays(2)->format('Y-m-d');
-                    // dd($tanggalKeluar, $tanggalTagihan, "Pertanggal Masuk: " . $tanggalTagihanKeluar);
                 }
             }
         }
 
 
 
-        // dd($tanggalTagihanKeluar, $tanggalKeluar, $barangMasukRecords);
-        // dd($tanggalKeluar);
-        // dd($tanggalTagihanKeluar);
         $barangKeluarData = [
             'nomer_surat_jalan' => $validated['nomor_surat_jalan'],
             'tanggal_keluar' => $validated['tanggal_keluar'],
@@ -458,8 +442,6 @@ private function deleteUnusedBarangKeluars()
             'items.*.barang_masuk_id' => 'required|exists:barang_masuks,id',
         ]);
 
-        // dd($validated);
-
         $bankTransfer = BankData::where('warehouse_id', $validated['gudang_id'])->first();
 
         $bank_transfer_id = $bankTransfer ? $bankTransfer->id : null;
@@ -478,25 +460,24 @@ private function deleteUnusedBarangKeluars()
             $tanggalTagihanKeluar = null;
 
             foreach ($barangMasukRecords as $record) {
-                $tanggalTagihan = $record->tanggal_invoice_masuk
-                    ? Carbon::createFromFormat('Y-m-d', $record->tanggal_invoice_masuk)->copy()->addMonthsNoOverflow(1)
-                    : Carbon::createFromFormat('Y-m-d', $record->tanggal_penimbunan);
 
                 if ($customer->type_payment_customer === 'Akhir Bulan') {
+                    $tanggalKeluarCopy = $tanggalKeluar->copy();
+                
+                    if ($tanggalKeluar->day <= 3) {
 
-                    if ($tanggalKeluar->lessThan($tanggalTagihan)) {
-                    
-                        $tanggalTagihanKeluar = $tanggalKeluar->copy()->startOfMonth()->addDays(2)->addMonths(2)->format('Y-m-d');
+                        $tanggalTagihanKeluar = $tanggalKeluarCopy->startOfMonth()->addDays(2)->format('Y-m-d');
                     } else {
-                        $tanggalTagihanKeluar = $tanggalKeluar->copy()->addMonthsNoOverflow(1)->startOfMonth()->addDays(2)->format('Y-m-d');
+
+                        $tanggalTagihanKeluar = $tanggalKeluarCopy->addMonthNoOverflow()->startOfMonth()->addDays(2)->format('Y-m-d');
                     }
-                } elseif ($customer->type_payment_customer === 'Pertanggal Masuk') {
+                }
+                 elseif ($customer->type_payment_customer === 'Pertanggal Masuk') {
+                    
                     $tanggalTagihanKeluar = $tanggalKeluar->copy()->addMonthsNoOverflow(1)->startOfMonth()->addDays(2)->format('Y-m-d');
                 }
             }
         }
-
-
 
         $barangKeluarData = [
             'tanggal_keluar' => $validated['tanggal_keluar'],

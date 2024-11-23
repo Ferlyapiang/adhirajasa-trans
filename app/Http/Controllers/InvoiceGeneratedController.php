@@ -28,7 +28,8 @@ class InvoiceGeneratedController extends Controller
             ->get();
 
         foreach ($barangMasuks as $barangMasuk) {
-            // Create a new Invoice for each BarangMasuk
+            Invoice::where('barang_keluars_id', $barangMasuk->id)->delete();
+
             $invoice = new Invoice();
             $invoice->barang_masuks_id = $barangMasuk->id;
             $invoice->tanggal_masuk = $barangMasuk->tanggal_tagihan_masuk;
@@ -44,6 +45,8 @@ class InvoiceGeneratedController extends Controller
             ->get();
 
         foreach ($barangKeluars as $barangKeluar) {
+            Invoice::where('barang_keluars_id', $barangKeluar->id)->delete();
+
             $invoice = new Invoice();
             $invoice->barang_keluars_id = $barangKeluar->id;
             $invoice->tanggal_masuk = $barangKeluar->tanggal_tagihan_keluar;
@@ -244,39 +247,11 @@ class InvoiceGeneratedController extends Controller
 
         $invoiceMaster = $invoiceMaster
             ->whereNull('invoices.nomer_invoice')
-            ->where('invoices.tanggal_masuk', '<=', DB::raw('LAST_DAY(CURDATE())'))
-            ->whereRaw('COALESCE(
-                        (SELECT min_qties.min_qty
-                        FROM invoices_reporting ir
-                        JOIN (
-                            SELECT barang_masuks_id, MIN(qty) AS min_qty
-                            FROM invoices_reporting
-                            GROUP BY barang_masuks_id
-                        ) AS min_qties 
-                        ON ir.barang_masuks_id = min_qties.barang_masuks_id
-                        WHERE ir.barang_masuks_id = invoices.barang_masuks_id
-                        LIMIT 1), 
-                    COALESCE(total_items.total_qty, 0)
-                    )  -  (COALESCE(total_keluar_invoices.total_qty, 0) + COALESCE(total_keluar_invoices_reporting.total_qty_reporting, 0)) > 0
-                OR (
-                    (COALESCE(barang_keluars.harga_lembur, 0)) > 0
-                    OR (CASE 
-                        WHEN customers_masuks.type_payment_customer = "Akhir Bulan" 
-                            AND YEAR(barang_masuks.tanggal_masuk) = YEAR(barang_masuks.tanggal_tagihan_masuk)
-                            AND MONTH(barang_masuks.tanggal_masuk) = MONTH(barang_masuks.tanggal_tagihan_masuk)
-                        THEN barang_masuks.harga_lembur
-                        WHEN customers_masuks.type_payment_customer = "Pertanggal Masuk" 
-                            AND barang_masuks.tanggal_tagihan_masuk <= DATE_ADD(barang_masuks.tanggal_masuk, INTERVAL 1 MONTH)
-                        THEN barang_masuks.harga_lembur
-                        ELSE 0
-                    END) > 0
-                    OR COALESCE(barang_keluars.harga_kirim_barang,0) > 0
-                )
-                OR invoices.barang_keluars_id IS NOT NULL
-        
-    ');
+            // ->where('invoices.tanggal_masuk', '<=', DB::raw('LAST_DAY(DATE_ADD(CURDATE(), INTERVAL 2 MONTH))'))
+            ->whereRaw('COALESCE(total_items.total_qty, 0) - COALESCE(total_keluar_invoices_reporting.total_qty_reporting, 0) > 0 OR invoices.barang_keluars_id IS NOT NULL');
+            
 
-        $invoiceMaster = $invoiceMaster->orderBy('barang_keluars.tanggal_keluar', 'asc')->get();
+        $invoiceMaster = $invoiceMaster->orderBy('invoices.tanggal_masuk', 'asc')->get();
 
         $owners = $invoiceMaster->map(function ($item) {
             return $item->customer_masuk_name ?: $item->customer_keluar_name;
