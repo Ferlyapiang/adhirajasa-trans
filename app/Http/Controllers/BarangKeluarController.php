@@ -583,6 +583,7 @@ private function deleteUnusedBarangKeluars()
                         'qty' => $remainingStock,
                         'unit' => $item->unit,
                         'joc_number' => $barangMasuk->joc_number,
+                        'status_ngepok' => $barangMasuk->status_ngepok,
                         'created_at' => $item->created_at,
                         'updated_at' => $item->updated_at,
                     ];
@@ -636,6 +637,7 @@ private function deleteUnusedBarangKeluars()
                         'created_at' => $item->created_at,
                         'updated_at' => $item->updated_at,
                         'nomer_container' => $barangMasuk -> nomer_container,
+                        'status_ngepok' => $barangMasuk -> status_ngepok,
                     ];
                 }
 

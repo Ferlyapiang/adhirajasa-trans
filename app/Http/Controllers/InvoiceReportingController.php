@@ -288,17 +288,13 @@ class InvoiceReportingController extends Controller
                 OR COALESCE(invoices_reporting.rokok, 0) > 0
             )";
 
-        // Execute the SQL query with the provided invoice number
         $invoiceMaster = DB::select($sql, [$nomer_invoice]);
 
-        // dd($invoiceMaster);
 
         if (empty($invoiceMaster)) {
 
             return redirect()->route('data-invoice.invoice-reporting.index')->with('error', 'Invoice not found.');
         }
-
-        // dd($invoiceMaster);
 
         session([
             'invoiceMaster' => $invoiceMaster

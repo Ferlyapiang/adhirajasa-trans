@@ -146,7 +146,7 @@
 
                                         <div class="form-group">
                                             <label for="shipping_option">Pilih Opsi Pengiriman</label>
-                                            <select name="shipping_option" id="shipping_option" class="form-control" onchange="toggleFieldsKirim()">
+                                            <select name="shipping_option" id="shipping_option" class="form-control" onchange="toggleFieldsKirim()" required>
                                                 <option value="">Pilih Opsi Pengiriman</option>
                                                 <option value="kirim">Kirim</option>
                                                 <option value="takeout">Pick Up</option>
@@ -309,12 +309,21 @@
                             <div class="col-md-6">
                                 <label for="item_qty_jo">Quantity</label>
                                 <input type="number" id="item_qty_jo" class="form-control" required>
-                                <span id="quantity-warning-jo" class="text-danger" style="display: none;">Hati-hati Quantity lebih besar dari Sisa Barang.</span>
+                                <span id="quantity-warning-jo" class="text-danger" style="display: none;">
+                                    Hati-hati Quantity lebih besar dari Sisa Barang.
+                                </span>
+                                <span id="quantity-warning-jo-status-ngepok" class="text-danger" style="display: none;">
+                                    Quantity harus sama dengan Sisa Barang karena status transit.
+                                </span>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="item_unit_jo">Unit</label>
                                     <input type="text" id="item_unit_jo" class="form-control" readonly>
+                                </div>
+                                <div class="form-group" hidden>
+                                    <label for="item_status_ngepok">Ngepok</label>
+                                    <input type="text" id="item_status_ngepok" class="form-control" readonly>
                                 </div>
                                 <div class="form-group">
                                     <label for="item_sisa_barang_jo">Sisa Barang</label>
@@ -363,12 +372,21 @@
                             <div class="col-md-6">
                                 <label for="item_qty_container">Quantity</label>
                                 <input type="number" id="item_qty_container" class="form-control" required>
-                                <span id="quantity-warning-container" class="text-danger" style="display: none;">Hati-hati Quantity lebih besar dari Sisa Barang.</span>
+                                <span id="quantity-warning-container" class="text-danger" style="display: none;">
+                                    Hati-hati Quantity lebih besar dari Sisa Barang.
+                                </span>
+                                <span id="quantity-warning-container-status-ngepok" class="text-danger" style="display: none;">
+                                    Quantity harus sama dengan Sisa Barang karena status transit.
+                                </span>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="item_unit_container">Unit</label>
                                     <input type="text" id="item_unit_container" class="form-control" readonly>
+                                </div>
+                                <div class="form-group" hidden>
+                                    <label for="item_status_ngepok">Ngepok</label>
+                                    <input type="text" id="item_status_ngepok" class="form-control" readonly>
                                 </div>
                                 <div class="form-group">
                                     <label for="item_sisa_barang_container">Sisa Barang</label>
@@ -575,6 +593,7 @@
                 const itemJocNumber = $('#item_joc_number_jo').val();
                 const itemSisaBarang = $('#item_sisa_barang_jo').val();
                 const itemBarangMasukID = $('#item_barang_masuk_id_jo').val();
+                const itemStatusNgepok = $('#item_status_ngepok').val();
 
                 if (!itemId) {
                     alert('Please select a valid item.');
@@ -619,6 +638,7 @@
                 $('#item_unit_jo').val('');
                 $('#item_sisa_barang_jo').val('');
                 $('#item_barang_masuk_id_joLabel').val('');
+                $('#item_status_ngepok').val('');
             });
 
             $('#add-item-btn-container').click(function() {
@@ -628,6 +648,7 @@
                 const itemJocNumber = $('#item_no_container').val();
                 const itemSisaBarang = $('#item_sisa_barang_container').val();
                 const itemBarangMasukID = $('#item_barang_masuk_id_container').val();
+                const itemStatusNgepok = $('#item_status_ngepok').val();
 
                 if (!itemId) {
                     alert('Please select a valid item.');
@@ -674,11 +695,8 @@
                 $('#item_unit_container').val('');
                 $('#item_sisa_barang_container').val('');
                 $('#item_barang_masuk_id_container').val('');
+                $('#item_status_ngepok').val('');
             });
-
-
-
-
 
             $('#gudang_id').change(function() {
                 const warehouseId = $(this).val();
@@ -691,7 +709,6 @@
                         url: `/api/customers/${warehouseId}`,
                         method: 'GET',
                         success: function(response) {
-                            console.log(response);
                             if (response.customers && Array.isArray(response.customers)) {
                                 response.customers.forEach(customer => {
                                     $('#customer_id').append(
@@ -713,13 +730,13 @@
             // Event untuk tombol "Add Item Job Order"
             $('#btn-jo-number').click(function() {
                 isContainer = false;
-                callApi('#item_name_jo', '#item_unit_jo', '#item_joc_number_jo', '#item_barang_masuk_id_jo', '#item_sisa_barang_jo');
+                callApi('#item_name_jo', '#item_unit_jo', '#item_joc_number_jo', '#item_barang_masuk_id_jo', '#item_sisa_barang_jo', '#item_status_ngepok');
             });
 
             // Event untuk tombol "Add Item Container"
             $('#btn-nomer-container').click(function() {
                 isContainer = true;
-                callApi('#item_name_container', '#item_unit_container', '#item_no_container', '#item_joc_number_jo', '#item_barang_masuk_id_container', '#item_sisa_barang_container');
+                callApi('#item_name_container', '#item_unit_container', '#item_no_container', '#item_joc_number_jo', '#item_barang_masuk_id_container', '#item_sisa_barang_container', '#item_status_ngepok');
             });
 
             // Fungsi untuk memanggil API berdasarkan pilihan
@@ -738,14 +755,11 @@
                     `/api/items/container/${customerId}/${warehouseId}` :
                     `/api/items/${customerId}/${warehouseId}`;
 
-                console.log('Request URL:', url);
-
                 // Lakukan AJAX request
                 $.ajax({
                     url: url,
                     method: 'GET',
                     success: function(response) {
-                        console.log('Response:', response);
 
                         const itemsDropdown = $(itemDropdownId);
                         itemsDropdown.empty(); // Kosongkan dropdown sebelumnya
@@ -761,7 +775,8 @@
                             data-unit="${item.unit}" 
                             data-joc-number="${item.joc_number}" 
                             data-barang-masuk-id="${item.barang_masuk_id}" 
-                            data-sisa-barang="${item.qty}">
+                            data-sisa-barang="${item.qty}"
+                            data-status-ngepok="${item.status_ngepok}">
                         ${displayText}
                     </option>`
                             );
@@ -788,9 +803,7 @@
                 const jocNumber = selectedOption.data('joc-number');
                 const barangMasukId = selectedOption.data('barang-masuk-id');
                 const sisaBarang = selectedOption.data('sisa-barang');
-
-                console.log('Selected Option:', selectedOption); // Debug
-                console.log('Unit:', unit, 'Sisa Barang:', sisaBarang); // Debug
+                const transit = selectedOption.data('status-ngepok');
 
                 // Tentukan input yang di-update berdasarkan modal aktif
                 if (isContainer) {
@@ -798,33 +811,49 @@
                     $('#item_no_container').val(jocNumber);
                     $('#item_barang_masuk_id_container').val(barangMasukId);
                     $('#item_sisa_barang_container').val(sisaBarang);
+                    $('#item_status_ngepok').val(transit);
                 } else {
                     $('#item_unit_jo').val(unit).prop('readonly', true);
                     $('#item_joc_number_jo').val(jocNumber);
                     $('#item_barang_masuk_id_jo').val(barangMasukId);
                     $('#item_sisa_barang_jo').val(sisaBarang);
+                    $('#item_status_ngepok').val(transit);
                 }
 
                 validateQuantity();
             });
 
-
             $('#item_barang_masuk_id_jo').on('shown.bs.modal', function() {
                 const itemQtyInput = document.getElementById('item_qty_jo');
                 const itemSisaBarangInput = document.getElementById('item_sisa_barang_jo');
-                const quantityWarning = document.getElementById('quantity-warning-jo');
+                const quantityWarningJO = document.getElementById('quantity-warning-jo');
+                const quantityWarningStatusNgepok = document.getElementById('quantity-warning-jo-status-ngepok');
                 const addItemButton = document.getElementById('add-item-btn-jo');
+                const itemStatusNgepok = document.getElementById('item_status_ngepok');
 
                 function checkQuantity() {
                     const qty = parseInt(itemQtyInput.value, 10) || 0;
                     const sisa = parseInt(itemSisaBarangInput.value, 10) || 0;
+                    const itemStatusNgepokValue = itemStatusNgepok.value;
+                    
 
-                    if (qty > sisa || qty <= 0) {
-                        quantityWarning.style.display = 'block';
+                    if (itemStatusNgepokValue === "Transit") {
+                        if (qty === sisa) {
+                            quantityWarningStatusNgepok.style.display = 'none';
+                            addItemButton.disabled = false;
+                        }else{
+                            quantityWarningStatusNgepok.style.display = 'block';
+                            addItemButton.disabled = true;
+                        }
+                    
+                    }else {
+                        if (qty > sisa || qty <= 0) {
+                        quantityWarningJO.style.display = 'block';
                         addItemButton.disabled = true;
                     } else {
-                        quantityWarning.style.display = 'none';
+                        quantityWarningJO.style.display = 'none';
                         addItemButton.disabled = false;
+                    }
                     }
                 }
 
@@ -841,19 +870,34 @@
             $('#nomerContainerModal').on('shown.bs.modal', function() {
                 const itemQtyInput = document.getElementById('item_qty_container');
                 const itemSisaBarangInput = document.getElementById('item_sisa_barang_container');
-                const quantityWarning = document.getElementById('quantity-warning-container');
+                const quantityWarningContainer = document.getElementById('quantity-warning-container');
+                const quantityWarningStatusNgepok = document.getElementById('quantity-warning-container-status-ngepok');
                 const addItemButton = document.getElementById('add-item-btn-container');
+
+                const itemStatusNgepok = document.getElementById('item_status_ngepok');
 
                 function checkQuantity() {
                     const qty = parseInt(itemQtyInput.value, 10) || 0;
                     const sisa = parseInt(itemSisaBarangInput.value, 10) || 0;
+                    const itemStatusNgepokValue = itemStatusNgepok.value;
 
-                    if (qty > sisa) {
-                        quantityWarning.style.display = 'block';
+                    if (itemStatusNgepokValue === "Transit") {
+                        if (qty === sisa) {
+                            quantityWarningStatusNgepok.style.display = 'none';
+                            addItemButton.disabled = false;
+                        }else{
+                            quantityWarningStatusNgepok.style.display = 'block';
+                            addItemButton.disabled = true;
+                        }
+                    
+                    }else {
+                        if (qty > sisa || qty <= 0) {
+                        quantityWarningContainer.style.display = 'block';
                         addItemButton.disabled = true;
                     } else {
-                        quantityWarning.style.display = 'none';
+                        quantityWarningContainer.style.display = 'none';
                         addItemButton.disabled = false;
+                    }
                     }
                 }
 
@@ -867,9 +911,6 @@
                     addItem();
                 }
             });
-
-
-
 
             $('#barang-keluar-form').submit(function() {
                 $('#items-input').val(JSON.stringify(items));
@@ -1145,6 +1186,8 @@
 
                 }
             });
+
+           
 
     </script>
 

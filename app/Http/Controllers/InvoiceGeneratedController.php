@@ -35,7 +35,6 @@ class InvoiceGeneratedController extends Controller
             $invoice->tanggal_masuk = $barangMasuk->tanggal_tagihan_masuk;
             $invoice->save();
 
-            // Update the status_invoice
             $barangMasuk->status_invoice = 'Invoice Barang Masuk';
             $barangMasuk->save();
         }
