@@ -336,6 +336,8 @@
                                                             <strong>{{ $item->nomer_container ?? ($item->nomer_polisi ?? 'X') }}</strong>
                                                         @elseif ($item->notedRokok)
                                                             <strong>{{ $item->notedRokok }}</strong>
+                                                        @elseif ($item->status_ngepok)
+                                                            <strong>{{ $item->status_ngepok }}</strong>
                                                         @else
                                                             Kontainer
                                                             <strong>{{ $item->type_mobil ?? '' }}</strong><br>

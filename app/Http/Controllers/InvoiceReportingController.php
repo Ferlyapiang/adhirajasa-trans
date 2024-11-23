@@ -186,6 +186,7 @@ class InvoiceReportingController extends Controller
             invoices_reporting.tanggal_masuk AS tanggal_tagihan,
             invoices_reporting.barang_masuks_id,
             barang_masuks.joc_number,
+            barang_masuks.status_ngepok,
             invoices_reporting.barang_keluars_id,
             barang_keluars.nomer_surat_jalan,
             barang_keluars.address,
@@ -290,6 +291,8 @@ class InvoiceReportingController extends Controller
         // Execute the SQL query with the provided invoice number
         $invoiceMaster = DB::select($sql, [$nomer_invoice]);
 
+        // dd($invoiceMaster);
+
         if (empty($invoiceMaster)) {
 
             return redirect()->route('data-invoice.invoice-reporting.index')->with('error', 'Invoice not found.');
@@ -313,9 +316,9 @@ class InvoiceReportingController extends Controller
             'new_tanggal_masuk' => 'required|date',
         ]);
 
-        $nomer_invoice = $request->input('nomer_invoice'); // current invoice number
-        $new_nomer_invoice = $request->input('new_nomer_invoice'); // new invoice number
-        $new_tanggal_masuk = $request->input('new_tanggal_masuk'); // new transaction date
+        $nomer_invoice = $request->input('nomer_invoice');
+        $new_nomer_invoice = $request->input('new_nomer_invoice'); 
+        $new_tanggal_masuk = $request->input('new_tanggal_masuk');
 
         // Update the record with the new values
         DB::table('invoices_reporting')
